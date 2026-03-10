@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
   countLabel: {
     ...typography.eyebrow,
     color: colors.textSecondary,
-    marginTop: 2,
+    marginTop: spacing.xs,
   },
 
   // BYLINE
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: spacing.sm + 2,
+    paddingVertical: spacing.sm + spacing.xs,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
     marginBottom: spacing.xl,
@@ -283,8 +283,8 @@ const styles = StyleSheet.create({
   sectionHead: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 14,
-    marginBottom: spacing.sm + 2,
+    gap: spacing.md,
+    marginBottom: spacing.sm + spacing.xs,
   },
   sectionLabel: {
     ...typography.sectionLabel,
@@ -361,9 +361,9 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     borderLeftWidth: 3,
     borderLeftColor: colors.border,
-    paddingVertical: spacing.md + 2,
+    paddingVertical: spacing.md + spacing.xs,
     paddingHorizontal: spacing.lg,
-    marginBottom: 6,
+    marginBottom: spacing.sm,
   },
   cardLeft: {
     flexDirection: 'row',
@@ -388,7 +388,7 @@ const styles = StyleSheet.create({
   cardTitle: {
     ...typography.cardTitle,
     color: colors.ink,
-    marginBottom: 3,
+    marginBottom: spacing.xs,
   },
   cardSub: {
     fontFamily: fontFamily.body,
@@ -411,7 +411,7 @@ const styles = StyleSheet.create({
   regionIndexHead: {
     ...typography.sectionLabel,
     color: colors.textSecondary,
-    marginBottom: 14,
+    marginBottom: spacing.md,
   },
   regionList: {
     flexDirection: 'row',
@@ -421,12 +421,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
   },
   regionItem: {
-    width: '33.33%',
+    width: '50%',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: spacing.sm + 2,
-    paddingHorizontal: 14,
+    paddingVertical: spacing.sm + spacing.xs,
+    paddingHorizontal: spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
     borderRightWidth: 1,

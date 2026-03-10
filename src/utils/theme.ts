@@ -9,43 +9,64 @@
 // — Accent red appears sparingly.
 // =====================
 
-export const colors = {
-  // Primary palette
-  ink: '#111827',          // Primary text / dark surfaces
-  red: '#E5271C',          // Single accent. Used sparingly.
-  slate: '#4B5563',        // Supporting text, metadata
-  rule: '#E5E7EB',         // Borders, dividers
-  rule2: '#D1D5DB',        // Secondary borders
-  paper: '#F9FAFB',        // Page background
-  white: '#FFFFFF',        // Card surfaces
+// ---- Single source of truth for every color value ----
+// Change a value here and it propagates everywhere.
+const palette = {
+  ink: '#111827',
+  inkLight: '#1F2937',
+  red: '#E5271C',
+  redLight: '#EF4444',
+  slate: '#4B5563',
+  muted: '#9CA3AF',
+  rule: '#E5E7EB',
+  rule2: '#D1D5DB',
+  paper: '#F9FAFB',
+  paperDark: '#F3F4F6',
+  white: '#FFFFFF',
+  black: '#000000',
+  green: '#16A34A',
+  crimson: '#DC2626',
+  amber: '#D97706',
+  blue: '#2563EB',
+};
 
-  // Semantic aliases (keep for backward compatibility across screens)
-  primary: '#111827',
-  primaryLight: '#1F2937',
-  accent: '#E5271C',
-  accentLight: '#EF4444',
-  success: '#16A34A',
-  error: '#DC2626',
-  warning: '#D97706',
-  background: '#F9FAFB',
-  surface: '#FFFFFF',
-  surfaceSecondary: '#F3F4F6',
-  text: '#111827',
-  textSecondary: '#4B5563',
-  textTertiary: '#9CA3AF',
-  border: '#E5E7EB',
-  borderLight: '#F3F4F6',
+export const colors = {
+  // Brand palette (direct access)
+  ink: palette.ink,
+  red: palette.red,
+  slate: palette.slate,
+  rule: palette.rule,
+  rule2: palette.rule2,
+  paper: palette.paper,
+  white: palette.white,
+  black: palette.black,
+
+  // Semantic roles (all reference palette)
+  primary: palette.ink,
+  primaryLight: palette.inkLight,
+  accent: palette.red,
+  accentLight: palette.redLight,
+  success: palette.green,
+  error: palette.crimson,
+  warning: palette.amber,
+  background: palette.paper,
+  surface: palette.white,
+  surfaceSecondary: palette.paperDark,
+  text: palette.ink,
+  textSecondary: palette.slate,
+  textTertiary: palette.muted,
+  border: palette.rule,
+  borderLight: palette.paperDark,
   shadow: 'rgba(17, 24, 39, 0.06)',
   overlay: 'rgba(17, 24, 39, 0.5)',
-  black: '#000000',
 
-  // Semantic feedback
-  gradeS: '#D97706',
-  gradeA: '#16A34A',
-  gradeB: '#2563EB',
-  gradeC: '#D97706',
-  gradeD: '#DC2626',
-  gradeF: '#DC2626',
+  // Grade colors
+  gradeS: palette.amber,
+  gradeA: palette.green,
+  gradeB: palette.blue,
+  gradeC: palette.amber,
+  gradeD: palette.crimson,
+  gradeF: palette.crimson,
 
   // Translucent helpers (for dark backgrounds)
   whiteAlpha15: 'rgba(255,255,255,0.15)',
@@ -99,7 +120,14 @@ export const typography = {
     fontFamily: fontFamily.display,
     letterSpacing: -0.5,
   },
+  // General-purpose heading — NO uppercase (use headingUpper for that)
   heading: {
+    fontSize: 22,
+    fontFamily: fontFamily.uiLabel,
+    letterSpacing: 1,
+  },
+  // Heading variant with uppercase — for section titles and UI labels
+  headingUpper: {
     fontSize: 22,
     fontFamily: fontFamily.uiLabel,
     letterSpacing: 1,
@@ -181,7 +209,6 @@ export const shadows = {
     shadowRadius: 0,
     elevation: 8,
   },
-  // Red accent shadow for hero hover effect
   accentShadow: {
     shadowColor: colors.red,
     shadowOffset: { width: 5, height: 5 },

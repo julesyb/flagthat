@@ -440,7 +440,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.lg,
   },
   readyButtonText: {
-    ...typography.heading,
+    ...typography.headingUpper,
     color: colors.white,
   },
   // Countdown
@@ -470,7 +470,7 @@ const styles = StyleSheet.create({
   timerBar: {
     height: 6,
     backgroundColor: colors.whiteAlpha20,
-    marginTop: 20,
+    marginTop: spacing.md + spacing.xs,
   },
   timerFill: {
     height: '100%',
@@ -531,7 +531,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: spacing.xl,
-    paddingBottom: 30,
+    paddingBottom: spacing.xl,
   },
   timerText: {
     fontSize: 28,

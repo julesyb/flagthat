@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   celebrationText: {
-    ...typography.heading,
+    ...typography.headingUpper,
     color: colors.primary,
   },
   gradeContainer: {
@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
   statLabel: {
     ...typography.caption,
     color: colors.textSecondary,
-    marginTop: 4,
+    marginTop: spacing.xs,
   },
   shareButton: {
     backgroundColor: colors.surface,
@@ -262,7 +262,7 @@ const styles = StyleSheet.create({
     color: colors.accent,
   },
   reviewTitle: {
-    ...typography.heading,
+    ...typography.headingUpper,
     color: colors.text,
     marginBottom: spacing.md,
   },
@@ -292,7 +292,7 @@ const styles = StyleSheet.create({
   reviewAnswer: {
     ...typography.caption,
     color: colors.error,
-    marginTop: 2,
+    marginTop: spacing.xs,
   },
   reviewIcon: {
     ...typography.heading,

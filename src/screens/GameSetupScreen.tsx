@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xxl,
   },
   sectionTitle: {
-    ...typography.heading,
+    ...typography.headingUpper,
     color: colors.text,
     marginBottom: spacing.md,
     marginTop: spacing.lg,
@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
   modeDesc: {
     ...typography.caption,
     color: colors.textSecondary,
-    marginTop: 2,
+    marginTop: spacing.xs,
     textAlign: 'center',
   },
   modeDescActive: {
@@ -309,7 +309,7 @@ const styles = StyleSheet.create({
     color: colors.accent,
   },
   categoryTextGroup: {
-    gap: 1,
+    gap: spacing.xs,
   },
   categoryLabel: {
     ...typography.label,
@@ -361,7 +361,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accentLight,
   },
   startButtonText: {
-    ...typography.heading,
+    ...typography.headingUpper,
     color: colors.white,
   },
 });
