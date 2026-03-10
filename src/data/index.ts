@@ -23,4 +23,10 @@ export function getTwins(countryName: string): string[] {
   return twinPairs[countryName] || [];
 }
 
+const flagByName = new Map<string, FlagItem>(countries.map((c) => [c.name, c]));
+
+export function getFlagByName(name: string): FlagItem | undefined {
+  return flagByName.get(name);
+}
+
 export { countries, twinPairs };

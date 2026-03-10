@@ -1,5 +1,7 @@
 export type GameMode = 'easy' | 'medium' | 'hard' | 'headsup';
 
+export type DisplayMode = 'flag' | 'map';
+
 export type CategoryType = 'region' | 'theme';
 
 export type CategoryId =
@@ -36,6 +38,7 @@ export interface GameConfig {
   category: CategoryId;
   questionCount: number;
   timeLimit?: number; // seconds, for heads up
+  displayMode?: DisplayMode; // flag (default) or map
 }
 
 export interface GameQuestion {

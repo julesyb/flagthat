@@ -15,6 +15,8 @@ import { GameQuestion, GameResult } from '../types';
 import { generateQuestions, checkAnswer } from '../utils/gameEngine';
 import { hapticCorrect, hapticWrong, hapticTap, playCorrectSound, playWrongSound } from '../utils/feedback';
 import FlagImage from '../components/FlagImage';
+import MapImage from '../components/MapImage';
+import { getFlagByName } from '../data';
 import { RootStackParamList } from '../types/navigation';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Game'>;
@@ -42,6 +44,7 @@ export default function GameScreen({ route, navigation }: Props) {
 
   const currentQuestion = questions[currentIndex];
   const isHard = config.mode === 'hard';
+  const isMapMode = config.displayMode === 'map';
   const progress = questions.length > 0 ? (currentIndex + 1) / questions.length : 0;
 
   const animateStreak = () => {
@@ -183,17 +186,28 @@ export default function GameScreen({ route, navigation }: Props) {
         ]}
       >
         <View style={styles.flagContainer}>
-          <FlagImage
-            countryCode={currentQuestion.flag.id}
-            size="hero"
-            emoji={currentQuestion.flag.emoji}
-          />
+          {isMapMode ? (
+            <MapImage
+              countryCode={currentQuestion.flag.id}
+              size="hero"
+            />
+          ) : (
+            <FlagImage
+              countryCode={currentQuestion.flag.id}
+              size="hero"
+              emoji={currentQuestion.flag.emoji}
+            />
+          )}
         </View>
 
-        <Text style={styles.regionHint}>{currentQuestion.flag.region}</Text>
+        {!isHard && (
+          <Text style={styles.regionHint}>{currentQuestion.flag.region}</Text>
+        )}
 
         {isHard && (
-          <Text style={styles.questionText}>Type the name of this flag:</Text>
+          <Text style={styles.questionText}>
+            {isMapMode ? 'Name this country:' : 'Type the name of this flag:'}
+          </Text>
         )}
 
         {isHard ? (
@@ -223,19 +237,25 @@ export default function GameScreen({ route, navigation }: Props) {
             </TouchableOpacity>
           </View>
         ) : (
-          <View style={styles.optionsContainer}>
+          <View style={isMapMode ? styles.optionsContainerMap : styles.optionsContainer}>
             {currentQuestion.options.map((option, index) => {
               const isSelected = selectedAnswer === option;
               const isCorrect = option === currentQuestion.flag.name;
-              let optionStyle = styles.optionButton;
+              const optionFlag = isMapMode ? getFlagByName(option) : null;
+
+              let optionStyle = isMapMode ? styles.optionButtonMap : styles.optionButton;
               let textStyle = styles.optionText;
 
               if (showFeedback) {
                 if (isCorrect) {
-                  optionStyle = { ...styles.optionButton, ...styles.optionCorrect };
+                  optionStyle = isMapMode
+                    ? { ...styles.optionButtonMap, ...styles.optionCorrectMap }
+                    : { ...styles.optionButton, ...styles.optionCorrect };
                   textStyle = { ...styles.optionText, ...styles.optionTextFeedback };
                 } else if (isSelected && !isCorrect) {
-                  optionStyle = { ...styles.optionButton, ...styles.optionWrong };
+                  optionStyle = isMapMode
+                    ? { ...styles.optionButtonMap, ...styles.optionWrongMap }
+                    : { ...styles.optionButton, ...styles.optionWrong };
                   textStyle = { ...styles.optionText, ...styles.optionTextFeedback };
                 }
               }
@@ -248,7 +268,15 @@ export default function GameScreen({ route, navigation }: Props) {
                   disabled={showFeedback}
                   activeOpacity={0.7}
                 >
-                  <Text style={textStyle}>{option}</Text>
+                  {isMapMode && optionFlag ? (
+                    <FlagImage
+                      countryCode={optionFlag.id}
+                      size="medium"
+                      emoji={optionFlag.emoji}
+                    />
+                  ) : (
+                    <Text style={textStyle}>{option}</Text>
+                  )}
                 </TouchableOpacity>
               );
             })}
@@ -350,6 +378,12 @@ const styles = StyleSheet.create({
   optionsContainer: {
     gap: spacing.xs,
   },
+  optionsContainerMap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    justifyContent: 'center',
+  },
   optionButton: {
     backgroundColor: colors.white,
     paddingHorizontal: spacing.md,
@@ -358,6 +392,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
+  optionButtonMap: {
+    padding: spacing.xs,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: colors.border,
+    backgroundColor: colors.white,
+  },
   optionCorrect: {
     backgroundColor: colors.success,
     borderColor: colors.success,
@@ -365,6 +406,14 @@ const styles = StyleSheet.create({
   optionWrong: {
     backgroundColor: colors.error,
     borderColor: colors.error,
+  },
+  optionCorrectMap: {
+    borderColor: colors.success,
+    borderWidth: 3,
+  },
+  optionWrongMap: {
+    borderColor: colors.error,
+    borderWidth: 3,
   },
   optionText: {
     ...typography.bodyBold,

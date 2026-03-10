@@ -21,6 +21,7 @@ import {
   playGameStartSound,
 } from '../utils/feedback';
 import FlagImage from '../components/FlagImage';
+import MapImage from '../components/MapImage';
 import { RootStackParamList } from '../types/navigation';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'HeadsUp'>;
@@ -345,11 +346,18 @@ export default function HeadsUpScreen({ route, navigation }: Props) {
           <Text style={styles.feedbackText}>PASS</Text>
         ) : (
           <>
-            <FlagImage
-              countryCode={currentQuestion.flag.id}
-              size="hero"
-              emoji={currentQuestion.flag.emoji}
-            />
+            {config.displayMode === 'map' ? (
+              <MapImage
+                countryCode={currentQuestion.flag.id}
+                size="hero"
+              />
+            ) : (
+              <FlagImage
+                countryCode={currentQuestion.flag.id}
+                size="hero"
+                emoji={currentQuestion.flag.emoji}
+              />
+            )}
             <Text style={styles.flagName}>{currentQuestion.flag.name}</Text>
             <Text style={styles.flagRegion}>{currentQuestion.flag.region}</Text>
           </>

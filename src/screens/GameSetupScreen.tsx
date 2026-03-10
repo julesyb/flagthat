@@ -11,6 +11,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { colors, spacing, typography, fontFamily } from '../utils/theme';
 import {
   GameMode,
+  DisplayMode,
   CategoryId,
   CategoryType,
   GAME_MODES,
@@ -27,6 +28,7 @@ const QUESTION_COUNTS = [10, 20, 50, 100];
 const HEADSUP_TIMES = [15, 30, 60, 90];
 
 export default function GameSetupScreen({ navigation }: Props) {
+  const [displayMode, setDisplayMode] = useState<DisplayMode>('flag');
   const [mode, setMode] = useState<GameMode>('easy');
   const [selectedCategory, setSelectedCategory] = useState<CategoryId>('all');
   const [questionCount, setQuestionCount] = useState(10);
@@ -65,6 +67,7 @@ export default function GameSetupScreen({ navigation }: Props) {
       mode,
       category: selectedCategory,
       questionCount: isHeadsUp ? 999 : effectiveQuestionCount,
+      displayMode,
       ...(isHeadsUp && { timeLimit }),
     };
 
@@ -85,6 +88,31 @@ export default function GameSetupScreen({ navigation }: Props) {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
+        <Text style={styles.sectionTitle}>Display</Text>
+        <View style={styles.displayToggleRow}>
+          {(['flag', 'map'] as DisplayMode[]).map((dm) => {
+            const isActive = displayMode === dm;
+            return (
+              <TouchableOpacity
+                key={dm}
+                style={[styles.displayToggle, isActive && styles.displayToggleActive]}
+                onPress={() => setDisplayMode(dm)}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.displayToggleIcon, isActive && styles.displayToggleIconActive]}>
+                  {dm === 'flag' ? '\u2691' : '\u2609'}
+                </Text>
+                <Text style={[styles.displayToggleText, isActive && styles.displayToggleTextActive]}>
+                  {dm === 'flag' ? 'Flag Mode' : 'Map Mode'}
+                </Text>
+                <Text style={[styles.displayToggleDesc, isActive && styles.displayToggleDescActive]}>
+                  {dm === 'flag' ? 'Identify the flag' : 'Identify the country on a map'}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+
         <Text style={styles.sectionTitle}>Game Mode</Text>
         <View style={styles.modeGrid}>
           {(Object.keys(GAME_MODES) as GameMode[]).map((m) => {
@@ -256,6 +284,47 @@ const styles = StyleSheet.create({
   content: {
     padding: spacing.lg,
     paddingBottom: spacing.xxl,
+  },
+  displayToggleRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginBottom: spacing.sm,
+  },
+  displayToggle: {
+    flex: 1,
+    backgroundColor: colors.surface,
+    padding: spacing.md,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: colors.border,
+  },
+  displayToggleActive: {
+    borderColor: colors.ink,
+    backgroundColor: colors.surfaceSecondary,
+  },
+  displayToggleIcon: {
+    fontSize: 24,
+    color: colors.textSecondary,
+    marginBottom: spacing.xs,
+  },
+  displayToggleIconActive: {
+    color: colors.ink,
+  },
+  displayToggleText: {
+    ...typography.bodyBold,
+    color: colors.text,
+  },
+  displayToggleTextActive: {
+    color: colors.ink,
+  },
+  displayToggleDesc: {
+    ...typography.caption,
+    color: colors.textSecondary,
+    marginTop: spacing.xxs,
+    textAlign: 'center',
+  },
+  displayToggleDescActive: {
+    color: colors.slate,
   },
   sectionTitle: {
     ...typography.headingUpper,
