@@ -73,6 +73,7 @@ export default function HomeScreen({ navigation }: Props) {
   const totalFlags = getTotalFlagCount();
   const [mode, setMode] = useState<GameMode>('medium');
   const [questionCount, setQuestionCount] = useState(10);
+  const [questionCountAll, setQuestionCountAll] = useState(false);
 
   useEffect(() => {
     initAudio();
@@ -81,7 +82,7 @@ export default function HomeScreen({ navigation }: Props) {
   const quickPlay = () => {
     hapticTap();
     navigation.navigate('Game', {
-      config: { mode, category: 'all', questionCount },
+      config: { mode, category: 'all', questionCount: questionCountAll ? totalFlags : questionCount },
     });
   };
 
@@ -124,7 +125,7 @@ export default function HomeScreen({ navigation }: Props) {
               <View>
                 <Text style={styles.heroTitle}>Play</Text>
                 <Text style={styles.heroSub}>
-                  {questionCount} random flags {'\u00A0\u00B7\u00A0'} all {totalFlags}
+                  {questionCountAll ? `All ${totalFlags}` : questionCount} random flags {'\u00A0\u00B7\u00A0'} all {totalFlags}
                 </Text>
               </View>
             </View>
@@ -138,15 +139,24 @@ export default function HomeScreen({ navigation }: Props) {
               {QUESTION_COUNTS.map((count) => (
                 <TouchableOpacity
                   key={count}
-                  style={[styles.modeChip, questionCount === count && styles.modeChipActive]}
-                  onPress={() => { hapticTap(); setQuestionCount(count); }}
+                  style={[styles.modeChip, !questionCountAll && questionCount === count && styles.modeChipActive]}
+                  onPress={() => { hapticTap(); setQuestionCount(count); setQuestionCountAll(false); }}
                   activeOpacity={0.7}
                 >
-                  <Text style={[styles.modeChipText, questionCount === count && styles.modeChipTextActive]}>
+                  <Text style={[styles.modeChipText, !questionCountAll && questionCount === count && styles.modeChipTextActive]}>
                     {count}
                   </Text>
                 </TouchableOpacity>
               ))}
+              <TouchableOpacity
+                style={[styles.modeChip, questionCountAll && styles.modeChipActive]}
+                onPress={() => { hapticTap(); setQuestionCountAll(true); }}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.modeChipText, questionCountAll && styles.modeChipTextActive]}>
+                  All
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
 
@@ -190,7 +200,21 @@ export default function HomeScreen({ navigation }: Props) {
             activeOpacity={0.7}
           >
             <CrosshairIcon size={16} color={colors.ink} />
-            <Text style={styles.bottomNavLabel}>Custom</Text>
+            <Text style={styles.bottomNavLabel}>Game Mode</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.bottomNavItem}
+            onPress={() => {
+              hapticTap();
+              navigation.navigate('HeadsUp', {
+                config: { mode: 'headsup', category: 'all', questionCount: 999, timeLimit: 60 },
+              });
+            }}
+            activeOpacity={0.7}
+          >
+            <LightningIcon size={16} color={colors.ink} filled={false} />
+            <Text style={styles.bottomNavLabel}>Heads Up</Text>
           </TouchableOpacity>
 
           <TouchableOpacity

@@ -18,28 +18,53 @@ import {
   CATEGORY_TYPE_LABELS,
   GameConfig,
 } from '../types';
-import { getCategoryCount } from '../data';
+import { getCategoryCount, getTotalFlagCount } from '../data';
 import { RootStackParamList } from '../types/navigation';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'GameSetup'>;
 
-const QUESTION_COUNTS = [10, 20, 30, 50];
-const HEADSUP_TIMES = [60, 90, 120];
+const QUESTION_COUNTS = [10, 20, 50, 100];
+const HEADSUP_TIMES = [15, 30, 60, 90];
 
 export default function GameSetupScreen({ navigation }: Props) {
   const [mode, setMode] = useState<GameMode>('easy');
-  const [selectedCategory, setSelectedCategory] = useState<CategoryId>('easy_flags');
+  const [selectedCategory, setSelectedCategory] = useState<CategoryId>('all');
   const [questionCount, setQuestionCount] = useState(10);
+  const [questionCountAll, setQuestionCountAll] = useState(false);
   const [timeLimit, setTimeLimit] = useState(60);
+  const [filterType, setFilterType] = useState<CategoryType | null>(null);
 
+  const totalFlags = getTotalFlagCount();
   const isHeadsUp = mode === 'headsup';
-  const categoryTypes: CategoryType[] = ['location', 'difficulty', 'theme'];
+
+  const handleFilterTypeSelect = (type: CategoryType) => {
+    if (filterType === type) {
+      // Deselect filter type, reset to all
+      setFilterType(null);
+      setSelectedCategory('all');
+    } else {
+      setFilterType(type);
+      setSelectedCategory('all');
+    }
+  };
+
+  const handleCategorySelect = (catId: CategoryId) => {
+    if (selectedCategory === catId) {
+      setSelectedCategory('all');
+    } else {
+      setSelectedCategory(catId);
+    }
+  };
 
   const startGame = () => {
+    const effectiveQuestionCount = questionCountAll
+      ? getCategoryCount(selectedCategory)
+      : questionCount;
+
     const config: GameConfig = {
       mode,
       category: selectedCategory,
-      questionCount: isHeadsUp ? 999 : questionCount,
+      questionCount: isHeadsUp ? 999 : effectiveQuestionCount,
       ...(isHeadsUp && { timeLimit }),
     };
 
@@ -49,6 +74,10 @@ export default function GameSetupScreen({ navigation }: Props) {
       navigation.navigate('Game', { config });
     }
   };
+
+  const filteredCategories = filterType
+    ? CATEGORIES.filter((c) => c.type === filterType)
+    : [];
 
   return (
     <SafeAreaView style={styles.container}>
@@ -82,43 +111,57 @@ export default function GameSetupScreen({ navigation }: Props) {
           })}
         </View>
 
-        <Text style={styles.sectionTitle}>Category</Text>
-        {categoryTypes.map((type) => {
-          const cats = CATEGORIES.filter((c) => c.type === type);
-          return (
-            <View key={type} style={styles.categoryGroup}>
-              <Text style={styles.categoryTypeLabel}>
-                {CATEGORY_TYPE_LABELS[type]}
-              </Text>
-              <View style={styles.categoryRow}>
-                {cats.map((cat) => {
-                  const count = getCategoryCount(cat.id);
-                  const isActive = selectedCategory === cat.id;
-                  return (
-                    <TouchableOpacity
-                      key={cat.id}
-                      style={[styles.categoryChip, isActive && styles.categoryChipActive]}
-                      onPress={() => setSelectedCategory(cat.id)}
-                      activeOpacity={0.7}
-                    >
-                      <View style={[styles.categoryIconBadge, isActive && styles.categoryIconBadgeActive]}>
-                        <Text style={[styles.categoryIconText, isActive && styles.categoryIconTextActive]}>{cat.icon}</Text>
-                      </View>
-                      <View style={styles.categoryTextGroup}>
-                        <Text style={[styles.categoryLabel, isActive && styles.categoryLabelActive]}>
-                          {cat.label}
-                        </Text>
-                        <Text style={[styles.categoryCount, isActive && styles.categoryCountActive]}>
-                          {count} flags
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-            </View>
-          );
-        })}
+        <Text style={styles.sectionTitle}>Filter</Text>
+        <Text style={styles.filterHint}>Optional — default is all {totalFlags} flags</Text>
+
+        {/* Filter type selector: Region or Theme */}
+        <View style={styles.filterTypeRow}>
+          {(['region', 'theme'] as CategoryType[]).map((type) => {
+            const isActive = filterType === type;
+            return (
+              <TouchableOpacity
+                key={type}
+                style={[styles.filterTypeChip, isActive && styles.filterTypeChipActive]}
+                onPress={() => handleFilterTypeSelect(type)}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.filterTypeText, isActive && styles.filterTypeTextActive]}>
+                  {CATEGORY_TYPE_LABELS[type]}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+
+        {/* Show categories for selected filter type */}
+        {filterType && (
+          <View style={styles.categoryRow}>
+            {filteredCategories.map((cat) => {
+              const count = getCategoryCount(cat.id);
+              const isActive = selectedCategory === cat.id;
+              return (
+                <TouchableOpacity
+                  key={cat.id}
+                  style={[styles.categoryChip, isActive && styles.categoryChipActive]}
+                  onPress={() => handleCategorySelect(cat.id)}
+                  activeOpacity={0.7}
+                >
+                  <View style={[styles.categoryIconBadge, isActive && styles.categoryIconBadgeActive]}>
+                    <Text style={[styles.categoryIconText, isActive && styles.categoryIconTextActive]}>{cat.icon}</Text>
+                  </View>
+                  <View style={styles.categoryTextGroup}>
+                    <Text style={[styles.categoryLabel, isActive && styles.categoryLabelActive]}>
+                      {cat.label}
+                    </Text>
+                    <Text style={[styles.categoryCount, isActive && styles.categoryCountActive]}>
+                      {count} flags
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        )}
 
         {!isHeadsUp ? (
           <>
@@ -129,21 +172,38 @@ export default function GameSetupScreen({ navigation }: Props) {
                   key={count}
                   style={[
                     styles.optionChip,
-                    questionCount === count && styles.optionChipActive,
+                    !questionCountAll && questionCount === count && styles.optionChipActive,
                   ]}
-                  onPress={() => setQuestionCount(count)}
+                  onPress={() => { setQuestionCount(count); setQuestionCountAll(false); }}
                   activeOpacity={0.7}
                 >
                   <Text
                     style={[
                       styles.optionLabel,
-                      questionCount === count && styles.optionLabelActive,
+                      !questionCountAll && questionCount === count && styles.optionLabelActive,
                     ]}
                   >
                     {count}
                   </Text>
                 </TouchableOpacity>
               ))}
+              <TouchableOpacity
+                style={[
+                  styles.optionChip,
+                  questionCountAll && styles.optionChipActive,
+                ]}
+                onPress={() => setQuestionCountAll(true)}
+                activeOpacity={0.7}
+              >
+                <Text
+                  style={[
+                    styles.optionLabel,
+                    questionCountAll && styles.optionLabelActive,
+                  ]}
+                >
+                  All
+                </Text>
+              </TouchableOpacity>
             </View>
           </>
         ) : (
@@ -203,6 +263,12 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
     marginTop: spacing.lg,
   },
+  filterHint: {
+    ...typography.caption,
+    color: colors.textTertiary,
+    marginBottom: spacing.md,
+    marginTop: -spacing.sm,
+  },
   modeGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -256,15 +322,29 @@ const styles = StyleSheet.create({
   modeDescActive: {
     color: colors.slate,
   },
-  categoryGroup: {
+  filterTypeRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
     marginBottom: spacing.md,
   },
-  categoryTypeLabel: {
-    ...typography.captionBold,
-    color: colors.textTertiary,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginBottom: spacing.sm,
+  filterTypeChip: {
+    flex: 1,
+    backgroundColor: colors.surface,
+    padding: spacing.md,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: colors.border,
+  },
+  filterTypeChipActive: {
+    borderColor: colors.ink,
+    backgroundColor: colors.surfaceSecondary,
+  },
+  filterTypeText: {
+    ...typography.bodyBold,
+    color: colors.text,
+  },
+  filterTypeTextActive: {
+    color: colors.ink,
   },
   categoryRow: {
     flexDirection: 'row',

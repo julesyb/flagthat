@@ -202,6 +202,14 @@ export default function HeadsUpScreen({ route, navigation }: Props) {
     [currentIndex, questions, navigation, config],
   );
 
+  const exitGame = () => {
+    navigation.replace('Results', { results: resultsRef.current, config });
+  };
+
+  const goHome = () => {
+    navigation.navigate('Home');
+  };
+
   // Tutorial screen
   if (phase === 'tutorial') {
     return (
@@ -268,6 +276,14 @@ export default function HeadsUpScreen({ route, navigation }: Props) {
           activeOpacity={0.8}
         >
           <Text style={styles.readyButtonText}>Ready!</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.exitButton}
+          onPress={goHome}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.exitButtonText}>Exit</Text>
         </TouchableOpacity>
       </View>
     );
@@ -364,6 +380,13 @@ export default function HeadsUpScreen({ route, navigation }: Props) {
         <Text style={[styles.timerText, timeLeft <= 10 && { color: colors.warning }]}>
           {timeLeft}s
         </Text>
+        <TouchableOpacity
+          style={styles.exitButtonPlaying}
+          onPress={exitGame}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.exitButtonPlayingText}>Exit</Text>
+        </TouchableOpacity>
         <Text style={styles.scoreText}>{correctCount} correct</Text>
       </View>
     </View>
@@ -536,6 +559,25 @@ const styles = StyleSheet.create({
   },
   scoreText: {
     ...typography.heading,
+    color: colors.whiteAlpha70,
+  },
+  exitButton: {
+    marginTop: spacing.lg,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.sm,
+  },
+  exitButtonText: {
+    ...typography.body,
+    color: colors.whiteAlpha50,
+    textDecorationLine: 'underline',
+  },
+  exitButtonPlaying: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    backgroundColor: colors.whiteAlpha15,
+  },
+  exitButtonPlayingText: {
+    ...typography.captionBold,
     color: colors.whiteAlpha70,
   },
 });

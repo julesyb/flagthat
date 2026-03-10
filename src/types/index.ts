@@ -1,6 +1,6 @@
 export type GameMode = 'easy' | 'medium' | 'hard' | 'headsup';
 
-export type CategoryType = 'location' | 'difficulty' | 'theme';
+export type CategoryType = 'region' | 'theme';
 
 export type CategoryId =
   | 'all'
@@ -67,25 +67,22 @@ export const GAME_MODES: Record<GameMode, { label: string; description: string; 
 };
 
 export const CATEGORIES: CategoryInfo[] = [
-  // Location-based
-  { id: 'africa', label: 'Africa', description: '54 countries', type: 'location', icon: 'AF' },
-  { id: 'asia', label: 'Asia', description: '49 countries', type: 'location', icon: 'AS' },
-  { id: 'europe', label: 'Europe', description: '45 countries', type: 'location', icon: 'EU' },
-  { id: 'americas', label: 'Americas', description: '35 countries', type: 'location', icon: 'AM' },
-  { id: 'oceania', label: 'Oceania', description: '14 countries', type: 'location', icon: 'OC' },
-
-  // Difficulty-based
-  { id: 'easy_flags', label: 'Famous Flags', description: 'The ones everyone knows', type: 'difficulty', icon: '*' },
-  { id: 'tricky_twins', label: 'Tricky Twins', description: 'Look-alike flags', type: 'difficulty', icon: '~' },
+  // Region-based
+  { id: 'africa', label: 'Africa', description: '54 countries', type: 'region', icon: 'AF' },
+  { id: 'asia', label: 'Asia', description: '49 countries', type: 'region', icon: 'AS' },
+  { id: 'europe', label: 'Europe', description: '45 countries', type: 'region', icon: 'EU' },
+  { id: 'americas', label: 'Americas', description: '35 countries', type: 'region', icon: 'AM' },
+  { id: 'oceania', label: 'Oceania', description: '14 countries', type: 'region', icon: 'OC' },
 
   // Theme-based
+  { id: 'easy_flags', label: 'Famous Flags', description: 'The ones everyone knows', type: 'theme', icon: '*' },
+  { id: 'tricky_twins', label: 'Tricky Twins', description: 'Look-alike flags', type: 'theme', icon: '~' },
   { id: 'island_nations', label: 'Island Nations', description: 'Surrounded by water', type: 'theme', icon: 'IS' },
   { id: 'top_travel', label: 'Top Destinations', description: 'Most visited countries', type: 'theme', icon: 'TD' },
   { id: 'short_names', label: 'Short Names', description: '5 letters or less', type: 'theme', icon: 'SN' },
 ];
 
 export const CATEGORY_TYPE_LABELS: Record<CategoryType, string> = {
-  location: 'By Region',
-  difficulty: 'By Difficulty',
+  region: 'By Region',
   theme: 'By Theme',
 };
