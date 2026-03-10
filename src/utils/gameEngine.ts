@@ -1,5 +1,6 @@
 import { GameMode, FlagItem, GameQuestion, GameResult, GameConfig } from '../types';
 import { getFlagsForCategory, getAllFlags } from '../data';
+import { countryAliases } from '../data/countryAliases';
 import { colors } from './theme';
 
 function shuffleArray<T>(array: T[]): T[] {
@@ -48,7 +49,23 @@ export function checkAnswer(userAnswer: string, correctName: string): boolean {
       .replace(/[-–—]/g, ' ')
       .replace(/\s+/g, ' ');
 
-  return normalize(userAnswer) === normalize(correctName);
+  const stripAccents = (s: string) =>
+    s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+  const normalizedAnswer = normalize(userAnswer);
+  const normalizedCorrect = normalize(correctName);
+
+  // Exact match (after normalization)
+  if (normalizedAnswer === normalizedCorrect) return true;
+
+  // Accent-insensitive match (e.g. "Cote d'Ivoire" matches "Côte d'Ivoire")
+  if (stripAccents(normalizedAnswer) === stripAccents(normalizedCorrect)) return true;
+
+  // Check alias/typo map
+  const alias = countryAliases[normalizedAnswer];
+  if (alias && normalize(alias) === normalizedCorrect) return true;
+
+  return false;
 }
 
 export function calculateAccuracy(results: GameResult[]): number {
