@@ -7,6 +7,7 @@ import {
   ScrollView,
   SafeAreaView,
   Alert,
+  Platform,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { colors, spacing, typography, fontFamily } from '../utils/theme';
@@ -22,22 +23,30 @@ export default function StatsScreen() {
     }, []),
   );
 
-  const handleReset = () => {
-    Alert.alert(
-      'Reset Statistics',
-      'Are you sure? This cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Reset',
-          style: 'destructive',
-          onPress: async () => {
-            await resetStats();
-            getStats().then(setStats);
+  const handleReset = async () => {
+    if (Platform.OS === 'web') {
+      const confirmed = window.confirm('Reset Statistics?\n\nAre you sure? This cannot be undone.');
+      if (confirmed) {
+        await resetStats();
+        getStats().then(setStats);
+      }
+    } else {
+      Alert.alert(
+        'Reset Statistics',
+        'Are you sure? This cannot be undone.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Reset',
+            style: 'destructive',
+            onPress: async () => {
+              await resetStats();
+              getStats().then(setStats);
+            },
           },
-        },
-      ],
-    );
+        ],
+      );
+    }
   };
 
   if (!stats) {

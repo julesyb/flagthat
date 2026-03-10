@@ -17,7 +17,7 @@ import { FlagImageSmall } from '../components/FlagImage';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Browse'>;
 
-const REGIONS = ['All', 'Africa', 'Asia', 'Europe', 'Americas', 'Oceania', 'Middle East'];
+const REGIONS = ['All', 'Africa', 'Asia', 'Europe', 'Americas', 'Oceania'];
 
 export default function BrowseScreen({ route }: Props) {
   const initialRegion = route.params?.region ?? 'All';
@@ -134,18 +134,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderWidth: 1.5,
-    borderColor: colors.border,
+    borderColor: colors.rule2,
   },
   regionChipActive: {
     borderColor: colors.ink,
-    backgroundColor: colors.surfaceSecondary,
+    backgroundColor: colors.ink,
   },
   regionLabel: {
     ...typography.captionBold,
-    color: colors.text,
+    color: colors.textSecondary,
   },
   regionLabelActive: {
-    color: colors.ink,
+    color: colors.white,
   },
   resultCount: {
     ...typography.caption,

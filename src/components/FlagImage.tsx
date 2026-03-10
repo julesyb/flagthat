@@ -11,19 +11,26 @@ interface FlagImageProps {
 }
 
 const SIZE_MAP = {
-  small: { width: 48, height: 32 },
-  medium: { width: 80, height: 54 },
-  large: { width: 160, height: 107 },
-  hero: { width: 280, height: 187 },
+  small: { width: 64, height: 43 },
+  medium: { width: 120, height: 80 },
+  large: { width: 240, height: 160 },
+  hero: { width: 320, height: 213 },
 };
 
+// flagcdn.com serves PNGs at these fixed widths
+const CDN_WIDTHS = [20, 40, 80, 160, 320, 640, 1280, 2560];
+
+function nearestCdnWidth(desired: number): number {
+  return CDN_WIDTHS.find((w) => w >= desired) ?? 2560;
+}
+
 function getFlagUrl(code: string, width: number): string {
-  return `https://flagcdn.com/w${width}/${code.toLowerCase()}.png`;
+  return `https://flagcdn.com/w${nearestCdnWidth(width)}/${code.toLowerCase()}.png`;
 }
 
 export default function FlagImage({ countryCode, size = 'large', emoji, style }: FlagImageProps) {
   const dimensions = SIZE_MAP[size];
-  const requestWidth = Math.min(dimensions.width * 2, 640);
+  const requestWidth = dimensions.width * 2;
   const [loaded, setLoaded] = useState(false);
 
   return (
@@ -50,12 +57,12 @@ export function FlagImageSmall({ countryCode, emoji }: { countryCode: string; em
   return (
     <View style={styles.smallContainer}>
       {!loaded && (
-        <View style={[styles.emojiOverlay, { width: 48, height: 32 }]}>
+        <View style={[styles.emojiOverlay, { width: 56, height: 37 }]}>
           <Text style={styles.smallEmojiText}>{emoji}</Text>
         </View>
       )}
       <Image
-        source={{ uri: getFlagUrl(countryCode, 80) }}
+        source={{ uri: getFlagUrl(countryCode, 112) }}
         style={styles.smallImage}
         contentFit="cover"
         transition={150}
@@ -82,14 +89,14 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   smallContainer: {
-    width: 48,
-    height: 32,
+    width: 56,
+    height: 37,
     overflow: 'hidden',
     backgroundColor: colors.border,
   },
   smallImage: {
-    width: 48,
-    height: 32,
+    width: 56,
+    height: 37,
   },
   smallEmojiText: {
     fontSize: 18,

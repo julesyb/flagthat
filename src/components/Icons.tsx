@@ -5,12 +5,13 @@ interface IconProps {
   size?: number;
   color?: string;
   strokeWidth?: number;
+  filled?: boolean;
 }
 
-// Lightning bolt (filled) — Quick Play hero icon
-export function LightningIcon({ size = 18, color = '#FFFFFF' }: IconProps) {
+// Lightning bolt — Quick Play hero icon
+export function LightningIcon({ size = 18, color = '#FFFFFF', strokeWidth = 1.5, filled = false }: IconProps) {
   return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill={filled ? color : 'none'} stroke={color} strokeWidth={strokeWidth}>
       <Path d="M13 2L4.5 13.5H11L10 22L19.5 10H13L13 2Z" />
     </Svg>
   );
@@ -30,10 +31,10 @@ export function CrosshairIcon({ size = 16, color = '#4B5563', strokeWidth = 1.5 
   );
 }
 
-// Bar chart (filled) — Statistics icon
-export function BarChartIcon({ size = 16, color = '#4B5563' }: IconProps) {
+// Bar chart — Statistics icon
+export function BarChartIcon({ size = 16, color = '#4B5563', strokeWidth = 1.5 }: IconProps) {
   return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth}>
       <Rect x={3} y={13} width={4} height={8} />
       <Rect x={10} y={8} width={4} height={13} />
       <Rect x={17} y={3} width={4} height={18} />
