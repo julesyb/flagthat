@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -9,15 +9,17 @@ import {
   StatusBar,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, borderRadius, typography, fontFamily } from '../utils/theme';
+import { colors, spacing, typography, fontFamily } from '../utils/theme';
 import { getTotalFlagCount, getAllFlags } from '../data';
 import { initAudio, hapticTap } from '../utils/feedback';
+import { getStats } from '../utils/storage';
 import { RootStackParamList } from '../types/navigation';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 export default function HomeScreen({ navigation }: Props) {
   const totalFlags = getTotalFlagCount();
+  const [mastered, setMastered] = useState(0);
 
   const regionCounts = useMemo(() => {
     const flags = getAllFlags();
@@ -31,6 +33,18 @@ export default function HomeScreen({ navigation }: Props) {
   useEffect(() => {
     initAudio();
   }, []);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      getStats().then((stats) => {
+        setMastered(stats.totalCorrect);
+      });
+    });
+    return unsubscribe;
+  }, [navigation]);
+
+  const progressPct = totalFlags > 0 ? Math.round((mastered / totalFlags) * 100) : 0;
+  const progressWidth = totalFlags > 0 ? (mastered / totalFlags) * 100 : 0;
 
   const quickPlay = () => {
     hapticTap();
@@ -73,6 +87,25 @@ export default function HomeScreen({ navigation }: Props) {
             {[0, 1, 2, 3, 4].map((i) => (
               <View key={i} style={styles.bylineDot} />
             ))}
+          </View>
+        </View>
+
+        {/* PROGRESS */}
+        <View style={styles.progressBlock}>
+          <View style={styles.progressMain}>
+            <View style={styles.progressLabelRow}>
+              <Text style={styles.progressLabel}>Mastery Progress</Text>
+              <Text style={styles.progressFraction}>
+                {mastered} of {totalFlags}
+              </Text>
+            </View>
+            <View style={styles.progressTrack}>
+              <View style={[styles.progressFill, { width: `${progressWidth}%` }]} />
+            </View>
+          </View>
+          <View style={styles.progressPct}>
+            <Text style={styles.progressPctNumber}>{progressPct}%</Text>
+            <Text style={styles.progressPctLabel}>Complete</Text>
           </View>
         </View>
 
@@ -259,7 +292,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm + spacing.xs,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
-    marginBottom: spacing.xl,
+    marginBottom: spacing.xl - spacing.sm,
   },
   bylineText: {
     ...typography.eyebrow,
@@ -274,6 +307,64 @@ const styles = StyleSheet.create({
     width: 4,
     height: 4,
     backgroundColor: colors.rule2,
+  },
+
+  // PROGRESS
+  progressBlock: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xl,
+    paddingVertical: spacing.md + spacing.xs,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+    marginBottom: spacing.xl,
+  },
+  progressMain: {
+    flex: 1,
+  },
+  progressLabelRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'baseline',
+    marginBottom: spacing.sm + spacing.xxs,
+  },
+  progressLabel: {
+    ...typography.sectionLabel,
+    fontFamily: fontFamily.uiLabel,
+    color: colors.textSecondary,
+  },
+  progressFraction: {
+    fontFamily: fontFamily.uiLabelMedium,
+    fontSize: 11,
+    letterSpacing: 0.7,
+    color: colors.textSecondary,
+  },
+  progressTrack: {
+    height: 3,
+    backgroundColor: colors.border,
+  },
+  progressFill: {
+    height: 3,
+    backgroundColor: colors.ink,
+  },
+  progressPct: {
+    alignItems: 'flex-end',
+    width: 80,
+  },
+  progressPctNumber: {
+    fontFamily: fontFamily.display,
+    fontSize: 28,
+    color: colors.ink,
+    letterSpacing: -0.5,
+    lineHeight: 28,
+  },
+  progressPctLabel: {
+    ...typography.sectionLabel,
+    fontSize: 9,
+    color: colors.textSecondary,
+    marginTop: spacing.xxs,
   },
 
   // SECTIONS
@@ -421,7 +512,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
   },
   regionItem: {
-    width: '50%',
+    width: '33.33%',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
