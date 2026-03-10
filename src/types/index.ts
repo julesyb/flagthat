@@ -3,6 +3,7 @@ export type GameMode = 'easy' | 'medium' | 'hard' | 'headsup';
 export type CategoryType = 'location' | 'difficulty' | 'theme';
 
 export type CategoryId =
+  | 'all'
   | 'africa'
   | 'asia'
   | 'europe'
