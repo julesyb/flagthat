@@ -14,7 +14,7 @@ import { colors, fontFamily, spacing } from '../utils/theme';
 import { getTotalFlagCount } from '../data';
 import { initAudio, hapticTap } from '../utils/feedback';
 import { RootStackParamList } from '../types/navigation';
-import { GameMode, DisplayMode } from '../types';
+import { GameMode } from '../types';
 import { LightningIcon, CrosshairIcon, BarChartIcon, GlobeIcon } from '../components/Icons';
 
 const MODES: { key: GameMode; label: string }[] = [
@@ -72,7 +72,6 @@ function FadeUp({ delay = 0, children }: { delay?: number; children: React.React
 export default function HomeScreen({ navigation }: Props) {
   const totalFlags = getTotalFlagCount();
   const [mode, setMode] = useState<GameMode>('medium');
-  const [displayMode, setDisplayMode] = useState<DisplayMode>('flag');
   const [questionCount, setQuestionCount] = useState(10);
   const [questionCountAll, setQuestionCountAll] = useState(false);
 
@@ -83,7 +82,7 @@ export default function HomeScreen({ navigation }: Props) {
   const quickPlay = () => {
     hapticTap();
     navigation.navigate('Game', {
-      config: { mode, category: 'all', questionCount: questionCountAll ? totalFlags : questionCount, displayMode },
+      config: { mode, category: 'all', questionCount: questionCountAll ? totalFlags : questionCount, displayMode: 'flag' },
     });
   };
 
@@ -180,24 +179,6 @@ export default function HomeScreen({ navigation }: Props) {
             </View>
           </View>
 
-          {/* ── DISPLAY MODE ── */}
-          <View style={styles.modeSwitcher}>
-            <Text style={styles.modeSwitcherLabel}>Display</Text>
-            <View style={styles.modeSwitcherRow}>
-              {([{ key: 'flag' as DisplayMode, label: 'Flag' }, { key: 'map' as DisplayMode, label: 'Map' }]).map((dm) => (
-                <TouchableOpacity
-                  key={dm.key}
-                  style={[styles.modeChip, displayMode === dm.key && styles.modeChipActive]}
-                  onPress={() => { hapticTap(); setDisplayMode(dm.key); }}
-                  activeOpacity={0.7}
-                >
-                  <Text style={[styles.modeChipText, displayMode === dm.key && styles.modeChipTextActive]}>
-                    {dm.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
         </FadeUp>
       </View>
 

@@ -1,5 +1,5 @@
-import React, { useState, useMemo, useRef, useCallback } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Platform } from 'react-native';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, useWindowDimensions } from 'react-native';
 import { Image } from 'expo-image';
 import { colors, fontFamily } from '../utils/theme';
 import { countryCoordinates } from '../data/countryCoordinates';
@@ -10,15 +10,9 @@ interface MapImageProps {
   style?: object;
 }
 
-const SIZE_MAP = {
-  small: { width: 64, height: 64 },
-  medium: { width: 120, height: 120 },
-  large: { width: 280, height: 200 },
-  hero: { width: 320, height: 240 },
-};
-
 // CartoDB no-labels basemap — free, no API key, no country names
 const TILE_URL = 'https://basemaps.cartocdn.com/light_nolabels';
+const TILE_SIZE = 256;
 
 function latLngToTile(lat: number, lng: number, zoom: number) {
   const n = Math.pow(2, zoom);
@@ -53,7 +47,7 @@ function getTileGrid(lat: number, lng: number, zoom: number, gridSize: number) {
 }
 
 // Pixel offset to center the country within the tile grid
-function getCenterOffset(lat: number, lng: number, zoom: number, tileSize: number, gridSize: number) {
+function getCenterOffset(lat: number, lng: number, zoom: number, gridSize: number) {
   const n = Math.pow(2, zoom);
   const xTile = ((lng + 180) / 360) * n;
   const latRad = (lat * Math.PI) / 180;
@@ -64,19 +58,27 @@ function getCenterOffset(lat: number, lng: number, zoom: number, tileSize: numbe
 
   const half = Math.floor(gridSize / 2);
 
-  const centerPxX = (half + fractX) * tileSize;
-  const centerPxY = (half + fractY) * tileSize;
+  const centerPxX = (half + fractX) * TILE_SIZE;
+  const centerPxY = (half + fractY) * TILE_SIZE;
 
   return { centerPxX, centerPxY };
 }
 
 export default function MapImage({ countryCode, size = 'hero', style }: MapImageProps) {
-  const dimensions = SIZE_MAP[size];
+  const { width: screenWidth } = useWindowDimensions();
   const coord = countryCoordinates[countryCode.toLowerCase()];
   const [zoomDelta, setZoomDelta] = useState(0);
   const scrollRef = useRef<ScrollView>(null);
 
   const isInteractive = size === 'hero' || size === 'large';
+
+  const dimensions = useMemo(() => {
+    if (size === 'hero') {
+      return { width: Math.min(screenWidth - 48, 500), height: 340 };
+    }
+    const fixed = { small: { width: 64, height: 64 }, medium: { width: 120, height: 120 }, large: { width: 280, height: 200 } };
+    return fixed[size] || fixed.medium;
+  }, [size, screenWidth]);
 
   if (!coord) {
     return (
@@ -87,16 +89,34 @@ export default function MapImage({ countryCode, size = 'hero', style }: MapImage
   }
 
   const zoom = coord.zoom + zoomDelta;
-  const TILE_SIZE = 256;
-  const gridSize = size === 'small' ? 3 : size === 'medium' ? 3 : 5;
+  const gridSize = size === 'small' || size === 'medium' ? 3 : 7;
   const totalPx = gridSize * TILE_SIZE;
 
   const tiles = useMemo(() => getTileGrid(coord.lat, coord.lng, zoom, gridSize), [coord.lat, coord.lng, zoom, gridSize]);
-  const centerOffset = useMemo(() => getCenterOffset(coord.lat, coord.lng, zoom, TILE_SIZE, gridSize), [coord.lat, coord.lng, zoom, gridSize]);
+  const centerOffset = useMemo(() => getCenterOffset(coord.lat, coord.lng, zoom, gridSize), [coord.lat, coord.lng, zoom, gridSize]);
 
-  // ScrollView content offset to center the country in the viewport
-  const initialOffsetX = centerOffset.centerPxX - dimensions.width / 2;
-  const initialOffsetY = centerOffset.centerPxY - dimensions.height / 2;
+  const scrollToCenter = () => {
+    scrollRef.current?.scrollTo({
+      x: centerOffset.centerPxX - dimensions.width / 2,
+      y: centerOffset.centerPxY - dimensions.height / 2,
+      animated: false,
+    });
+  };
+
+  // Re-center when zoom changes
+  useEffect(() => {
+    if (isInteractive) {
+      // Small delay to let new tiles render before scrolling
+      const timer = setTimeout(scrollToCenter, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [zoom, dimensions.width, dimensions.height]);
+
+  // Pin marker position — centered on the country coordinates
+  const PIN_WIDTH = 30;
+  const PIN_HEIGHT = 40;
+  const pinLeft = centerOffset.centerPxX - PIN_WIDTH / 2;
+  const pinTop = centerOffset.centerPxY - PIN_HEIGHT;
 
   if (!isInteractive) {
     // Non-interactive: simple clipped view (small/medium sizes)
@@ -126,10 +146,23 @@ export default function MapImage({ countryCode, size = 'hero', style }: MapImage
               cachePolicy="disk"
             />
           ))}
+          {/* Pin marker on the country */}
+          <View style={[styles.pinMarker, { left: pinLeft, top: pinTop, width: PIN_WIDTH, height: PIN_HEIGHT }]} pointerEvents="none">
+            <View style={styles.pinHead} />
+            <View style={styles.pinPoint} />
+          </View>
         </View>
       </View>
     );
   }
+
+  const handleZoomIn = () => {
+    setZoomDelta((d) => Math.min(d + 1, 4));
+  };
+
+  const handleZoomOut = () => {
+    setZoomDelta((d) => Math.max(d - 1, -2));
+  };
 
   // Interactive: ScrollView with pinch-to-zoom + pan
   return (
@@ -137,7 +170,10 @@ export default function MapImage({ countryCode, size = 'hero', style }: MapImage
       <ScrollView
         ref={scrollRef}
         style={dimensions}
-        contentOffset={{ x: initialOffsetX, y: initialOffsetY }}
+        contentOffset={{
+          x: centerOffset.centerPxX - dimensions.width / 2,
+          y: centerOffset.centerPxY - dimensions.height / 2,
+        }}
         minimumZoomScale={1}
         maximumZoomScale={3}
         bouncesZoom
@@ -161,25 +197,26 @@ export default function MapImage({ countryCode, size = 'hero', style }: MapImage
               cachePolicy="disk"
             />
           ))}
+          {/* Pin marker on the country — inside ScrollView so it stays on location */}
+          <View style={[styles.pinMarker, { left: pinLeft, top: pinTop, width: PIN_WIDTH, height: PIN_HEIGHT }]} pointerEvents="none">
+            <View style={styles.pinHead} />
+            <View style={styles.pinPoint} />
+          </View>
         </View>
       </ScrollView>
 
-      {/* Crosshair marker */}
-      <View style={styles.crosshairH} pointerEvents="none" />
-      <View style={styles.crosshairV} pointerEvents="none" />
-
-      {/* Zoom buttons — tile-level zoom (loads higher res tiles) */}
+      {/* Zoom buttons */}
       <View style={styles.zoomControls}>
         <TouchableOpacity
           style={styles.zoomButton}
-          onPress={() => setZoomDelta((d) => Math.min(d + 1, 4))}
+          onPress={handleZoomIn}
           activeOpacity={0.7}
         >
           <Text style={styles.zoomText}>+</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.zoomButton}
-          onPress={() => setZoomDelta((d) => Math.max(d - 1, -2))}
+          onPress={handleZoomOut}
           activeOpacity={0.7}
         >
           <Text style={styles.zoomText}>-</Text>
@@ -211,34 +248,45 @@ const styles = StyleSheet.create({
     fontSize: 24,
     color: colors.textTertiary,
   },
-  crosshairH: {
+  pinMarker: {
     position: 'absolute',
-    left: '45%',
-    right: '45%',
-    top: '50%',
-    height: 1,
-    backgroundColor: 'rgba(229, 39, 28, 0.35)',
-    pointerEvents: 'none',
+    alignItems: 'center',
+    zIndex: 10,
   },
-  crosshairV: {
-    position: 'absolute',
-    top: '45%',
-    bottom: '45%',
-    left: '50%',
-    width: 1,
-    backgroundColor: 'rgba(229, 39, 28, 0.35)',
-    pointerEvents: 'none',
+  pinHead: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: colors.accent,
+    borderWidth: 3,
+    borderColor: colors.white,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.5,
+    shadowRadius: 4,
+    elevation: 6,
+  },
+  pinPoint: {
+    width: 0,
+    height: 0,
+    borderLeftWidth: 8,
+    borderRightWidth: 8,
+    borderTopWidth: 12,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderTopColor: colors.accent,
+    marginTop: -2,
   },
   zoomControls: {
     position: 'absolute',
-    bottom: 8,
-    right: 8,
-    gap: 4,
+    bottom: 10,
+    right: 10,
+    gap: 6,
   },
   zoomButton: {
-    width: 28,
-    height: 28,
-    backgroundColor: 'rgba(255,255,255,0.9)',
+    width: 36,
+    height: 36,
+    backgroundColor: 'rgba(255,255,255,0.92)',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
@@ -246,8 +294,8 @@ const styles = StyleSheet.create({
   },
   zoomText: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 16,
+    fontSize: 20,
     color: colors.ink,
-    lineHeight: 18,
+    lineHeight: 22,
   },
 });
