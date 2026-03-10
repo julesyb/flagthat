@@ -1,6 +1,6 @@
 import { GameMode, FlagItem, GameQuestion, GameResult, GameConfig } from '../types';
 import { getFlagsForCategory, getAllFlags } from '../data';
-import { countryAliases } from '../data/countryAliases';
+import { countryAliases, twinPairs } from '../data/countryAliases';
 import { colors } from './theme';
 
 function shuffleArray<T>(array: T[]): T[] {
@@ -35,8 +35,18 @@ function generateOptions(correctFlag: FlagItem, allFlags: FlagItem[], mode: Game
 
   const choiceCount = mode === 'easy' ? 2 : 4;
   const otherFlags = allFlags.filter((f) => f.id !== correctFlag.id);
-  const shuffledOthers = shuffleArray(otherFlags);
-  const wrongOptions = shuffledOthers.slice(0, choiceCount - 1).map((f) => f.name);
+
+  // Prioritize twin flags as wrong options so look-alikes appear together
+  const twinNames = twinPairs[correctFlag.name] || [];
+  const twinFlags = otherFlags.filter((f) => twinNames.includes(f.name));
+  const nonTwinFlags = otherFlags.filter((f) => !twinNames.includes(f.name));
+
+  const wrongCount = choiceCount - 1;
+  const selectedTwins = shuffleArray(twinFlags).slice(0, wrongCount);
+  const remainingCount = wrongCount - selectedTwins.length;
+  const selectedOthers = shuffleArray(nonTwinFlags).slice(0, remainingCount);
+
+  const wrongOptions = [...selectedTwins, ...selectedOthers].map((f) => f.name);
 
   return shuffleArray([correctFlag.name, ...wrongOptions]);
 }

@@ -1074,3 +1074,61 @@ export const countryAliases: Record<string, string> = {
   'vanutu': 'Vanuatu',
   'vanatu': 'Vanuatu',
 };
+
+// Flag look-alike pairs ("tricky twins").
+// Each entry maps a country name to its twin(s) — flags that are commonly
+// confused with each other due to similar colors, layout, or design.
+export const twinPairs: Record<string, string[]> = {
+  // Blue-yellow-red vertical tricolors (nearly identical)
+  'Chad': ['Romania'],
+  'Romania': ['Chad'],
+
+  // Same tricolor with coat of arms variations
+  'Andorra': ['Moldova', 'Romania', 'Chad'],
+  'Moldova': ['Andorra', 'Romania', 'Chad'],
+
+  // Orange-white-green reversed
+  "Côte d'Ivoire": ['Ireland'],
+  'Ireland': ["Côte d'Ivoire"],
+
+  // Green-white-orange/red vertical tricolors
+  'Italy': ['Ireland'],
+
+  // Red-yellow-green vertical tricolors (reversed / star)
+  'Guinea': ['Mali', 'Senegal'],
+  'Mali': ['Guinea', 'Senegal'],
+  'Senegal': ['Guinea', 'Mali'],
+
+  // Orange-white-green with center roundel
+  'Niger': ['India'],
+
+  // Red-white horizontal bicolors
+  'Indonesia': ['Monaco', 'Poland'],
+  'Monaco': ['Indonesia', 'Poland'],
+  'Poland': ['Indonesia', 'Monaco'],
+
+  // Red-white-blue horizontal tricolors
+  'France': ['Netherlands', 'Luxembourg'],
+  'Netherlands': ['France', 'Luxembourg'],
+  'Luxembourg': ['Netherlands', 'France'],
+
+  // Red-white-green horizontal tricolors
+  'Hungary': ['Italy'],
+
+  // Similar tricolors with coat of arms
+  'Slovakia': ['Slovenia'],
+  'Slovenia': ['Slovakia'],
+
+  // Yellow-blue-red horizontal tricolors
+  'Ecuador': ['Colombia'],
+  'Colombia': ['Ecuador'],
+
+  // Stars-and-stripes designs
+  'Liberia': ['Malaysia'],
+  'Malaysia': ['Liberia'],
+
+  // Red-white-blue with union jack + southern cross
+  'New Zealand': ['Australia'],
+  'Australia': ['New Zealand'],
+
+};
