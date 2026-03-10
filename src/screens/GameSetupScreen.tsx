@@ -25,7 +25,7 @@ import { RootStackParamList } from '../types/navigation';
 type Props = NativeStackScreenProps<RootStackParamList, 'GameSetup'>;
 
 const QUESTION_COUNTS = [10, 20, 50, 100];
-const HEADSUP_TIMES = [15, 30, 60, 90];
+const FLAGFLASH_TIMES = [15, 30, 60, 90];
 
 export default function GameSetupScreen({ navigation }: Props) {
   const [displayMode, setDisplayMode] = useState<DisplayMode>('flag');
@@ -37,7 +37,7 @@ export default function GameSetupScreen({ navigation }: Props) {
   const [filterType, setFilterType] = useState<CategoryType | null>(null);
 
   const totalFlags = getTotalFlagCount();
-  const isHeadsUp = mode === 'headsup';
+  const isFlagFlash = mode === 'flagflash';
 
   const handleFilterTypeSelect = (type: CategoryType) => {
     if (filterType === type) {
@@ -66,13 +66,13 @@ export default function GameSetupScreen({ navigation }: Props) {
     const config: GameConfig = {
       mode,
       category: selectedCategory,
-      questionCount: isHeadsUp ? 999 : effectiveQuestionCount,
+      questionCount: isFlagFlash ? 999 : effectiveQuestionCount,
       displayMode,
-      ...(isHeadsUp && { timeLimit }),
+      ...(isFlagFlash && { timeLimit }),
     };
 
-    if (isHeadsUp) {
-      navigation.navigate('HeadsUp', { config });
+    if (isFlagFlash) {
+      navigation.navigate('FlagFlash', { config });
     } else {
       navigation.navigate('Game', { config });
     }
@@ -191,7 +191,7 @@ export default function GameSetupScreen({ navigation }: Props) {
           </View>
         )}
 
-        {!isHeadsUp ? (
+        {!isFlagFlash ? (
           <>
             <Text style={styles.sectionTitle}>Questions</Text>
             <View style={styles.optionRow}>
@@ -238,7 +238,7 @@ export default function GameSetupScreen({ navigation }: Props) {
           <>
             <Text style={styles.sectionTitle}>Time Limit</Text>
             <View style={styles.optionRow}>
-              {HEADSUP_TIMES.map((t) => (
+              {FLAGFLASH_TIMES.map((t) => (
                 <TouchableOpacity
                   key={t}
                   style={[
@@ -263,12 +263,12 @@ export default function GameSetupScreen({ navigation }: Props) {
         )}
 
         <TouchableOpacity
-          style={[styles.startButton, isHeadsUp && styles.startButtonParty]}
+          style={[styles.startButton, isFlagFlash && styles.startButtonParty]}
           onPress={startGame}
           activeOpacity={0.8}
         >
           <Text style={styles.startButtonText}>
-            {isHeadsUp ? 'Start Heads Up!' : 'Start Game'}
+            {isFlagFlash ? 'Start FlagFlash' : 'Start Game'}
           </Text>
         </TouchableOpacity>
       </ScrollView>

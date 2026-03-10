@@ -31,7 +31,7 @@ export function generateQuestions(config: GameConfig): GameQuestion[] {
 }
 
 function generateOptions(correctFlag: FlagItem, allFlags: FlagItem[], mode: GameMode): string[] {
-  if (mode === 'hard' || mode === 'headsup') return [];
+  if (mode === 'hard' || mode === 'flagflash') return [];
 
   const choiceCount = mode === 'easy' ? 2 : 4;
   const otherFlags = allFlags.filter((f) => f.id !== correctFlag.id);

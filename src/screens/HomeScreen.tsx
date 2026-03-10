@@ -227,14 +227,14 @@ export default function HomeScreen({ navigation }: Props) {
             style={styles.bottomNavItem}
             onPress={() => {
               hapticTap();
-              navigation.navigate('HeadsUp', {
-                config: { mode: 'headsup', category: 'all', questionCount: 999, timeLimit: 60 },
+              navigation.navigate('FlagFlash', {
+                config: { mode: 'flagflash', category: 'all', questionCount: 999, timeLimit: 60 },
               });
             }}
             activeOpacity={0.7}
           >
             <LightningIcon size={16} color={colors.ink} filled={false} />
-            <Text style={styles.bottomNavLabel}>Heads Up</Text>
+            <Text style={styles.bottomNavLabel}>FlagFlash</Text>
           </TouchableOpacity>
 
           <TouchableOpacity

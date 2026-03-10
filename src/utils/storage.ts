@@ -12,7 +12,7 @@ const DEFAULT_STATS: UserStats = {
     easy: { correct: 0, total: 0 },
     medium: { correct: 0, total: 0 },
     hard: { correct: 0, total: 0 },
-    headsup: { correct: 0, total: 0 },
+    flagflash: { correct: 0, total: 0 },
   },
   categoryStats: {},
 };

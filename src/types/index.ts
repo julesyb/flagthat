@@ -1,4 +1,4 @@
-export type GameMode = 'easy' | 'medium' | 'hard' | 'headsup';
+export type GameMode = 'easy' | 'medium' | 'hard' | 'flagflash';
 
 export type DisplayMode = 'flag' | 'map';
 
@@ -37,7 +37,7 @@ export interface GameConfig {
   mode: GameMode;
   category: CategoryId;
   questionCount: number;
-  timeLimit?: number; // seconds, for heads up
+  timeLimit?: number; // seconds, for FlagFlash
   displayMode?: DisplayMode; // flag (default) or map
 }
 
@@ -66,7 +66,7 @@ export const GAME_MODES: Record<GameMode, { label: string; description: string; 
   easy: { label: 'Easy', description: '50/50 - Pick from 2', icon: 'E' },
   medium: { label: 'Medium', description: 'Pick from 4', icon: 'M' },
   hard: { label: 'Hard', description: 'Type the answer', icon: 'H' },
-  headsup: { label: 'Heads Up!', description: 'Party mode - tilt to play', icon: '!' },
+  flagflash: { label: 'FlagFlash', description: 'Party mode - tilt to play', icon: '!' },
 };
 
 export const CATEGORIES: CategoryInfo[] = [

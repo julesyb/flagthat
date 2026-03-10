@@ -24,14 +24,14 @@ import FlagImage from '../components/FlagImage';
 import MapImage from '../components/MapImage';
 import { RootStackParamList } from '../types/navigation';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'HeadsUp'>;
+type Props = NativeStackScreenProps<RootStackParamList, 'FlagFlash'>;
 
 type TiltState = 'neutral' | 'correct' | 'skip';
 type Phase = 'tutorial' | 'countdown' | 'playing';
 
 const isWeb = Platform.OS === 'web';
 
-export default function HeadsUpScreen({ route, navigation }: Props) {
+export default function FlagFlashScreen({ route, navigation }: Props) {
   const { config } = route.params;
   const [questions, setQuestions] = useState<GameQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -216,7 +216,7 @@ export default function HeadsUpScreen({ route, navigation }: Props) {
     return (
       <View style={styles.tutorialContainer}>
         <StatusBar hidden />
-        <Text style={styles.tutorialTitle}>Heads Up!</Text>
+        <Text style={styles.tutorialTitle}>FlagFlash</Text>
         <Text style={styles.tutorialSubtitle}>How to play</Text>
 
         <View style={styles.tutorialSteps}>

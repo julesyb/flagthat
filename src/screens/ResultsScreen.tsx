@@ -84,8 +84,8 @@ export default function ResultsScreen({ route, navigation }: Props) {
   };
 
   const playAgain = () => {
-    if (config.mode === 'headsup') {
-      navigation.replace('HeadsUp', { config });
+    if (config.mode === 'flagflash') {
+      navigation.replace('FlagFlash', { config });
     } else {
       navigation.replace('Game', { config });
     }
