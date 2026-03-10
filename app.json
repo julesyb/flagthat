@@ -28,7 +28,12 @@
       }
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "name": "Flag That",
+      "shortName": "Flag That",
+      "description": "Test your knowledge of 195+ country flags",
+      "bundler": "metro",
+      "output": "single"
     },
     "plugins": [
       "expo-screen-orientation"
