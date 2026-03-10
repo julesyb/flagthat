@@ -54,8 +54,8 @@ export default function HomeScreen({ navigation }: Props) {
             <Text style={styles.logoIconText}>F</Text>
           </View>
           <View style={styles.logoTextRow}>
-            <Text style={styles.logoFlags}>Flag</Text>
-            <Text style={styles.logoAreUs}>That</Text>
+            <Text style={styles.logoFlag}>Flag</Text>
+            <Text style={styles.logoThat}>That</Text>
           </View>
           <Text style={styles.subtitle}>{totalFlags} flags to master</Text>
         </View>
@@ -172,14 +172,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: spacing.sm,
   },
-  logoFlags: {
+  logoFlag: {
     fontFamily: fontFamily.display,
     fontSize: 42,
     color: colors.ink,
     letterSpacing: -0.5,
     lineHeight: 48,
   },
-  logoAreUs: {
+  logoThat: {
     fontFamily: fontFamily.displayItalic,
     fontSize: 42,
     color: colors.accent,
