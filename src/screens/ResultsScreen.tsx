@@ -10,7 +10,7 @@ import {
   Share,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, buttons } from '../utils/theme';
 import { calculateAccuracy, getStreakFromResults, getGrade } from '../utils/gameEngine';
 import { updateStats, updateFlagResults } from '../utils/storage';
 import { hapticCorrect, playCelebrationSound } from '../utils/feedback';
@@ -250,16 +250,11 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
   },
   shareButton: {
-    backgroundColor: colors.surface,
-    padding: spacing.md,
-    alignItems: 'center',
-    borderWidth: 1.5,
-    borderColor: colors.ink,
+    ...buttons.secondary,
     marginBottom: spacing.lg,
   },
   shareButtonText: {
-    ...typography.bodyBold,
-    color: colors.ink,
+    ...buttons.secondaryText,
   },
   reviewTitle: {
     ...typography.headingUpper,
@@ -303,25 +298,17 @@ const styles = StyleSheet.create({
     marginTop: spacing.xl,
   },
   secondaryButton: {
+    ...buttons.secondary,
     flex: 1,
-    backgroundColor: colors.surface,
-    padding: spacing.lg,
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: colors.border,
   },
   secondaryButtonText: {
-    ...typography.bodyBold,
-    color: colors.text,
+    ...buttons.secondaryText,
   },
   primaryButton: {
+    ...buttons.primary,
     flex: 1,
-    backgroundColor: colors.ink,
-    padding: spacing.lg,
-    alignItems: 'center',
   },
   primaryButtonText: {
-    ...typography.bodyBold,
-    color: colors.white,
+    ...buttons.primaryText,
   },
 });

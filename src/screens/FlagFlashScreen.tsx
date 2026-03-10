@@ -8,7 +8,7 @@ import {
   Platform,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, buttons, nav } from '../utils/theme';
 import { GameQuestion, GameResult } from '../types';
 import { generateQuestions } from '../utils/gameEngine';
 import {
@@ -463,13 +463,12 @@ const styles = StyleSheet.create({
     color: colors.white,
   },
   readyButton: {
+    ...buttons.primary,
     backgroundColor: colors.accent,
     paddingHorizontal: spacing.xxl,
-    paddingVertical: spacing.lg,
   },
   readyButtonText: {
-    ...typography.headingUpper,
-    color: colors.white,
+    ...buttons.primaryText,
   },
   // Countdown
   countdownContainer: {
@@ -571,21 +570,18 @@ const styles = StyleSheet.create({
   },
   exitButton: {
     marginTop: spacing.lg,
-    paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.sm,
+    padding: spacing.sm,
   },
   exitButtonText: {
-    ...typography.body,
+    ...nav.backText,
     color: colors.whiteAlpha50,
-    textDecorationLine: 'underline',
   },
   exitButtonPlaying: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
+    padding: spacing.sm,
     backgroundColor: colors.whiteAlpha15,
   },
   exitButtonPlayingText: {
-    ...typography.captionBold,
+    ...nav.backText,
     color: colors.whiteAlpha70,
   },
 });

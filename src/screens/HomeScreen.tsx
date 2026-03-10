@@ -10,7 +10,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, fontFamily } from '../utils/theme';
+import { colors, fontFamily, spacing } from '../utils/theme';
 import { getTotalFlagCount } from '../data';
 import { initAudio, hapticTap } from '../utils/feedback';
 import { RootStackParamList } from '../types/navigation';
@@ -271,7 +271,7 @@ const styles = StyleSheet.create({
     maxWidth: 700,
     alignSelf: 'center',
     width: '100%',
-    paddingHorizontal: 40,
+    paddingHorizontal: spacing.lg,
     justifyContent: 'center',
   },
 
@@ -297,13 +297,13 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 3,
     backgroundColor: colors.accent,
-    marginBottom: 16,
+    marginBottom: spacing.md,
   },
   headerInner: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-end',
-    paddingBottom: 14,
+    paddingBottom: spacing.md,
     borderBottomWidth: 2,
     borderBottomColor: colors.ink,
   },
@@ -320,7 +320,7 @@ const styles = StyleSheet.create({
   },
   headerRight: {
     alignItems: 'flex-end',
-    paddingBottom: 4,
+    paddingBottom: spacing.xs,
   },
   countNumber: {
     fontFamily: fontFamily.display,
@@ -335,7 +335,7 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
     textTransform: 'uppercase',
     color: colors.slate,
-    marginTop: 2,
+    marginTop: spacing.xxs,
   },
 
   // Hero card
@@ -344,8 +344,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: colors.ink,
-    paddingVertical: 28,
-    paddingHorizontal: 28,
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.lg,
     position: 'relative',
   },
   cardHeroBar: {
@@ -359,13 +359,13 @@ const styles = StyleSheet.create({
   heroLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 20,
+    gap: spacing.md,
   },
   heroIcon: {
     width: 48,
     height: 48,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.2)',
+    borderColor: colors.whiteAlpha20,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -376,17 +376,17 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     lineHeight: 32,
     color: colors.white,
-    marginBottom: 4,
+    marginBottom: spacing.xs,
   },
   heroSub: {
     fontFamily: fontFamily.body,
     fontSize: 12,
-    color: 'rgba(255,255,255,0.45)',
+    color: colors.whiteAlpha45,
   },
   heroArrow: {
     fontFamily: fontFamily.uiLabel,
     fontSize: 20,
-    color: 'rgba(255,255,255,0.4)',
+    color: colors.whiteAlpha45,
   },
 
   // Mode switcher
@@ -394,7 +394,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: 12,
+    marginTop: spacing.sm,
   },
   modeSwitcherLabel: {
     fontFamily: fontFamily.uiLabel,
@@ -405,7 +405,7 @@ const styles = StyleSheet.create({
   },
   modeSwitcherRow: {
     flexDirection: 'row',
-    gap: 6,
+    gap: spacing.sm,
   },
   modeChip: {
     paddingVertical: 6,
@@ -432,11 +432,11 @@ const styles = StyleSheet.create({
   // Bottom nav
   bottomNav: {
     backgroundColor: colors.background,
-    paddingBottom: 8,
+    paddingBottom: spacing.sm,
     maxWidth: 700,
     alignSelf: 'center',
     width: '100%',
-    paddingHorizontal: 40,
+    paddingHorizontal: spacing.lg,
   },
   bottomNavTopRule: {
     height: 2,
@@ -446,13 +446,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    paddingVertical: 10,
+    paddingVertical: spacing.sm,
   },
   bottomNavItem: {
     alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
+    gap: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
   },
   bottomNavLabel: {
     fontFamily: fontFamily.uiLabel,

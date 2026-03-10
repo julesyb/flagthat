@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    borderWidth: 1.5,
+    borderWidth: 2,
     borderColor: colors.rule2,
   },
   regionChipActive: {

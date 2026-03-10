@@ -185,6 +185,81 @@ export const typography = {
   },
 };
 
+// ---- Standard border widths (single source of truth) ----
+export const borders = {
+  thin: 1,
+  medium: 1.5,
+  thick: 2,
+};
+
+// ---- Common interactive element styles ----
+export const buttons = {
+  primary: {
+    backgroundColor: palette.ink,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    alignItems: 'center' as const,
+  },
+  primaryText: {
+    fontFamily: 'BarlowCondensed_700Bold',
+    fontSize: 18,
+    letterSpacing: 1.5,
+    textTransform: 'uppercase' as const,
+    color: palette.white,
+  },
+  secondary: {
+    backgroundColor: palette.white,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    alignItems: 'center' as const,
+    borderWidth: 2,
+    borderColor: palette.ink,
+  },
+  secondaryText: {
+    fontFamily: 'BarlowCondensed_700Bold',
+    fontSize: 18,
+    letterSpacing: 1.5,
+    textTransform: 'uppercase' as const,
+    color: palette.ink,
+  },
+  chip: {
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    backgroundColor: palette.white,
+  },
+  chipActive: {
+    backgroundColor: palette.ink,
+    borderColor: palette.ink,
+  },
+  chipText: {
+    fontFamily: 'BarlowCondensed_600SemiBold',
+    fontSize: 11,
+    letterSpacing: 1.2,
+    textTransform: 'uppercase' as const,
+    color: '#4B5563',
+  },
+  chipTextActive: {
+    color: palette.white,
+  },
+};
+
+// ---- Standard nav bar element ----
+export const nav = {
+  backButton: {
+    padding: 8,
+    width: 60,
+  },
+  backText: {
+    fontSize: 13,
+    fontFamily: 'BarlowCondensed_600SemiBold',
+    letterSpacing: 0.5,
+    color: '#9CA3AF',
+    textTransform: 'uppercase' as const,
+  },
+};
+
 export const shadows = {
   small: {
     shadowColor: colors.ink,

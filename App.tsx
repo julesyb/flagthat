@@ -37,7 +37,10 @@ const screenOptions = {
   },
   headerTintColor: colors.text,
   headerTitleStyle: {
-    ...typography.bodyBold,
+    fontFamily: 'BarlowCondensed_700Bold',
+    fontSize: 18,
+    letterSpacing: 1.5,
+    textTransform: 'uppercase' as const,
   },
   headerShadowVisible: false,
   headerBackTitleVisible: false,

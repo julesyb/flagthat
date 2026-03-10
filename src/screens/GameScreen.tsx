@@ -10,7 +10,7 @@ import {
   Keyboard,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, nav, buttons } from '../utils/theme';
 import { GameQuestion, GameResult } from '../types';
 import { generateQuestions, checkAnswer } from '../utils/gameEngine';
 import { hapticCorrect, hapticWrong, hapticTap, playCorrectSound, playWrongSound } from '../utils/feedback';
@@ -158,7 +158,7 @@ export default function GameScreen({ route, navigation }: Props) {
           onPress={() => navigation.popToTop()}
           style={styles.quitButton}
         >
-          <Text style={styles.quitText}>Quit</Text>
+          <Text style={styles.quitText}>Exit</Text>
         </TouchableOpacity>
         <View style={styles.centerInfo}>
           <Text style={styles.counter}>
@@ -302,7 +302,7 @@ export default function GameScreen({ route, navigation }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.white,
+    backgroundColor: colors.background,
   },
   loadingContainer: {
     flex: 1,
@@ -329,12 +329,10 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
   },
   quitButton: {
-    padding: spacing.sm,
-    width: 60,
+    ...nav.backButton,
   },
   quitText: {
-    ...typography.caption,
-    color: colors.textTertiary,
+    ...nav.backText,
   },
   centerInfo: {
     alignItems: 'center',
@@ -385,11 +383,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   optionButton: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
     alignItems: 'center',
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: colors.border,
   },
   optionButtonMap: {
@@ -430,21 +428,18 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     ...typography.body,
     color: colors.text,
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: colors.border,
     textAlign: 'center',
   },
   submitButton: {
-    backgroundColor: colors.ink,
-    padding: spacing.lg,
-    alignItems: 'center',
+    ...buttons.primary,
   },
   submitButtonDisabled: {
     backgroundColor: colors.textTertiary,
   },
   submitButtonText: {
-    ...typography.bodyBold,
-    color: colors.white,
+    ...buttons.primaryText,
   },
   feedbackContainer: {
     marginTop: spacing.lg,

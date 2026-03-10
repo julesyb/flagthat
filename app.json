@@ -9,7 +9,7 @@
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#F2F2F7"
+      "backgroundColor": "#F9FAFB"
     },
     "ios": {
       "supportsTablet": true,
@@ -21,7 +21,7 @@
     "android": {
       "package": "com.flagsareus.app",
       "adaptiveIcon": {
-        "backgroundColor": "#F2F2F7",
+        "backgroundColor": "#F9FAFB",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"

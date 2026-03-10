@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Flag That — App Icon Generator</title>
+<style>
+  body { font-family: sans-serif; background: #1a1a1a; color: #fff; padding: 40px; }
+  h1 { font-size: 24px; margin-bottom: 8px; }
+  p { color: #999; margin-bottom: 32px; }
+  .grid { display: flex; flex-wrap: wrap; gap: 32px; }
+  .icon-card { text-align: center; }
+  .icon-card label { display: block; margin-top: 8px; font-size: 12px; color: #888; }
+  canvas { image-rendering: -webkit-optimize-contrast; }
+  button { background: #E5271C; color: #fff; border: none; padding: 12px 32px;
+           font-size: 14px; cursor: pointer; text-transform: uppercase;
+           letter-spacing: 2px; margin-top: 32px; }
+  button:hover { background: #c92018; }
+</style>
+<!--
+  Google Fonts loaded here because the icon uses the same brand typefaces.
+  Libre Baskerville Bold for "Flag", Libre Baskerville Italic for "That".
+-->
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<h1>Flag That — Icon Generator</h1>
+<p>Open this file in a browser. Click "Download All" to save every icon variant as PNG.</p>
+
+<div class="grid" id="grid"></div>
+<button onclick="downloadAll()">Download All Icons</button>
+
+<script>
+// ── Brand palette ──
+const INK    = '#111827';
+const RED    = '#E5271C';
+const PAPER  = '#F9FAFB';
+const WHITE  = '#FFFFFF';
+
+// ── Icon variants ──
+const VARIANTS = [
+  { name: 'icon',                     size: 1024, bg: INK,   mono: false },
+  { name: 'favicon',                  size: 64,   bg: INK,   mono: false },
+  { name: 'splash-icon',              size: 512,  bg: PAPER, mono: false },
+  { name: 'android-icon-foreground',  size: 432,  bg: null,  mono: false },
+  { name: 'android-icon-background',  size: 432,  bg: PAPER, mono: false, bgOnly: true },
+  { name: 'android-icon-monochrome',  size: 432,  bg: null,  mono: true  },
+];
+
+const grid = document.getElementById('grid');
+const canvases = {};
+
+function waitForFonts() {
+  return document.fonts.ready;
+}
+
+function drawIcon(ctx, size, bg, mono, bgOnly) {
+  const s = size;
+  ctx.clearRect(0, 0, s, s);
+
+  // Background fill
+  if (bg) {
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, s, s);
+  }
+
+  if (bgOnly) return;
+
+  const scale = s / 1024;
+
+  // ── Accent bar (top-left vertical stripe) ──
+  if (!mono) {
+    ctx.fillStyle = RED;
+    ctx.fillRect(s * 0.08, s * 0.12, s * 0.025, s * 0.76);
+  }
+
+  // ── "Flag" text ──
+  const flagSize = Math.round(280 * scale);
+  ctx.font = `700 ${flagSize}px "Libre Baskerville", serif`;
+  ctx.textBaseline = 'alphabetic';
+  ctx.textAlign = 'left';
+  ctx.fillStyle = mono ? '#000000' : (bg === INK ? WHITE : INK);
+  ctx.fillText('Flag', s * 0.16, s * 0.52);
+
+  // ── "That" text (italic, red on dark / red on light) ──
+  const thatSize = Math.round(280 * scale);
+  ctx.font = `italic 400 ${thatSize}px "Libre Baskerville", serif`;
+  ctx.fillStyle = mono ? '#000000' : RED;
+  ctx.fillText('That', s * 0.16, s * 0.82);
+
+  // ── Small decorative rule under "Flag" ──
+  if (!mono) {
+    const ruleY = s * 0.55;
+    const flagMetrics = ctx.measureText('Flag');
+    // Reset font to measure "Flag" width
+    ctx.font = `700 ${flagSize}px "Libre Baskerville", serif`;
+    const flagWidth = ctx.measureText('Flag').width;
+    ctx.fillStyle = bg === INK ? 'rgba(255,255,255,0.15)' : 'rgba(17,24,39,0.1)';
+    ctx.fillRect(s * 0.16, ruleY, flagWidth, Math.max(2, 2 * scale));
+  }
+}
+
+async function init() {
+  await waitForFonts();
+
+  for (const v of VARIANTS) {
+    const card = document.createElement('div');
+    card.className = 'icon-card';
+
+    const canvas = document.createElement('canvas');
+    canvas.width = v.size;
+    canvas.height = v.size;
+    // Display at max 256px
+    const displaySize = Math.min(v.size, 256);
+    canvas.style.width = displaySize + 'px';
+    canvas.style.height = displaySize + 'px';
+    if (!v.bg) {
+      canvas.style.background = 'repeating-conic-gradient(#333 0% 25%, #444 0% 50%) 0 0 / 16px 16px';
+    }
+
+    const ctx = canvas.getContext('2d');
+    drawIcon(ctx, v.size, v.bg, v.mono, v.bgOnly);
+
+    card.appendChild(canvas);
+
+    const label = document.createElement('label');
+    label.textContent = `${v.name} (${v.size}x${v.size})`;
+    card.appendChild(label);
+
+    grid.appendChild(card);
+    canvases[v.name] = canvas;
+  }
+}
+
+function downloadAll() {
+  for (const [name, canvas] of Object.entries(canvases)) {
+    const link = document.createElement('a');
+    link.download = name + '.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  }
+}
+
+init();
+</script>
+</body>
+</html>

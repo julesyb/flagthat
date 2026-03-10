@@ -8,7 +8,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, buttons } from '../utils/theme';
 import {
   GameMode,
   DisplayMode,
@@ -426,7 +426,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    borderWidth: 1.5,
+    borderWidth: 2,
     borderColor: colors.border,
     gap: spacing.sm,
   },
@@ -495,16 +495,13 @@ const styles = StyleSheet.create({
     color: colors.ink,
   },
   startButton: {
-    backgroundColor: colors.ink,
-    padding: spacing.lg,
-    alignItems: 'center',
+    ...buttons.primary,
     marginTop: spacing.xl,
   },
   startButtonParty: {
     backgroundColor: colors.accent,
   },
   startButtonText: {
-    ...typography.headingUpper,
-    color: colors.white,
+    ...buttons.primaryText,
   },
 });
