@@ -8,6 +8,7 @@ import ResultsScreen from './src/screens/ResultsScreen';
 import StatsScreen from './src/screens/StatsScreen';
 import BrowseScreen from './src/screens/BrowseScreen';
 import HeadsUpScreen from './src/screens/HeadsUpScreen';
+import ErrorBoundary from './src/components/ErrorBoundary';
 import { RootStackParamList } from './src/types/navigation';
 import { colors, typography } from './src/utils/theme';
 
@@ -30,6 +31,7 @@ const screenOptions = {
 
 export default function App() {
   return (
+    <ErrorBoundary>
     <NavigationContainer>
       <Stack.Navigator screenOptions={screenOptions}>
         <Stack.Screen
@@ -69,5 +71,6 @@ export default function App() {
         />
       </Stack.Navigator>
     </NavigationContainer>
+    </ErrorBoundary>
   );
 }

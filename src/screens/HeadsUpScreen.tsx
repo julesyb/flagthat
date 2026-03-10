@@ -3,8 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
-  Dimensions,
   StatusBar,
   TouchableOpacity,
 } from 'react-native';
@@ -27,8 +25,6 @@ import FlagImage from '../components/FlagImage';
 import { RootStackParamList } from '../types/navigation';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'HeadsUp'>;
-
-const { width, height } = Dimensions.get('window');
 
 type TiltState = 'neutral' | 'correct' | 'skip';
 type Phase = 'tutorial' | 'countdown' | 'playing';
@@ -373,7 +369,7 @@ const styles = StyleSheet.create({
     ...typography.body,
     color: colors.white,
     textAlign: 'center',
-    marginTop: height / 2 - 20,
+    marginTop: '45%',
   },
   timerBar: {
     height: 6,

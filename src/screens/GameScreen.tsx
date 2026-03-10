@@ -27,6 +27,7 @@ export default function GameScreen({ route, navigation }: Props) {
   const [textInput, setTextInput] = useState('');
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
+  const [lastAnswerCorrect, setLastAnswerCorrect] = useState(false);
   const [currentStreak, setCurrentStreak] = useState(0);
   const [questionStartTime, setQuestionStartTime] = useState(Date.now());
   const fadeAnim = useRef(new Animated.Value(1)).current;
@@ -73,6 +74,7 @@ export default function GameScreen({ route, navigation }: Props) {
 
       setSelectedAnswer(answer);
       setShowFeedback(true);
+      setLastAnswerCorrect(correct);
 
       if (correct) {
         hapticCorrect();
@@ -114,6 +116,7 @@ export default function GameScreen({ route, navigation }: Props) {
           setCurrentIndex((i) => i + 1);
           setSelectedAnswer(null);
           setShowFeedback(false);
+          setLastAnswerCorrect(false);
           setTextInput('');
           setQuestionStartTime(Date.now());
           Keyboard.dismiss();
@@ -145,7 +148,7 @@ export default function GameScreen({ route, navigation }: Props) {
     <SafeAreaView style={styles.container}>
       <View style={styles.topBar}>
         <TouchableOpacity
-          onPress={() => navigation.goBack()}
+          onPress={() => navigation.popToTop()}
           style={styles.quitButton}
         >
           <Text style={styles.quitText}>Quit</Text>
@@ -254,7 +257,7 @@ export default function GameScreen({ route, navigation }: Props) {
 
         {showFeedback && (
           <View style={styles.feedbackContainer}>
-            {checkAnswer(selectedAnswer || textInput, currentQuestion.flag.name) ? (
+            {lastAnswerCorrect ? (
               <Text style={styles.feedbackCorrect}>Correct!</Text>
             ) : (
               <Text style={styles.feedbackWrong}>

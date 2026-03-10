@@ -46,15 +46,23 @@ export default function ResultsScreen({ route, navigation }: Props) {
       useNativeDriver: true,
     }).start();
 
+    let cancelCelebration: (() => void) | undefined;
+
     if (isPerfect) {
       hapticCorrect();
-      playCelebrationSound();
-      Animated.loop(
+      cancelCelebration = playCelebrationSound();
+      const loopAnim = Animated.loop(
         Animated.sequence([
           Animated.timing(confettiOpacity, { toValue: 1, duration: 500, useNativeDriver: true }),
           Animated.timing(confettiOpacity, { toValue: 0.3, duration: 500, useNativeDriver: true }),
         ]),
-      ).start();
+      );
+      loopAnim.start();
+
+      return () => {
+        loopAnim.stop();
+        cancelCelebration?.();
+      };
     }
   }, []);
 
