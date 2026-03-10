@@ -23,6 +23,8 @@ const MODES: { key: GameMode; label: string }[] = [
   { key: 'hard', label: 'Type' },
 ];
 
+const QUESTION_COUNTS = [5, 10, 15, 20];
+
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 const GRID_SPACING = 80;
@@ -70,6 +72,7 @@ function FadeUp({ delay = 0, children }: { delay?: number; children: React.React
 export default function HomeScreen({ navigation }: Props) {
   const totalFlags = getTotalFlagCount();
   const [mode, setMode] = useState<GameMode>('medium');
+  const [questionCount, setQuestionCount] = useState(10);
 
   useEffect(() => {
     initAudio();
@@ -78,7 +81,7 @@ export default function HomeScreen({ navigation }: Props) {
   const quickPlay = () => {
     hapticTap();
     navigation.navigate('Game', {
-      config: { mode, category: 'all', questionCount: 10 },
+      config: { mode, category: 'all', questionCount },
     });
   };
 
@@ -121,16 +124,35 @@ export default function HomeScreen({ navigation }: Props) {
               <View>
                 <Text style={styles.heroTitle}>Play</Text>
                 <Text style={styles.heroSub}>
-                  10 random flags {'\u00A0\u00B7\u00A0'} all {totalFlags}
+                  {questionCount} random flags {'\u00A0\u00B7\u00A0'} all {totalFlags}
                 </Text>
               </View>
             </View>
             <Text style={styles.heroArrow}>{'\u2192'}</Text>
           </TouchableOpacity>
 
+          {/* ── QUESTION COUNT PICKER ── */}
+          <View style={styles.modeSwitcher}>
+            <Text style={styles.modeSwitcherLabel}>Cards</Text>
+            <View style={styles.modeSwitcherRow}>
+              {QUESTION_COUNTS.map((count) => (
+                <TouchableOpacity
+                  key={count}
+                  style={[styles.modeChip, questionCount === count && styles.modeChipActive]}
+                  onPress={() => { hapticTap(); setQuestionCount(count); }}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[styles.modeChipText, questionCount === count && styles.modeChipTextActive]}>
+                    {count}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
           {/* ── MODE SWITCHER ── */}
           <View style={styles.modeSwitcher}>
-            <Text style={styles.modeSwitcherLabel}>Mode</Text>
+            <Text style={styles.modeSwitcherLabel}>Game Mode</Text>
             <View style={styles.modeSwitcherRow}>
               {MODES.map((m) => (
                 <TouchableOpacity
