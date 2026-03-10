@@ -76,6 +76,8 @@ const styles = StyleSheet.create({
   container: {
     overflow: 'hidden',
     backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: colors.rule2,
   },
   image: {},
   emojiOverlay: {
@@ -93,6 +95,8 @@ const styles = StyleSheet.create({
     height: 37,
     overflow: 'hidden',
     backgroundColor: colors.border,
+    borderWidth: 1,
+    borderColor: colors.rule2,
   },
   smallImage: {
     width: 56,
