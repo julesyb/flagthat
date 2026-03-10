@@ -13,7 +13,6 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { colors, fontFamily } from '../utils/theme';
 import { getTotalFlagCount } from '../data';
 import { initAudio, hapticTap } from '../utils/feedback';
-import { getStats } from '../utils/storage';
 import { RootStackParamList } from '../types/navigation';
 import { GameMode } from '../types';
 import { LightningIcon, CrosshairIcon, BarChartIcon, GlobeIcon } from '../components/Icons';
@@ -23,6 +22,8 @@ const MODES: { key: GameMode; label: string }[] = [
   { key: 'medium', label: '4' },
   { key: 'hard', label: 'Type' },
 ];
+
+const QUESTION_COUNTS = [5, 10, 15, 20];
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
@@ -70,47 +71,19 @@ function FadeUp({ delay = 0, children }: { delay?: number; children: React.React
 // ─── Main Screen ─────────────────────────────────────────────
 export default function HomeScreen({ navigation }: Props) {
   const totalFlags = getTotalFlagCount();
-  const [mastered, setMastered] = useState(0);
   const [mode, setMode] = useState<GameMode>('medium');
-  const progressAnim = useRef(new Animated.Value(0)).current;
+  const [questionCount, setQuestionCount] = useState(10);
 
   useEffect(() => {
     initAudio();
   }, []);
 
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
-      getStats().then((stats) => {
-        setMastered(stats.totalCorrect);
-      });
-    });
-    return unsubscribe;
-  }, [navigation]);
-
-  // Animate progress bar fill
-  useEffect(() => {
-    const target = totalFlags > 0 ? Math.min(mastered / totalFlags, 1) : 0;
-    Animated.timing(progressAnim, {
-      toValue: target,
-      duration: 1000,
-      delay: 700,
-      useNativeDriver: false,
-    }).start();
-  }, [mastered, totalFlags]);
-
-  const progressPct = totalFlags > 0 ? Math.min(Math.round((mastered / totalFlags) * 100), 100) : 0;
-
   const quickPlay = () => {
     hapticTap();
     navigation.navigate('Game', {
-      config: { mode, category: 'all', questionCount: 10 },
+      config: { mode, category: 'all', questionCount },
     });
   };
-
-  const progressWidth = progressAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0%', '100%'],
-  });
 
   return (
     <SafeAreaView style={styles.container}>
@@ -123,9 +96,6 @@ export default function HomeScreen({ navigation }: Props) {
           <View style={styles.headerTopRule} />
           <View style={styles.headerInner}>
             <View>
-              <Text style={styles.eyebrow}>
-                Flag Identification {'\u00B7'} {totalFlags} Countries
-              </Text>
               <Text style={styles.logotypeMain}>
                 Flag{'\n'}
                 <Text style={styles.logotypeItalic}>That</Text>
@@ -138,40 +108,6 @@ export default function HomeScreen({ navigation }: Props) {
           </View>
         </FadeUp>
 
-        {/* ── BYLINE ── */}
-        <FadeUp delay={80}>
-          <View style={styles.byline}>
-            <Text style={styles.bylineText}>
-              Geography {'\u00B7'} Cartography {'\u00B7'} Mastery
-            </Text>
-            <View style={styles.bylineDots}>
-              {[0, 1, 2, 3, 4].map((i) => (
-                <View key={i} style={styles.bylineDot} />
-              ))}
-            </View>
-          </View>
-        </FadeUp>
-
-        {/* ── PROGRESS ── */}
-        <FadeUp delay={140}>
-          <View style={styles.progressBlock}>
-            <View style={styles.progressLeft}>
-              <View style={styles.progressLabelRow}>
-                <Text style={styles.progressLabel}>Mastery Progress</Text>
-                <Text style={styles.progressFraction}>
-                  {mastered} of {totalFlags}
-                </Text>
-              </View>
-              <View style={styles.progressTrack}>
-                <Animated.View style={[styles.progressFill, { width: progressWidth }]} />
-              </View>
-            </View>
-            <View style={styles.progressPctBox}>
-              <Text style={styles.progressPctNumber}>{progressPct}%</Text>
-              <Text style={styles.progressPctLabel}>Complete</Text>
-            </View>
-          </View>
-        </FadeUp>
 
         {/* ── SINGLE CTA ── */}
         <FadeUp delay={220}>
@@ -188,16 +124,35 @@ export default function HomeScreen({ navigation }: Props) {
               <View>
                 <Text style={styles.heroTitle}>Play</Text>
                 <Text style={styles.heroSub}>
-                  10 random flags {'\u00A0\u00B7\u00A0'} all {totalFlags}
+                  {questionCount} random flags {'\u00A0\u00B7\u00A0'} all {totalFlags}
                 </Text>
               </View>
             </View>
             <Text style={styles.heroArrow}>{'\u2192'}</Text>
           </TouchableOpacity>
 
+          {/* ── QUESTION COUNT PICKER ── */}
+          <View style={styles.modeSwitcher}>
+            <Text style={styles.modeSwitcherLabel}>Cards</Text>
+            <View style={styles.modeSwitcherRow}>
+              {QUESTION_COUNTS.map((count) => (
+                <TouchableOpacity
+                  key={count}
+                  style={[styles.modeChip, questionCount === count && styles.modeChipActive]}
+                  onPress={() => { hapticTap(); setQuestionCount(count); }}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[styles.modeChipText, questionCount === count && styles.modeChipTextActive]}>
+                    {count}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
           {/* ── MODE SWITCHER ── */}
           <View style={styles.modeSwitcher}>
-            <Text style={styles.modeSwitcherLabel}>Mode</Text>
+            <Text style={styles.modeSwitcherLabel}>Game Mode</Text>
             <View style={styles.modeSwitcherRow}>
               {MODES.map((m) => (
                 <TouchableOpacity
@@ -308,14 +263,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
     borderBottomColor: colors.ink,
   },
-  eyebrow: {
-    fontFamily: fontFamily.uiLabel,
-    fontSize: 10,
-    letterSpacing: 2.8,
-    textTransform: 'uppercase',
-    color: colors.slate,
-    marginBottom: 8,
-  },
   logotypeMain: {
     fontFamily: fontFamily.display,
     fontSize: 64,
@@ -342,96 +289,6 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.uiLabelMedium,
     fontSize: 10,
     letterSpacing: 2,
-    textTransform: 'uppercase',
-    color: colors.slate,
-    marginTop: 2,
-  },
-
-  // Byline
-  byline: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.rule,
-    marginBottom: 20,
-  },
-  bylineText: {
-    fontFamily: fontFamily.uiLabelMedium,
-    fontSize: 10,
-    letterSpacing: 2,
-    textTransform: 'uppercase',
-    color: colors.slate,
-  },
-  bylineDots: {
-    flexDirection: 'row',
-    gap: 4,
-    alignItems: 'center',
-  },
-  bylineDot: {
-    width: 4,
-    height: 4,
-    backgroundColor: colors.rule2,
-  },
-
-  // Progress
-  progressBlock: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 32,
-    paddingVertical: 14,
-    borderTopWidth: 1,
-    borderTopColor: colors.rule,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.rule,
-    marginBottom: 24,
-  },
-  progressLeft: {
-    flex: 1,
-  },
-  progressLabelRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'baseline',
-    marginBottom: 10,
-  },
-  progressLabel: {
-    fontFamily: fontFamily.uiLabel,
-    fontSize: 10,
-    letterSpacing: 2.2,
-    textTransform: 'uppercase',
-    color: colors.slate,
-  },
-  progressFraction: {
-    fontFamily: fontFamily.uiLabelMedium,
-    fontSize: 11,
-    letterSpacing: 0.66,
-    color: colors.slate,
-  },
-  progressTrack: {
-    height: 3,
-    backgroundColor: colors.rule,
-  },
-  progressFill: {
-    height: 3,
-    backgroundColor: colors.ink,
-  },
-  progressPctBox: {
-    width: 80,
-    alignItems: 'flex-end',
-  },
-  progressPctNumber: {
-    fontFamily: fontFamily.display,
-    fontSize: 28,
-    color: colors.ink,
-    letterSpacing: -0.56,
-    lineHeight: 28,
-  },
-  progressPctLabel: {
-    fontFamily: fontFamily.uiLabelMedium,
-    fontSize: 9,
-    letterSpacing: 1.62,
     textTransform: 'uppercase',
     color: colors.slate,
     marginTop: 2,
