@@ -89,7 +89,7 @@ export default function HomeScreen({ navigation }: Props) {
 
   // Animate progress bar fill
   useEffect(() => {
-    const target = totalFlags > 0 ? mastered / totalFlags : 0;
+    const target = totalFlags > 0 ? Math.min(mastered / totalFlags, 1) : 0;
     Animated.timing(progressAnim, {
       toValue: target,
       duration: 1000,
@@ -98,7 +98,7 @@ export default function HomeScreen({ navigation }: Props) {
     }).start();
   }, [mastered, totalFlags]);
 
-  const progressPct = totalFlags > 0 ? Math.round((mastered / totalFlags) * 100) : 0;
+  const progressPct = totalFlags > 0 ? Math.min(Math.round((mastered / totalFlags) * 100), 100) : 0;
 
   const quickPlay = () => {
     hapticTap();

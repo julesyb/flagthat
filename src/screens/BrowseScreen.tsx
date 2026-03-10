@@ -17,7 +17,7 @@ import { FlagImageSmall } from '../components/FlagImage';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Browse'>;
 
-const REGIONS = ['All', 'Africa', 'Asia', 'Europe', 'Americas', 'Oceania', 'Middle East'];
+const REGIONS = ['All', 'Africa', 'Asia', 'Europe', 'Americas', 'Oceania'];
 
 export default function BrowseScreen({ route }: Props) {
   const initialRegion = route.params?.region ?? 'All';

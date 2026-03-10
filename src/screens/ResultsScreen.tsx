@@ -62,7 +62,9 @@ export default function ResultsScreen({ route, navigation }: Props) {
     }
   }, []);
 
-  const categoryLabel = CATEGORIES.find((c) => c.id === config.category)?.label || '';
+  const categoryLabel = config.category === 'all'
+    ? 'All Flags'
+    : CATEGORIES.find((c) => c.id === config.category)?.label || '';
   const modeLabel = GAME_MODES[config.mode].label;
 
   const handleShare = async () => {
