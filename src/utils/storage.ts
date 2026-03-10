@@ -74,15 +74,26 @@ export async function resetStats(): Promise<void> {
   }
 }
 
-// Per-flag stats: tracks wrong count per flag for "Practice More"
+// Per-flag stats: tracks wrong/right counts and consecutive-right streak.
+// Once rightStreak reaches 3, the flag is considered "learned" and drops
+// out of Practice More. Getting it wrong again resets the streak.
 export interface FlagStats {
-  [flagId: string]: { wrong: number; right: number };
+  [flagId: string]: { wrong: number; right: number; rightStreak: number };
 }
 
 export async function getFlagStats(): Promise<FlagStats> {
   try {
     const json = await AsyncStorage.getItem(FLAG_STATS_KEY);
-    if (json) return JSON.parse(json);
+    if (json) {
+      const parsed = JSON.parse(json);
+      // Backfill rightStreak for data saved before this field existed
+      for (const id of Object.keys(parsed)) {
+        if (parsed[id].rightStreak === undefined) {
+          parsed[id].rightStreak = 0;
+        }
+      }
+      return parsed;
+    }
     return {};
   } catch {
     return {};
@@ -95,12 +106,14 @@ export async function updateFlagResults(results: GameResult[]): Promise<void> {
     for (const r of results) {
       const id = r.question.flag.id;
       if (!stats[id]) {
-        stats[id] = { wrong: 0, right: 0 };
+        stats[id] = { wrong: 0, right: 0, rightStreak: 0 };
       }
       if (r.correct) {
         stats[id].right += 1;
+        stats[id].rightStreak += 1;
       } else {
         stats[id].wrong += 1;
+        stats[id].rightStreak = 0;
       }
     }
     await AsyncStorage.setItem(FLAG_STATS_KEY, JSON.stringify(stats));
@@ -112,7 +125,7 @@ export async function updateFlagResults(results: GameResult[]): Promise<void> {
 export async function getMissedFlagIds(): Promise<string[]> {
   const stats = await getFlagStats();
   return Object.entries(stats)
-    .filter(([, s]) => s.wrong > 0)
+    .filter(([, s]) => s.wrong > 0 && s.rightStreak < 3)
     .sort(([, a], [, b]) => b.wrong - a.wrong)
     .map(([id]) => id);
 }

@@ -43,7 +43,7 @@ export default function StatsScreen() {
 
   const bottom10 = React.useMemo(() => {
     return Object.entries(flagStats)
-      .filter(([, s]) => s.wrong > 0)
+      .filter(([, s]) => s.wrong > 0 && s.rightStreak < 3)
       .sort(([, a], [, b]) => b.wrong - a.wrong)
       .slice(0, 10);
   }, [flagStats]);
