@@ -134,18 +134,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderWidth: 1.5,
-    borderColor: colors.border,
+    borderColor: colors.rule2,
   },
   regionChipActive: {
     borderColor: colors.ink,
-    backgroundColor: colors.surfaceSecondary,
+    backgroundColor: colors.ink,
   },
   regionLabel: {
     ...typography.captionBold,
-    color: colors.text,
+    color: colors.textSecondary,
   },
   regionLabelActive: {
-    color: colors.ink,
+    color: colors.white,
   },
   resultCount: {
     ...typography.caption,
