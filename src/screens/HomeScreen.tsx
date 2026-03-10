@@ -169,22 +169,22 @@ const styles = StyleSheet.create({
     color: colors.white,
   },
   logoTextRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    gap: spacing.sm + spacing.xs,
+    alignItems: 'center',
     marginBottom: spacing.sm,
   },
   logoFlags: {
     fontFamily: fontFamily.display,
-    fontSize: 40,
+    fontSize: 42,
     color: colors.ink,
     letterSpacing: -0.5,
+    lineHeight: 48,
   },
   logoAreUs: {
     fontFamily: fontFamily.displayItalic,
-    fontSize: 40,
+    fontSize: 42,
     color: colors.accent,
     letterSpacing: -0.5,
+    lineHeight: 48,
   },
   subtitle: {
     fontFamily: fontFamily.body,
