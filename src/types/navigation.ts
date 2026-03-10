@@ -5,6 +5,7 @@ export type RootStackParamList = {
   GameSetup: undefined;
   Game: { config: GameConfig };
   FlagFlash: { config: GameConfig };
+  FlagPuzzle: { config: GameConfig };
   Results: { results: GameResult[]; config: GameConfig };
   Stats: undefined;
   Browse: { region?: string } | undefined;

@@ -25,6 +25,7 @@ import ResultsScreen from './src/screens/ResultsScreen';
 import StatsScreen from './src/screens/StatsScreen';
 import BrowseScreen from './src/screens/BrowseScreen';
 import FlagFlashScreen from './src/screens/FlagFlashScreen';
+import FlagPuzzleScreen from './src/screens/FlagPuzzleScreen';
 import ErrorBoundary from './src/components/ErrorBoundary';
 import { RootStackParamList } from './src/types/navigation';
 import { colors, typography } from './src/utils/theme';
@@ -71,6 +72,11 @@ function AppContent() {
         <Stack.Screen
           name="FlagFlash"
           component={FlagFlashScreen}
+          options={{ headerShown: false, gestureEnabled: false }}
+        />
+        <Stack.Screen
+          name="FlagPuzzle"
+          component={FlagPuzzleScreen}
           options={{ headerShown: false, gestureEnabled: false }}
         />
         <Stack.Screen

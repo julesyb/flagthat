@@ -14,6 +14,7 @@ const DEFAULT_STATS: UserStats = {
     medium: { correct: 0, total: 0 },
     hard: { correct: 0, total: 0 },
     flagflash: { correct: 0, total: 0 },
+    flagpuzzle: { correct: 0, total: 0 },
   },
   categoryStats: {},
 };

@@ -26,6 +26,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'GameSetup'>;
 
 const QUESTION_COUNTS = [10, 20, 50, 100];
 const FLAGFLASH_TIMES = [15, 30, 60, 90];
+const FLAGPUZZLE_TIMES = [15, 30, 60];
 
 export default function GameSetupScreen({ navigation }: Props) {
   const [displayMode, setDisplayMode] = useState<DisplayMode>('flag');
@@ -38,6 +39,8 @@ export default function GameSetupScreen({ navigation }: Props) {
 
   const totalFlags = getTotalFlagCount();
   const isFlagFlash = mode === 'flagflash';
+  const isFlagPuzzle = mode === 'flagpuzzle';
+  const hasTimeLimit = isFlagFlash || isFlagPuzzle;
 
   const handleFilterTypeSelect = (type: CategoryType) => {
     if (filterType === type) {
@@ -68,11 +71,13 @@ export default function GameSetupScreen({ navigation }: Props) {
       category: selectedCategory,
       questionCount: isFlagFlash ? 999 : effectiveQuestionCount,
       displayMode,
-      ...(isFlagFlash && { timeLimit }),
+      ...(hasTimeLimit && { timeLimit }),
     };
 
     if (isFlagFlash) {
       navigation.navigate('FlagFlash', { config });
+    } else if (isFlagPuzzle) {
+      navigation.navigate('FlagPuzzle', { config });
     } else {
       navigation.navigate('Game', { config });
     }
@@ -191,7 +196,77 @@ export default function GameSetupScreen({ navigation }: Props) {
           </View>
         )}
 
-        {!isFlagFlash ? (
+        {hasTimeLimit ? (
+          <>
+            <Text style={styles.sectionTitle}>Time Limit</Text>
+            <View style={styles.optionRow}>
+              {(isFlagPuzzle ? FLAGPUZZLE_TIMES : FLAGFLASH_TIMES).map((t) => (
+                <TouchableOpacity
+                  key={t}
+                  style={[
+                    styles.optionChip,
+                    timeLimit === t && styles.optionChipActive,
+                  ]}
+                  onPress={() => setTimeLimit(t)}
+                  activeOpacity={0.7}
+                >
+                  <Text
+                    style={[
+                      styles.optionLabel,
+                      timeLimit === t && styles.optionLabelActive,
+                    ]}
+                  >
+                    {t}s
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            {isFlagPuzzle && (
+              <>
+                <Text style={styles.sectionTitle}>Questions</Text>
+                <View style={styles.optionRow}>
+                  {QUESTION_COUNTS.map((count) => (
+                    <TouchableOpacity
+                      key={count}
+                      style={[
+                        styles.optionChip,
+                        !questionCountAll && questionCount === count && styles.optionChipActive,
+                      ]}
+                      onPress={() => { setQuestionCount(count); setQuestionCountAll(false); }}
+                      activeOpacity={0.7}
+                    >
+                      <Text
+                        style={[
+                          styles.optionLabel,
+                          !questionCountAll && questionCount === count && styles.optionLabelActive,
+                        ]}
+                      >
+                        {count}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                  <TouchableOpacity
+                    style={[
+                      styles.optionChip,
+                      questionCountAll && styles.optionChipActive,
+                    ]}
+                    onPress={() => setQuestionCountAll(true)}
+                    activeOpacity={0.7}
+                  >
+                    <Text
+                      style={[
+                        styles.optionLabel,
+                        questionCountAll && styles.optionLabelActive,
+                      ]}
+                    >
+                      All
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            )}
+          </>
+        ) : (
           <>
             <Text style={styles.sectionTitle}>Questions</Text>
             <View style={styles.optionRow}>
@@ -234,41 +309,15 @@ export default function GameSetupScreen({ navigation }: Props) {
               </TouchableOpacity>
             </View>
           </>
-        ) : (
-          <>
-            <Text style={styles.sectionTitle}>Time Limit</Text>
-            <View style={styles.optionRow}>
-              {FLAGFLASH_TIMES.map((t) => (
-                <TouchableOpacity
-                  key={t}
-                  style={[
-                    styles.optionChip,
-                    timeLimit === t && styles.optionChipActive,
-                  ]}
-                  onPress={() => setTimeLimit(t)}
-                  activeOpacity={0.7}
-                >
-                  <Text
-                    style={[
-                      styles.optionLabel,
-                      timeLimit === t && styles.optionLabelActive,
-                    ]}
-                  >
-                    {t}s
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </>
         )}
 
         <TouchableOpacity
-          style={[styles.startButton, isFlagFlash && styles.startButtonParty]}
+          style={[styles.startButton, (isFlagFlash || isFlagPuzzle) && styles.startButtonParty]}
           onPress={startGame}
           activeOpacity={0.8}
         >
           <Text style={styles.startButtonText}>
-            {isFlagFlash ? 'Start FlagFlash' : 'Start Game'}
+            {isFlagFlash ? 'Start FlagFlash' : isFlagPuzzle ? 'Start Flag Puzzle' : 'Start Game'}
           </Text>
         </TouchableOpacity>
       </ScrollView>

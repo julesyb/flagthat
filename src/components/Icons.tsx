@@ -42,6 +42,15 @@ export function BarChartIcon({ size = 16, color = '#4B5563', strokeWidth = 1.5 }
   );
 }
 
+// Puzzle piece — Flag Puzzle icon
+export function PuzzleIcon({ size = 16, color = '#4B5563', strokeWidth = 1.5 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth}>
+      <Path d="M4 7h3a2 2 0 0 0 2-2 2 2 0 0 1 4 0 2 2 0 0 0 2 2h3v3a2 2 0 0 0 2 2 2 2 0 0 1 0 4 2 2 0 0 0-2 2v3H4v-3a2 2 0 0 1 0-4 2 2 0 0 0 0-4V7Z" />
+    </Svg>
+  );
+}
+
 // Globe — Browse Flags icon
 export function GlobeIcon({ size = 16, color = '#4B5563', strokeWidth = 1.5 }: IconProps) {
   return (
