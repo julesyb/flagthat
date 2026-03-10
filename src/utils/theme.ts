@@ -1,27 +1,26 @@
 // =====================
 // BRAND GUIDELINES — Flags Are Us
-// Voice: Intelligent. Editorial. Authoritative.
+// Voice: Friendly. Modern. Clean.
 //
 // Rules:
-// — No rounded corners. Sharp geometry only.
-// — No gradients. Flat color planes.
-// — No drop shadows except offset hard shadows on hover.
-// — Accent red appears sparingly.
+// — Rounded corners on cards and icons.
+// — Warm orange accent color.
+// — Clean, centered layouts.
+// — Soft shadows and subtle borders.
 // =====================
 
 // ---- Single source of truth for every color value ----
-// Change a value here and it propagates everywhere.
 const palette = {
-  ink: '#111827',
-  inkLight: '#1F2937',
-  red: '#E5271C',
-  redLight: '#EF4444',
-  slate: '#4B5563',
-  muted: '#9CA3AF',
-  rule: '#E5E7EB',
-  rule2: '#D1D5DB',
-  paper: '#F9FAFB',
-  paperDark: '#F3F4F6',
+  ink: '#1E293B',
+  inkLight: '#334155',
+  orange: '#D4782F',
+  orangeLight: '#E08A42',
+  slate: '#64748B',
+  muted: '#94A3B8',
+  rule: '#E2E8F0',
+  rule2: '#CBD5E1',
+  paper: '#F8F9FA',
+  paperDark: '#F1F5F9',
   white: '#FFFFFF',
   black: '#000000',
   green: '#16A34A',
@@ -33,7 +32,7 @@ const palette = {
 export const colors = {
   // Brand palette (direct access)
   ink: palette.ink,
-  red: palette.red,
+  red: palette.orange,
   slate: palette.slate,
   rule: palette.rule,
   rule2: palette.rule2,
@@ -44,8 +43,8 @@ export const colors = {
   // Semantic roles (all reference palette)
   primary: palette.ink,
   primaryLight: palette.inkLight,
-  accent: palette.red,
-  accentLight: palette.redLight,
+  accent: palette.orange,
+  accentLight: palette.orangeLight,
   success: palette.green,
   error: palette.crimson,
   warning: palette.amber,
@@ -87,14 +86,13 @@ export const spacing = {
   xxl: 48,
 };
 
-// Sharp geometry — no rounded corners per brand guidelines
 export const borderRadius = {
   none: 0,
-  sm: 0,
-  md: 0,
-  lg: 0,
-  xl: 0,
-  full: 0,
+  sm: 4,
+  md: 8,
+  lg: 12,
+  xl: 16,
+  full: 9999,
 };
 
 // Font family names — these must match the keys used when loading fonts
@@ -187,34 +185,33 @@ export const typography = {
   },
 };
 
-// Hard offset shadows only (per brand guidelines)
 export const shadows = {
   small: {
     shadowColor: colors.ink,
-    shadowOffset: { width: 3, height: 3 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
   medium: {
     shadowColor: colors.ink,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
   },
   large: {
     shadowColor: colors.ink,
-    shadowOffset: { width: 5, height: 5 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   },
   accentShadow: {
-    shadowColor: colors.red,
-    shadowOffset: { width: 5, height: 5 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 4,
+    shadowColor: colors.accent,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
 };
