@@ -8,7 +8,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, borderRadius, typography, fontFamily, shadows } from '../utils/theme';
+import { colors, spacing, typography, fontFamily } from '../utils/theme';
 import {
   GameMode,
   CategoryId,
@@ -212,27 +212,25 @@ const styles = StyleSheet.create({
     width: '48%',
     flexGrow: 1,
     backgroundColor: colors.surface,
-    borderRadius: borderRadius.md,
     padding: spacing.md,
     alignItems: 'center',
     borderWidth: 2,
     borderColor: colors.border,
   },
   modeCardActive: {
-    borderColor: colors.accent,
-    backgroundColor: colors.accent + '10',
+    borderColor: colors.ink,
+    backgroundColor: colors.surfaceSecondary,
   },
   modeIconBadge: {
     width: 36,
     height: 36,
-    borderRadius: borderRadius.sm,
     backgroundColor: colors.surfaceSecondary,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: spacing.xs,
   },
   modeIconBadgeActive: {
-    backgroundColor: colors.accent + '20',
+    backgroundColor: colors.ink,
   },
   modeIconText: {
     fontSize: 16,
@@ -240,14 +238,14 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   modeIconTextActive: {
-    color: colors.accent,
+    color: colors.white,
   },
   modeLabel: {
     ...typography.bodyBold,
     color: colors.text,
   },
   modeLabelActive: {
-    color: colors.accent,
+    color: colors.ink,
   },
   modeDesc: {
     ...typography.caption,
@@ -256,7 +254,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   modeDescActive: {
-    color: colors.accent,
+    color: colors.slate,
   },
   categoryGroup: {
     marginBottom: spacing.md,
@@ -277,7 +275,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.surface,
-    borderRadius: borderRadius.md,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderWidth: 1.5,
@@ -285,19 +282,18 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   categoryChipActive: {
-    borderColor: colors.accent,
-    backgroundColor: colors.accent + '10',
+    borderColor: colors.ink,
+    backgroundColor: colors.surfaceSecondary,
   },
   categoryIconBadge: {
     width: 32,
     height: 32,
-    borderRadius: borderRadius.sm,
     backgroundColor: colors.surfaceSecondary,
     justifyContent: 'center',
     alignItems: 'center',
   },
   categoryIconBadgeActive: {
-    backgroundColor: colors.accent + '20',
+    backgroundColor: colors.ink,
   },
   categoryIconText: {
     fontSize: 11,
@@ -306,7 +302,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   categoryIconTextActive: {
-    color: colors.accent,
+    color: colors.white,
   },
   categoryTextGroup: {
     gap: 1,
@@ -316,7 +312,7 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   categoryLabelActive: {
-    color: colors.accent,
+    color: colors.ink,
   },
   categoryCount: {
     ...typography.caption,
@@ -324,7 +320,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
   },
   categoryCountActive: {
-    color: colors.accent,
+    color: colors.slate,
   },
   optionRow: {
     flexDirection: 'row',
@@ -333,32 +329,30 @@ const styles = StyleSheet.create({
   optionChip: {
     flex: 1,
     backgroundColor: colors.surface,
-    borderRadius: borderRadius.md,
     padding: spacing.md,
     alignItems: 'center',
     borderWidth: 2,
     borderColor: colors.border,
   },
   optionChipActive: {
-    borderColor: colors.accent,
-    backgroundColor: colors.accent + '10',
+    borderColor: colors.ink,
+    backgroundColor: colors.surfaceSecondary,
   },
   optionLabel: {
     ...typography.bodyBold,
     color: colors.text,
   },
   optionLabelActive: {
-    color: colors.accent,
+    color: colors.ink,
   },
   startButton: {
-    backgroundColor: colors.accent,
-    borderRadius: borderRadius.lg,
+    backgroundColor: colors.ink,
     padding: spacing.lg,
     alignItems: 'center',
     marginTop: spacing.xl,
   },
   startButtonParty: {
-    backgroundColor: colors.accentLight,
+    backgroundColor: colors.accent,
   },
   startButtonText: {
     ...typography.headingUpper,

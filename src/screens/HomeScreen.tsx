@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -7,19 +7,74 @@ import {
   ScrollView,
   SafeAreaView,
   StatusBar,
+  Animated,
+  Dimensions,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, fontFamily, borderRadius } from '../utils/theme';
+import { colors, spacing, fontFamily } from '../utils/theme';
 import { getTotalFlagCount } from '../data';
 import { initAudio, hapticTap } from '../utils/feedback';
 import { getStats } from '../utils/storage';
 import { RootStackParamList } from '../types/navigation';
+import { LightningIcon, CrosshairIcon, BarChartIcon, GlobeIcon } from '../components/Icons';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
+const REGIONS = [
+  { name: 'Africa', count: 54 },
+  { name: 'Americas', count: 35 },
+  { name: 'Asia', count: 48 },
+  { name: 'Europe', count: 44 },
+  { name: 'Oceania', count: 14 },
+  { name: 'Middle East', count: 18 },
+];
+
+const GRID_SPACING = 80;
+
+// ─── Background Grid ─────────────────────────────────────────
+function GridLines() {
+  const screenWidth = Dimensions.get('window').width;
+  const lineCount = Math.floor(screenWidth / GRID_SPACING);
+
+  return (
+    <View style={styles.gridContainer} pointerEvents="none">
+      {Array.from({ length: lineCount }, (_, i) => (
+        <View
+          key={i}
+          style={[styles.gridLine, { left: (i + 1) * GRID_SPACING }]}
+        />
+      ))}
+    </View>
+  );
+}
+
+// ─── Fade-up wrapper ─────────────────────────────────────────
+function FadeUp({ delay = 0, children }: { delay?: number; children: React.ReactNode }) {
+  const opacity = useRef(new Animated.Value(0)).current;
+  const translateY = useRef(new Animated.Value(10)).current;
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      Animated.parallel([
+        Animated.timing(opacity, { toValue: 1, duration: 500, useNativeDriver: true }),
+        Animated.timing(translateY, { toValue: 0, duration: 500, useNativeDriver: true }),
+      ]).start();
+    }, delay);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <Animated.View style={{ opacity, transform: [{ translateY }] }}>
+      {children}
+    </Animated.View>
+  );
+}
+
+// ─── Main Screen ─────────────────────────────────────────────
 export default function HomeScreen({ navigation }: Props) {
   const totalFlags = getTotalFlagCount();
   const [mastered, setMastered] = useState(0);
+  const progressAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     initAudio();
@@ -34,6 +89,19 @@ export default function HomeScreen({ navigation }: Props) {
     return unsubscribe;
   }, [navigation]);
 
+  // Animate progress bar fill
+  useEffect(() => {
+    const target = totalFlags > 0 ? mastered / totalFlags : 0;
+    Animated.timing(progressAnim, {
+      toValue: target,
+      duration: 1000,
+      delay: 700,
+      useNativeDriver: false,
+    }).start();
+  }, [mastered, totalFlags]);
+
+  const progressPct = totalFlags > 0 ? Math.round((mastered / totalFlags) * 100) : 0;
+
   const quickPlay = () => {
     hapticTap();
     navigation.navigate('Game', {
@@ -41,296 +109,538 @@ export default function HomeScreen({ navigation }: Props) {
     });
   };
 
+  const progressWidth = progressAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0%', '100%'],
+  });
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
+      <GridLines />
+
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        {/* LOGO */}
-        <View style={styles.logoSection}>
-          <View style={styles.logoIcon}>
-            <Text style={styles.logoIconText}>F</Text>
+        {/* ── HEADER ── */}
+        <FadeUp delay={0}>
+          <View style={styles.headerTopRule} />
+          <View style={styles.headerInner}>
+            <View>
+              <Text style={styles.eyebrow}>
+                Flag Identification {'\u00B7'} {totalFlags} Countries
+              </Text>
+              <Text style={styles.logotypeMain}>
+                Flag{'\n'}
+                <Text style={styles.logotypeItalic}>That</Text>
+              </Text>
+            </View>
+            <View style={styles.headerRight}>
+              <Text style={styles.countNumber}>{totalFlags}</Text>
+              <Text style={styles.countLabel}>Countries</Text>
+            </View>
           </View>
-          <View style={styles.logoTextRow}>
-            <Text style={styles.logoFlag}>Flag</Text>
-            <Text style={styles.logoThat}>That</Text>
+        </FadeUp>
+
+        {/* ── BYLINE ── */}
+        <FadeUp delay={80}>
+          <View style={styles.byline}>
+            <Text style={styles.bylineText}>
+              Geography {'\u00B7'} Cartography {'\u00B7'} Mastery
+            </Text>
+            <View style={styles.bylineDots}>
+              {[0, 1, 2, 3, 4].map((i) => (
+                <View key={i} style={styles.bylineDot} />
+              ))}
+            </View>
           </View>
-          <Text style={styles.subtitle}>{totalFlags} flags to master</Text>
+        </FadeUp>
+
+        {/* ── PROGRESS ── */}
+        <FadeUp delay={140}>
+          <View style={styles.progressBlock}>
+            <View style={styles.progressLeft}>
+              <View style={styles.progressLabelRow}>
+                <Text style={styles.progressLabel}>Mastery Progress</Text>
+                <Text style={styles.progressFraction}>
+                  {mastered} of {totalFlags}
+                </Text>
+              </View>
+              <View style={styles.progressTrack}>
+                <Animated.View style={[styles.progressFill, { width: progressWidth }]} />
+              </View>
+            </View>
+            <View style={styles.progressPctBox}>
+              <Text style={styles.progressPctNumber}>{progressPct}%</Text>
+              <Text style={styles.progressPctLabel}>Complete</Text>
+            </View>
+          </View>
+        </FadeUp>
+
+        {/* ── PLAY ── */}
+        <View style={styles.sectionHead}>
+          <Text style={styles.sectionLabel}>Play</Text>
+          <View style={styles.sectionRule} />
         </View>
 
-        {/* CARDS */}
-        <View style={styles.cardsContainer}>
-          {/* Quick Play */}
+        <FadeUp delay={220}>
           <TouchableOpacity
-            style={styles.cardQuickPlay}
+            style={styles.cardHero}
             onPress={quickPlay}
             activeOpacity={0.85}
           >
-            <View style={styles.cardInner}>
-              <View style={styles.iconCircleLight}>
-                <Text style={styles.iconTextWhite}>Q</Text>
+            <View style={styles.cardHeroBar} />
+            <View style={styles.heroLeft}>
+              <View style={styles.heroIcon}>
+                <LightningIcon size={18} color={colors.white} />
               </View>
-              <View style={styles.cardTextGroup}>
-                <Text style={styles.cardTitleWhite}>Quick Play</Text>
-                <Text style={styles.cardSubWhite}>10 famous flags, 50/50</Text>
+              <View>
+                <Text style={styles.heroTitle}>Quick Play</Text>
+                <Text style={styles.heroSub}>
+                  10 famous flags {'\u00A0\u00B7\u00A0'} 50 / 50 score
+                </Text>
               </View>
             </View>
-            <Text style={styles.arrowWhite}>{'\u2192'}</Text>
+            <Text style={styles.heroArrow}>{'\u2192'}</Text>
           </TouchableOpacity>
+        </FadeUp>
 
-          {/* Custom Game */}
+        <FadeUp delay={300}>
           <TouchableOpacity
-            style={styles.cardDark}
+            style={styles.card}
             onPress={() => { hapticTap(); navigation.navigate('GameSetup'); }}
             activeOpacity={0.85}
           >
-            <View style={styles.cardInner}>
-              <View style={styles.iconCircleDark}>
-                <Text style={styles.iconTextLight}>+</Text>
+            <View style={styles.cardLeft}>
+              <View style={styles.cardIcon}>
+                <CrosshairIcon size={16} color={colors.slate} />
               </View>
-              <View style={styles.cardTextGroup}>
-                <Text style={styles.cardTitleWhite}>Custom Game</Text>
-                <Text style={styles.cardSubLight}>Choose mode, category & more</Text>
+              <View>
+                <Text style={styles.cardTitle}>Custom Game</Text>
+                <Text style={styles.cardSub}>Choose mode, category & more</Text>
               </View>
             </View>
-            <Text style={styles.arrowLight}>{'\u2192'}</Text>
+            <Text style={styles.cardArrow}>{'\u2192'}</Text>
           </TouchableOpacity>
+        </FadeUp>
 
-          {/* Statistics */}
+        {/* ── EXPLORE ── */}
+        <View style={[styles.sectionHead, { marginTop: spacing.lg }]}>
+          <Text style={styles.sectionLabel}>Explore</Text>
+          <View style={styles.sectionRule} />
+        </View>
+
+        <FadeUp delay={360}>
           <TouchableOpacity
-            style={styles.cardLight}
+            style={styles.card}
             onPress={() => { hapticTap(); navigation.navigate('Stats'); }}
             activeOpacity={0.85}
           >
-            <View style={styles.cardInner}>
-              <View style={styles.iconCircleGray}>
-                <Text style={styles.iconTextDark}>#</Text>
+            <View style={styles.cardLeft}>
+              <View style={styles.cardIcon}>
+                <BarChartIcon size={16} color={colors.slate} />
               </View>
-              <View style={styles.cardTextGroup}>
-                <Text style={styles.cardTitleDark}>Statistics</Text>
-                <Text style={styles.cardSubDark}>Track your progress</Text>
+              <View>
+                <Text style={styles.cardTitle}>Statistics</Text>
+                <Text style={styles.cardSub}>Track your progress</Text>
               </View>
             </View>
-            <Text style={styles.arrowGray}>{'\u2192'}</Text>
+            <Text style={styles.cardArrow}>{'\u2192'}</Text>
           </TouchableOpacity>
+        </FadeUp>
 
-          {/* Browse Flags */}
+        <FadeUp delay={420}>
           <TouchableOpacity
-            style={styles.cardLight}
+            style={styles.card}
             onPress={() => { hapticTap(); navigation.navigate('Browse'); }}
             activeOpacity={0.85}
           >
-            <View style={styles.cardInner}>
-              <View style={styles.iconCircleGray}>
-                <Text style={styles.iconTextDark}>{'\u2261'}</Text>
+            <View style={styles.cardLeft}>
+              <View style={styles.cardIcon}>
+                <GlobeIcon size={16} color={colors.slate} />
               </View>
-              <View style={styles.cardTextGroup}>
-                <Text style={styles.cardTitleDark}>Browse Flags</Text>
-                <Text style={styles.cardSubDark}>Explore all {totalFlags} flags</Text>
+              <View>
+                <Text style={styles.cardTitle}>Browse Flags</Text>
+                <Text style={styles.cardSub}>Explore all {totalFlags} flags</Text>
               </View>
             </View>
-            <Text style={styles.arrowGray}>{'\u2192'}</Text>
+            <Text style={styles.cardArrow}>{'\u2192'}</Text>
           </TouchableOpacity>
-        </View>
+        </FadeUp>
+
+        {/* ── REGION INDEX ── */}
+        <FadeUp delay={500}>
+          <View style={styles.regionIndex}>
+            <Text style={styles.regionIndexHead}>Browse by Region</Text>
+            <View style={styles.regionGrid}>
+              {REGIONS.map((region, i) => (
+                <TouchableOpacity
+                  key={region.name}
+                  style={[
+                    styles.regionItem,
+                    (i + 1) % 3 !== 0 && styles.regionItemBorderRight,
+                    i < 3 && styles.regionItemBorderBottom,
+                  ]}
+                  onPress={() => { hapticTap(); navigation.navigate('Browse'); }}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.regionName}>{region.name}</Text>
+                  <Text style={styles.regionCount}>{region.count}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        </FadeUp>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
+// ─── Styles ──────────────────────────────────────────────────
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
   },
   content: {
-    paddingBottom: spacing.xxl + spacing.xl,
+    maxWidth: 700,
+    alignSelf: 'center',
+    width: '100%',
+    paddingHorizontal: 40,
+    paddingBottom: 80,
   },
 
-  // LOGO
-  logoSection: {
-    alignItems: 'center',
-    paddingTop: spacing.xxl + spacing.lg,
-    paddingBottom: spacing.xl + spacing.md,
+  // Grid
+  gridContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
-  logoIcon: {
-    width: 64,
-    height: 64,
-    borderRadius: 14,
+  gridLine: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    width: 1,
+    backgroundColor: colors.rule,
+    opacity: 0.35,
+  },
+
+  // Header
+  headerTopRule: {
+    width: '100%',
+    height: 3,
     backgroundColor: colors.accent,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: spacing.md,
+    marginTop: 56,
+    marginBottom: 24,
   },
-  logoIconText: {
+  headerInner: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    paddingBottom: 20,
+    borderBottomWidth: 2,
+    borderBottomColor: colors.ink,
+  },
+  eyebrow: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 32,
-    color: colors.white,
+    fontSize: 10,
+    letterSpacing: 2.8,
+    textTransform: 'uppercase',
+    color: colors.slate,
+    marginBottom: 8,
   },
-  logoTextRow: {
-    alignItems: 'center',
-    marginBottom: spacing.sm,
-  },
-  logoFlag: {
+  logotypeMain: {
     fontFamily: fontFamily.display,
-    fontSize: 42,
+    fontSize: 64,
+    lineHeight: 58,
     color: colors.ink,
-    letterSpacing: -0.5,
-    lineHeight: 48,
+    letterSpacing: -1.3,
   },
-  logoThat: {
+  logotypeItalic: {
     fontFamily: fontFamily.displayItalic,
-    fontSize: 42,
     color: colors.accent,
-    letterSpacing: -0.5,
-    lineHeight: 48,
   },
-  subtitle: {
-    fontFamily: fontFamily.body,
-    fontSize: 15,
-    color: colors.textSecondary,
+  headerRight: {
+    alignItems: 'flex-end',
+    paddingBottom: 4,
+  },
+  countNumber: {
+    fontFamily: fontFamily.display,
+    fontSize: 52,
+    lineHeight: 52,
+    color: colors.ink,
+    letterSpacing: -1.6,
+  },
+  countLabel: {
+    fontFamily: fontFamily.uiLabelMedium,
+    fontSize: 10,
+    letterSpacing: 2,
+    textTransform: 'uppercase',
+    color: colors.slate,
+    marginTop: 2,
   },
 
-  // CARDS
-  cardsContainer: {
-    paddingHorizontal: spacing.md,
-    gap: spacing.md,
-  },
-
-  // Quick Play card (orange)
-  cardQuickPlay: {
+  // Byline
+  byline: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: colors.accent,
-    borderRadius: borderRadius.xl,
-    paddingVertical: spacing.lg,
-    paddingHorizontal: spacing.lg,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.rule,
+    marginBottom: 40,
+  },
+  bylineText: {
+    fontFamily: fontFamily.uiLabelMedium,
+    fontSize: 10,
+    letterSpacing: 2,
+    textTransform: 'uppercase',
+    color: colors.slate,
+  },
+  bylineDots: {
+    flexDirection: 'row',
+    gap: 4,
+    alignItems: 'center',
+  },
+  bylineDot: {
+    width: 4,
+    height: 4,
+    backgroundColor: colors.rule2,
   },
 
-  // Dark card (Custom Game)
-  cardDark: {
+  // Progress
+  progressBlock: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 32,
+    paddingVertical: 20,
+    borderTopWidth: 1,
+    borderTopColor: colors.rule,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.rule,
+    marginBottom: 40,
+  },
+  progressLeft: {
+    flex: 1,
+  },
+  progressLabelRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'baseline',
+    marginBottom: 10,
+  },
+  progressLabel: {
+    fontFamily: fontFamily.uiLabel,
+    fontSize: 10,
+    letterSpacing: 2.2,
+    textTransform: 'uppercase',
+    color: colors.slate,
+  },
+  progressFraction: {
+    fontFamily: fontFamily.uiLabelMedium,
+    fontSize: 11,
+    letterSpacing: 0.66,
+    color: colors.slate,
+  },
+  progressTrack: {
+    height: 3,
+    backgroundColor: colors.rule,
+  },
+  progressFill: {
+    height: 3,
+    backgroundColor: colors.ink,
+  },
+  progressPctBox: {
+    width: 80,
+    alignItems: 'flex-end',
+  },
+  progressPctNumber: {
+    fontFamily: fontFamily.display,
+    fontSize: 28,
+    color: colors.ink,
+    letterSpacing: -0.56,
+    lineHeight: 28,
+  },
+  progressPctLabel: {
+    fontFamily: fontFamily.uiLabelMedium,
+    fontSize: 9,
+    letterSpacing: 1.62,
+    textTransform: 'uppercase',
+    color: colors.slate,
+    marginTop: 2,
+  },
+
+  // Section heads
+  sectionHead: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    marginBottom: 10,
+  },
+  sectionLabel: {
+    fontFamily: fontFamily.uiLabel,
+    fontSize: 9,
+    letterSpacing: 2.52,
+    textTransform: 'uppercase',
+    color: colors.slate,
+  },
+  sectionRule: {
+    flex: 1,
+    height: 1,
+    backgroundColor: colors.rule,
+  },
+
+  // Hero card
+  cardHero: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: colors.ink,
-    borderRadius: borderRadius.xl,
-    paddingVertical: spacing.lg,
-    paddingHorizontal: spacing.lg,
+    paddingVertical: 28,
+    paddingHorizontal: 32,
+    marginBottom: 8,
+    position: 'relative',
+  },
+  cardHeroBar: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 4,
+    backgroundColor: colors.accent,
+  },
+  heroLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 20,
+  },
+  heroIcon: {
+    width: 40,
+    height: 40,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  heroTitle: {
+    fontFamily: fontFamily.uiLabel,
+    fontSize: 26,
+    letterSpacing: 2.08,
+    textTransform: 'uppercase',
+    lineHeight: 26,
+    color: colors.white,
+    marginBottom: 4,
+  },
+  heroSub: {
+    fontFamily: fontFamily.body,
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.45)',
+  },
+  heroArrow: {
+    fontFamily: fontFamily.uiLabel,
+    fontSize: 20,
+    color: 'rgba(255,255,255,0.4)',
   },
 
-  // Light card (Statistics, Browse)
-  cardLight: {
+  // Standard cards
+  card: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: colors.white,
-    borderRadius: borderRadius.xl,
-    paddingVertical: spacing.lg,
-    paddingHorizontal: spacing.lg,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.rule,
+    borderLeftWidth: 3,
+    borderLeftColor: colors.rule,
+    paddingVertical: 18,
+    paddingHorizontal: 24,
+    marginBottom: 6,
   },
-
-  cardInner: {
+  cardLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.md,
-    flex: 1,
+    gap: 16,
   },
-  cardTextGroup: {
-    flex: 1,
-  },
-
-  // Icon circles
-  iconCircleLight: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.25)',
+  cardIcon: {
+    width: 32,
+    height: 32,
+    borderWidth: 1,
+    borderColor: colors.rule,
+    backgroundColor: colors.paper,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  iconCircleDark: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.12)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  iconCircleGray: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.surfaceSecondary,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  // Icon text
-  iconTextWhite: {
+  cardTitle: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 16,
-    color: colors.white,
-  },
-  iconTextLight: {
-    fontFamily: fontFamily.uiLabel,
-    fontSize: 18,
-    color: 'rgba(255,255,255,0.7)',
-  },
-  iconTextDark: {
-    fontFamily: fontFamily.uiLabel,
-    fontSize: 16,
-    color: colors.textSecondary,
-  },
-
-  // Card titles
-  cardTitleWhite: {
-    fontFamily: fontFamily.uiLabel,
-    fontSize: 18,
-    color: colors.white,
-    marginBottom: spacing.xxs,
-  },
-  cardTitleDark: {
-    fontFamily: fontFamily.uiLabel,
-    fontSize: 18,
+    fontSize: 20,
+    letterSpacing: 1.4,
+    textTransform: 'uppercase',
     color: colors.ink,
-    marginBottom: spacing.xxs,
+    lineHeight: 20,
+    marginBottom: 3,
   },
-
-  // Card subtitles
-  cardSubWhite: {
+  cardSub: {
     fontFamily: fontFamily.body,
-    fontSize: 13,
-    color: 'rgba(255,255,255,0.65)',
+    fontSize: 12,
+    color: colors.slate,
   },
-  cardSubLight: {
+  cardArrow: {
     fontFamily: fontFamily.body,
-    fontSize: 13,
-    color: 'rgba(255,255,255,0.5)',
-  },
-  cardSubDark: {
-    fontFamily: fontFamily.body,
-    fontSize: 13,
-    color: colors.textSecondary,
-  },
-
-  // Arrows
-  arrowWhite: {
-    fontFamily: fontFamily.body,
-    fontSize: 20,
-    color: 'rgba(255,255,255,0.6)',
-  },
-  arrowLight: {
-    fontFamily: fontFamily.body,
-    fontSize: 20,
-    color: 'rgba(255,255,255,0.35)',
-  },
-  arrowGray: {
-    fontFamily: fontFamily.body,
-    fontSize: 20,
+    fontSize: 16,
     color: colors.rule2,
+  },
+
+  // Region index
+  regionIndex: {
+    borderTopWidth: 2,
+    borderTopColor: colors.ink,
+    marginTop: 44,
+    paddingTop: 16,
+  },
+  regionIndexHead: {
+    fontFamily: fontFamily.uiLabel,
+    fontSize: 9,
+    letterSpacing: 2.52,
+    textTransform: 'uppercase',
+    color: colors.slate,
+    marginBottom: 14,
+  },
+  regionGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    borderWidth: 1,
+    borderColor: colors.rule,
+    backgroundColor: colors.white,
+  },
+  regionItem: {
+    width: '33.333%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+  },
+  regionItemBorderRight: {
+    borderRightWidth: 1,
+    borderRightColor: colors.rule,
+  },
+  regionItemBorderBottom: {
+    borderBottomWidth: 1,
+    borderBottomColor: colors.rule,
+  },
+  regionName: {
+    fontFamily: fontFamily.uiLabelMedium,
+    fontSize: 12,
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
+    color: colors.ink,
+  },
+  regionCount: {
+    fontFamily: fontFamily.uiLabelLight,
+    fontSize: 11,
+    color: colors.slate,
   },
 });

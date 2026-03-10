@@ -9,7 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { colors, spacing, borderRadius, typography, fontFamily } from '../utils/theme';
+import { colors, spacing, typography, fontFamily } from '../utils/theme';
 import { UserStats, GAME_MODES, CATEGORIES, GameMode } from '../types';
 import { getStats, resetStats } from '../utils/storage';
 
@@ -151,7 +151,6 @@ const styles = StyleSheet.create({
   },
   bigStatCard: {
     backgroundColor: colors.primary,
-    borderRadius: borderRadius.lg,
     padding: spacing.xl,
     alignItems: 'center',
     marginBottom: spacing.sm,
@@ -173,7 +172,6 @@ const styles = StyleSheet.create({
   smallStatCard: {
     flex: 1,
     backgroundColor: colors.surface,
-    borderRadius: borderRadius.md,
     padding: spacing.md,
     alignItems: 'center',
     borderWidth: 1,
@@ -181,7 +179,7 @@ const styles = StyleSheet.create({
   },
   smallStatValue: {
     ...typography.heading,
-    color: colors.accent,
+    color: colors.ink,
   },
   smallStatLabel: {
     ...typography.caption,
@@ -209,13 +207,11 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 8,
     backgroundColor: colors.border,
-    borderRadius: borderRadius.sm,
     overflow: 'hidden',
   },
   statBar: {
     height: '100%',
     backgroundColor: colors.ink,
-    borderRadius: borderRadius.sm,
   },
   statRowValue: {
     ...typography.captionBold,

@@ -8,7 +8,7 @@ import {
   Platform,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, borderRadius, typography, fontFamily } from '../utils/theme';
+import { colors, spacing, typography, fontFamily } from '../utils/theme';
 import { GameQuestion, GameResult } from '../types';
 import { generateQuestions } from '../utils/gameEngine';
 import {
@@ -408,7 +408,6 @@ const styles = StyleSheet.create({
   stepIconBox: {
     width: 44,
     height: 44,
-    borderRadius: borderRadius.sm,
     backgroundColor: colors.whiteAlpha15,
     justifyContent: 'center',
     alignItems: 'center',
@@ -423,7 +422,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   tiltDemo: {
-    borderRadius: borderRadius.sm,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     width: 140,
@@ -435,7 +433,6 @@ const styles = StyleSheet.create({
   },
   readyButton: {
     backgroundColor: colors.accent,
-    borderRadius: borderRadius.lg,
     paddingHorizontal: spacing.xxl,
     paddingVertical: spacing.lg,
   },
@@ -512,7 +509,6 @@ const styles = StyleSheet.create({
   webButton: {
     flex: 1,
     maxWidth: 200,
-    borderRadius: borderRadius.md,
     paddingVertical: spacing.md,
     alignItems: 'center',
   },

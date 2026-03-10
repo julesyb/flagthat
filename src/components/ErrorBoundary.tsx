@@ -1,6 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { colors, spacing, borderRadius, typography } from '../utils/theme';
+import { colors, spacing, typography } from '../utils/theme';
 
 interface Props {
   children: ReactNode;
@@ -69,7 +69,6 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: colors.ink,
-    borderRadius: borderRadius.md,
     paddingHorizontal: spacing.xl,
     paddingVertical: spacing.md,
   },

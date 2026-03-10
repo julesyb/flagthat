@@ -10,7 +10,7 @@ import {
   Share,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, borderRadius, typography, fontFamily } from '../utils/theme';
+import { colors, spacing, typography, fontFamily } from '../utils/theme';
 import { calculateAccuracy, getStreakFromResults, getGrade } from '../utils/gameEngine';
 import { updateStats } from '../utils/storage';
 import { hapticCorrect, playCelebrationSound } from '../utils/feedback';
@@ -197,7 +197,6 @@ const styles = StyleSheet.create({
   },
   celebrationBanner: {
     backgroundColor: colors.warning,
-    borderRadius: borderRadius.lg,
     padding: spacing.md,
     alignItems: 'center',
     marginBottom: spacing.md,
@@ -233,7 +232,6 @@ const styles = StyleSheet.create({
   statCard: {
     flex: 1,
     backgroundColor: colors.surface,
-    borderRadius: borderRadius.md,
     padding: spacing.md,
     alignItems: 'center',
     borderWidth: 1,
@@ -250,16 +248,15 @@ const styles = StyleSheet.create({
   },
   shareButton: {
     backgroundColor: colors.surface,
-    borderRadius: borderRadius.md,
     padding: spacing.md,
     alignItems: 'center',
     borderWidth: 1.5,
-    borderColor: colors.accent,
+    borderColor: colors.ink,
     marginBottom: spacing.lg,
   },
   shareButtonText: {
     ...typography.bodyBold,
-    color: colors.accent,
+    color: colors.ink,
   },
   reviewTitle: {
     ...typography.headingUpper,
@@ -270,7 +267,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.surface,
-    borderRadius: borderRadius.md,
     padding: spacing.md,
     marginBottom: spacing.sm,
     borderLeftWidth: 4,
@@ -306,7 +302,6 @@ const styles = StyleSheet.create({
   secondaryButton: {
     flex: 1,
     backgroundColor: colors.surface,
-    borderRadius: borderRadius.lg,
     padding: spacing.lg,
     alignItems: 'center',
     borderWidth: 2,
@@ -318,8 +313,7 @@ const styles = StyleSheet.create({
   },
   primaryButton: {
     flex: 1,
-    backgroundColor: colors.accent,
-    borderRadius: borderRadius.lg,
+    backgroundColor: colors.ink,
     padding: spacing.lg,
     alignItems: 'center',
   },

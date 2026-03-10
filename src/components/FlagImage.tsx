@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import { Image } from 'expo-image';
-import { colors, borderRadius } from '../utils/theme';
+import { colors } from '../utils/theme';
 
 interface FlagImageProps {
   countryCode: string;
@@ -67,13 +67,10 @@ export function FlagImageSmall({ countryCode, emoji }: { countryCode: string; em
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: borderRadius.sm,
     overflow: 'hidden',
     backgroundColor: colors.border,
   },
-  image: {
-    borderRadius: borderRadius.sm,
-  },
+  image: {},
   emojiOverlay: {
     position: 'absolute',
     zIndex: 1,
@@ -87,14 +84,12 @@ const styles = StyleSheet.create({
   smallContainer: {
     width: 48,
     height: 32,
-    borderRadius: borderRadius.sm,
     overflow: 'hidden',
     backgroundColor: colors.border,
   },
   smallImage: {
     width: 48,
     height: 32,
-    borderRadius: borderRadius.sm,
   },
   smallEmojiText: {
     fontSize: 18,

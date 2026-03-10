@@ -10,7 +10,7 @@ import {
   Keyboard,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, borderRadius, typography, fontFamily } from '../utils/theme';
+import { colors, spacing, typography, fontFamily } from '../utils/theme';
 import { GameQuestion, GameResult } from '../types';
 import { generateQuestions, checkAnswer } from '../utils/gameEngine';
 import { hapticCorrect, hapticWrong, hapticTap, playCorrectSound, playWrongSound } from '../utils/feedback';
@@ -320,12 +320,10 @@ const styles = StyleSheet.create({
     height: 3,
     backgroundColor: colors.border,
     marginHorizontal: spacing.lg,
-    borderRadius: borderRadius.sm,
   },
   progressFill: {
     height: '100%',
     backgroundColor: colors.ink,
-    borderRadius: borderRadius.sm,
   },
   questionContainer: {
     flex: 1,
@@ -353,7 +351,6 @@ const styles = StyleSheet.create({
   },
   optionButton: {
     backgroundColor: colors.surface,
-    borderRadius: borderRadius.md,
     padding: spacing.md,
     paddingVertical: spacing.lg,
     alignItems: 'center',
@@ -380,7 +377,6 @@ const styles = StyleSheet.create({
   },
   textInput: {
     backgroundColor: colors.surface,
-    borderRadius: borderRadius.md,
     padding: spacing.lg,
     ...typography.body,
     color: colors.text,
@@ -389,8 +385,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   submitButton: {
-    backgroundColor: colors.accent,
-    borderRadius: borderRadius.md,
+    backgroundColor: colors.ink,
     padding: spacing.lg,
     alignItems: 'center',
   },

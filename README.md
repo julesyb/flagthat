@@ -1,4 +1,4 @@
-# Flags Are Us
+# Flag That
 
 A mobile flag guessing game built with React Native and Expo. Test your knowledge of 195+ country flags across multiple game modes.
 

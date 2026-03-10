@@ -8,7 +8,7 @@ import {
   SafeAreaView,
   TextInput,
 } from 'react-native';
-import { colors, spacing, borderRadius, typography } from '../utils/theme';
+import { colors, spacing, typography } from '../utils/theme';
 import { FlagItem } from '../types';
 import { getAllFlags } from '../data';
 import { FlagImageSmall } from '../components/FlagImage';
@@ -110,7 +110,6 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     backgroundColor: colors.surface,
-    borderRadius: borderRadius.md,
     padding: spacing.md,
     ...typography.body,
     color: colors.text,
@@ -127,22 +126,21 @@ const styles = StyleSheet.create({
   },
   regionChip: {
     backgroundColor: colors.surface,
-    borderRadius: borderRadius.full,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderWidth: 1.5,
     borderColor: colors.border,
   },
   regionChipActive: {
-    borderColor: colors.accent,
-    backgroundColor: colors.accent + '10',
+    borderColor: colors.ink,
+    backgroundColor: colors.surfaceSecondary,
   },
   regionLabel: {
     ...typography.captionBold,
     color: colors.text,
   },
   regionLabelActive: {
-    color: colors.accent,
+    color: colors.ink,
   },
   resultCount: {
     ...typography.caption,
@@ -159,7 +157,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.surface,
-    borderRadius: borderRadius.md,
     padding: spacing.md,
     marginBottom: spacing.sm,
     gap: spacing.md,
