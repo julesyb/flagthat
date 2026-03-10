@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,8 @@ import {
   ScrollView,
   SafeAreaView,
   StatusBar,
+  Animated,
+  Dimensions,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { colors, spacing, fontFamily } from '../utils/theme';
@@ -14,12 +16,65 @@ import { getTotalFlagCount } from '../data';
 import { initAudio, hapticTap } from '../utils/feedback';
 import { getStats } from '../utils/storage';
 import { RootStackParamList } from '../types/navigation';
+import { LightningIcon, CrosshairIcon, BarChartIcon, GlobeIcon } from '../components/Icons';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
+const REGIONS = [
+  { name: 'Africa', count: 54 },
+  { name: 'Americas', count: 35 },
+  { name: 'Asia', count: 48 },
+  { name: 'Europe', count: 44 },
+  { name: 'Oceania', count: 14 },
+  { name: 'Middle East', count: 18 },
+];
+
+const GRID_SPACING = 80;
+
+// ─── Background Grid ─────────────────────────────────────────
+function GridLines() {
+  const screenWidth = Dimensions.get('window').width;
+  const lineCount = Math.floor(screenWidth / GRID_SPACING);
+
+  return (
+    <View style={styles.gridContainer} pointerEvents="none">
+      {Array.from({ length: lineCount }, (_, i) => (
+        <View
+          key={i}
+          style={[styles.gridLine, { left: (i + 1) * GRID_SPACING }]}
+        />
+      ))}
+    </View>
+  );
+}
+
+// ─── Fade-up wrapper ─────────────────────────────────────────
+function FadeUp({ delay = 0, children }: { delay?: number; children: React.ReactNode }) {
+  const opacity = useRef(new Animated.Value(0)).current;
+  const translateY = useRef(new Animated.Value(10)).current;
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      Animated.parallel([
+        Animated.timing(opacity, { toValue: 1, duration: 500, useNativeDriver: true }),
+        Animated.timing(translateY, { toValue: 0, duration: 500, useNativeDriver: true }),
+      ]).start();
+    }, delay);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <Animated.View style={{ opacity, transform: [{ translateY }] }}>
+      {children}
+    </Animated.View>
+  );
+}
+
+// ─── Main Screen ─────────────────────────────────────────────
 export default function HomeScreen({ navigation }: Props) {
   const totalFlags = getTotalFlagCount();
   const [mastered, setMastered] = useState(0);
+  const progressAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     initAudio();
@@ -34,8 +89,18 @@ export default function HomeScreen({ navigation }: Props) {
     return unsubscribe;
   }, [navigation]);
 
+  // Animate progress bar fill
+  useEffect(() => {
+    const target = totalFlags > 0 ? mastered / totalFlags : 0;
+    Animated.timing(progressAnim, {
+      toValue: target,
+      duration: 1000,
+      delay: 700,
+      useNativeDriver: false,
+    }).start();
+  }, [mastered, totalFlags]);
+
   const progressPct = totalFlags > 0 ? Math.round((mastered / totalFlags) * 100) : 0;
-  const progressWidth = totalFlags > 0 ? ((mastered / totalFlags) * 100).toFixed(1) : '0';
 
   const quickPlay = () => {
     hapticTap();
@@ -44,144 +109,195 @@ export default function HomeScreen({ navigation }: Props) {
     });
   };
 
+  const progressWidth = progressAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0%', '100%'],
+  });
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
+      <GridLines />
+
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        {/* HEADER */}
-        <View style={styles.headerTopRule} />
-        <View style={styles.headerInner}>
-          <View>
-            <Text style={styles.eyebrow}>Flag Identification {'\u00B7'} {totalFlags} Countries</Text>
-            <Text style={styles.logotypeMain}>Flag{'\n'}<Text style={styles.logotypeItalic}>That</Text></Text>
-          </View>
-          <View style={styles.headerRight}>
-            <Text style={styles.countNumber}>{totalFlags}</Text>
-            <Text style={styles.countLabel}>Countries</Text>
-          </View>
-        </View>
-
-        {/* BYLINE */}
-        <View style={styles.byline}>
-          <Text style={styles.bylineText}>Geography {'\u00B7'} Cartography {'\u00B7'} Mastery</Text>
-          <View style={styles.bylineDots}>
-            <View style={styles.bylineDot} />
-            <View style={styles.bylineDot} />
-            <View style={styles.bylineDot} />
-            <View style={styles.bylineDot} />
-            <View style={styles.bylineDot} />
-          </View>
-        </View>
-
-        {/* PROGRESS */}
-        <View style={styles.progressBlock}>
-          <View style={styles.progressLeft}>
-            <View style={styles.progressLabelRow}>
-              <Text style={styles.progressLabel}>Mastery Progress</Text>
-              <Text style={styles.progressFraction}>{mastered} of {totalFlags}</Text>
+        {/* ── HEADER ── */}
+        <FadeUp delay={0}>
+          <View style={styles.headerTopRule} />
+          <View style={styles.headerInner}>
+            <View>
+              <Text style={styles.eyebrow}>
+                Flag Identification {'\u00B7'} {totalFlags} Countries
+              </Text>
+              <Text style={styles.logotypeMain}>
+                Flag{'\n'}
+                <Text style={styles.logotypeItalic}>That</Text>
+              </Text>
             </View>
-            <View style={styles.progressTrack}>
-              <View style={[styles.progressFill, { width: `${progressWidth}%` }]} />
+            <View style={styles.headerRight}>
+              <Text style={styles.countNumber}>{totalFlags}</Text>
+              <Text style={styles.countLabel}>Countries</Text>
             </View>
           </View>
-          <View style={styles.progressPctBox}>
-            <Text style={styles.progressPctNumber}>{progressPct}%</Text>
-            <Text style={styles.progressPctLabel}>Complete</Text>
-          </View>
-        </View>
+        </FadeUp>
 
-        {/* PLAY SECTION */}
+        {/* ── BYLINE ── */}
+        <FadeUp delay={80}>
+          <View style={styles.byline}>
+            <Text style={styles.bylineText}>
+              Geography {'\u00B7'} Cartography {'\u00B7'} Mastery
+            </Text>
+            <View style={styles.bylineDots}>
+              {[0, 1, 2, 3, 4].map((i) => (
+                <View key={i} style={styles.bylineDot} />
+              ))}
+            </View>
+          </View>
+        </FadeUp>
+
+        {/* ── PROGRESS ── */}
+        <FadeUp delay={140}>
+          <View style={styles.progressBlock}>
+            <View style={styles.progressLeft}>
+              <View style={styles.progressLabelRow}>
+                <Text style={styles.progressLabel}>Mastery Progress</Text>
+                <Text style={styles.progressFraction}>
+                  {mastered} of {totalFlags}
+                </Text>
+              </View>
+              <View style={styles.progressTrack}>
+                <Animated.View style={[styles.progressFill, { width: progressWidth }]} />
+              </View>
+            </View>
+            <View style={styles.progressPctBox}>
+              <Text style={styles.progressPctNumber}>{progressPct}%</Text>
+              <Text style={styles.progressPctLabel}>Complete</Text>
+            </View>
+          </View>
+        </FadeUp>
+
+        {/* ── PLAY ── */}
         <View style={styles.sectionHead}>
           <Text style={styles.sectionLabel}>Play</Text>
           <View style={styles.sectionRule} />
         </View>
 
-        {/* Quick Play — Hero Card */}
-        <TouchableOpacity
-          style={styles.cardHero}
-          onPress={quickPlay}
-          activeOpacity={0.85}
-        >
-          <View style={styles.cardHeroBar} />
-          <View style={styles.heroLeft}>
-            <View style={styles.heroIcon}>
-              <Text style={styles.heroIconText}>Q</Text>
+        <FadeUp delay={220}>
+          <TouchableOpacity
+            style={styles.cardHero}
+            onPress={quickPlay}
+            activeOpacity={0.85}
+          >
+            <View style={styles.cardHeroBar} />
+            <View style={styles.heroLeft}>
+              <View style={styles.heroIcon}>
+                <LightningIcon size={18} color={colors.white} />
+              </View>
+              <View>
+                <Text style={styles.heroTitle}>Quick Play</Text>
+                <Text style={styles.heroSub}>
+                  10 famous flags {'\u00A0\u00B7\u00A0'} 50 / 50 score
+                </Text>
+              </View>
             </View>
-            <View>
-              <Text style={styles.heroTitle}>Quick Play</Text>
-              <Text style={styles.heroSub}>10 famous flags {'\u00B7'} 50/50</Text>
-            </View>
-          </View>
-          <Text style={styles.heroArrow}>{'\u2192'}</Text>
-        </TouchableOpacity>
+            <Text style={styles.heroArrow}>{'\u2192'}</Text>
+          </TouchableOpacity>
+        </FadeUp>
 
-        {/* Custom Game */}
-        <TouchableOpacity
-          style={styles.card}
-          onPress={() => { hapticTap(); navigation.navigate('GameSetup'); }}
-          activeOpacity={0.85}
-        >
-          <View style={styles.cardLeft}>
-            <View style={styles.cardIcon}>
-              <Text style={styles.cardIconText}>+</Text>
+        <FadeUp delay={300}>
+          <TouchableOpacity
+            style={styles.card}
+            onPress={() => { hapticTap(); navigation.navigate('GameSetup'); }}
+            activeOpacity={0.85}
+          >
+            <View style={styles.cardLeft}>
+              <View style={styles.cardIcon}>
+                <CrosshairIcon size={16} color={colors.slate} />
+              </View>
+              <View>
+                <Text style={styles.cardTitle}>Custom Game</Text>
+                <Text style={styles.cardSub}>Choose mode, category & more</Text>
+              </View>
             </View>
-            <View>
-              <Text style={styles.cardTitle}>Custom Game</Text>
-              <Text style={styles.cardSub}>Choose mode, category & more</Text>
-            </View>
-          </View>
-          <Text style={styles.cardArrow}>{'\u2192'}</Text>
-        </TouchableOpacity>
+            <Text style={styles.cardArrow}>{'\u2192'}</Text>
+          </TouchableOpacity>
+        </FadeUp>
 
-        {/* EXPLORE SECTION */}
+        {/* ── EXPLORE ── */}
         <View style={[styles.sectionHead, { marginTop: spacing.lg }]}>
           <Text style={styles.sectionLabel}>Explore</Text>
           <View style={styles.sectionRule} />
         </View>
 
-        {/* Statistics */}
-        <TouchableOpacity
-          style={styles.card}
-          onPress={() => { hapticTap(); navigation.navigate('Stats'); }}
-          activeOpacity={0.85}
-        >
-          <View style={styles.cardLeft}>
-            <View style={styles.cardIcon}>
-              <Text style={styles.cardIconText}>#</Text>
+        <FadeUp delay={360}>
+          <TouchableOpacity
+            style={styles.card}
+            onPress={() => { hapticTap(); navigation.navigate('Stats'); }}
+            activeOpacity={0.85}
+          >
+            <View style={styles.cardLeft}>
+              <View style={styles.cardIcon}>
+                <BarChartIcon size={16} color={colors.slate} />
+              </View>
+              <View>
+                <Text style={styles.cardTitle}>Statistics</Text>
+                <Text style={styles.cardSub}>Track your progress</Text>
+              </View>
             </View>
-            <View>
-              <Text style={styles.cardTitle}>Statistics</Text>
-              <Text style={styles.cardSub}>Track your progress</Text>
-            </View>
-          </View>
-          <Text style={styles.cardArrow}>{'\u2192'}</Text>
-        </TouchableOpacity>
+            <Text style={styles.cardArrow}>{'\u2192'}</Text>
+          </TouchableOpacity>
+        </FadeUp>
 
-        {/* Browse Flags */}
-        <TouchableOpacity
-          style={styles.card}
-          onPress={() => { hapticTap(); navigation.navigate('Browse'); }}
-          activeOpacity={0.85}
-        >
-          <View style={styles.cardLeft}>
-            <View style={styles.cardIcon}>
-              <Text style={styles.cardIconText}>{'\u2261'}</Text>
+        <FadeUp delay={420}>
+          <TouchableOpacity
+            style={styles.card}
+            onPress={() => { hapticTap(); navigation.navigate('Browse'); }}
+            activeOpacity={0.85}
+          >
+            <View style={styles.cardLeft}>
+              <View style={styles.cardIcon}>
+                <GlobeIcon size={16} color={colors.slate} />
+              </View>
+              <View>
+                <Text style={styles.cardTitle}>Browse Flags</Text>
+                <Text style={styles.cardSub}>Explore all {totalFlags} flags</Text>
+              </View>
             </View>
-            <View>
-              <Text style={styles.cardTitle}>Browse Flags</Text>
-              <Text style={styles.cardSub}>Explore all {totalFlags} flags</Text>
+            <Text style={styles.cardArrow}>{'\u2192'}</Text>
+          </TouchableOpacity>
+        </FadeUp>
+
+        {/* ── REGION INDEX ── */}
+        <FadeUp delay={500}>
+          <View style={styles.regionIndex}>
+            <Text style={styles.regionIndexHead}>Browse by Region</Text>
+            <View style={styles.regionGrid}>
+              {REGIONS.map((region, i) => (
+                <TouchableOpacity
+                  key={region.name}
+                  style={[
+                    styles.regionItem,
+                    (i + 1) % 3 !== 0 && styles.regionItemBorderRight,
+                    i < 3 && styles.regionItemBorderBottom,
+                  ]}
+                  onPress={() => { hapticTap(); navigation.navigate('Browse'); }}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.regionName}>{region.name}</Text>
+                  <Text style={styles.regionCount}>{region.count}</Text>
+                </TouchableOpacity>
+              ))}
             </View>
           </View>
-          <Text style={styles.cardArrow}>{'\u2192'}</Text>
-        </TouchableOpacity>
+        </FadeUp>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
+// ─── Styles ──────────────────────────────────────────────────
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -195,7 +311,24 @@ const styles = StyleSheet.create({
     paddingBottom: 80,
   },
 
-  // HEADER
+  // Grid
+  gridContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  gridLine: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    width: 1,
+    backgroundColor: colors.rule,
+    opacity: 0.35,
+  },
+
+  // Header
   headerTopRule: {
     width: '100%',
     height: 3,
@@ -214,8 +347,7 @@ const styles = StyleSheet.create({
   eyebrow: {
     fontFamily: fontFamily.uiLabel,
     fontSize: 10,
-    fontWeight: '700',
-    letterSpacing: 3,
+    letterSpacing: 2.8,
     textTransform: 'uppercase',
     color: colors.slate,
     marginBottom: 8,
@@ -223,14 +355,12 @@ const styles = StyleSheet.create({
   logotypeMain: {
     fontFamily: fontFamily.display,
     fontSize: 64,
-    fontWeight: '700',
     lineHeight: 58,
     color: colors.ink,
-    letterSpacing: -1,
+    letterSpacing: -1.3,
   },
   logotypeItalic: {
     fontFamily: fontFamily.displayItalic,
-    fontWeight: '400',
     color: colors.accent,
   },
   headerRight: {
@@ -240,22 +370,20 @@ const styles = StyleSheet.create({
   countNumber: {
     fontFamily: fontFamily.display,
     fontSize: 52,
-    fontWeight: '700',
     lineHeight: 52,
     color: colors.ink,
-    letterSpacing: -1,
+    letterSpacing: -1.6,
   },
   countLabel: {
     fontFamily: fontFamily.uiLabelMedium,
     fontSize: 10,
-    fontWeight: '600',
     letterSpacing: 2,
     textTransform: 'uppercase',
     color: colors.slate,
     marginTop: 2,
   },
 
-  // BYLINE
+  // Byline
   byline: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -268,7 +396,6 @@ const styles = StyleSheet.create({
   bylineText: {
     fontFamily: fontFamily.uiLabelMedium,
     fontSize: 10,
-    fontWeight: '600',
     letterSpacing: 2,
     textTransform: 'uppercase',
     color: colors.slate,
@@ -284,7 +411,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.rule2,
   },
 
-  // PROGRESS
+  // Progress
   progressBlock: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -308,28 +435,22 @@ const styles = StyleSheet.create({
   progressLabel: {
     fontFamily: fontFamily.uiLabel,
     fontSize: 10,
-    fontWeight: '700',
-    letterSpacing: 2.5,
+    letterSpacing: 2.2,
     textTransform: 'uppercase',
     color: colors.slate,
   },
   progressFraction: {
     fontFamily: fontFamily.uiLabelMedium,
     fontSize: 11,
-    fontWeight: '600',
-    letterSpacing: 0.7,
+    letterSpacing: 0.66,
     color: colors.slate,
   },
   progressTrack: {
     height: 3,
     backgroundColor: colors.rule,
-    position: 'relative',
   },
   progressFill: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    bottom: 0,
+    height: 3,
     backgroundColor: colors.ink,
   },
   progressPctBox: {
@@ -339,22 +460,20 @@ const styles = StyleSheet.create({
   progressPctNumber: {
     fontFamily: fontFamily.display,
     fontSize: 28,
-    fontWeight: '700',
     color: colors.ink,
-    letterSpacing: -0.5,
+    letterSpacing: -0.56,
     lineHeight: 28,
   },
   progressPctLabel: {
     fontFamily: fontFamily.uiLabelMedium,
     fontSize: 9,
-    fontWeight: '600',
-    letterSpacing: 2,
+    letterSpacing: 1.62,
     textTransform: 'uppercase',
     color: colors.slate,
     marginTop: 2,
   },
 
-  // SECTION HEADS
+  // Section heads
   sectionHead: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -364,8 +483,7 @@ const styles = StyleSheet.create({
   sectionLabel: {
     fontFamily: fontFamily.uiLabel,
     fontSize: 9,
-    fontWeight: '700',
-    letterSpacing: 3,
+    letterSpacing: 2.52,
     textTransform: 'uppercase',
     color: colors.slate,
   },
@@ -375,14 +493,14 @@ const styles = StyleSheet.create({
     backgroundColor: colors.rule,
   },
 
-  // HERO CARD (dark, red left bar)
+  // Hero card
   cardHero: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: colors.ink,
-    padding: 28,
-    paddingLeft: 32,
+    paddingVertical: 28,
+    paddingHorizontal: 32,
     marginBottom: 8,
     position: 'relative',
   },
@@ -407,16 +525,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  heroIconText: {
-    fontFamily: fontFamily.uiLabel,
-    fontSize: 16,
-    color: colors.white,
-  },
   heroTitle: {
     fontFamily: fontFamily.uiLabel,
     fontSize: 26,
-    fontWeight: '700',
-    letterSpacing: 2,
+    letterSpacing: 2.08,
     textTransform: 'uppercase',
     lineHeight: 26,
     color: colors.white,
@@ -425,7 +537,6 @@ const styles = StyleSheet.create({
   heroSub: {
     fontFamily: fontFamily.body,
     fontSize: 12,
-    fontWeight: '400',
     color: 'rgba(255,255,255,0.45)',
   },
   heroArrow: {
@@ -434,7 +545,7 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.4)',
   },
 
-  // STANDARD CARDS
+  // Standard cards
   card: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -444,7 +555,7 @@ const styles = StyleSheet.create({
     borderColor: colors.rule,
     borderLeftWidth: 3,
     borderLeftColor: colors.rule,
-    padding: 18,
+    paddingVertical: 18,
     paddingHorizontal: 24,
     marginBottom: 6,
   },
@@ -462,16 +573,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  cardIconText: {
-    fontFamily: fontFamily.uiLabel,
-    fontSize: 14,
-    color: colors.slate,
-  },
   cardTitle: {
     fontFamily: fontFamily.uiLabel,
     fontSize: 20,
-    fontWeight: '700',
-    letterSpacing: 1.5,
+    letterSpacing: 1.4,
     textTransform: 'uppercase',
     color: colors.ink,
     lineHeight: 20,
@@ -486,5 +591,56 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.body,
     fontSize: 16,
     color: colors.rule2,
+  },
+
+  // Region index
+  regionIndex: {
+    borderTopWidth: 2,
+    borderTopColor: colors.ink,
+    marginTop: 44,
+    paddingTop: 16,
+  },
+  regionIndexHead: {
+    fontFamily: fontFamily.uiLabel,
+    fontSize: 9,
+    letterSpacing: 2.52,
+    textTransform: 'uppercase',
+    color: colors.slate,
+    marginBottom: 14,
+  },
+  regionGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    borderWidth: 1,
+    borderColor: colors.rule,
+    backgroundColor: colors.white,
+  },
+  regionItem: {
+    width: '33.333%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+  },
+  regionItemBorderRight: {
+    borderRightWidth: 1,
+    borderRightColor: colors.rule,
+  },
+  regionItemBorderBottom: {
+    borderBottomWidth: 1,
+    borderBottomColor: colors.rule,
+  },
+  regionName: {
+    fontFamily: fontFamily.uiLabelMedium,
+    fontSize: 12,
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
+    color: colors.ink,
+  },
+  regionCount: {
+    fontFamily: fontFamily.uiLabelLight,
+    fontSize: 11,
+    color: colors.slate,
   },
 });
