@@ -21,6 +21,9 @@ const DEFAULT_STATS: UserStats = {
     flagflash: { correct: 0, total: 0 },
     flagpuzzle: { correct: 0, total: 0 },
     timeattack: { correct: 0, total: 0 },
+    neighbors: { correct: 0, total: 0 },
+    impostor: { correct: 0, total: 0 },
+    capitalconnection: { correct: 0, total: 0 },
   },
   categoryStats: {},
 };

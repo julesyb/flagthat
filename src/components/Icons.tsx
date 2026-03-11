@@ -110,6 +110,38 @@ export function FlagIcon({ size = 16, color = '#4B5563', strokeWidth = 1.5 }: Ic
   );
 }
 
+// Users/Neighbors — people/connection icon
+export function UsersIcon({ size = 16, color = '#4B5563', strokeWidth = 1.5 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth}>
+      <Path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+      <Circle cx={9} cy={7} r={4} />
+      <Path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+      <Path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    </Svg>
+  );
+}
+
+// Eye — impostor/detect icon
+export function EyeIcon({ size = 16, color = '#4B5563', strokeWidth = 1.5 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth}>
+      <Path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+      <Circle cx={12} cy={12} r={3} />
+    </Svg>
+  );
+}
+
+// Link — connection/matching icon
+export function LinkIcon({ size = 16, color = '#4B5563', strokeWidth = 1.5 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth}>
+      <Path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+      <Path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+    </Svg>
+  );
+}
+
 // Map pin — map display mode toggle
 export function MapPinIcon({ size = 16, color = '#4B5563', strokeWidth = 1.5 }: IconProps) {
   return (

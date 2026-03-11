@@ -98,6 +98,9 @@ export default function GameSetupScreen({ navigation }: Props) {
   const isFlagFlash = mode === 'flagflash';
   const isFlagPuzzle = mode === 'flagpuzzle';
   const isTimeAttack = mode === 'timeattack';
+  const isNeighbors = mode === 'neighbors';
+  const isImpostor = mode === 'impostor';
+  const isCapitalConnection = mode === 'capitalconnection';
   const hasTimeLimit = isFlagFlash || isFlagPuzzle || isTimeAttack;
 
   const handleFilterTypeSelect = (type: CategoryType) => {
@@ -136,6 +139,12 @@ export default function GameSetupScreen({ navigation }: Props) {
       navigation.navigate('FlagFlash', { config });
     } else if (isFlagPuzzle) {
       navigation.navigate('FlagPuzzle', { config });
+    } else if (isNeighbors) {
+      navigation.navigate('Neighbors', { config });
+    } else if (isImpostor) {
+      navigation.navigate('FlagImpostor', { config });
+    } else if (isCapitalConnection) {
+      navigation.navigate('CapitalConnection', { config });
     } else {
       navigation.navigate('Game', { config });
     }
@@ -368,7 +377,7 @@ export default function GameSetupScreen({ navigation }: Props) {
         )}
 
         <TouchableOpacity
-          style={[styles.startButton, (isFlagFlash || isFlagPuzzle || isTimeAttack) && styles.startButtonParty]}
+          style={[styles.startButton, (isFlagFlash || isFlagPuzzle || isTimeAttack || isNeighbors || isImpostor || isCapitalConnection) && styles.startButtonParty]}
           onPress={startGame}
           activeOpacity={0.8}
           accessibilityRole="button"
@@ -381,7 +390,13 @@ export default function GameSetupScreen({ navigation }: Props) {
                 ? 'Start FlagFlash'
                 : isFlagPuzzle
                   ? 'Start Flag Puzzle'
-                  : 'Start Game'}
+                  : isNeighbors
+                    ? 'Start Neighbors'
+                    : isImpostor
+                      ? 'Start Flag Impostor'
+                      : isCapitalConnection
+                        ? 'Start Capital Connection'
+                        : 'Start Game'}
           </Text>
         </TouchableOpacity>
       </ScrollView>

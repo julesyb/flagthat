@@ -90,6 +90,12 @@ export default function ResultsScreen({ route, navigation }: Props) {
       navigation.replace('FlagFlash', { config });
     } else if (config.mode === 'flagpuzzle') {
       navigation.replace('FlagPuzzle', { config });
+    } else if (config.mode === 'neighbors') {
+      navigation.replace('Neighbors', { config });
+    } else if (config.mode === 'impostor') {
+      navigation.replace('FlagImpostor', { config });
+    } else if (config.mode === 'capitalconnection') {
+      navigation.replace('CapitalConnection', { config });
     } else {
       navigation.replace('Game', { config });
     }

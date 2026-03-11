@@ -18,7 +18,7 @@ import { getStats, getDayStreak } from '../utils/storage';
 import { generateQuestions } from '../utils/gameEngine';
 import { RootStackParamList } from '../types/navigation';
 import { GameMode, UserStats, GameQuestion, CategoryId } from '../types';
-import { LightningIcon, CrosshairIcon, ChevronRightIcon, ClockIcon } from '../components/Icons';
+import { LightningIcon, CrosshairIcon, ChevronRightIcon, ClockIcon, UsersIcon, EyeIcon, LinkIcon } from '../components/Icons';
 import FlagImage from '../components/FlagImage';
 import BottomNav from '../components/BottomNav';
 
@@ -325,6 +325,66 @@ export default function HomeScreen({ navigation }: Props) {
             <View style={s.modeText}>
               <Text style={s.modeTitle}>Time Attack</Text>
               <Text style={s.modeSub}>60 seconds - how many can you get?</Text>
+            </View>
+            <ChevronRightIcon size={18} color={colors.rule} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={s.modeCard}
+            activeOpacity={0.85}
+            onPress={() => {
+              hapticTap();
+              navigation.navigate('Neighbors', {
+                config: { mode: 'neighbors', category: 'all', questionCount: 10, displayMode: 'flag' },
+              });
+            }}
+          >
+            <View style={s.modeIcon}>
+              <UsersIcon size={18} color={colors.white} />
+            </View>
+            <View style={s.modeText}>
+              <Text style={s.modeTitle}>Neighbors</Text>
+              <Text style={s.modeSub}>Find all bordering countries</Text>
+            </View>
+            <ChevronRightIcon size={18} color={colors.rule} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={s.modeCard}
+            activeOpacity={0.85}
+            onPress={() => {
+              hapticTap();
+              navigation.navigate('FlagImpostor', {
+                config: { mode: 'impostor', category: 'all', questionCount: 10, displayMode: 'flag' },
+              });
+            }}
+          >
+            <View style={[s.modeIcon, s.modeIconRed]}>
+              <EyeIcon size={18} color={colors.white} />
+            </View>
+            <View style={s.modeText}>
+              <Text style={s.modeTitle}>Flag Impostor</Text>
+              <Text style={s.modeSub}>Spot the fake flag</Text>
+            </View>
+            <ChevronRightIcon size={18} color={colors.rule} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={s.modeCard}
+            activeOpacity={0.85}
+            onPress={() => {
+              hapticTap();
+              navigation.navigate('CapitalConnection', {
+                config: { mode: 'capitalconnection', category: 'all', questionCount: 5, displayMode: 'flag' },
+              });
+            }}
+          >
+            <View style={s.modeIcon}>
+              <LinkIcon size={18} color={colors.white} />
+            </View>
+            <View style={s.modeText}>
+              <Text style={s.modeTitle}>Capital Connection</Text>
+              <Text style={s.modeSub}>Match flags to their capitals</Text>
             </View>
             <ChevronRightIcon size={18} color={colors.rule} />
           </TouchableOpacity>
