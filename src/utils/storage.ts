@@ -14,6 +14,7 @@ const DEFAULT_STATS: UserStats = {
   totalCorrect: 0,
   totalAnswered: 0,
   bestStreak: 0,
+  bestTimeAttackScore: 0,
   modeStats: {
     easy: { correct: 0, total: 0 },
     medium: { correct: 0, total: 0 },
@@ -59,6 +60,9 @@ export async function updateStats(
     stats.totalCorrect += correct;
     stats.totalAnswered += total;
     stats.bestStreak = Math.max(stats.bestStreak, streak);
+    if (mode === 'timeattack') {
+      stats.bestTimeAttackScore = Math.max(stats.bestTimeAttackScore || 0, correct);
+    }
 
     stats.modeStats[mode].correct += correct;
     stats.modeStats[mode].total += total;

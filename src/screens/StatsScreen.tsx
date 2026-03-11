@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { colors, spacing, typography, fontFamily, borderRadius } from '../utils/theme';
-import { UserStats, GAME_MODES, CATEGORIES, GameMode } from '../types';
+import { UserStats, GAME_MODES, GameMode } from '../types';
 import { getStats, resetStats, getFlagStats, FlagStats } from '../utils/storage';
 import { getAllFlags } from '../data';
 import BottomNav from '../components/BottomNav';
@@ -117,6 +117,12 @@ export default function StatsScreen() {
               <Text style={styles.smallStatLabel}>Correct</Text>
             </View>
           </View>
+          {(stats.bestTimeAttackScore || 0) > 0 && (
+            <View style={[styles.smallStatCard, { marginTop: spacing.sm }]}>
+              <Text style={styles.smallStatValue}>{stats.bestTimeAttackScore}</Text>
+              <Text style={styles.smallStatLabel}>Best Timed Quiz Score</Text>
+            </View>
+          )}
         </View>
 
         <Text style={styles.sectionTitle}>By Mode</Text>
@@ -124,30 +130,20 @@ export default function StatsScreen() {
           const s = stats.modeStats[m];
           const acc = s.total > 0 ? Math.round((s.correct / s.total) * 100) : 0;
           return (
-            <View key={m} style={styles.statRow}>
-              <Text style={styles.statRowLabel}>{GAME_MODES[m].label}</Text>
+            <View key={m} style={styles.modeStatCard}>
+              <View style={styles.modeStatHeader}>
+                <Text style={styles.modeStatLabel}>{GAME_MODES[m].label}</Text>
+                <Text style={styles.modeStatPct}>
+                  {s.total > 0 ? `${acc}%` : '-'}
+                </Text>
+              </View>
               <View style={styles.statBarContainer}>
                 <View style={[styles.statBar, { width: `${acc}%` }]} />
               </View>
-              <Text style={styles.statRowValue}>
-                {s.total > 0 ? `${acc}%` : '-'}
-              </Text>
-            </View>
-          );
-        })}
-
-        <Text style={styles.sectionTitle}>By Category</Text>
-        {CATEGORIES.map((cat) => {
-          const s = stats.categoryStats[cat.id];
-          const acc = s && s.total > 0 ? Math.round((s.correct / s.total) * 100) : 0;
-          return (
-            <View key={cat.id} style={styles.statRow}>
-              <Text style={styles.statRowLabel}>{cat.label}</Text>
-              <View style={styles.statBarContainer}>
-                <View style={[styles.statBar, { width: `${acc}%` }]} />
-              </View>
-              <Text style={styles.statRowValue}>
-                {s && s.total > 0 ? `${acc}%` : '-'}
+              <Text style={styles.modeStatDetail}>
+                {s.total > 0
+                  ? `${s.correct} correct out of ${s.total} answered`
+                  : 'Not played yet'}
               </Text>
             </View>
           );
@@ -268,16 +264,32 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
     marginTop: spacing.md,
   },
-  statRow: {
+  modeStatCard: {
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+    marginBottom: spacing.sm,
+  },
+  modeStatHeader: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: spacing.sm,
-    gap: spacing.sm,
   },
-  statRowLabel: {
-    ...typography.label,
+  modeStatLabel: {
+    ...typography.bodyBold,
     color: colors.text,
-    width: 130,
+  },
+  modeStatPct: {
+    ...typography.bodyBold,
+    color: colors.ink,
+  },
+  modeStatDetail: {
+    ...typography.caption,
+    color: colors.textSecondary,
+    marginTop: spacing.xs,
   },
   statBarContainer: {
     flex: 1,
@@ -290,12 +302,6 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: colors.ink,
     borderRadius: borderRadius.full,
-  },
-  statRowValue: {
-    ...typography.captionBold,
-    color: colors.textSecondary,
-    width: 40,
-    textAlign: 'right',
   },
   flagStatRow: {
     flexDirection: 'row',

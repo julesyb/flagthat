@@ -11,11 +11,6 @@ import {
   Barlow_500Medium,
   Barlow_600SemiBold,
 } from '@expo-google-fonts/barlow';
-import {
-  BarlowCondensed_500Medium,
-  BarlowCondensed_600SemiBold,
-  BarlowCondensed_700Bold,
-} from '@expo-google-fonts/barlow-condensed';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from './src/screens/HomeScreen';
@@ -41,9 +36,9 @@ const screenOptions = {
   },
   headerTintColor: colors.text,
   headerTitleStyle: {
-    fontFamily: 'BarlowCondensed_700Bold',
+    fontFamily: 'Barlow_600SemiBold',
     fontSize: 18,
-    letterSpacing: 1.5,
+    letterSpacing: 0.8,
     textTransform: 'uppercase' as const,
   },
   headerShadowVisible: false,
@@ -125,9 +120,6 @@ export default function App() {
     Barlow_400Regular,
     Barlow_500Medium,
     Barlow_600SemiBold,
-    BarlowCondensed_500Medium,
-    BarlowCondensed_600SemiBold,
-    BarlowCondensed_700Bold,
   });
 
   if (!fontsLoaded) {

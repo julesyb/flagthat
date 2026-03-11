@@ -10,38 +10,35 @@ import {
   ScrollView,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, fontFamily, spacing, borderRadius } from '../utils/theme';
-import { getTotalFlagCount, getCategoryCount } from '../data';
+import { getTotalFlagCount } from '../data';
 import { initAudio, hapticTap, hapticCorrect, hapticWrong, playCorrectSound, playWrongSound } from '../utils/feedback';
 import { getStats, getDayStreak } from '../utils/storage';
 import { generateQuestions } from '../utils/gameEngine';
 import { RootStackParamList } from '../types/navigation';
-import { GameMode, UserStats, GameQuestion, CategoryId } from '../types';
+import { GameMode, UserStats, GameQuestion } from '../types';
 import { LightningIcon, CrosshairIcon, ChevronRightIcon, ClockIcon, UsersIcon, EyeIcon, LinkIcon } from '../components/Icons';
 import FlagImage from '../components/FlagImage';
 import BottomNav from '../components/BottomNav';
 
 const MODES: { key: GameMode; label: string }[] = [
-  { key: 'easy', label: '2 Easy' },
-  { key: 'medium', label: '4 Hard' },
-  { key: 'hard', label: 'Type' },
+  { key: 'easy', label: '2 Pick' },
+  { key: 'medium', label: '4 Pick' },
+  { key: 'hard', label: 'Free' },
 ];
 
 const QUESTION_COUNTS = [5, 10, 15, 20];
 
-const REGIONS: { id: CategoryId; label: string }[] = [
-  { id: 'europe', label: 'Europe' },
-  { id: 'asia', label: 'Asia' },
-  { id: 'africa', label: 'Africa' },
-  { id: 'americas', label: 'Americas' },
-  { id: 'oceania', label: 'Oceania' },
-];
+
+
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 // ─── Flag Teaser (inline mini-quiz) ─────────────────────────
 function FlagTeaser() {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const question = useMemo<GameQuestion | null>(() => {
     const qs = generateQuestions({ mode: 'medium', category: 'all', questionCount: 1, displayMode: 'flag' });
     return qs[0] ?? null;
@@ -102,61 +99,82 @@ function FlagTeaser() {
       </View>
 
       {/* Options 2x2 */}
-      <View style={s.optsGrid}>
-        <View style={s.optsRow}>
-          {question.options.slice(0, 2).map((opt, i) => {
-            const isCorrect = opt === question.flag.name;
-            const isSelected = picked === opt;
-            const showCorrect = picked !== null && isCorrect;
-            const showWrong = isSelected && !isCorrect;
-            return (
-              <Animated.View
-                key={opt}
-                style={[
-                  s.optWrap,
-                  { opacity: optAnims[i], transform: [{ scale: optAnims[i].interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }) }] },
-                ]}
-              >
-                <TouchableOpacity
-                  style={[s.optBtn, showCorrect && s.optCorrect, showWrong && s.optWrong]}
-                  onPress={() => handlePick(opt)}
-                  activeOpacity={0.8}
-                  disabled={picked !== null}
+      {!picked ? (
+        <View style={s.optsGrid}>
+          <View style={s.optsRow}>
+            {question.options.slice(0, 2).map((opt, i) => {
+              const isCorrect = opt === question.flag.name;
+              const isSelected = picked === opt;
+              const showCorrect = picked !== null && isCorrect;
+              const showWrong = isSelected && !isCorrect;
+              return (
+                <Animated.View
+                  key={opt}
+                  style={[
+                    s.optWrap,
+                    { opacity: optAnims[i], transform: [{ scale: optAnims[i].interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }) }] },
+                  ]}
                 >
-                  <Text style={[s.optText, showCorrect && s.optTextCorrect, showWrong && s.optTextWrong]}>{opt}</Text>
-                </TouchableOpacity>
-              </Animated.View>
-            );
-          })}
-        </View>
-        <View style={s.optsRow}>
-          {question.options.slice(2, 4).map((opt, i) => {
-            const idx = i + 2;
-            const isCorrect = opt === question.flag.name;
-            const isSelected = picked === opt;
-            const showCorrect = picked !== null && isCorrect;
-            const showWrong = isSelected && !isCorrect;
-            return (
-              <Animated.View
-                key={opt}
-                style={[
-                  s.optWrap,
-                  { opacity: optAnims[idx], transform: [{ scale: optAnims[idx].interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }) }] },
-                ]}
-              >
-                <TouchableOpacity
-                  style={[s.optBtn, showCorrect && s.optCorrect, showWrong && s.optWrong]}
-                  onPress={() => handlePick(opt)}
-                  activeOpacity={0.8}
-                  disabled={picked !== null}
+                  <TouchableOpacity
+                    style={[s.optBtn, showCorrect && s.optCorrect, showWrong && s.optWrong]}
+                    onPress={() => handlePick(opt)}
+                    activeOpacity={0.8}
+                    disabled={picked !== null}
+                  >
+                    <Text style={[s.optText, showCorrect && s.optTextCorrect, showWrong && s.optTextWrong]}>{opt}</Text>
+                  </TouchableOpacity>
+                </Animated.View>
+              );
+            })}
+          </View>
+          <View style={s.optsRow}>
+            {question.options.slice(2, 4).map((opt, i) => {
+              const idx = i + 2;
+              const isCorrect = opt === question.flag.name;
+              const isSelected = picked === opt;
+              const showCorrect = picked !== null && isCorrect;
+              const showWrong = isSelected && !isCorrect;
+              return (
+                <Animated.View
+                  key={opt}
+                  style={[
+                    s.optWrap,
+                    { opacity: optAnims[idx], transform: [{ scale: optAnims[idx].interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }) }] },
+                  ]}
                 >
-                  <Text style={[s.optText, showCorrect && s.optTextCorrect, showWrong && s.optTextWrong]}>{opt}</Text>
-                </TouchableOpacity>
-              </Animated.View>
-            );
-          })}
+                  <TouchableOpacity
+                    style={[s.optBtn, showCorrect && s.optCorrect, showWrong && s.optWrong]}
+                    onPress={() => handlePick(opt)}
+                    activeOpacity={0.8}
+                    disabled={picked !== null}
+                  >
+                    <Text style={[s.optText, showCorrect && s.optTextCorrect, showWrong && s.optTextWrong]}>{opt}</Text>
+                  </TouchableOpacity>
+                </Animated.View>
+              );
+            })}
+          </View>
         </View>
-      </View>
+      ) : (
+        <View style={s.teaserResult}>
+          <Text style={s.teaserResultText}>
+            {picked === question.flag.name ? 'Correct!' : `It was ${question.flag.name}`}
+          </Text>
+          <TouchableOpacity
+            style={s.teaserPlayBtn}
+            onPress={() => {
+              hapticTap();
+              navigation.navigate('Game', {
+                config: { mode: 'medium', category: 'all', questionCount: 10, displayMode: 'flag' },
+              });
+            }}
+            activeOpacity={0.85}
+          >
+            <Text style={s.teaserPlayText}>Keep Playing</Text>
+            <ChevronRightIcon size={14} color={colors.white} />
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 }
@@ -190,19 +208,16 @@ export default function HomeScreen({ navigation }: Props) {
   };
 
   const hasPlayed = stats !== null && stats.totalGamesPlayed > 0;
-
-  // Region accuracy for progress bars
-  const regionProgress = REGIONS.map((r) => {
-    const cs = stats?.categoryStats[r.id];
-    const pct = cs && cs.total > 0 ? Math.round((cs.correct / cs.total) * 100) : 0;
-    return { ...r, pct };
-  });
+  const accuracy = stats && stats.totalAnswered > 0
+    ? Math.round((stats.totalCorrect / stats.totalAnswered) * 100)
+    : 0;
 
   return (
     <SafeAreaView style={s.container}>
       <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
 
       <ScrollView style={s.scroll} contentContainerStyle={s.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={s.desktopWrapper}>
         {/* ── HEADER ── */}
         <View style={s.header}>
           <View style={s.wordmark}>
@@ -323,7 +338,7 @@ export default function HomeScreen({ navigation }: Props) {
               <ClockIcon size={18} color={colors.white} />
             </View>
             <View style={s.modeText}>
-              <Text style={s.modeTitle}>Time Attack</Text>
+              <Text style={s.modeTitle}>Timed Quiz</Text>
               <Text style={s.modeSub}>60 seconds - how many can you get?</Text>
             </View>
             <ChevronRightIcon size={18} color={colors.rule} />
@@ -390,23 +405,29 @@ export default function HomeScreen({ navigation }: Props) {
           </TouchableOpacity>
         </View>
 
-        {/* ── YOUR PROGRESS ── */}
+        {/* ── YOUR STATS ── */}
         {hasPlayed && (
-          <View style={s.progressCard}>
-            <Text style={[s.sectionLbl, { marginBottom: 12 }]}>Your progress</Text>
-            {regionProgress.map((r) => (
-              <View key={r.id} style={s.progRow}>
-                <Text style={s.progName}>{r.label}</Text>
-                <View style={s.progTrack}>
-                  <View style={[s.progFill, { width: `${r.pct}%` }]} />
-                </View>
-                <Text style={s.progPct}>{r.pct}%</Text>
+          <View style={s.statsWrap}>
+            <Text style={s.sectionLbl}>Your stats</Text>
+            <View style={s.statsRow}>
+              <View style={s.statTile}>
+                <Text style={s.statVal}>{stats!.bestStreak}</Text>
+                <Text style={s.statLbl}>Best Streak</Text>
               </View>
-            ))}
+              <View style={s.statTile}>
+                <Text style={s.statVal}>{stats!.bestTimeAttackScore}</Text>
+                <Text style={s.statLbl}>Best 60s</Text>
+              </View>
+              <View style={s.statTile}>
+                <Text style={s.statVal}>{accuracy}%</Text>
+                <Text style={s.statLbl}>Accuracy</Text>
+              </View>
+            </View>
           </View>
         )}
 
         <View style={{ height: spacing.md }} />
+        </View>
       </ScrollView>
 
       {/* ── BOTTOM NAV ── */}
@@ -434,6 +455,11 @@ const s = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: spacing.md,
+    alignItems: 'center',
+  },
+  desktopWrapper: {
+    width: '100%',
+    maxWidth: 480,
   },
 
   // ── Header
@@ -474,7 +500,7 @@ const s = StyleSheet.create({
   streakLbl: {
     fontFamily: fontFamily.uiLabel,
     fontSize: 9,
-    letterSpacing: 1.5,
+    letterSpacing: 1,
     textTransform: 'uppercase',
     color: colors.accent,
     marginTop: 1,
@@ -482,7 +508,7 @@ const s = StyleSheet.create({
   streakLblMuted: {
     fontFamily: fontFamily.uiLabel,
     fontSize: 9,
-    letterSpacing: 1.5,
+    letterSpacing: 1,
     textTransform: 'uppercase',
     color: colors.textTertiary,
     marginTop: 1,
@@ -500,7 +526,7 @@ const s = StyleSheet.create({
   heroLabel: {
     fontFamily: fontFamily.uiLabel,
     fontSize: 10,
-    letterSpacing: 2.5,
+    letterSpacing: 1.5,
     textTransform: 'uppercase',
     color: colors.whiteAlpha45,
     marginBottom: 18,
@@ -566,6 +592,38 @@ const s = StyleSheet.create({
     color: colors.errorTextOnDark,
   },
 
+  // ── Teaser result
+  teaserResult: {
+    marginTop: 16,
+    alignItems: 'center',
+    gap: 12,
+  },
+  teaserResultText: {
+    fontFamily: fontFamily.uiLabel,
+    fontSize: 16,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    color: colors.whiteAlpha70,
+  },
+  teaserPlayBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: colors.accent,
+    paddingVertical: 14,
+    paddingHorizontal: 28,
+    borderRadius: borderRadius.md,
+    width: '100%',
+  },
+  teaserPlayText: {
+    fontFamily: fontFamily.uiLabel,
+    fontSize: 15,
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+    color: colors.white,
+  },
+
   // ── Play button
   playWrap: {
     paddingHorizontal: spacing.md,
@@ -591,7 +649,7 @@ const s = StyleSheet.create({
   playBtnText: {
     fontFamily: fontFamily.uiLabel,
     fontSize: 17,
-    letterSpacing: 1.2,
+    letterSpacing: 0.8,
     textTransform: 'uppercase',
     color: colors.white,
   },
@@ -662,7 +720,7 @@ const s = StyleSheet.create({
   sectionLbl: {
     fontFamily: fontFamily.uiLabel,
     fontSize: 10,
-    letterSpacing: 2,
+    letterSpacing: 1.2,
     textTransform: 'uppercase',
     color: colors.textTertiary,
     marginBottom: 8,
@@ -706,46 +764,36 @@ const s = StyleSheet.create({
     lineHeight: 16,
   },
 
-  // ── Progress card
-  progressCard: {
-    marginHorizontal: spacing.md,
+  // ── Stats row
+  statsWrap: {
+    paddingHorizontal: spacing.md,
     marginTop: 10,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    gap: 7,
+  },
+  statTile: {
+    flex: 1,
     backgroundColor: colors.white,
     borderRadius: borderRadius.lg,
     borderWidth: 1,
     borderColor: colors.rule,
-    padding: 16,
-  },
-  progRow: {
-    flexDirection: 'row',
+    padding: 14,
     alignItems: 'center',
-    gap: 10,
-    marginBottom: 9,
   },
-  progName: {
-    fontFamily: fontFamily.bodyMedium,
-    fontSize: 12,
-    color: colors.textTertiary,
-    width: 60,
-    flexShrink: 0,
-  },
-  progTrack: {
-    flex: 1,
-    height: 5,
-    backgroundColor: colors.surfaceSecondary,
-    borderRadius: 99,
-    overflow: 'hidden',
-  },
-  progFill: {
-    height: '100%',
-    backgroundColor: colors.ink,
-    borderRadius: 99,
-  },
-  progPct: {
-    fontFamily: fontFamily.uiLabel,
-    fontSize: 13,
+  statVal: {
+    fontFamily: fontFamily.display,
+    fontSize: 22,
     color: colors.ink,
-    width: 28,
-    textAlign: 'right',
+    lineHeight: 26,
+  },
+  statLbl: {
+    fontFamily: fontFamily.uiLabel,
+    fontSize: 9,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    color: colors.textTertiary,
+    marginTop: 4,
   },
 });

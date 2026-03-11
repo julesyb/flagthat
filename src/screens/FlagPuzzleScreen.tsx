@@ -17,10 +17,10 @@ import { GameQuestion, GameResult } from '../types';
 import { generateQuestions, checkAnswer } from '../utils/gameEngine';
 import { hapticCorrect, hapticWrong, hapticTap, playCorrectSound, playWrongSound } from '../utils/feedback';
 import FlagImage from '../components/FlagImage';
-import GameTopBar from '../components/GameTopBar';
 import { useGameAnimations } from '../hooks/useGameAnimations';
 import { getAllFlags } from '../data';
 import { RootStackParamList } from '../types/navigation';
+import { ChevronRightIcon } from '../components/Icons';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'FlagPuzzle'>;
 
@@ -40,7 +40,7 @@ function generateRevealOrder(): number[] {
 
 export default function FlagPuzzleScreen({ route, navigation }: Props) {
   const { config } = route.params;
-  const timeLimit = config.timeLimit || 30;
+  const timeLimit = config.timeLimit || 15;
   const { width: screenWidth } = useWindowDimensions();
 
   // Responsive flag dimensions
@@ -60,7 +60,6 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
 
   const [timeRemaining, setTimeRemaining] = useState(timeLimit);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [revealOrder, setRevealOrder] = useState<number[]>(() => generateRevealOrder());
   const [revealedCount, setRevealedCount] = useState(0);
@@ -68,6 +67,7 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
 
   const [showSuggestions, setShowSuggestions] = useState(false);
   const allFlagNames = useMemo(() => getAllFlags().map((f) => f.name).sort(), []);
+  const handleAnswerRef = useRef<(answer: string) => void>(() => {});
 
   const { fadeAnim, streakScale, shakeAnim, animateStreak, animateWrong, animateTransition } = useGameAnimations();
 
@@ -81,7 +81,7 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
       if (revealIntervalRef.current) clearInterval(revealIntervalRef.current);
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      if (autoAdvanceRef.current) clearTimeout(autoAdvanceRef.current);
     };
   }, []);
 
@@ -125,17 +125,12 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
 
   useEffect(() => {
     if (timeRemaining === 0 && !showFeedback && questions.length > 0) {
-      handleAnswer('');
+      handleAnswerRef.current('');
     }
-  }, [timeRemaining]);
+  }, [timeRemaining, showFeedback, questions.length]);
 
   const currentQuestion = questions[currentIndex];
   const progress = questions.length > 0 ? (currentIndex + 1) / questions.length : 0;
-
-  const correctCount = useMemo(
-    () => results.filter((r) => r.correct).length,
-    [results],
-  );
 
   const revealedTiles = useMemo(() => {
     const set = new Set<number>();
@@ -150,6 +145,35 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
     const query = textInput.toLowerCase().trim();
     return allFlagNames.filter((name) => name.toLowerCase().startsWith(query)).slice(0, 5);
   }, [textInput, allFlagNames]);
+
+  const pendingResultsRef = useRef<GameResult[] | null>(null);
+  const autoAdvanceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const goToNext = useCallback(() => {
+    if (autoAdvanceRef.current) {
+      clearTimeout(autoAdvanceRef.current);
+      autoAdvanceRef.current = null;
+    }
+    const newResults = pendingResultsRef.current;
+    if (!newResults) return;
+    pendingResultsRef.current = null;
+
+    if (currentIndex < questions.length - 1) {
+      animateTransition();
+      setResults(newResults);
+      setCurrentIndex((i) => i + 1);
+      setShowFeedback(false);
+      setLastAnswerCorrect(false);
+      setTextInput('');
+      setShowSuggestions(false);
+      setRevealOrder(generateRevealOrder());
+      setRevealedCount(0);
+      setQuestionStartTime(Date.now());
+      Keyboard.dismiss();
+    } else {
+      navigation.replace('Results', { results: newResults, config });
+    }
+  }, [currentIndex, questions, navigation, config, animateTransition]);
 
   const handleAnswer = useCallback(
     (answer: string) => {
@@ -186,27 +210,16 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
       };
 
       const newResults = [...results, result];
+      pendingResultsRef.current = newResults;
 
-      timeoutRef.current = setTimeout(() => {
-        if (currentIndex < questions.length - 1) {
-          animateTransition();
-          setResults(newResults);
-          setCurrentIndex((i) => i + 1);
-          setShowFeedback(false);
-          setLastAnswerCorrect(false);
-          setTextInput('');
-          setShowSuggestions(false);
-          setRevealOrder(generateRevealOrder());
-          setRevealedCount(0);
-          setQuestionStartTime(Date.now());
-          Keyboard.dismiss();
-        } else {
-          navigation.replace('Results', { results: newResults, config });
-        }
+      autoAdvanceRef.current = setTimeout(() => {
+        goToNext();
       }, correct ? 600 : 1200);
     },
-    [showFeedback, currentQuestion, questionStartTime, results, currentIndex, questions, navigation, config, animateStreak, animateWrong, animateTransition],
+    [showFeedback, currentQuestion, questionStartTime, results, animateStreak, animateWrong, goToNext],
   );
+
+  handleAnswerRef.current = handleAnswer;
 
   const handleSubmit = () => {
     if (textInput.trim().length > 0) {
@@ -384,6 +397,16 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
                 It was {currentQuestion.flag.name}
               </Text>
             )}
+            <TouchableOpacity
+              style={styles.nextButton}
+              onPress={goToNext}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="Next question"
+            >
+              <Text style={styles.nextButtonText}>Next</Text>
+              <ChevronRightIcon size={16} color={colors.white} />
+            </TouchableOpacity>
           </View>
         )}
       </Animated.View>
@@ -538,5 +561,21 @@ const styles = StyleSheet.create({
   feedbackWrong: {
     ...typography.heading,
     color: colors.error,
+  },
+  nextButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: colors.ink,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: borderRadius.md,
+    marginTop: spacing.md,
+  },
+  nextButtonText: {
+    ...typography.captionBold,
+    color: colors.white,
+    textTransform: 'uppercase',
   },
 });
