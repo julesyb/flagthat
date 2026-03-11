@@ -76,7 +76,8 @@ export default function ResultsScreen({ route, navigation }: Props) {
       `Score: ${correct}/${results.length} (${accuracy}%)\n` +
       `Grade: ${grade.label} | Streak: ${streak}\n` +
       (isPerfect ? 'PERFECT SCORE!\n' : '') +
-      `Can you beat my score?`;
+      `Can you beat my score?\n` +
+      `https://flagthat.app`;
 
     try {
       await Share.share({ message });
@@ -84,6 +85,8 @@ export default function ResultsScreen({ route, navigation }: Props) {
       // Share cancelled
     }
   };
+
+  const goHome = () => navigation.popToTop();
 
   const playAgain = () => {
     if (config.mode === 'flagflash') {
@@ -139,15 +142,33 @@ export default function ResultsScreen({ route, navigation }: Props) {
           </View>
         </View>
 
-        <TouchableOpacity
-          style={styles.shareButton}
-          onPress={handleShare}
-          activeOpacity={0.7}
-          accessibilityRole="button"
-          accessibilityLabel="Share results"
-        >
-          <Text style={styles.shareButtonText}>Share Results</Text>
-        </TouchableOpacity>
+        {/* Top action buttons */}
+        <View style={styles.buttonRow}>
+          <TouchableOpacity
+            style={styles.secondaryButton}
+            onPress={handleShare}
+            activeOpacity={0.7}
+            accessibilityLabel="Share results"
+          >
+            <Text style={styles.secondaryButtonText}>Share</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.primaryButton}
+            onPress={playAgain}
+            activeOpacity={0.7}
+            accessibilityLabel="Play again"
+          >
+            <Text style={styles.primaryButtonText}>Play Again</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.secondaryButton}
+            onPress={goHome}
+            activeOpacity={0.7}
+            accessibilityLabel="Go home"
+          >
+            <Text style={styles.secondaryButtonText}>Home</Text>
+          </TouchableOpacity>
+        </View>
 
         <Text style={styles.reviewTitle}>Review</Text>
         {results.map((result, index) => (
@@ -177,24 +198,31 @@ export default function ResultsScreen({ route, navigation }: Props) {
           </View>
         ))}
 
+        {/* Bottom action buttons (mirrored) */}
         <View style={styles.buttonRow}>
           <TouchableOpacity
             style={styles.secondaryButton}
-            onPress={() => navigation.popToTop()}
+            onPress={handleShare}
             activeOpacity={0.7}
-            accessibilityRole="button"
-            accessibilityLabel="Go home"
+            accessibilityLabel="Share results"
           >
-            <Text style={styles.secondaryButtonText}>Home</Text>
+            <Text style={styles.secondaryButtonText}>Share</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.primaryButton}
             onPress={playAgain}
             activeOpacity={0.7}
-            accessibilityRole="button"
             accessibilityLabel="Play again"
           >
             <Text style={styles.primaryButtonText}>Play Again</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.secondaryButton}
+            onPress={goHome}
+            activeOpacity={0.7}
+            accessibilityLabel="Go home"
+          >
+            <Text style={styles.secondaryButtonText}>Home</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -264,13 +292,6 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     marginTop: spacing.xs,
   },
-  shareButton: {
-    ...buttons.secondary,
-    marginBottom: spacing.lg,
-  },
-  shareButtonText: {
-    ...buttons.secondaryText,
-  },
   reviewTitle: {
     ...typography.headingUpper,
     color: colors.text,
@@ -306,8 +327,8 @@ const styles = StyleSheet.create({
   },
   buttonRow: {
     flexDirection: 'row',
-    gap: spacing.md,
-    marginTop: spacing.xl,
+    gap: spacing.sm,
+    marginVertical: spacing.lg,
   },
   secondaryButton: {
     ...buttons.secondary,

@@ -490,7 +490,7 @@ const s = StyleSheet.create({
     alignItems: 'flex-end',
   },
   streakVal: {
-    fontFamily: fontFamily.uiLabel,
+    fontFamily: fontFamily.display,
     fontSize: 28,
     lineHeight: 28,
     color: colors.ink,
@@ -618,7 +618,7 @@ const s = StyleSheet.create({
   teaserPlayText: {
     fontFamily: fontFamily.uiLabel,
     fontSize: 15,
-    letterSpacing: 0.8,
+    letterSpacing: 1.5,
     textTransform: 'uppercase',
     color: colors.white,
   },
@@ -648,7 +648,7 @@ const s = StyleSheet.create({
   playBtnText: {
     fontFamily: fontFamily.uiLabel,
     fontSize: 17,
-    letterSpacing: 0.8,
+    letterSpacing: 1.5,
     textTransform: 'uppercase',
     color: colors.white,
   },
@@ -751,7 +751,7 @@ const s = StyleSheet.create({
     flex: 1,
   },
   modeTitle: {
-    fontFamily: fontFamily.display,
+    fontFamily: fontFamily.bodyBold,
     fontSize: 15,
     color: colors.ink,
     marginBottom: 2,

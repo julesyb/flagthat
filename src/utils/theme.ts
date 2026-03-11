@@ -98,7 +98,7 @@ export const colors = {
   accentBg: 'rgba(229, 39, 28, 0.06)',
 
   // Map
-  mapBackground: '#e8e4df',
+  mapBackground: '#f2f2f0',
   mapZoomSurface: 'rgba(255,255,255,0.92)',
 };
 

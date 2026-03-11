@@ -10,8 +10,8 @@ interface MapImageProps {
   style?: object;
 }
 
-// CartoDB Voyager no-labels basemap — cleaner country borders, less road detail
-const TILE_URL = 'https://basemaps.cartocdn.com/rastertiles/voyager_nolabels';
+// CartoDB Positron no-labels — simple country outlines, no roads or terrain
+const TILE_URL = 'https://basemaps.cartocdn.com/light_nolabels';
 const TILE_SIZE = 256;
 
 function latLngToTile(lat: number, lng: number, zoom: number) {
