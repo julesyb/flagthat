@@ -72,6 +72,75 @@ const FLAG_TEMPLATES: FlagTemplate[] = [
   { name: 'seychelles', colorSlots: 3 },
 ];
 
+// Blocklist: template + sorted color combos that match real national flags
+const REAL_FLAG_COMBOS = new Set([
+  // japan/palau (circle layouts)
+  'japan:#CE1126,#FFFFFF',             // Japan
+  'japan:#003DA5,#FFCD00',             // Palau
+  'japan:#009739,#CE1126',             // Bangladesh
+  'palau:#CE1126,#FFFFFF',             // Japan
+  'palau:#003DA5,#FFCD00',             // Palau
+  'palau:#009739,#CE1126',             // Bangladesh
+  // france (vertical triband)
+  'france:#003DA5,#CE1126,#FFFFFF',    // France
+  'france:#009739,#CE1126,#FFFFFF',    // Italy, Mexico
+  'france:#009739,#FF6600,#FFFFFF',    // Ireland, Ivory Coast
+  'france:#000000,#CE1126,#FFCD00',    // Belgium
+  'france:#003DA5,#CE1126,#FFCD00',    // Chad, Romania
+  'france:#009739,#CE1126,#FFCD00',    // Mali, Guinea, Cameroon, Senegal
+  'france:#009739,#009739,#FFFFFF',    // Nigeria
+  'france:#CE1126,#CE1126,#FFFFFF',    // Peru
+  // germany (horizontal triband)
+  'germany:#000000,#CE1126,#FFCD00',   // Germany
+  'germany:#003DA5,#CE1126,#FFFFFF',   // Netherlands, Luxembourg, Croatia
+  'germany:#009739,#CE1126,#FFFFFF',   // Hungary, Bulgaria, Iran
+  'germany:#009739,#CE1126,#FFCD00',   // Lithuania, Bolivia, Ethiopia, Ghana
+  'germany:#000000,#CE1126,#FFFFFF',   // Yemen, Egypt, Iraq, Syria
+  'germany:#000000,#003DA5,#FFFFFF',   // Estonia
+  'germany:#000000,#009739,#CE1126',   // Afghanistan, Libya, Malawi
+  'germany:#003DA5,#009739,#FFFFFF',   // Sierra Leone, Uzbekistan
+  'germany:#003DA5,#009739,#FFCD00',   // Gabon
+  'germany:#003DA5,#CE1126,#FF6600',   // Armenia
+  'germany:#00A9E0,#00A9E0,#FFFFFF',   // Argentina
+  'germany:#CE1126,#CE1126,#FFFFFF',   // Austria, Latvia
+  // indonesia (horizontal bicolor)
+  'indonesia:#CE1126,#FFFFFF',          // Indonesia, Monaco, Poland
+  'indonesia:#003DA5,#FFCD00',          // Ukraine
+  'indonesia:#00A9E0,#FFCD00',          // Ukraine (sky blue)
+  'indonesia:#003DA5,#CE1126',          // Haiti, Liechtenstein
+  // sweden (nordic cross)
+  'sweden:#003DA5,#FFCD00',             // Sweden
+  'sweden:#CE1126,#FFFFFF',             // Denmark
+  'sweden:#003DA5,#FFFFFF',             // Finland
+  // norway (outlined nordic cross)
+  'norway:#003DA5,#CE1126,#FFFFFF',    // Norway, Iceland
+  // czech (hoist triangle + bicolor)
+  'czech:#003DA5,#CE1126,#FFFFFF',     // Czech Republic
+  'czech:#003DA5,#009739,#FFFFFF',     // Djibouti
+  // madagascar (vertical band + 2 horizontal)
+  'madagascar:#009739,#CE1126,#FFFFFF', // Madagascar
+  'madagascar:#009739,#CE1126,#FFCD00', // Benin
+  // thailand (5 symmetric stripes)
+  'thailand:#003DA5,#CE1126,#FFFFFF',  // Thailand, Costa Rica
+  // tanzania (diagonal band)
+  'tanzania:#000000,#009739,#00A9E0',  // Tanzania
+  'tanzania:#009739,#CE1126,#FFCD00',  // Republic of Congo
+  // jamaica (saltire)
+  'jamaica:#000000,#009739,#FFCD00',   // Jamaica
+  // cuba (stripes + triangle)
+  'cuba:#003DA5,#CE1126,#FFFFFF',      // Cuba
+  // panama (quartered)
+  'panama:#003DA5,#CE1126,#FFFFFF',    // Panama
+  // colombia (unequal horizontal)
+  'colombia:#003DA5,#CE1126,#FFCD00',  // Colombia, Ecuador, Venezuela
+  // chile (bicolor + canton)
+  'chile:#003DA5,#CE1126,#FFFFFF',     // Chile
+  // botswana (center stripe)
+  'botswana:#000000,#00A9E0,#FFFFFF',  // Botswana
+  // seychelles (radiating)
+  'seychelles:#003DA5,#009739,#CE1126', // Seychelles
+]);
+
 interface FakeFlag {
   templateIndex: number;
   colors: string[];
@@ -79,14 +148,28 @@ interface FakeFlag {
 }
 
 function generateFakeFlag(): FakeFlag {
-  const templateIndex = Math.floor(Math.random() * FLAG_TEMPLATES.length);
-  const template = FLAG_TEMPLATES[templateIndex];
-  const shuffled = shuffleArray([...IMPOSTOR_COLORS]);
-  const flagColors = shuffled.slice(0, template.colorSlots);
+  for (let attempt = 0; attempt < 20; attempt++) {
+    const templateIndex = Math.floor(Math.random() * FLAG_TEMPLATES.length);
+    const template = FLAG_TEMPLATES[templateIndex];
+    const shuffled = shuffleArray([...IMPOSTOR_COLORS]);
+    const flagColors = shuffled.slice(0, template.colorSlots);
+
+    const sortedColors = [...flagColors].sort().join(',');
+    const comboKey = `${template.name}:${sortedColors}`;
+    if (REAL_FLAG_COMBOS.has(comboKey)) continue;
+
+    return {
+      templateIndex,
+      colors: flagColors,
+      reason: 'Real flag layout recolored - does not match any real flag',
+    };
+  }
+
+  // Fallback: seychelles with purple + brown + teal (no real flag match)
   return {
-    templateIndex,
-    colors: flagColors,
-    reason: 'Real flag layout recolored with non-traditional colors',
+    templateIndex: FLAG_TEMPLATES.findIndex((t) => t.name === 'seychelles'),
+    colors: ['#502379', '#7B3F00', '#007A5E'],
+    reason: 'Real flag layout recolored - does not match any real flag',
   };
 }
 
