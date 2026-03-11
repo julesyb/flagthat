@@ -18,7 +18,7 @@ import { initAudio, hapticTap, hapticCorrect, hapticWrong, playCorrectSound, pla
 import { getStats, getDayStreak } from '../utils/storage';
 import { generateQuestions } from '../utils/gameEngine';
 import { RootStackParamList } from '../types/navigation';
-import { GameMode, UserStats, GameQuestion, CategoryId } from '../types';
+import { GameMode, UserStats, GameQuestion } from '../types';
 import { LightningIcon, CrosshairIcon, ChevronRightIcon, ClockIcon } from '../components/Icons';
 import FlagImage from '../components/FlagImage';
 import BottomNav from '../components/BottomNav';
@@ -31,13 +31,8 @@ const MODES: { key: GameMode; label: string }[] = [
 
 const QUESTION_COUNTS = [5, 10, 15, 20];
 
-const REGIONS: { id: CategoryId; label: string }[] = [
-  { id: 'europe', label: 'Europe' },
-  { id: 'asia', label: 'Asia' },
-  { id: 'africa', label: 'Africa' },
-  { id: 'americas', label: 'Americas' },
-  { id: 'oceania', label: 'Oceania' },
-];
+
+
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
@@ -213,13 +208,9 @@ export default function HomeScreen({ navigation }: Props) {
   };
 
   const hasPlayed = stats !== null && stats.totalGamesPlayed > 0;
-
-  // Region accuracy for progress bars
-  const regionProgress = REGIONS.map((r) => {
-    const cs = stats?.categoryStats[r.id];
-    const pct = cs && cs.total > 0 ? Math.round((cs.correct / cs.total) * 100) : 0;
-    return { ...r, pct };
-  });
+  const accuracy = stats && stats.totalAnswered > 0
+    ? Math.round((stats.totalCorrect / stats.totalAnswered) * 100)
+    : 0;
 
   return (
     <SafeAreaView style={s.container}>
@@ -354,19 +345,24 @@ export default function HomeScreen({ navigation }: Props) {
           </TouchableOpacity>
         </View>
 
-        {/* ── YOUR PROGRESS ── */}
+        {/* ── YOUR STATS ── */}
         {hasPlayed && (
-          <View style={s.progressCard}>
-            <Text style={[s.sectionLbl, { marginBottom: 12 }]}>Your progress</Text>
-            {regionProgress.map((r) => (
-              <View key={r.id} style={s.progRow}>
-                <Text style={s.progName}>{r.label}</Text>
-                <View style={s.progTrack}>
-                  <View style={[s.progFill, { width: `${r.pct}%` }]} />
-                </View>
-                <Text style={s.progPct}>{r.pct}%</Text>
+          <View style={s.statsWrap}>
+            <Text style={s.sectionLbl}>Your stats</Text>
+            <View style={s.statsRow}>
+              <View style={s.statTile}>
+                <Text style={s.statVal}>{stats!.bestStreak}</Text>
+                <Text style={s.statLbl}>Best Streak</Text>
               </View>
-            ))}
+              <View style={s.statTile}>
+                <Text style={s.statVal}>{stats!.bestTimeAttackScore}</Text>
+                <Text style={s.statLbl}>Best 60s</Text>
+              </View>
+              <View style={s.statTile}>
+                <Text style={s.statVal}>{accuracy}%</Text>
+                <Text style={s.statLbl}>Accuracy</Text>
+              </View>
+            </View>
           </View>
         )}
 
@@ -708,46 +704,36 @@ const s = StyleSheet.create({
     lineHeight: 16,
   },
 
-  // ── Progress card
-  progressCard: {
-    marginHorizontal: spacing.md,
+  // ── Stats row
+  statsWrap: {
+    paddingHorizontal: spacing.md,
     marginTop: 10,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    gap: 7,
+  },
+  statTile: {
+    flex: 1,
     backgroundColor: colors.white,
     borderRadius: borderRadius.lg,
     borderWidth: 1,
     borderColor: colors.rule,
-    padding: 16,
-  },
-  progRow: {
-    flexDirection: 'row',
+    padding: 14,
     alignItems: 'center',
-    gap: 10,
-    marginBottom: 9,
   },
-  progName: {
-    fontFamily: fontFamily.bodyMedium,
-    fontSize: 12,
-    color: colors.textTertiary,
-    width: 60,
-    flexShrink: 0,
-  },
-  progTrack: {
-    flex: 1,
-    height: 5,
-    backgroundColor: colors.surfaceSecondary,
-    borderRadius: 99,
-    overflow: 'hidden',
-  },
-  progFill: {
-    height: '100%',
-    backgroundColor: colors.ink,
-    borderRadius: 99,
-  },
-  progPct: {
-    fontFamily: fontFamily.uiLabel,
-    fontSize: 13,
+  statVal: {
+    fontFamily: fontFamily.display,
+    fontSize: 22,
     color: colors.ink,
-    width: 28,
-    textAlign: 'right',
+    lineHeight: 26,
+  },
+  statLbl: {
+    fontFamily: fontFamily.uiLabel,
+    fontSize: 9,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    color: colors.textTertiary,
+    marginTop: 4,
   },
 });
