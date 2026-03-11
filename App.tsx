@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet, Platform } from 'react-native';
 import { Analytics } from '@vercel/analytics/react';
 import { useFonts } from 'expo-font';
@@ -12,7 +12,7 @@ import {
   Barlow_500Medium,
   Barlow_600SemiBold,
 } from '@expo-google-fonts/barlow';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from './src/screens/HomeScreen';
 import GameSetupScreen from './src/screens/GameSetupScreen';
@@ -28,13 +28,17 @@ import FlagImpostorScreen from './src/screens/FlagImpostorScreen';
 import CapitalConnectionScreen from './src/screens/CapitalConnectionScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
 import ErrorBoundary from './src/components/ErrorBoundary';
+import SideNav from './src/components/SideNav';
 import { ChevronLeftIcon } from './src/components/Icons';
 import { RootStackParamList } from './src/types/navigation';
+import { TabId } from './src/components/BottomNav';
 import { colors, fontFamily, fontSize } from './src/utils/theme';
+import { useLayout } from './src/utils/useLayout';
 import { configureNotificationHandler, syncNotificationSchedule } from './src/utils/notifications';
 import { initLocale, t } from './src/utils/i18n';
 import { hasCompletedOnboarding } from './src/utils/storage';
 import { initializeAds, requestConsent } from './src/utils/ads';
+import { hapticTap } from './src/utils/feedback';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -73,6 +77,30 @@ const screenOptions = {
 // Configure notification display behavior at module level
 configureNotificationHandler();
 
+const TAB_ROUTES: Record<TabId, keyof RootStackParamList> = {
+  Play: 'Home',
+  Modes: 'GameSetup',
+  Stats: 'Stats',
+  Browse: 'Browse',
+};
+
+const navigationRef = createNavigationContainerRef<RootStackParamList>();
+
+function DesktopSideNavWrapper() {
+  const { isDesktopWeb } = useLayout();
+
+  const handleNavigate = useCallback((tab: TabId) => {
+    hapticTap();
+    const route = TAB_ROUTES[tab];
+    if (navigationRef.isReady()) {
+      navigationRef.navigate(route as never);
+    }
+  }, []);
+
+  if (!isDesktopWeb) return null;
+  return <SideNav onNavigate={handleNavigate} />;
+}
+
 function AppContent() {
   const [localeReady, setLocaleReady] = useState(false);
   const [initialRoute, setInitialRoute] = useState<keyof RootStackParamList>('Home');
@@ -97,90 +125,95 @@ function AppContent() {
   if (!localeReady) return null;
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator screenOptions={screenOptions} initialRouteName={initialRoute}>
-        <Stack.Screen
-          name="Onboarding"
-          component={OnboardingScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Home"
-          component={HomeScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="GameSetup"
-          component={GameSetupScreen}
-          options={({ navigation }) => ({
-            title: t('app.gameModes'),
-            headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
-          })}
-        />
-        <Stack.Screen
-          name="Game"
-          component={GameScreen}
-          options={{ headerShown: false, gestureEnabled: false }}
-        />
-        <Stack.Screen
-          name="FlagFlash"
-          component={FlagFlashScreen}
-          options={{ headerShown: false, gestureEnabled: false }}
-        />
-        <Stack.Screen
-          name="FlagPuzzle"
-          component={FlagPuzzleScreen}
-          options={{ headerShown: false, gestureEnabled: false }}
-        />
-        <Stack.Screen
-          name="Neighbors"
-          component={NeighborsScreen}
-          options={{ headerShown: false, gestureEnabled: false }}
-        />
-        <Stack.Screen
-          name="FlagImpostor"
-          component={FlagImpostorScreen}
-          options={{ headerShown: false, gestureEnabled: false }}
-        />
-        <Stack.Screen
-          name="CapitalConnection"
-          component={CapitalConnectionScreen}
-          options={{ headerShown: false, gestureEnabled: false }}
-        />
-        <Stack.Screen
-          name="Results"
-          component={ResultsScreen}
-          options={({ navigation }) => ({
-            title: t('app.results'),
-            headerLeft: () => <BackButton onPress={() => navigation.navigate('Home')} />,
-            gestureEnabled: false,
-          })}
-        />
-        <Stack.Screen
-          name="Stats"
-          component={StatsScreen}
-          options={({ navigation }) => ({
-            title: t('app.statistics'),
-            headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
-          })}
-        />
-        <Stack.Screen
-          name="Settings"
-          component={SettingsScreen}
-          options={({ navigation }) => ({
-            title: t('app.settings'),
-            headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
-          })}
-        />
-        <Stack.Screen
-          name="Browse"
-          component={BrowseScreen}
-          options={({ navigation }) => ({
-            title: t('app.browseFlags'),
-            headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
-          })}
-        />
-      </Stack.Navigator>
+    <NavigationContainer ref={navigationRef}>
+      <View style={appStyles.shell}>
+        <DesktopSideNavWrapper />
+        <View style={appStyles.content}>
+          <Stack.Navigator screenOptions={screenOptions} initialRouteName={initialRoute}>
+            <Stack.Screen
+              name="Onboarding"
+              component={OnboardingScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="Home"
+              component={HomeScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="GameSetup"
+              component={GameSetupScreen}
+              options={({ navigation }) => ({
+                title: t('app.gameModes'),
+                headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
+              })}
+            />
+            <Stack.Screen
+              name="Game"
+              component={GameScreen}
+              options={{ headerShown: false, gestureEnabled: false }}
+            />
+            <Stack.Screen
+              name="FlagFlash"
+              component={FlagFlashScreen}
+              options={{ headerShown: false, gestureEnabled: false }}
+            />
+            <Stack.Screen
+              name="FlagPuzzle"
+              component={FlagPuzzleScreen}
+              options={{ headerShown: false, gestureEnabled: false }}
+            />
+            <Stack.Screen
+              name="Neighbors"
+              component={NeighborsScreen}
+              options={{ headerShown: false, gestureEnabled: false }}
+            />
+            <Stack.Screen
+              name="FlagImpostor"
+              component={FlagImpostorScreen}
+              options={{ headerShown: false, gestureEnabled: false }}
+            />
+            <Stack.Screen
+              name="CapitalConnection"
+              component={CapitalConnectionScreen}
+              options={{ headerShown: false, gestureEnabled: false }}
+            />
+            <Stack.Screen
+              name="Results"
+              component={ResultsScreen}
+              options={({ navigation }) => ({
+                title: t('app.results'),
+                headerLeft: () => <BackButton onPress={() => navigation.navigate('Home')} />,
+                gestureEnabled: false,
+              })}
+            />
+            <Stack.Screen
+              name="Stats"
+              component={StatsScreen}
+              options={({ navigation }) => ({
+                title: t('app.statistics'),
+                headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
+              })}
+            />
+            <Stack.Screen
+              name="Settings"
+              component={SettingsScreen}
+              options={({ navigation }) => ({
+                title: t('app.settings'),
+                headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
+              })}
+            />
+            <Stack.Screen
+              name="Browse"
+              component={BrowseScreen}
+              options={({ navigation }) => ({
+                title: t('app.browseFlags'),
+                headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
+              })}
+            />
+          </Stack.Navigator>
+        </View>
+      </View>
     </NavigationContainer>
   );
 }
@@ -211,6 +244,16 @@ export default function App() {
     </ErrorBoundary>
   );
 }
+
+const appStyles = StyleSheet.create({
+  shell: {
+    flex: 1,
+    flexDirection: 'row',
+  },
+  content: {
+    flex: 1,
+  },
+});
 
 const loadingStyles = StyleSheet.create({
   container: {

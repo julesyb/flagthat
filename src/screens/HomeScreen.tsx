@@ -12,7 +12,8 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { colors, fontFamily, fontSize, spacing, borderRadius, shadows } from '../utils/theme';
+import { colors, fontFamily, fontSize, spacing, borderRadius, shadows, layout } from '../utils/theme';
+import { useLayout } from '../utils/useLayout';
 import { getTotalFlagCount, getCategoryCount } from '../data';
 import { initAudio, hapticTap, hapticCorrect, hapticWrong, playWrongSound, setSoundsEnabled, setHapticsEnabled } from '../utils/feedback';
 import { getStats, getDayStreak, getDailyChallenge, DailyChallengeData, getSettings, getMissedFlagIds, getBaselineData, BaselineData } from '../utils/storage';
@@ -170,6 +171,7 @@ function FlagTeaser() {
 
 export default function HomeScreen({ navigation }: Props) {
   const onNavigate = useNavTabs();
+  const { isDesktop } = useLayout();
   const totalFlags = getTotalFlagCount();
   const [mode, setMode] = useState<GameMode>('medium');
   const [questionCount, setQuestionCount] = useState(10);
@@ -430,8 +432,9 @@ export default function HomeScreen({ navigation }: Props) {
         <View style={s.sectionWrap}>
           <Text style={s.sectionLbl}>{t('home.gameModes')}</Text>
 
+          <View style={isDesktop ? s.modeGrid : undefined}>
           <TouchableOpacity
-            style={s.modeCard}
+            style={[s.modeCard, isDesktop && s.modeCardDesktop]}
             activeOpacity={0.85}
             onPress={() => {
               hapticTap();
@@ -451,7 +454,7 @@ export default function HomeScreen({ navigation }: Props) {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={s.modeCard}
+            style={[s.modeCard, isDesktop && s.modeCardDesktop]}
             activeOpacity={0.85}
             onPress={() => {
               hapticTap();
@@ -471,7 +474,7 @@ export default function HomeScreen({ navigation }: Props) {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={s.modeCard}
+            style={[s.modeCard, isDesktop && s.modeCardDesktop]}
             activeOpacity={0.85}
             onPress={() => {
               hapticTap();
@@ -491,7 +494,7 @@ export default function HomeScreen({ navigation }: Props) {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={s.modeCard}
+            style={[s.modeCard, isDesktop && s.modeCardDesktop]}
             activeOpacity={0.85}
             onPress={() => {
               hapticTap();
@@ -512,7 +515,7 @@ export default function HomeScreen({ navigation }: Props) {
 
           {weakFlagCount > 0 && (
             <TouchableOpacity
-              style={[s.modeCard, { borderColor: colors.accent, borderWidth: 1.5 }]}
+              style={[s.modeCard, isDesktop && s.modeCardDesktop, { borderColor: colors.accent, borderWidth: 1.5 }]}
               activeOpacity={0.85}
               onPress={() => {
                 hapticTap();
@@ -531,6 +534,7 @@ export default function HomeScreen({ navigation }: Props) {
               <ChevronRightIcon size={18} color={colors.accent} />
             </TouchableOpacity>
           )}
+          </View>
         </View>
 
         {/* ── SUPPORT ── */}
@@ -970,6 +974,17 @@ const s = StyleSheet.create({
     textTransform: 'uppercase',
     color: colors.textTertiary,
     marginBottom: spacing.sm,
+  },
+  modeGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    marginBottom: -spacing.sm, // offset modeCard marginBottom in grid mode
+  },
+  modeCardDesktop: {
+    flexBasis: '48%',
+    flexGrow: 1,
+    marginBottom: 0,
   },
   modeCard: {
     flexDirection: 'row',

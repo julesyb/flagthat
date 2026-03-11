@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { colors, fontFamily, fontSize, spacing, layout } from '../utils/theme';
 import { LightningIcon, CrosshairIcon, BarChartIcon, GlobeIcon } from './Icons';
+import { useLayout } from '../utils/useLayout';
 import { t } from '../utils/i18n';
 
 export type TabId = 'Play' | 'Modes' | 'Stats' | 'Browse';
@@ -26,6 +27,11 @@ const TAB_KEYS: { id: TabId; labelKey: string }[] = [
 ];
 
 export default function BottomNav({ activeTab, onNavigate }: BottomNavProps) {
+  const { isDesktopWeb } = useLayout();
+
+  // On desktop web, SideNav handles navigation instead
+  if (isDesktopWeb) return null;
+
   return (
     <View style={styles.container} accessibilityRole="tablist">
       <View style={styles.inner}>

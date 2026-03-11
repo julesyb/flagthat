@@ -13,7 +13,7 @@ import {
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
-import { colors, spacing, fontFamily, fontSize, borderRadius } from '../utils/theme';
+import { colors, spacing, fontFamily, fontSize, borderRadius, layout } from '../utils/theme';
 import { UserStats, GameMode, CategoryId } from '../types';
 import { getStats, getFlagStats, FlagStats, getDayStreak, getBadgeData, getMissedFlagIds, BadgeData, getSupportData, getGameHistory, GameHistoryEntry } from '../utils/storage';
 import { getAllFlags, getTotalFlagCount } from '../data';
@@ -23,6 +23,7 @@ import { FlagImageSmall } from '../components/FlagImage';
 import BottomNav from '../components/BottomNav';
 import ScreenContainer from '../components/ScreenContainer';
 import { useNavTabs } from '../hooks/useNavTabs';
+import { useLayout } from '../utils/useLayout';
 import { evaluateBadges, BADGES, TIER_COLORS, BadgeIcon, BadgeCheckContext, getBadgeProgress } from '../utils/badges';
 import { FlagIcon, GlobeIcon, CheckIcon, PlayIcon, LightningIcon, CalendarIcon, ClockIcon, CrosshairIcon, LinkIcon, HeartIcon, ChevronRightIcon, BarChartIcon } from '../components/Icons';
 
@@ -44,6 +45,7 @@ const REGIONS: CategoryId[] = ['africa', 'asia', 'europe', 'americas', 'oceania'
 export default function StatsScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const onNavigate = useNavTabs();
+  const { isDesktop } = useLayout();
   const [stats, setStats] = useState<UserStats | null>(null);
   const [flagStats, setFlagStats] = useState<FlagStats>({});
   const [dayStreak, setDayStreak] = useState(0);
@@ -559,8 +561,9 @@ export default function StatsScreen() {
               const earned = earnedIds.has(badge.id);
               const tierColor = TIER_COLORS[badge.tier];
               const progress = !earned && badgeCtx ? getBadgeProgress(badge, badgeCtx) : null;
+              const badgeWidth = isDesktop ? '31%' : '48%';
               return (
-                <View key={badge.id} style={[s.badgeCard, !earned && s.badgeCardLocked]}>
+                <View key={badge.id} style={[s.badgeCard, { width: badgeWidth as unknown as number }, !earned && s.badgeCardLocked]}>
                   <View style={[s.badgeIconWrap, { backgroundColor: earned ? tierColor + '18' : colors.surfaceSecondary }]}>
                     {renderBadgeIcon(badge.icon, earned, tierColor)}
                   </View>
@@ -1002,7 +1005,6 @@ const s = StyleSheet.create({
     gap: 8,
   },
   badgeCard: {
-    width: '48%',
     backgroundColor: colors.surface,
     borderRadius: borderRadius.md,
     borderWidth: 1,

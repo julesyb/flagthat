@@ -21,6 +21,7 @@ import { translateName, flagName } from '../data/countryNames';
 import BottomNav from '../components/BottomNav';
 import ScreenContainer from '../components/ScreenContainer';
 import { useNavTabs } from '../hooks/useNavTabs';
+import { useLayout } from '../utils/useLayout';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Browse'>;
 
@@ -37,6 +38,8 @@ const PRACTICE_MORE = 'Practice More';
 
 export default function BrowseScreen({ route, navigation }: Props) {
   const onNavigate = useNavTabs();
+  const { isDesktop } = useLayout();
+  const numColumns = isDesktop ? 2 : 1;
   const initialRegion = route.params?.region ?? 'All';
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState(initialRegion);
@@ -149,9 +152,12 @@ export default function BrowseScreen({ route, navigation }: Props) {
       </Text>
 
       <FlatList
+        key={numColumns}
         data={filteredFlags}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
+        numColumns={numColumns}
+        columnWrapperStyle={numColumns > 1 ? styles.columnWrapper : undefined}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
         style={{ flex: 1 }}
@@ -219,7 +225,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.xxl,
   },
+  columnWrapper: {
+    gap: spacing.sm,
+  },
   flagItem: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.surfaceSecondary,

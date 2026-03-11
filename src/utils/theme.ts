@@ -335,11 +335,13 @@ export const nav = {
 // ---- Responsive layout ----
 export const layout = {
   maxContentWidth: 600,
+  maxContentWidthDesktop: 900,
   maxGameWidth: 600,
   breakpoints: {
     tablet: 768,
     desktop: 1024,
   },
+  sidebarWidth: 220,
   headerHeight: 56,
   gameTopBarHeight: 48,
 };
