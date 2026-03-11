@@ -45,11 +45,12 @@ export default function OnboardingScreen({ navigation }: Props) {
 
   const handleRegionPress = (region: BaselineRegionId) => {
     hapticTap();
+    const count = getCategoryCount(region as CategoryId);
     navigation.navigate('Game', {
       config: {
         mode: 'baseline',
         category: region as CategoryId,
-        questionCount: 10,
+        questionCount: count,
         displayMode: 'flag',
       },
     });

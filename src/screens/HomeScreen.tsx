@@ -15,11 +15,11 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, fontFamily, fontSize, spacing, borderRadius } from '../utils/theme';
 import { getTotalFlagCount } from '../data';
 import { initAudio, hapticTap, hapticCorrect, hapticWrong, playWrongSound, setSoundsEnabled, setHapticsEnabled } from '../utils/feedback';
-import { getStats, getDayStreak, getDailyChallenge, DailyChallengeData, getSettings, getMissedFlagIds } from '../utils/storage';
+import { getStats, getDayStreak, getDailyChallenge, DailyChallengeData, getSettings, getMissedFlagIds, getBaselineData, BaselineData } from '../utils/storage';
 import { generateQuestions, getDailyNumber } from '../utils/gameEngine';
 import { RootStackParamList } from '../types/navigation';
 import { GameMode, UserStats, GameQuestion } from '../types';
-import { PlayIcon, ChevronRightIcon, ClockIcon, UsersIcon, EyeIcon, CalendarIcon, CrosshairIcon, LightningIcon, GearIcon } from '../components/Icons';
+import { PlayIcon, ChevronRightIcon, ClockIcon, UsersIcon, EyeIcon, CalendarIcon, CrosshairIcon, LightningIcon, GearIcon, CheckIcon } from '../components/Icons';
 import FlagImage from '../components/FlagImage';
 import BottomNav from '../components/BottomNav';
 import { t } from '../utils/i18n';
@@ -175,6 +175,7 @@ export default function HomeScreen({ navigation }: Props) {
   const [dailyDone, setDailyDone] = useState<DailyChallengeData | null>(null);
   const [weakFlagCount, setWeakFlagCount] = useState(0);
   const [autocomplete, setAutocomplete] = useState(false);
+  const [baseline, setBaseline] = useState<BaselineData | null>(null);
 
   useEffect(() => {
     initAudio();
@@ -190,6 +191,7 @@ export default function HomeScreen({ navigation }: Props) {
       getDayStreak().then(setDayStreak);
       getDailyChallenge().then(setDailyDone);
       getMissedFlagIds().then((ids) => setWeakFlagCount(ids.length));
+      getBaselineData().then(setBaseline);
       setTeaserKey((k) => k + 1);
     }, []),
   );
@@ -200,6 +202,10 @@ export default function HomeScreen({ navigation }: Props) {
       config: { mode, category: 'all', questionCount: questionCountAll ? totalFlags : questionCount, displayMode: 'flag', ...(mode === 'hard' && { autocomplete }) },
     });
   };
+
+  const ONBOARDING_REGIONS = ['africa', 'asia', 'europe', 'americas', 'oceania'] as const;
+  const onboardingComplete = baseline ? (baseline.completedAt !== null || baseline.skipped === true) : true;
+  const onboardingCount = baseline ? ONBOARDING_REGIONS.filter((r) => baseline.regions[r]).length : 0;
 
   const hasPlayed = stats !== null && stats.totalGamesPlayed > 0;
   const accuracy = stats && stats.totalAnswered > 0
@@ -239,6 +245,47 @@ export default function HomeScreen({ navigation }: Props) {
             <GearIcon size={20} color={colors.textTertiary} />
           </TouchableOpacity>
         </View>
+
+        {/* ── ONBOARDING PROGRESS ── */}
+        {!onboardingComplete && (
+          <TouchableOpacity
+            style={s.onboardingCard}
+            activeOpacity={0.85}
+            onPress={() => {
+              hapticTap();
+              navigation.navigate('Onboarding');
+            }}
+          >
+            <View style={s.onboardingTop}>
+              <View style={s.onboardingInfo}>
+                <Text style={s.onboardingTitle}>{t('onboarding.subtitle')}</Text>
+                <Text style={s.onboardingSub}>
+                  {t('home.onboardingProgress', { completed: onboardingCount, total: ONBOARDING_REGIONS.length })}
+                </Text>
+              </View>
+              <View style={s.onboardingBtn}>
+                <Text style={s.onboardingBtnText}>{t('home.continueOnboarding')}</Text>
+                <ChevronRightIcon size={14} color={colors.white} />
+              </View>
+            </View>
+            <View style={s.onboardingBarTrack}>
+              <View style={[s.onboardingBarFill, { width: `${(onboardingCount / ONBOARDING_REGIONS.length) * 100}%` }]} />
+            </View>
+            <View style={s.onboardingDots}>
+              {ONBOARDING_REGIONS.map((r) => (
+                <View key={r} style={s.onboardingDotWrap}>
+                  {baseline?.regions[r] ? (
+                    <View style={s.onboardingDotDone}>
+                      <CheckIcon size={10} color={colors.white} />
+                    </View>
+                  ) : (
+                    <View style={s.onboardingDotPending} />
+                  )}
+                </View>
+              ))}
+            </View>
+          </TouchableOpacity>
+        )}
 
         {/* ── DAILY CHALLENGE ── */}
         <TouchableOpacity
@@ -577,6 +624,87 @@ const s = StyleSheet.create({
     textTransform: 'uppercase',
     color: colors.textTertiary,
     marginTop: spacing.xxs,
+  },
+
+  // ── Onboarding progress
+  onboardingCard: {
+    backgroundColor: colors.ink,
+    borderRadius: borderRadius.lg,
+    marginHorizontal: spacing.md,
+    marginTop: spacing.md,
+    padding: spacing.md,
+  },
+  onboardingTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: spacing.sm,
+  },
+  onboardingInfo: {
+    flex: 1,
+    marginRight: spacing.sm,
+  },
+  onboardingTitle: {
+    fontFamily: fontFamily.bodyBold,
+    fontSize: fontSize.body,
+    color: colors.white,
+    marginBottom: spacing.xxs,
+  },
+  onboardingSub: {
+    fontFamily: fontFamily.body,
+    fontSize: fontSize.caption,
+    color: colors.whiteAlpha45,
+  },
+  onboardingBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    backgroundColor: colors.accent,
+    borderRadius: borderRadius.sm,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+  },
+  onboardingBtnText: {
+    fontFamily: fontFamily.uiLabel,
+    fontSize: fontSize.caption,
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+    color: colors.white,
+  },
+  onboardingBarTrack: {
+    height: 4,
+    backgroundColor: colors.darkBorder,
+    borderRadius: 2,
+    overflow: 'hidden',
+    marginBottom: spacing.sm,
+  },
+  onboardingBarFill: {
+    height: 4,
+    backgroundColor: colors.success,
+    borderRadius: 2,
+  },
+  onboardingDots: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.xs,
+  },
+  onboardingDotWrap: {
+    alignItems: 'center',
+  },
+  onboardingDotDone: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: colors.success,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  onboardingDotPending: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: colors.darkBorder,
+    marginVertical: 5,
   },
 
   // ── Daily Challenge

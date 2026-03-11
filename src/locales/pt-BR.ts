@@ -70,6 +70,8 @@ const ptBR: typeof en = {
     bestStreak: 'Melhor sequ\u00eancia',
     best60s: 'Melhor 60s',
     accuracy: 'Precis\u00e3o',
+    onboardingProgress: '{completed} de {total} regi\u00f5es',
+    continueOnboarding: 'Continuar',
   },
 
   setup: {
@@ -283,7 +285,7 @@ const ptBR: typeof en = {
 
   onboarding: {
     subtitle: 'Vamos ver seu n\u00edvel',
-    regionTest: 'Quiz de 10 bandeiras',
+    regionTest: 'Quiz de bandeiras',
     flagCount: '{count} bandeiras',
     completed: 'Feito',
     startPlaying: 'Come\u00e7ar a jogar',

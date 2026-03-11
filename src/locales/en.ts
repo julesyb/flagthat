@@ -72,6 +72,8 @@ const en = {
     bestStreak: 'Best Streak',
     best60s: 'Best 60s',
     accuracy: 'Accuracy',
+    onboardingProgress: '{completed} of {total} regions',
+    continueOnboarding: 'Continue',
   },
 
   // ─── Game Setup ──────────────────────────────────────────
@@ -299,7 +301,7 @@ const en = {
   // ─── Onboarding ───────────────────────────────────────────
   onboarding: {
     subtitle: "Let's see where you stand",
-    regionTest: '10-flag quiz',
+    regionTest: 'Flag quiz',
     flagCount: '{count} flags',
     completed: 'Done',
     startPlaying: 'Start Playing',

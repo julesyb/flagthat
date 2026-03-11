@@ -70,6 +70,8 @@ const fr: typeof en = {
     bestStreak: 'Meilleure s\u00e9rie',
     best60s: 'Meilleur 60s',
     accuracy: 'Pr\u00e9cision',
+    onboardingProgress: '{completed} sur {total} r\u00e9gions',
+    continueOnboarding: 'Continuer',
   },
 
   setup: {
@@ -283,7 +285,7 @@ const fr: typeof en = {
 
   onboarding: {
     subtitle: 'Voyons o\u00f9 vous en \u00eates',
-    regionTest: 'Quiz de 10 drapeaux',
+    regionTest: 'Quiz de drapeaux',
     flagCount: '{count} drapeaux',
     completed: 'Termin\u00e9',
     startPlaying: 'Commencer \u00e0 jouer',

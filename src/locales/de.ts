@@ -70,6 +70,8 @@ const de: typeof en = {
     bestStreak: 'Beste Serie',
     best60s: 'Beste 60s',
     accuracy: 'Genauigkeit',
+    onboardingProgress: '{completed} von {total} Regionen',
+    continueOnboarding: 'Weiter',
   },
 
   setup: {
@@ -283,7 +285,7 @@ const de: typeof en = {
 
   onboarding: {
     subtitle: 'Mal sehen, wo du stehst',
-    regionTest: '10-Flaggen-Quiz',
+    regionTest: 'Flaggen-Quiz',
     flagCount: '{count} Flaggen',
     completed: 'Fertig',
     startPlaying: 'Losspielen',
