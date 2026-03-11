@@ -1,6 +1,6 @@
 // =====================
 // BRAND GUIDELINES - Flag That
-// Voice: Intelligent. Editorial. Authoritative.
+// Voice: Playful. Confident. Nostalgic-modern.
 //
 // Typography: Two font families only.
 //   LibreBaskerville - display / editorial headings (Flag That wordmark, big numbers)
@@ -13,26 +13,31 @@
 // - Accent red appears maximum twice per screen.
 // - No emoji anywhere in the UI. Use SVG icons from Icons.tsx.
 // - No em dashes in user-facing text. Use hyphens or commas.
+//
+// Palette: Retro-warm (90s nostalgia meets 2026 polish).
+//   Deep midnight navy, warm cream surfaces, coral-red accent,
+//   teal/gold/electric-blue pops for variety.
 // =====================
 
 // ---- Single source of truth for every color value ----
 const palette = {
-  ink: '#111827',
-  inkLight: '#1F2937',
-  red: '#E5271C',
-  redLight: '#EF4444',
-  slate: '#4B5563',
-  muted: '#9CA3AF',
-  rule: '#E5E7EB',
-  rule2: '#D1D5DB',
-  paper: '#F5F6F8',
-  paperDark: '#EDEEF1',
+  ink: '#1A1A2E',         // Deep midnight navy (retro cartridge vibes)
+  inkLight: '#2A2A45',    // Lighter midnight
+  red: '#E84855',         // Warm coral-red (friendlier, more playful)
+  redLight: '#FF6B6B',    // Light coral
+  slate: '#4E5172',       // Indigo-slate (warm secondary text)
+  muted: '#6F7194',       // Muted lavender (AA on cream, 4.7:1)
+  rule: '#E6DDD5',        // Warm rule line
+  rule2: '#D6CCC3',       // Warmer rule
+  paper: '#FFF7EE',       // Warm cream background
+  paperDark: '#EFE6DC',   // Darker cream
   white: '#FFFFFF',
   black: '#000000',
-  green: '#16A34A',
-  crimson: '#DC2626',
-  amber: '#D97706',
-  blue: '#2563EB',
+  green: '#16A34A',       // Success green (functional, unchanged)
+  crimson: '#DC2626',     // Error red (functional, unchanged)
+  amber: '#E8A317',       // Warm gold
+  blue: '#4361EE',        // Electric retro blue
+  teal: '#00B4A6',        // 90s teal (icons, graphical accents)
 };
 
 export const colors = {
@@ -45,6 +50,9 @@ export const colors = {
   paper: palette.paper,
   white: palette.white,
   black: palette.black,
+  teal: palette.teal,
+  blue: palette.blue,
+  amber: palette.amber,
 
   // Semantic roles (all reference palette)
   primary: palette.ink,
@@ -62,8 +70,8 @@ export const colors = {
   textTertiary: palette.muted,
   border: palette.rule,
   borderLight: palette.paperDark,
-  shadow: 'rgba(17, 24, 39, 0.06)',
-  overlay: 'rgba(17, 24, 39, 0.5)',
+  shadow: 'rgba(26, 26, 46, 0.06)',
+  overlay: 'rgba(26, 26, 46, 0.5)',
 
   // Grade colors
   gradeS: palette.amber,
@@ -94,11 +102,11 @@ export const colors = {
   // Light feedback backgrounds (on white/paper)
   successBg: 'rgba(22, 163, 74, 0.08)',
   errorBg: 'rgba(220, 38, 38, 0.08)',
-  warningBg: 'rgba(217, 119, 6, 0.08)',
-  accentBg: 'rgba(229, 39, 28, 0.06)',
+  warningBg: 'rgba(232, 163, 23, 0.08)',
+  accentBg: 'rgba(232, 72, 85, 0.06)',
 
   // Map
-  mapBackground: '#f2f2f0',
+  mapBackground: '#f5f0e8',
   mapZoomSurface: 'rgba(255,255,255,0.92)',
 };
 

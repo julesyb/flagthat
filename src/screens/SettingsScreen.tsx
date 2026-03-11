@@ -404,7 +404,7 @@ const styles = StyleSheet.create({
   langOptionText: {
     ...typography.body,
     color: colors.text,
-    fontSize: 15,
+    fontSize: fontSize.body,
   },
   langOptionActive: {
     fontFamily: fontFamily.bodyBold,
