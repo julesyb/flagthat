@@ -444,8 +444,11 @@ export default function ResultsScreen({ route, navigation }: Props) {
           : t('results.playAgain');
 
   const progressPct = totalFlags > 0 ? Math.round((countriesSeen / totalFlags) * 100) : 0;
+  const dataLoaded = overallStats !== null;
   const accDiff = prevAccuracy !== null ? accuracy - prevAccuracy : null;
-  const accInsight = prevAccuracy === null
+  const accInsight = !dataLoaded
+    ? null
+    : prevAccuracy === null
     ? t('results.firstGame')
     : accDiff !== null && accDiff > 0 ? t('results.aboveAverage', { pct: accDiff })
     : accDiff !== null && accDiff < 0 ? t('results.belowAverage', { pct: Math.abs(accDiff) })
