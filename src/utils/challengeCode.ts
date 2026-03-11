@@ -31,6 +31,10 @@ const INDEX_MODE = new Map(CHALLENGE_MODES.map((m, i) => [i, m]));
  * V2 format: "FT2:" + base64(compact pipe-delimited string)
  */
 export function encodeChallenge(data: ChallengeData): string {
+  // V2 format requires all flag IDs to be exactly 2 chars (ISO 3166-1 alpha-2)
+  if (data.flagIds.some((id) => id.length !== 2)) {
+    throw new Error('All flag IDs must be exactly 2 characters for V2 encoding');
+  }
   const modeIdx = MODE_INDEX.get(data.mode) ?? 0;
   const flags = data.flagIds.join('');
   const bits = data.hostResults.map((r) => r.correct ? '1' : '0').join('');
@@ -44,8 +48,9 @@ export function encodeChallenge(data: ChallengeData): string {
 /**
  * Decode a challenge code string back into ChallengeData.
  * Supports both V2 (FT2:) and legacy V1 (FT:) formats.
+ * Returns 'unsupported' if the code uses a newer format version.
  */
-export function decodeChallenge(code: string): ChallengeData | null {
+export function decodeChallenge(code: string): ChallengeData | null | 'unsupported' {
   try {
     const trimmed = code.trim();
     if (trimmed.startsWith('FT2:')) {
@@ -53,6 +58,10 @@ export function decodeChallenge(code: string): ChallengeData | null {
     }
     if (trimmed.startsWith('FT:')) {
       return decodeV1(trimmed.slice(3));
+    }
+    // Detect future format versions (FT3:, FT4:, etc.)
+    if (/^FT\d+:/.test(trimmed)) {
+      return 'unsupported';
     }
     return null;
   } catch {

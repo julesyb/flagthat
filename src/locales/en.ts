@@ -296,6 +296,8 @@ const en = {
     play: 'Play',
     invalidCodeTitle: 'Invalid code',
     invalidCode: 'This challenge code is not valid. Check that you pasted the full code.',
+    unsupportedCode: 'This code was created with a newer version of Flag That. Update the app to play this challenge.',
+    unsupportedCodeShort: 'Update required',
     challengeFriend: 'Challenge a Friend',
     challengeDesc: 'Share your game so a friend can try the same flags',
     enterName: 'Your name',

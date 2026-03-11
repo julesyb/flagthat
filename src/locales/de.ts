@@ -370,6 +370,8 @@ const de: typeof en = {
     play: 'Spielen',
     invalidCodeTitle: 'Ung\u00fcltiger Code',
     invalidCode: 'Dieser Challenge-Code ist nicht g\u00fcltig. Pr\u00fcfe, ob du den vollst\u00e4ndigen Code eingef\u00fcgt hast.',
+    unsupportedCode: 'Dieser Code wurde mit einer neueren Version von Flag That erstellt. Aktualisiere die App, um diese Challenge zu spielen.',
+    unsupportedCodeShort: 'Update erforderlich',
     challengeFriend: 'Freund herausfordern',
     challengeDesc: 'Teile dein Spiel, damit ein Freund dieselben Flaggen probieren kann',
     enterName: 'Dein Name',

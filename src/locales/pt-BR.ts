@@ -370,6 +370,8 @@ const ptBR: typeof en = {
     play: 'Jogar',
     invalidCodeTitle: 'C\u00f3digo inv\u00e1lido',
     invalidCode: 'Este c\u00f3digo de desafio n\u00e3o \u00e9 v\u00e1lido. Verifique se voc\u00ea colou o c\u00f3digo completo.',
+    unsupportedCode: 'Este c\u00f3digo foi criado com uma vers\u00e3o mais nova do Flag That. Atualize o app para jogar este desafio.',
+    unsupportedCodeShort: 'Atualiza\u00e7\u00e3o necess\u00e1ria',
     challengeFriend: 'Desafiar um amigo',
     challengeDesc: 'Compartilhe sua partida para que um amigo tente as mesmas bandeiras',
     enterName: 'Seu nome',

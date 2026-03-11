@@ -16,7 +16,7 @@ import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadiu
 import { RootStackParamList } from '../types/navigation';
 import { decodeChallenge, buildChallengeQuestions, getScreenForMode, ChallengeData } from '../utils/challengeCode';
 import { hapticTap, hapticWrong } from '../utils/feedback';
-import { UsersIcon, CheckIcon } from '../components/Icons';
+import { UsersIcon, CheckIcon, CrossIcon } from '../components/Icons';
 import ScreenContainer from '../components/ScreenContainer';
 import BottomNav from '../components/BottomNav';
 import { useNavTabs } from '../hooks/useNavTabs';
@@ -30,60 +30,66 @@ export default function JoinChallengeScreen({ navigation }: Props) {
   const [code, setCode] = useState('');
   const [name, setName] = useState('');
   const [debouncedCode, setDebouncedCode] = useState('');
-  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mountedRef = useRef(true);
+
+  // Track mount state to prevent setState after unmount
+  useEffect(() => {
+    return () => { mountedRef.current = false; };
+  }, []);
 
   // Load saved name on mount
   useEffect(() => {
     getChallengeName().then((saved) => {
-      if (saved) setName(saved);
+      if (saved && mountedRef.current) setName(saved);
     });
   }, []);
 
   // Debounce code changes (300ms)
   useEffect(() => {
-    if (debounceTimer.current) clearTimeout(debounceTimer.current);
-    debounceTimer.current = setTimeout(() => {
-      setDebouncedCode(code);
+    const timer = setTimeout(() => {
+      if (mountedRef.current) setDebouncedCode(code);
     }, 300);
-    return () => {
-      if (debounceTimer.current) clearTimeout(debounceTimer.current);
-    };
+    return () => clearTimeout(timer);
   }, [code]);
 
   // Decode challenge from debounced code for live preview
-  const preview: ChallengeData | null = useMemo(() => {
+  const decoded = useMemo(() => {
     const trimmed = debouncedCode.trim();
     if (trimmed.length === 0) return null;
     return decodeChallenge(trimmed);
   }, [debouncedCode]);
 
+  const preview: ChallengeData | null = decoded && decoded !== 'unsupported' ? decoded : null;
+  const isUnsupported = decoded === 'unsupported';
+
   const canPlay = code.trim().length > 0 && name.trim().length > 0;
+
+  const showError = (msg: string) => {
+    hapticWrong();
+    if (Platform.OS === 'web') {
+      alert(msg);
+    } else {
+      Alert.alert(t('challenge.invalidCodeTitle'), msg);
+    }
+  };
 
   const handlePlay = () => {
     Keyboard.dismiss();
     hapticTap();
 
     const challenge = decodeChallenge(code.trim());
+    if (challenge === 'unsupported') {
+      showError(t('challenge.unsupportedCode'));
+      return;
+    }
     if (!challenge) {
-      hapticWrong();
-      const msg = t('challenge.invalidCode');
-      if (Platform.OS === 'web') {
-        alert(msg);
-      } else {
-        Alert.alert(t('challenge.invalidCodeTitle'), msg);
-      }
+      showError(t('challenge.invalidCode'));
       return;
     }
 
     const questions = buildChallengeQuestions(challenge.flagIds, challenge.mode);
     if (!questions) {
-      hapticWrong();
-      const msg = t('challenge.invalidCode');
-      if (Platform.OS === 'web') {
-        alert(msg);
-      } else {
-        Alert.alert(t('challenge.invalidCodeTitle'), msg);
-      }
+      showError(t('challenge.invalidCode'));
       return;
     }
 
@@ -154,6 +160,17 @@ export default function JoinChallengeScreen({ navigation }: Props) {
             />
             <Text style={styles.hint}>{t('challenge.codeHint')}</Text>
           </View>
+
+          {/* Unsupported format warning */}
+          {isUnsupported && (
+            <View style={[styles.previewCard, { borderColor: colors.accent }]}>
+              <View style={styles.previewHeader}>
+                <CrossIcon size={16} color={colors.accent} />
+                <Text style={[styles.previewHeaderText, { color: colors.accent }]}>{t('challenge.unsupportedCodeShort')}</Text>
+              </View>
+              <Text style={styles.previewLabel}>{t('challenge.unsupportedCode')}</Text>
+            </View>
+          )}
 
           {/* Live preview when a valid code is pasted */}
           {preview && (

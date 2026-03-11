@@ -114,18 +114,18 @@ export default function ResultsScreen({ route, navigation }: Props) {
     setShowChallengeModal(false);
     hapticTap();
     saveChallengeName(challengeName.trim());
-    const flagIds = results.map((r) => r.question.flag.id);
-    const hostResults = results.map((r) => ({ correct: r.correct, timeMs: r.timeTaken }));
-    const code = encodeChallenge({
-      hostName: challengeName.trim(),
-      mode: config.mode,
-      timeLimit: config.timeLimit || 15,
-      flagIds,
-      hostResults,
-    });
     try {
+      const flagIds = results.map((r) => r.question.flag.id);
+      const hostResults = results.map((r) => ({ correct: r.correct, timeMs: r.timeTaken }));
+      const code = encodeChallenge({
+        hostName: challengeName.trim(),
+        mode: config.mode,
+        timeLimit: config.timeLimit || 15,
+        flagIds,
+        hostResults,
+      });
       await Share.share({ message: `${t('challenge.shareMessage')}\n\n${code}` });
-    } catch { /* cancelled */ }
+    } catch { /* encoding error or share cancelled */ }
   };
 
   // Head-to-head comparison data
@@ -653,11 +653,12 @@ export default function ResultsScreen({ route, navigation }: Props) {
         )}
 
         {/* ── CHALLENGE BACK (after playing a challenge) ── */}
+        {/* Navigate to GameSetup so they play NEW flags, then share from those results */}
         {isChallenge && canChallenge && !reviewOnly && (
           <Animated.View style={{ opacity: restFade }}>
             <TouchableOpacity
               style={st.challengeButton}
-              onPress={() => { hapticTap(); setShowChallengeModal(true); }}
+              onPress={() => { hapticTap(); navigation.replace('GameSetup'); }}
               activeOpacity={0.7}
             >
               <UsersIcon size={18} color={colors.ink} />

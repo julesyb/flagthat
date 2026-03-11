@@ -370,6 +370,8 @@ const es: typeof en = {
     play: 'Jugar',
     invalidCodeTitle: 'C\u00f3digo inv\u00e1lido',
     invalidCode: 'Este c\u00f3digo de desaf\u00edo no es v\u00e1lido. Verifica que hayas pegado el c\u00f3digo completo.',
+    unsupportedCode: 'Este c\u00f3digo fue creado con una versi\u00f3n m\u00e1s nueva de Flag That. Actualiza la app para jugar este desaf\u00edo.',
+    unsupportedCodeShort: 'Actualizaci\u00f3n requerida',
     challengeFriend: 'Desafiar a un amigo',
     challengeDesc: 'Comparte tu partida para que un amigo pruebe las mismas banderas',
     enterName: 'Tu nombre',

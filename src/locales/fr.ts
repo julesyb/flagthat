@@ -370,6 +370,8 @@ const fr: typeof en = {
     play: 'Jouer',
     invalidCodeTitle: 'Code invalide',
     invalidCode: 'Ce code de d\u00e9fi n\u2019est pas valide. V\u00e9rifie que tu as coll\u00e9 le code complet.',
+    unsupportedCode: 'Ce code a \u00e9t\u00e9 cr\u00e9\u00e9 avec une version plus r\u00e9cente de Flag That. Mets \u00e0 jour l\u2019appli pour jouer ce d\u00e9fi.',
+    unsupportedCodeShort: 'Mise \u00e0 jour requise',
     challengeFriend: 'D\u00e9fier un ami',
     challengeDesc: 'Partagez votre partie pour qu\u2019un ami essaie les m\u00eames drapeaux',
     enterName: 'Ton nom',
