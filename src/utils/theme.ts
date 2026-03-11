@@ -102,11 +102,11 @@ export const colors = {
   // Light feedback backgrounds (on white/paper)
   successBg: 'rgba(22, 163, 74, 0.08)',
   errorBg: 'rgba(220, 38, 38, 0.08)',
-  warningBg: 'rgba(217, 119, 6, 0.08)',
+  warningBg: 'rgba(232, 163, 23, 0.08)',
   accentBg: 'rgba(232, 72, 85, 0.06)',
 
   // Map
-  mapBackground: '#f2f2f0',
+  mapBackground: '#f5f0e8',
   mapZoomSurface: 'rgba(255,255,255,0.92)',
 };
 
