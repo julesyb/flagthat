@@ -159,7 +159,7 @@ export default function GameSetupScreen({ navigation }: Props) {
     const config: GameConfig = {
       mode: resolvedMode,
       category: selectedCategory,
-      questionCount: isTimeAttack ? 999 : effectiveQuestionCount,
+      questionCount: (isTimeAttack || isFlagFlash) ? 999 : effectiveQuestionCount,
       displayMode,
       ...(hasTimeLimit && { timeLimit }),
       ...(difficulty === 'hard' && isQuiz && { autocomplete }),
