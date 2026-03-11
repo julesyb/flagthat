@@ -110,6 +110,20 @@ export default function StatsScreen() {
       .slice(0, 10);
   }, [flagStats]);
 
+  const earnedBadges = React.useMemo(() => {
+    if (!badgeData || !stats) return [];
+    return evaluateBadges({
+      stats,
+      flagStats,
+      dayStreak,
+      dailyChallengesCompleted: badgeData.dailyChallengesCompleted,
+      hasShared: badgeData.hasShared,
+      lastGamePerfect10: badgeData.lastGamePerfect10,
+      lastGameSRank: badgeData.lastGameSRank,
+      weakFlagCount,
+    });
+  }, [stats, flagStats, dayStreak, badgeData, weakFlagCount]);
+
   if (!stats) {
     return (
       <SafeAreaView style={s.container}>
@@ -145,20 +159,6 @@ export default function StatsScreen() {
       // Share cancelled
     }
   };
-
-  const earnedBadges = React.useMemo(() => {
-    if (!badgeData) return [];
-    return evaluateBadges({
-      stats,
-      flagStats,
-      dayStreak,
-      dailyChallengesCompleted: badgeData.dailyChallengesCompleted,
-      hasShared: badgeData.hasShared,
-      lastGamePerfect10: badgeData.lastGamePerfect10,
-      lastGameSRank: badgeData.lastGameSRank,
-      weakFlagCount,
-    });
-  }, [stats, flagStats, dayStreak, badgeData, weakFlagCount]);
 
   const earnedIds = new Set(earnedBadges.map((b) => b.id));
 
