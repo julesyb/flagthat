@@ -21,46 +21,62 @@ export type DecodeResult =
   | { status: 'unsupported' }
   | { status: 'invalid' };
 
-// ── V3 ultra-compact format ──
-// "FT3-" + urlSafeBase64(name|modeIdx|timeLimit|flagIds|packedResults)
-// packedResults: 2-char base36 per flag. 0 = wrong, >0 = correct (deciseconds + 1).
-// This merges correctness + timing into one field, no separators needed.
+// ── V3 raw URL-safe format (no base64) ──
+// name~modeIdx~timeLimit~flagIds~packedResults
+// All chars are URL-safe, zero encoding overhead.
+// packedResults: 2-char base36 per flag (0=wrong, >0 = deciseconds+1).
 
 const MODE_INDEX = new Map(CHALLENGE_MODES.map((m, i) => [m, i]));
 const INDEX_MODE = new Map(CHALLENGE_MODES.map((m, i) => [i, m]));
 
+/** Sanitize name for URL: keep alphanumeric + underscore, replace spaces */
+function sanitizeName(name: string): string {
+  return name.replace(/\s+/g, '_').replace(/[^A-Za-z0-9_]/g, '').slice(0, 15) || 'Player';
+}
+
 /**
- * Encode challenge data into a shareable string.
- * V3: "FT3-" + urlSafeBase64(compact payload). URL-safe, no encoding needed.
+ * Encode challenge data into a URL-safe string.
+ * No base64 - the output goes directly into the URL path.
  */
 export function encodeChallenge(data: ChallengeData): string | null {
-  if (data.flagIds.some((id) => id.length !== 2)) {
-    return null;
-  }
+  if (data.flagIds.some((id) => id.length !== 2)) return null;
   const modeIdx = MODE_INDEX.get(data.mode);
-  if (modeIdx === undefined) {
-    return null;
-  }
+  if (modeIdx === undefined) return null;
+
+  const name = sanitizeName(data.hostName);
   const flags = data.flagIds.join('');
-  // Pack results: 0 = wrong, deciseconds+1 = correct (2 chars base36 each)
   const packed = data.hostResults.map((r) => {
     const val = r.correct ? Math.round(r.timeMs / 100) + 1 : 0;
     return val.toString(36).padStart(2, '0');
   }).join('');
-  const payload = `${data.hostName}|${modeIdx}|${data.timeLimit}|${flags}|${packed}`;
-  const encoded = toUrlSafeBase64(payload);
-  return `FT3-${encoded}`;
+
+  return `${name}~${modeIdx}~${data.timeLimit}~${flags}~${packed}`;
+}
+
+/** Strip URL prefixes so users can paste full URLs into the code input */
+function stripUrlPrefix(input: string): string {
+  return input
+    .replace(/^https?:\/\/flagthat\.app\/c\//i, '')
+    .replace(/^flagthat\.app\/c\//i, '')
+    .replace(/^flagthat:\/\/c\//i, '');
 }
 
 /**
  * Decode a challenge code string back into ChallengeData.
- * Supports V3 (FT3-), V2 (FT2:), and legacy V1 (FT:) formats.
+ * Supports V3 raw (~-separated), V2 (FT2:base64), and V1 (FT:base64).
+ * Also handles full URLs pasted into the input field.
  */
 export function decodeChallenge(code: string): DecodeResult {
   try {
-    const trimmed = code.trim();
+    const trimmed = stripUrlPrefix(code.trim());
+    // V3 raw format: contains ~ separators
+    if (trimmed.includes('~')) {
+      const data = decodeV3Raw(trimmed);
+      return data ? { status: 'ok', data } : { status: 'invalid' };
+    }
+    // V3 base64 (transitional, from earlier builds)
     if (trimmed.startsWith('FT3-')) {
-      const data = decodeV3(trimmed.slice(4));
+      const data = decodeV3Base64(trimmed.slice(4));
       return data ? { status: 'ok', data } : { status: 'invalid' };
     }
     if (trimmed.startsWith('FT2:')) {
@@ -71,7 +87,6 @@ export function decodeChallenge(code: string): DecodeResult {
       const data = decodeV1(trimmed.slice(3));
       return data ? { status: 'ok', data } : { status: 'invalid' };
     }
-    // Known prefixes handled above. Any other FT prefix is unsupported.
     if (/^FT\d+[-:]/.test(trimmed)) {
       return { status: 'unsupported' };
     }
@@ -81,7 +96,38 @@ export function decodeChallenge(code: string): DecodeResult {
   }
 }
 
-function decodeV3(encoded: string): ChallengeData | null {
+function decodeV3Raw(raw: string): ChallengeData | null {
+  const parts = raw.split('~');
+  if (parts.length !== 5) return null;
+
+  const [hostName, modeIdxStr, timeLimitStr, flags, packed] = parts;
+  if (!hostName || hostName.length > 50 || flags.length === 0 || flags.length % 2 !== 0) return null;
+
+  const modeIdx = parseInt(modeIdxStr, 10);
+  const mode = INDEX_MODE.get(modeIdx);
+  if (!mode) return null;
+
+  const timeLimit = parseInt(timeLimitStr, 10);
+  if (isNaN(timeLimit)) return null;
+
+  const flagIds: string[] = [];
+  for (let i = 0; i < flags.length; i += 2) {
+    flagIds.push(flags.slice(i, i + 2));
+  }
+
+  if (packed.length !== flagIds.length * 2) return null;
+  const hostResults = flagIds.map((_, i) => {
+    const val = parseInt(packed.slice(i * 2, i * 2 + 2), 36);
+    return val === 0
+      ? { correct: false, timeMs: 0 }
+      : { correct: true, timeMs: (val - 1) * 100 };
+  });
+
+  return { hostName, mode, timeLimit, flagIds, hostResults };
+}
+
+// Transitional: decode FT3- base64 codes from earlier builds
+function decodeV3Base64(encoded: string): ChallengeData | null {
   const payload = fromUrlSafeBase64(encoded);
   const parts = payload.split('|');
   if (parts.length !== 5) return null;
@@ -101,7 +147,6 @@ function decodeV3(encoded: string): ChallengeData | null {
     flagIds.push(flags.slice(i, i + 2));
   }
 
-  // Each result is 2 chars base36. 0 = wrong, >0 = correct (val-1 = deciseconds)
   if (packed.length !== flagIds.length * 2) return null;
   const hostResults = flagIds.map((_, i) => {
     const val = parseInt(packed.slice(i * 2, i * 2 + 2), 36);
@@ -145,7 +190,7 @@ function decodeV2(encoded: string): ChallengeData | null {
   return { hostName, mode, timeLimit, flagIds, hostResults };
 }
 
-// Legacy V1 decoder for backwards compatibility
+// Legacy V1 decoder
 interface CompactChallengeV1 {
   n: string;
   m: string;
@@ -190,7 +235,6 @@ export function buildChallengeQuestions(flagIds: string[], mode: GameMode): Game
     const flag = flagMap.get(id);
     if (!flag) return null;
 
-    // Generate options for modes that need them
     const needsOptions = mode === 'easy' || mode === 'medium' || mode === 'timeattack';
     let options: string[] = [];
     if (needsOptions) {
@@ -215,9 +259,6 @@ export function buildChallengeQuestions(flagIds: string[], mode: GameMode): Game
 /** Screen names that support challenge play */
 export type ChallengeScreenName = 'Game' | 'FlagPuzzle' | 'Neighbors' | 'CapitalConnection';
 
-/**
- * Get the navigation screen name for a given game mode.
- */
 export function getScreenForMode(mode: GameMode): ChallengeScreenName {
   const map: Partial<Record<GameMode, ChallengeScreenName>> = {
     flagpuzzle: 'FlagPuzzle',
@@ -228,9 +269,7 @@ export function getScreenForMode(mode: GameMode): ChallengeScreenName {
 }
 
 // ── Short challenge code ──
-// Generate a 6-character alphanumeric code from challenge data.
-// Used as a human-readable identifier in share messages.
-const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no I/O/0/1 to avoid confusion
+const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
 function simpleHash(str: string): number {
   let hash = 5381;
@@ -240,10 +279,6 @@ function simpleHash(str: string): number {
   return Math.abs(hash);
 }
 
-/**
- * Generate a 6-char alphanumeric code from challenge data.
- * Deterministic: same challenge data always produces the same code.
- */
 export function generateShortCode(data: ChallengeData): string {
   const seed = `${data.hostName}|${data.mode}|${data.flagIds.join('')}|${data.hostResults.map((r) => r.correct ? '1' : '0').join('')}`;
   let hash = simpleHash(seed);
@@ -255,25 +290,13 @@ export function generateShortCode(data: ChallengeData): string {
   return code;
 }
 
-// ── Base64 helpers (cross-platform) ──
-
-function toBase64(str: string): string {
-  if (typeof btoa === 'function') {
-    return btoa(unescape(encodeURIComponent(str)));
-  }
-  return Buffer.from(str, 'utf-8').toString('base64');
-}
+// ── Base64 helpers (for legacy V1/V2 decoding only) ──
 
 function fromBase64(encoded: string): string {
   if (typeof atob === 'function') {
     return decodeURIComponent(escape(atob(encoded)));
   }
   return Buffer.from(encoded, 'base64').toString('utf-8');
-}
-
-// URL-safe base64: replaces +/ with -_, strips = padding
-function toUrlSafeBase64(str: string): string {
-  return toBase64(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
 function fromUrlSafeBase64(encoded: string): string {
