@@ -19,7 +19,7 @@ import { getStats, getDayStreak, getDailyChallenge, DailyChallengeData, getSetti
 import { generateQuestions, getDailyNumber } from '../utils/gameEngine';
 import { RootStackParamList } from '../types/navigation';
 import { GameMode, UserStats, GameQuestion, CategoryId } from '../types';
-import { PlayIcon, ChevronRightIcon, ChevronDownIcon, ClockIcon, UsersIcon, EyeIcon, CalendarIcon, CrosshairIcon, LightningIcon, GearIcon } from '../components/Icons';
+import { PlayIcon, ChevronRightIcon, ClockIcon, UsersIcon, EyeIcon, CalendarIcon, CrosshairIcon, LightningIcon, GearIcon, CheckIcon } from '../components/Icons';
 import FlagImage from '../components/FlagImage';
 import BottomNav from '../components/BottomNav';
 import ScreenContainer from '../components/ScreenContainer';
@@ -181,7 +181,6 @@ export default function HomeScreen({ navigation }: Props) {
   const [weakFlagCount, setWeakFlagCount] = useState(0);
   const [autocomplete, setAutocomplete] = useState(false);
   const [baseline, setBaseline] = useState<BaselineData | null>(null);
-  const [baselineExpanded, setBaselineExpanded] = useState(false);
 
   useEffect(() => {
     initAudio();
@@ -257,54 +256,73 @@ export default function HomeScreen({ navigation }: Props) {
         {/* ── ONBOARDING PROGRESS ── */}
         {!onboardingComplete && (
           <View style={s.onboardingWrap}>
-            <TouchableOpacity
-              style={s.onboardingHeader}
-              activeOpacity={0.85}
-              onPress={() => {
-                hapticTap();
-                const count = getCategoryCount(nextRegion as CategoryId);
-                navigation.navigate('Game', {
-                  config: { mode: 'baseline', category: nextRegion as CategoryId, questionCount: count, displayMode: 'flag' },
-                });
-              }}
-            >
-              <View style={s.onboardingHeaderLeft}>
-                <Text style={s.onboardingHeaderTitle}>{t(`categories.${nextRegion}`)}</Text>
-                <View style={s.onboardingPip} />
-                <Text style={s.onboardingHeaderCount}>{onboardingCount}/{ONBOARDING_REGIONS.length}</Text>
+            <View style={s.onboardingTop}>
+              <View style={s.onboardingTopLeft}>
+                <Text style={s.onboardingTitle}>{t('onboarding.baselineProgress')}</Text>
+                <Text style={s.onboardingCount}>
+                  {t('onboarding.regionsComplete', { count: onboardingCount, total: ONBOARDING_REGIONS.length })}
+                </Text>
               </View>
-              <ChevronRightIcon size={16} color={colors.ink} />
-            </TouchableOpacity>
-            {onboardingCount > 0 && (
               <TouchableOpacity
-                style={s.onboardingExpandBtn}
-                activeOpacity={0.7}
+                style={s.onboardingCta}
+                activeOpacity={0.85}
                 onPress={() => {
                   hapticTap();
-                  setBaselineExpanded((v) => !v);
+                  const count = getCategoryCount(nextRegion as CategoryId);
+                  navigation.navigate('Game', {
+                    config: { mode: 'baseline', category: nextRegion as CategoryId, questionCount: count, displayMode: 'flag' },
+                  });
                 }}
-                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
-                <Text style={s.onboardingExpandText}>{t('home.onboardingScores')}</Text>
-                <View style={baselineExpanded ? { transform: [{ rotate: '180deg' }] } : undefined}>
-                  <ChevronDownIcon size={12} color={colors.textTertiary} />
-                </View>
+                <Text style={s.onboardingCtaText}>{t(`categories.${nextRegion}`)}</Text>
+                <ChevronRightIcon size={14} color={colors.white} />
               </TouchableOpacity>
-            )}
-            {baselineExpanded && (
-              <View style={s.onboardingScoreList}>
-                {ONBOARDING_REGIONS.map((r) => {
-                  const result = baseline?.regions[r];
-                  if (!result) return null;
-                  return (
-                    <View key={r} style={s.onboardingScoreRow}>
-                      <Text style={s.onboardingScoreRegion}>{t(`categories.${r}`)}</Text>
-                      <Text style={s.onboardingScoreVal}>{result.accuracy}%</Text>
-                    </View>
-                  );
-                })}
-              </View>
-            )}
+            </View>
+            <View style={s.onboardingBar}>
+              <View
+                style={[
+                  s.onboardingBarFill,
+                  { width: `${(onboardingCount / ONBOARDING_REGIONS.length) * 100}%` },
+                ]}
+              />
+            </View>
+            {/* Region chips */}
+            <View style={s.onboardingChips}>
+              {ONBOARDING_REGIONS.map((r) => {
+                const result = baseline?.regions[r];
+                const isDone = !!result;
+                const isNext = r === nextRegion;
+                return (
+                  <TouchableOpacity
+                    key={r}
+                    style={[
+                      s.onboardingChip,
+                      isDone && s.onboardingChipDone,
+                      isNext && s.onboardingChipNext,
+                    ]}
+                    activeOpacity={isDone ? 1 : 0.7}
+                    disabled={isDone}
+                    onPress={() => {
+                      hapticTap();
+                      const count = getCategoryCount(r as CategoryId);
+                      navigation.navigate('Game', {
+                        config: { mode: 'baseline', category: r as CategoryId, questionCount: count, displayMode: 'flag' },
+                      });
+                    }}
+                  >
+                    {isDone && <CheckIcon size={10} color={colors.success} />}
+                    <Text style={[
+                      s.onboardingChipText,
+                      isDone && s.onboardingChipTextDone,
+                      isNext && s.onboardingChipTextNext,
+                    ]}>
+                      {t(`categories.${r}`)}
+                    </Text>
+                    {isDone && <Text style={s.onboardingChipPct}>{result!.accuracy}%</Text>}
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
           </View>
         )}
 
@@ -645,66 +663,93 @@ const s = StyleSheet.create({
     borderWidth: 2,
     borderColor: colors.ink,
     borderRadius: borderRadius.lg,
-    overflow: 'hidden',
-  },
-  onboardingHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
     padding: spacing.md,
-  },
-  onboardingHeaderLeft: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
     gap: spacing.sm,
   },
-  onboardingHeaderTitle: {
+  onboardingTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  onboardingTopLeft: {
+    flex: 1,
+  },
+  onboardingTitle: {
     fontFamily: fontFamily.bodyBold,
-    fontSize: fontSize.lg,
+    fontSize: fontSize.body,
     color: colors.ink,
+    marginBottom: 2,
   },
-  onboardingPip: {
-    width: 3,
-    height: 3,
-    borderRadius: 1.5,
-    backgroundColor: colors.textTertiary,
-  },
-  onboardingHeaderCount: {
+  onboardingCount: {
     fontFamily: fontFamily.body,
-    fontSize: fontSize.caption,
+    fontSize: fontSize.sm,
     color: colors.textTertiary,
   },
-  onboardingExpandBtn: {
+  onboardingCta: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
-    paddingHorizontal: spacing.md,
-    paddingBottom: spacing.md,
+    backgroundColor: colors.ink,
+    borderRadius: borderRadius.sm,
+    paddingVertical: spacing.xs + 2,
+    paddingHorizontal: spacing.sm + 2,
   },
-  onboardingExpandText: {
-    fontFamily: fontFamily.bodyMedium,
-    fontSize: fontSize.caption,
-    color: colors.textTertiary,
+  onboardingCtaText: {
+    fontFamily: fontFamily.uiLabel,
+    fontSize: fontSize.sm,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+    color: colors.white,
   },
-  onboardingScoreList: {
-    borderTopWidth: 1,
-    borderTopColor: colors.rule,
+  onboardingBar: {
+    height: 6,
+    backgroundColor: colors.rule,
+    borderRadius: borderRadius.full,
+    overflow: 'hidden',
   },
-  onboardingScoreRow: {
+  onboardingBarFill: {
+    height: 6,
+    backgroundColor: colors.success,
+    borderRadius: borderRadius.full,
+  },
+  onboardingChips: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
+  },
+  onboardingChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
+    gap: spacing.xs,
+    backgroundColor: colors.surfaceSecondary,
+    borderWidth: 1,
+    borderColor: colors.rule,
+    borderRadius: borderRadius.sm,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
   },
-  onboardingScoreRegion: {
-    fontFamily: fontFamily.body,
-    fontSize: fontSize.caption,
+  onboardingChipDone: {
+    backgroundColor: colors.successBg,
+    borderColor: colors.success,
+  },
+  onboardingChipNext: {
+    backgroundColor: colors.ink,
+    borderColor: colors.ink,
+  },
+  onboardingChipText: {
+    fontFamily: fontFamily.bodyMedium,
+    fontSize: fontSize.sm,
     color: colors.textTertiary,
-    flex: 1,
   },
-  onboardingScoreVal: {
+  onboardingChipTextDone: {
+    color: colors.success,
+  },
+  onboardingChipTextNext: {
+    color: colors.white,
+  },
+  onboardingChipPct: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: fontSize.caption,
+    fontSize: fontSize.sm,
     color: colors.success,
   },
 

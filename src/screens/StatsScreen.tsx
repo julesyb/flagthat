@@ -15,7 +15,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
 import { colors, spacing, fontFamily, fontSize, borderRadius } from '../utils/theme';
 import { UserStats, GameMode, CategoryId } from '../types';
-import { getStats, getFlagStats, FlagStats, getDayStreak, getBadgeData, getMissedFlagIds, BadgeData, getSupportData, getGameHistory, GameHistoryEntry } from '../utils/storage';
+import { getStats, getFlagStats, FlagStats, getDayStreak, getBadgeData, getMissedFlagIds, BadgeData, getSupportData, getGameHistory, GameHistoryEntry, getBaselineData, BaselineData } from '../utils/storage';
 import { getAllFlags, getTotalFlagCount } from '../data';
 import { getGrade } from '../utils/gameEngine';
 import { t } from '../utils/i18n';
@@ -51,6 +51,7 @@ export default function StatsScreen() {
   const [weakFlagCount, setWeakFlagCount] = useState(0);
   const [adsWatched, setAdsWatched] = useState(0);
   const [gameHistory, setGameHistory] = useState<GameHistoryEntry[]>([]);
+  const [baseline, setBaseline] = useState<BaselineData | null>(null);
 
   // ── Animation values ──
   const heroFade = useRef(new Animated.Value(0)).current;
@@ -98,8 +99,8 @@ export default function StatsScreen() {
 
       async function loadData() {
         try {
-          const [s, fs, ds, bd, missed, gh, support] = await Promise.all([
-            getStats(), getFlagStats(), getDayStreak(), getBadgeData(), getMissedFlagIds(), getGameHistory(), getSupportData(),
+          const [s, fs, ds, bd, missed, gh, support, bl] = await Promise.all([
+            getStats(), getFlagStats(), getDayStreak(), getBadgeData(), getMissedFlagIds(), getGameHistory(), getSupportData(), getBaselineData(),
           ]);
           if (!cancelled) {
             setStats(s);
@@ -109,6 +110,7 @@ export default function StatsScreen() {
             setWeakFlagCount(missed.length);
             setGameHistory(gh);
             setAdsWatched(support.totalAdsWatched);
+            setBaseline(bl);
 
             // ── Kick off animation sequence after data loads ──
             const acc = s.totalAnswered > 0
@@ -479,13 +481,39 @@ export default function StatsScreen() {
             <View style={s.modeBreakdown}>
               {regionData.map(({ id, pct, correct, total }) => {
                 const barWidth = Math.max(pct, 2);
+                const baselineResult = baseline?.regions[id as keyof typeof baseline.regions];
+                const baselinePct = baselineResult?.accuracy ?? null;
+                const diff = baselinePct !== null ? pct - baselinePct : null;
                 return (
-                  <View key={id} style={s.modeRow}>
-                    <Text style={s.modeLabel}>{t(`categories.${id}`)}</Text>
-                    <View style={s.modeBarWrap}>
-                      <View style={[s.modeBarFill, { width: `${barWidth}%` }, pct >= 70 && s.modeBarGood]} />
+                  <View key={id}>
+                    <View style={s.modeRow}>
+                      <Text style={s.modeLabel}>{t(`categories.${id}`)}</Text>
+                      <View style={s.modeBarWrap}>
+                        <View style={[s.modeBarFill, { width: `${barWidth}%` }, pct >= 70 && s.modeBarGood]} />
+                        {baselinePct !== null && (
+                          <View style={[s.baselineMarker, { left: `${Math.min(baselinePct, 100)}%` }]} />
+                        )}
+                      </View>
+                      <Text style={[s.modePct, pct >= 70 && s.modePctGood]}>{pct}%</Text>
                     </View>
-                    <Text style={[s.modePct, pct >= 70 && s.modePctGood]}>{pct}%</Text>
+                    {diff !== null && (
+                      <View style={s.baselineRow}>
+                        <Text style={s.baselineLabel}>
+                          {t('stats.baselineLabel', { pct: baselinePct! })}
+                        </Text>
+                        <Text style={[
+                          s.baselineChange,
+                          diff > 0 && s.baselineChangeUp,
+                          diff < 0 && s.baselineChangeDown,
+                        ]}>
+                          {diff > 0
+                            ? t('stats.improvementUp', { pct: diff })
+                            : diff < 0
+                            ? t('stats.improvementDown', { pct: Math.abs(diff) })
+                            : t('stats.improvementSame')}
+                        </Text>
+                      </View>
+                    )}
                   </View>
                 );
               })}
@@ -886,6 +914,37 @@ const s = StyleSheet.create({
   },
   modePctGood: {
     color: colors.success,
+  },
+  baselineMarker: {
+    position: 'absolute',
+    top: -1,
+    width: 2,
+    height: 10,
+    backgroundColor: colors.warning,
+    borderRadius: 1,
+  },
+  baselineRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginLeft: 90,
+    marginTop: 2,
+    marginBottom: 4,
+  },
+  baselineLabel: {
+    fontFamily: fontFamily.body,
+    fontSize: fontSize.xxs,
+    color: colors.textTertiary,
+  },
+  baselineChange: {
+    fontFamily: fontFamily.bodyMedium,
+    fontSize: fontSize.xxs,
+    color: colors.textTertiary,
+  },
+  baselineChangeUp: {
+    color: colors.success,
+  },
+  baselineChangeDown: {
+    color: colors.error,
   },
 
   // ── Section

@@ -189,6 +189,10 @@ const en = {
     overallGrade: 'Overall Grade',
     moreToUnlock: '{count} more to unlock',
     scoreDistribution: 'Score Distribution',
+    baselineLabel: 'Baseline: {pct}%',
+    improvementUp: 'Up {pct}% from baseline',
+    improvementSame: 'Same as baseline',
+    improvementDown: 'Down {pct}% from baseline',
   },
 
   // ─── Settings Screen ────────────────────────────────────
@@ -342,6 +346,15 @@ const en = {
     skip: 'Skip',
     next: 'Next Region',
     allDone: 'All done, nice work',
+    welcome: 'Welcome to',
+    tagline: 'How well do you know the world?',
+    startPlayingNow: 'Start Playing',
+    startPlayingDesc: 'Jump right into the game',
+    testKnowledge: 'Test Your Knowledge',
+    testKnowledgeDesc: 'Quick baseline quiz for each region',
+    baselineProgress: 'Baseline Progress',
+    continueBaseline: 'Continue',
+    regionsComplete: '{count}/{total} regions',
   },
 
   // ─── Game Modes (for labels) ────────────────────────────
