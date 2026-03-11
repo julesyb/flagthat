@@ -40,18 +40,18 @@ function sanitizeName(name: string): string {
  */
 export function encodeChallenge(data: ChallengeData): string | null {
   if (data.flagIds.some((id) => id.length !== 2)) return null;
+  if (data.flagIds.length > 30) return null; // bit-packing limit
   const modeIdx = MODE_INDEX.get(data.mode);
   if (modeIdx === undefined) return null;
 
   const name = sanitizeName(data.hostName);
   const flags = data.flagIds.join('');
-  // Pack correct/wrong bits as hex
+  // Pack correct/wrong bits as unsigned hex (>>> 0 prevents signed int issues)
   let bits = 0;
   for (const r of data.hostResults) {
     bits = (bits << 1) | (r.correct ? 1 : 0);
   }
-  const correctHex = bits.toString(16);
-  // Total time in deciseconds
+  const correctHex = (bits >>> 0).toString(16);
   const totalDeci = Math.round(data.hostResults.reduce((s, r) => s + r.timeMs, 0) / 100);
 
   return `${name}~${modeIdx}~${data.timeLimit}~${flags}~${correctHex}~${totalDeci}`;
@@ -105,7 +105,7 @@ function decodeV3Raw(raw: string): ChallengeData | null {
   if (parts.length !== 6) return null;
 
   const [hostName, modeIdxStr, timeLimitStr, flags, correctHex, totalDeciStr] = parts;
-  if (!hostName || hostName.length > 50 || flags.length === 0 || flags.length % 2 !== 0) return null;
+  if (!hostName || hostName.length > 50 || flags.length === 0 || flags.length % 2 !== 0 || flags.length > 60) return null;
 
   const modeIdx = parseInt(modeIdxStr, 10);
   const mode = INDEX_MODE.get(modeIdx);
@@ -119,17 +119,17 @@ function decodeV3Raw(raw: string): ChallengeData | null {
     flagIds.push(flags.slice(i, i + 2));
   }
 
-  const bits = parseInt(correctHex, 16);
+  const bits = parseInt(correctHex, 16) >>> 0; // unsigned
   if (isNaN(bits)) return null;
   const totalDeci = parseInt(totalDeciStr, 10);
   if (isNaN(totalDeci)) return null;
 
   const n = flagIds.length;
-  const correctCount = flagIds.filter((_, i) => (bits >> (n - 1 - i)) & 1).length;
+  const correctCount = flagIds.filter((_, i) => (bits >>> (n - 1 - i)) & 1).length;
   const avgTimeMs = correctCount > 0 ? Math.round((totalDeci * 100) / correctCount) : 0;
 
   const hostResults = flagIds.map((_, i) => {
-    const correct = !!((bits >> (n - 1 - i)) & 1);
+    const correct = !!((bits >>> (n - 1 - i)) & 1);
     return { correct, timeMs: correct ? avgTimeMs : 0 };
   });
 
