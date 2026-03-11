@@ -70,8 +70,7 @@ const de: typeof en = {
     bestStreak: 'Beste Serie',
     best60s: 'Beste 60s',
     accuracy: 'Genauigkeit',
-    onboardingStart: 'Mach den Einstufungstest',
-    onboardingNext: 'Weiter: {region}',
+    onboardingDesc: '{count} Flaggen, 4 Optionen',
   },
 
   setup: {

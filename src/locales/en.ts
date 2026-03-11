@@ -72,8 +72,7 @@ const en = {
     bestStreak: 'Best Streak',
     best60s: 'Best 60s',
     accuracy: 'Accuracy',
-    onboardingStart: 'Take the baseline quiz',
-    onboardingNext: 'Next up: {region}',
+    onboardingDesc: '{count} flags, 4 options',
   },
 
   // ─── Game Setup ──────────────────────────────────────────
