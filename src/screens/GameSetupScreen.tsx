@@ -14,7 +14,6 @@ import {
   DisplayMode,
   CategoryId,
   CategoryType,
-  GAME_MODES,
   CATEGORIES,
   CATEGORY_TYPE_LABELS,
   GameConfig,
@@ -26,7 +25,6 @@ import BottomNav from '../components/BottomNav';
 type Props = NativeStackScreenProps<RootStackParamList, 'GameSetup'>;
 
 const QUESTION_COUNTS = [10, 20, 50, 100];
-const FLAGFLASH_TIMES = [15, 30, 60, 90];
 const FLAGPUZZLE_TIMES = [15, 30, 60];
 const TIMEATTACK_TIMES = [30, 60, 90, 120];
 const DEFAULT_GUESS_LIMIT = 3;
@@ -86,32 +84,52 @@ function OptionChipRow({
   );
 }
 
+type SetupMode = 'quiz' | 'flagpuzzle' | 'timeattack' | 'neighbors' | 'impostor' | 'capitalconnection';
+type QuizDifficulty = 'easy' | 'medium' | 'hard';
+
+const SETUP_MODES: { key: SetupMode; label: string; description: string; icon: string }[] = [
+  { key: 'quiz', label: 'Quiz', description: 'Classic flag quiz', icon: 'Q' },
+  { key: 'flagpuzzle', label: 'Flag Puzzle', description: 'Flag reveals over time', icon: '??' },
+  { key: 'timeattack', label: 'Timed Quiz', description: 'Race the clock', icon: '00' },
+  { key: 'neighbors', label: 'Neighbors', description: 'Find bordering countries', icon: 'NB' },
+  { key: 'impostor', label: 'Flag Impostor', description: 'Spot the fake flag', icon: 'FI' },
+  { key: 'capitalconnection', label: 'Capital Quiz', description: 'Match flags to capitals', icon: 'CC' },
+];
+
+const DIFFICULTIES: { key: QuizDifficulty; label: string }[] = [
+  { key: 'easy', label: 'Easy' },
+  { key: 'medium', label: 'Medium' },
+  { key: 'hard', label: 'Hard' },
+];
+
 export default function GameSetupScreen({ navigation }: Props) {
   const displayMode: DisplayMode = 'flag';
-  const [mode, setMode] = useState<GameMode>('easy');
+  const [setupMode, setSetupMode] = useState<SetupMode>('quiz');
+  const [difficulty, setDifficulty] = useState<QuizDifficulty>('medium');
   const [selectedCategory, setSelectedCategory] = useState<CategoryId>('all');
   const [questionCount, setQuestionCount] = useState(10);
   const [questionCountAll, setQuestionCountAll] = useState(false);
   const [timeLimit, setTimeLimit] = useState(60);
   const [filterType, setFilterType] = useState<CategoryType | null>(null);
-  const [autocomplete, setAutocomplete] = useState(false);
   const [guessLimit, setGuessLimit] = useState(DEFAULT_GUESS_LIMIT);
+  const [autocomplete, setAutocomplete] = useState(false);
 
   const totalFlags = getTotalFlagCount();
-  const isFlagFlash = mode === 'flagflash';
-  const isFlagPuzzle = mode === 'flagpuzzle';
-  const isTimeAttack = mode === 'timeattack';
-  const isNeighbors = mode === 'neighbors';
-  const isImpostor = mode === 'impostor';
-  const isCapitalConnection = mode === 'capitalconnection';
-  const hasTimeLimit = isFlagFlash || isFlagPuzzle || isTimeAttack;
-  const showGuessLimit = !isFlagFlash && !isFlagPuzzle && !isTimeAttack && !isNeighbors && !isImpostor && !isCapitalConnection;
+  const isFlagPuzzle = setupMode === 'flagpuzzle';
+  const isTimeAttack = setupMode === 'timeattack';
+  const hasTimeLimit = isFlagPuzzle || isTimeAttack;
+  const isQuiz = setupMode === 'quiz';
+
+  // Resolve the actual GameMode from setup selections
+  const resolvedMode: GameMode = isQuiz ? difficulty : setupMode;
+
+  const showGuessLimit = setupMode !== 'timeattack' && setupMode !== 'flagpuzzle';
 
   // Set sensible default time limit when mode changes
   useEffect(() => {
     if (isFlagPuzzle) setTimeLimit(15);
-    else if (isTimeAttack || isFlagFlash) setTimeLimit(60);
-  }, [mode]);
+    else if (isTimeAttack) setTimeLimit(60);
+  }, [setupMode]);
 
   const handleFilterTypeSelect = (type: CategoryType) => {
     if (filterType === type) {
@@ -136,26 +154,24 @@ export default function GameSetupScreen({ navigation }: Props) {
       : questionCount;
 
     const config: GameConfig = {
-      mode,
+      mode: resolvedMode,
       category: selectedCategory,
-      questionCount: (isFlagFlash || isTimeAttack) ? 999 : effectiveQuestionCount,
+      questionCount: isTimeAttack ? 999 : effectiveQuestionCount,
       displayMode,
       ...(hasTimeLimit && { timeLimit }),
-      ...(mode === 'hard' && { autocomplete }),
+      ...(difficulty === 'hard' && isQuiz && { autocomplete }),
       ...(showGuessLimit && guessLimit > 0 && { guessLimit }),
     };
 
     if (isTimeAttack) {
       navigation.navigate('Game', { config });
-    } else if (isFlagFlash) {
-      navigation.navigate('FlagFlash', { config });
     } else if (isFlagPuzzle) {
       navigation.navigate('FlagPuzzle', { config });
-    } else if (isNeighbors) {
+    } else if (setupMode === 'neighbors') {
       navigation.navigate('Neighbors', { config });
-    } else if (isImpostor) {
+    } else if (setupMode === 'impostor') {
       navigation.navigate('FlagImpostor', { config });
-    } else if (isCapitalConnection) {
+    } else if (setupMode === 'capitalconnection') {
       navigation.navigate('CapitalConnection', { config });
     } else {
       navigation.navigate('Game', { config });
@@ -168,11 +184,10 @@ export default function GameSetupScreen({ navigation }: Props) {
 
   const getTimeLimitOptions = () => {
     if (isFlagPuzzle) return FLAGPUZZLE_TIMES;
-    if (isTimeAttack) return TIMEATTACK_TIMES;
-    return FLAGFLASH_TIMES;
+    return TIMEATTACK_TIMES;
   };
 
-  const showQuestionCount = !isFlagFlash && !isTimeAttack && !isFlagPuzzle && filterType !== 'theme';
+  const showQuestionCount = !isTimeAttack && !isFlagPuzzle && filterType !== 'theme';
 
   return (
     <SafeAreaView style={styles.container}>
@@ -185,64 +200,75 @@ export default function GameSetupScreen({ navigation }: Props) {
         {/* Game Mode */}
         <Text style={styles.sectionTitle}>Game Mode</Text>
         <View style={styles.modeGrid}>
-          {(Object.keys(GAME_MODES) as GameMode[]).filter((m) => !GAME_MODES[m].hidden).map((m) => {
-            const info = GAME_MODES[m];
-            const isActive = mode === m;
+          {SETUP_MODES.map((m) => {
+            const isActive = setupMode === m.key;
             return (
               <TouchableOpacity
-                key={m}
+                key={m.key}
                 style={[styles.modeCard, isActive && styles.modeCardActive]}
-                onPress={() => setMode(m)}
+                onPress={() => setSetupMode(m.key)}
                 activeOpacity={0.7}
                 accessibilityRole="button"
                 accessibilityState={{ selected: isActive }}
-                accessibilityLabel={`${info.label}: ${info.description}`}
+                accessibilityLabel={`${m.label}: ${m.description}`}
               >
                 <View style={[styles.modeIconBadge, isActive && styles.modeIconBadgeActive]}>
-                  <Text style={[styles.modeIconText, isActive && styles.modeIconTextActive]}>{info.icon}</Text>
+                  <Text style={[styles.modeIconText, isActive && styles.modeIconTextActive]}>{m.icon}</Text>
                 </View>
                 <Text style={[styles.modeLabel, isActive && styles.modeLabelActive]}>
-                  {info.label}
+                  {m.label}
                 </Text>
                 <Text style={[styles.modeDesc, isActive && styles.modeDescActive]}>
-                  {info.description}
+                  {m.description}
                 </Text>
               </TouchableOpacity>
             );
           })}
         </View>
 
-        {/* Autocomplete toggle (only for Hard mode) */}
-        {mode === 'hard' && (
+        {/* Difficulty (only for Quiz mode) */}
+        {isQuiz && (
           <>
-            <Text style={styles.sectionTitle}>Autocomplete</Text>
-            <View style={styles.displayToggleRow}>
-              {([false, true] as const).map((val) => {
-                const isActive = autocomplete === val;
+            <Text style={styles.sectionTitle}>Difficulty</Text>
+            <View style={styles.optionRow}>
+              {DIFFICULTIES.map((d) => {
+                const isActive = difficulty === d.key;
                 return (
                   <TouchableOpacity
-                    key={String(val)}
-                    style={[styles.displayToggle, isActive && styles.displayToggleActive]}
-                    onPress={() => setAutocomplete(val)}
+                    key={d.key}
+                    style={[styles.optionChip, isActive && styles.optionChipActive]}
+                    onPress={() => setDifficulty(d.key)}
                     activeOpacity={0.7}
                     accessibilityRole="button"
                     accessibilityState={{ selected: isActive }}
-                    accessibilityLabel={val ? 'Autocomplete On' : 'Autocomplete Off'}
                   >
-                    <View style={[styles.displayToggleIconWrapper, isActive && styles.displayToggleIconWrapperActive]}>
-                      <Text style={[styles.modeIconText, isActive && styles.modeIconTextActive]}>
-                        {val ? 'On' : 'Off'}
-                      </Text>
-                    </View>
-                    <Text style={[styles.displayToggleText, isActive && styles.displayToggleTextActive]}>
-                      {val ? 'On' : 'Off'}
-                    </Text>
-                    <Text style={[styles.displayToggleDesc, isActive && styles.displayToggleDescActive]}>
-                      {val ? 'Show suggestions as you type' : 'Type the full answer'}
-                    </Text>
+                    <Text style={[styles.optionLabel, isActive && styles.optionLabelActive]}>{d.label}</Text>
                   </TouchableOpacity>
                 );
               })}
+            </View>
+          </>
+        )}
+
+        {/* Autocomplete (only for Hard quiz) */}
+        {isQuiz && difficulty === 'hard' && (
+          <>
+            <Text style={styles.sectionTitle}>Hints</Text>
+            <View style={styles.optionRow}>
+              <TouchableOpacity
+                style={[styles.optionChip, !autocomplete && styles.optionChipActive]}
+                onPress={() => setAutocomplete(false)}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.optionLabel, !autocomplete && styles.optionLabelActive]}>Off</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.optionChip, autocomplete && styles.optionChipActive]}
+                onPress={() => setAutocomplete(true)}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.optionLabel, autocomplete && styles.optionLabelActive]}>On</Text>
+              </TouchableOpacity>
             </View>
           </>
         )}
@@ -419,14 +445,14 @@ export default function GameSetupScreen({ navigation }: Props) {
         )}
 
         <TouchableOpacity
-          style={[styles.startButton, mode !== 'easy' && mode !== 'medium' && mode !== 'hard' && styles.startButtonParty]}
+          style={styles.startButton}
           onPress={startGame}
           activeOpacity={0.8}
           accessibilityRole="button"
-          accessibilityLabel={`Start ${GAME_MODES[mode].label}`}
+          accessibilityLabel={`Start ${isQuiz ? DIFFICULTIES.find((d) => d.key === difficulty)?.label + ' Quiz' : SETUP_MODES.find((m) => m.key === setupMode)?.label}`}
         >
           <Text style={styles.startButtonText}>
-            Start {GAME_MODES[mode].label}
+            Start {isQuiz ? `${DIFFICULTIES.find((d) => d.key === difficulty)?.label} Quiz` : SETUP_MODES.find((m) => m.key === setupMode)?.label}
           </Text>
         </TouchableOpacity>
       </ScrollView>
@@ -453,46 +479,6 @@ const styles = StyleSheet.create({
   content: {
     padding: spacing.lg,
     paddingBottom: spacing.xxl,
-  },
-  displayToggleRow: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    marginBottom: spacing.sm,
-  },
-  displayToggle: {
-    flex: 1,
-    backgroundColor: colors.surface,
-    padding: spacing.md,
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: colors.border,
-    borderRadius: borderRadius.md,
-  },
-  displayToggleActive: {
-    borderColor: colors.ink,
-    backgroundColor: colors.surfaceSecondary,
-  },
-  displayToggleIconWrapper: {
-    marginBottom: spacing.xs,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  displayToggleIconWrapperActive: {},
-  displayToggleText: {
-    ...typography.bodyBold,
-    color: colors.text,
-  },
-  displayToggleTextActive: {
-    color: colors.ink,
-  },
-  displayToggleDesc: {
-    ...typography.caption,
-    color: colors.textSecondary,
-    marginTop: spacing.xxs,
-    textAlign: 'center',
-  },
-  displayToggleDescActive: {
-    color: colors.slate,
   },
   sectionTitle: {
     ...typography.headingUpper,
@@ -671,9 +657,6 @@ const styles = StyleSheet.create({
   startButton: {
     ...buttons.primary,
     marginTop: spacing.xl,
-  },
-  startButtonParty: {
-    backgroundColor: colors.accent,
   },
   startButtonText: {
     ...buttons.primaryText,

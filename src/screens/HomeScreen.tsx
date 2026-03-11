@@ -176,6 +176,7 @@ export default function HomeScreen({ navigation }: Props) {
   const [teaserKey, setTeaserKey] = useState(0);
   const [dailyDone, setDailyDone] = useState<DailyChallengeData | null>(null);
   const [weakFlagCount, setWeakFlagCount] = useState(0);
+  const [autocomplete, setAutocomplete] = useState(false);
 
   useEffect(() => {
     initAudio();
@@ -198,7 +199,7 @@ export default function HomeScreen({ navigation }: Props) {
   const play = () => {
     hapticTap();
     navigation.navigate('Game', {
-      config: { mode, category: 'all', questionCount: questionCountAll ? totalFlags : questionCount, displayMode: 'flag', ...(mode === 'hard' && { autocomplete: true }) },
+      config: { mode, category: 'all', questionCount: questionCountAll ? totalFlags : questionCount, displayMode: 'flag', ...(mode === 'hard' && { autocomplete }) },
     });
   };
 
@@ -321,6 +322,30 @@ export default function HomeScreen({ navigation }: Props) {
               ))}
             </View>
           </View>
+          {mode === 'hard' && (
+            <>
+              <View style={s.configDivider} />
+              <View style={s.configRow}>
+                <Text style={s.configLbl}>Hints</Text>
+                <View style={s.segRow}>
+                  <TouchableOpacity
+                    style={[s.segBtn, !autocomplete && s.segBtnOn]}
+                    onPress={() => { hapticTap(); setAutocomplete(false); }}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={[s.segBtnText, !autocomplete && s.segBtnTextOn]}>Off</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[s.segBtn, autocomplete && s.segBtnOn]}
+                    onPress={() => { hapticTap(); setAutocomplete(true); }}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={[s.segBtnText, autocomplete && s.segBtnTextOn]}>On</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </>
+          )}
         </View>
 
         {/* ── GAME MODES ── */}

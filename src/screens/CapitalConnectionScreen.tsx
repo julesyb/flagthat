@@ -63,6 +63,9 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
     };
   }, []);
 
+  const guessLimit = config.guessLimit ?? 0;
+  const wrongCount = results.filter((r) => !r.correct).length;
+
   const question = questions[currentIndex] ?? null;
   const correctCount = results.filter((r) => r.correct).length;
   const progress = questions.length > 0 ? (currentIndex + 1) / questions.length : 0;
@@ -76,7 +79,9 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
     if (!newResults) return;
     pendingResultsRef.current = null;
 
-    if (currentIndex < questions.length - 1) {
+    const isEliminated = guessLimit > 0 && newResults.filter((r) => !r.correct).length >= guessLimit;
+
+    if (currentIndex < questions.length - 1 && !isEliminated) {
       fadeAnim.setValue(1);
       Animated.timing(fadeAnim, { toValue: 0, duration: 100, useNativeDriver: true }).start(() => {
         setResults(newResults);
@@ -168,7 +173,11 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
             <Text style={styles.scoreText}>{correctCount} correct</Text>
           )}
         </View>
-        <View style={styles.spacer} />
+        {guessLimit > 0 ? (
+          <Text style={styles.livesText}>{Math.max(0, guessLimit - wrongCount)} {guessLimit - wrongCount === 1 ? 'life' : 'lives'}</Text>
+        ) : (
+          <View style={styles.spacer} />
+        )}
       </View>
 
       <Animated.View style={[styles.questionContainer, { opacity: fadeAnim }]}>
@@ -221,7 +230,7 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
             {selectedAnswer === question.correctCapital ? (
               <Text style={styles.feedbackCorrect}>Correct!</Text>
             ) : (
-              <Text style={styles.feedbackWrong}>Wrong</Text>
+              <Text style={styles.feedbackWrong}>{question.correctCapital}</Text>
             )}
           </View>
         )}
@@ -281,6 +290,7 @@ const styles = StyleSheet.create({
     color: colors.accent,
   },
   spacer: { width: 60 },
+  livesText: { ...typography.bodyBold, color: colors.error, width: 60, textAlign: 'right' },
   questionContainer: {
     flex: 1,
     padding: spacing.lg,

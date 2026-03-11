@@ -210,6 +210,9 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const roundStartTime = useRef(Date.now());
 
+  const guessLimit = config.guessLimit ?? 0;
+  const wrongCount = results.filter((r) => !r.correct).length;
+
   const round = rounds[roundIndex] ?? null;
   const isLastRound = roundIndex >= rounds.length - 1;
   const correctCount = results.filter((r) => r.correct).length;
@@ -251,14 +254,18 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
     }]);
   };
 
+  const finishGame = (finalResults: GameResult[]) => {
+    const correct = finalResults.filter((r) => r.correct).length;
+    const streak = getStreakFromResults(finalResults);
+    updateStats(correct, finalResults.length, streak, 'impostor', config.category);
+    updateFlagResults(finalResults);
+    navigation.replace('Results', { results: finalResults, config });
+  };
+
   const handleNext = () => {
-    if (isLastRound) {
-      const finalResults = [...results];
-      const correct = finalResults.filter((r) => r.correct).length;
-      const streak = getStreakFromResults(finalResults);
-      updateStats(correct, finalResults.length, streak, 'impostor', config.category);
-      updateFlagResults(finalResults);
-      navigation.replace('Results', { results: finalResults, config });
+    const isEliminated = guessLimit > 0 && results.filter((r) => !r.correct).length >= guessLimit;
+    if (isLastRound || isEliminated) {
+      finishGame([...results]);
       return;
     }
 
@@ -284,7 +291,11 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
           <Text style={styles.counter}>{roundIndex + 1} / {rounds.length}</Text>
           <Text style={styles.scoreText}>{correctCount} correct</Text>
         </View>
-        <View style={styles.spacer} />
+        {guessLimit > 0 ? (
+          <Text style={styles.livesText}>{Math.max(0, guessLimit - wrongCount)} {guessLimit - wrongCount === 1 ? 'life' : 'lives'}</Text>
+        ) : (
+          <View style={styles.spacer} />
+        )}
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -390,6 +401,7 @@ const styles = StyleSheet.create({
   counter: { ...typography.bodyBold, color: colors.text },
   scoreText: { ...typography.caption, color: colors.success },
   spacer: { width: 60 },
+  livesText: { ...typography.bodyBold, color: colors.error, width: 60, textAlign: 'right' },
   content: { padding: spacing.lg, paddingBottom: 120 },
   prompt: { ...typography.headingUpper, color: colors.text, textAlign: 'center', marginBottom: spacing.xs },
   subtitle: { ...typography.caption, color: colors.textTertiary, textAlign: 'center', marginBottom: spacing.xl },
