@@ -129,8 +129,9 @@ export default function ResultsScreen({ route, navigation }: Props) {
       return;
     }
     const link = `https://flagthat.app/c/${encodeURIComponent(code)}`;
+    const headline = t('challenge.shareMessage', { correct, total: results.length });
     try {
-      await Share.share({ message: `${t('challenge.shareMessage')}\n\n${link}\n\n${code}` });
+      await Share.share({ message: `${headline}\n\n${link}` });
     } catch { /* share cancelled */ }
   };
 
