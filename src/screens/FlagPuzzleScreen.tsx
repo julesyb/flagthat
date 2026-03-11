@@ -20,6 +20,7 @@ import FlagImage from '../components/FlagImage';
 import { useGameAnimations } from '../hooks/useGameAnimations';
 import { getAllFlags } from '../data';
 import { RootStackParamList } from '../types/navigation';
+import { ChevronRightIcon } from '../components/Icons';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'FlagPuzzle'>;
 
@@ -59,7 +60,7 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
 
   const [timeRemaining, setTimeRemaining] = useState(timeLimit);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
 
   const [revealOrder, setRevealOrder] = useState<number[]>(() => generateRevealOrder());
   const [revealedCount, setRevealedCount] = useState(0);
@@ -80,7 +81,7 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
       if (revealIntervalRef.current) clearInterval(revealIntervalRef.current);
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      if (autoAdvanceRef.current) clearTimeout(autoAdvanceRef.current);
     };
   }, []);
 
@@ -145,6 +146,35 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
     return allFlagNames.filter((name) => name.toLowerCase().startsWith(query)).slice(0, 5);
   }, [textInput, allFlagNames]);
 
+  const pendingResultsRef = useRef<GameResult[] | null>(null);
+  const autoAdvanceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const goToNext = useCallback(() => {
+    if (autoAdvanceRef.current) {
+      clearTimeout(autoAdvanceRef.current);
+      autoAdvanceRef.current = null;
+    }
+    const newResults = pendingResultsRef.current;
+    if (!newResults) return;
+    pendingResultsRef.current = null;
+
+    if (currentIndex < questions.length - 1) {
+      animateTransition();
+      setResults(newResults);
+      setCurrentIndex((i) => i + 1);
+      setShowFeedback(false);
+      setLastAnswerCorrect(false);
+      setTextInput('');
+      setShowSuggestions(false);
+      setRevealOrder(generateRevealOrder());
+      setRevealedCount(0);
+      setQuestionStartTime(Date.now());
+      Keyboard.dismiss();
+    } else {
+      navigation.replace('Results', { results: newResults, config });
+    }
+  }, [currentIndex, questions, navigation, config, animateTransition]);
+
   const handleAnswer = useCallback(
     (answer: string) => {
       if (showFeedback) return;
@@ -180,26 +210,13 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
       };
 
       const newResults = [...results, result];
+      pendingResultsRef.current = newResults;
 
-      timeoutRef.current = setTimeout(() => {
-        if (currentIndex < questions.length - 1) {
-          animateTransition();
-          setResults(newResults);
-          setCurrentIndex((i) => i + 1);
-          setShowFeedback(false);
-          setLastAnswerCorrect(false);
-          setTextInput('');
-          setShowSuggestions(false);
-          setRevealOrder(generateRevealOrder());
-          setRevealedCount(0);
-          setQuestionStartTime(Date.now());
-          Keyboard.dismiss();
-        } else {
-          navigation.replace('Results', { results: newResults, config });
-        }
+      autoAdvanceRef.current = setTimeout(() => {
+        goToNext();
       }, correct ? 600 : 1200);
     },
-    [showFeedback, currentQuestion, questionStartTime, results, currentIndex, questions, navigation, config, animateStreak, animateWrong, animateTransition],
+    [showFeedback, currentQuestion, questionStartTime, results, animateStreak, animateWrong, goToNext],
   );
 
   const handleSubmit = () => {
@@ -378,6 +395,16 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
                 It was {currentQuestion.flag.name}
               </Text>
             )}
+            <TouchableOpacity
+              style={styles.nextButton}
+              onPress={goToNext}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="Next question"
+            >
+              <Text style={styles.nextButtonText}>Next</Text>
+              <ChevronRightIcon size={16} color={colors.white} />
+            </TouchableOpacity>
           </View>
         )}
       </Animated.View>
@@ -532,5 +559,21 @@ const styles = StyleSheet.create({
   feedbackWrong: {
     ...typography.heading,
     color: colors.error,
+  },
+  nextButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: colors.ink,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: borderRadius.md,
+    marginTop: spacing.md,
+  },
+  nextButtonText: {
+    ...typography.captionBold,
+    color: colors.white,
+    textTransform: 'uppercase',
   },
 });
