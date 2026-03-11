@@ -469,18 +469,6 @@ const styles = StyleSheet.create({
     ...typography.caption,
     color: colors.success,
   },
-  timerDisplay: {
-    width: 60,
-    alignItems: 'flex-end',
-  },
-  timerText: {
-    fontFamily: fontFamily.uiLabel,
-    fontSize: 18,
-    color: colors.ink,
-  },
-  timerTextUrgent: {
-    color: colors.error,
-  },
   questionContainer: {
     flex: 1,
     padding: spacing.lg,
