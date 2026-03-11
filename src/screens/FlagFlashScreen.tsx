@@ -199,6 +199,11 @@ export default function FlagFlashScreen({ route, navigation }: Props) {
     if (phase !== 'playing') return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        exitGame();
+        return;
+      }
       if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
         e.preventDefault();
         handleTilt('correct');

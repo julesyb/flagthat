@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -43,6 +43,7 @@ export default function SettingsScreen() {
   });
   const [, forceRender] = useState(0);
   const [langOpen, setLangOpen] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -129,14 +130,24 @@ export default function SettingsScreen() {
     }
   };
 
+  // Close language dropdown on Escape key (web)
+  useEffect(() => {
+    if (Platform.OS !== 'web' || !langOpen) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setLangOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [langOpen]);
+
   const currentLocaleName = SUPPORTED_LOCALES.find((l) => l.code === getLocale())?.name ?? 'English';
 
   const handleReset = async () => {
     if (Platform.OS === 'web') {
-      const confirmed = window.confirm(t('settings.resetConfirmWeb'));
-      if (confirmed) {
-        await resetStats();
-      }
+      setShowResetConfirm(true);
     } else {
       Alert.alert(
         t('settings.resetConfirmTitle'),
@@ -152,6 +163,24 @@ export default function SettingsScreen() {
       );
     }
   };
+
+  const confirmReset = async () => {
+    await resetStats();
+    setShowResetConfirm(false);
+  };
+
+  // Close reset confirm dialog on Escape
+  useEffect(() => {
+    if (Platform.OS !== 'web' || !showResetConfirm) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setShowResetConfirm(false);
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [showResetConfirm]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -337,6 +366,32 @@ export default function SettingsScreen() {
         </ScreenContainer>
       </ScrollView>
       <BottomNav activeTab="Play" onNavigate={onNavigate} />
+
+      {/* Styled reset confirmation for web */}
+      {showResetConfirm && (
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>{t('settings.resetConfirmTitle')}</Text>
+            <Text style={styles.modalBody}>{t('settings.resetConfirmMsg')}</Text>
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={styles.modalCancelBtn}
+                onPress={() => setShowResetConfirm(false)}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.modalCancelText}>{t('common.cancel')}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.modalDestructiveBtn}
+                onPress={confirmReset}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.modalDestructiveText}>{t('settings.reset')}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      )}
     </SafeAreaView>
   );
 }
@@ -438,5 +493,62 @@ const styles = StyleSheet.create({
   resetButtonText: {
     ...typography.label,
     color: colors.error,
+  },
+  modalOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(26, 26, 46, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 100,
+  },
+  modalCard: {
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.lg,
+    borderWidth: 2,
+    borderColor: colors.border,
+    padding: spacing.xl,
+    maxWidth: 380,
+    width: '90%',
+  },
+  modalTitle: {
+    ...typography.heading,
+    color: colors.text,
+    marginBottom: spacing.sm,
+  },
+  modalBody: {
+    ...typography.body,
+    color: colors.textSecondary,
+    marginBottom: spacing.xl,
+    lineHeight: 22,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    justifyContent: 'flex-end',
+  },
+  modalCancelBtn: {
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  modalCancelText: {
+    ...typography.bodyBold,
+    color: colors.textSecondary,
+  },
+  modalDestructiveBtn: {
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.error,
+  },
+  modalDestructiveText: {
+    ...typography.bodyBold,
+    color: colors.white,
   },
 });

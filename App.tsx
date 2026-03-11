@@ -113,18 +113,22 @@ function AppContent() {
       style.textContent = [
         // Pointer cursor on all touchable/pressable elements
         '[role="button"], [role="tab"], [role="link"] { cursor: pointer; }',
-        // Subtle hover lift for cards and buttons (only on desktop, not touch)
-        '@media (hover: hover) { [role="button"]:hover, [role="tab"]:hover { opacity: 0.85; } }',
-        // Smooth transitions
-        '[role="button"], [role="tab"] { transition: opacity 0.15s ease; }',
+        // Smooth transitions for hover effects
+        '[role="button"], [role="tab"] { transition: opacity 0.15s ease, transform 0.15s ease, filter 0.15s ease; }',
+        // Hover: slight brightness boost + subtle lift (desktop only, not touch)
+        '@media (hover: hover) {',
+        '  [role="button"]:hover, [role="tab"]:hover { opacity: 0.88; filter: brightness(1.03); transform: translateY(-1px); }',
+        '  [role="button"]:active, [role="tab"]:active { transform: translateY(0px); opacity: 0.75; }',
+        '}',
         // Focus-visible outline for keyboard navigation
         '[role="button"]:focus-visible, [role="tab"]:focus-visible, input:focus-visible { outline: 2px solid #CC3344; outline-offset: 2px; }',
         // Remove default focus ring for mouse users
         '[role="button"]:focus:not(:focus-visible), [role="tab"]:focus:not(:focus-visible) { outline: none; }',
-        // Hide mobile-style scrollbar on desktop
+        // Styled scrollbar
         '::-webkit-scrollbar { width: 6px; }',
         '::-webkit-scrollbar-track { background: transparent; }',
         '::-webkit-scrollbar-thumb { background: rgba(26,26,46,0.15); border-radius: 3px; }',
+        '::-webkit-scrollbar-thumb:hover { background: rgba(26,26,46,0.3); }',
         // Prevent text selection on interactive elements
         '[role="button"], [role="tab"] { user-select: none; -webkit-user-select: none; }',
       ].join('\n');

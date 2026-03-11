@@ -114,12 +114,16 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
     }
   }, [currentIndex, questions, navigation, config, fadeAnim]);
 
-  // Keyboard shortcuts: 1-4 to select options
+  // Keyboard shortcuts: 1-4 to select options, Enter/Space to advance
   useEffect(() => {
     if (Platform.OS !== 'web') return;
     const handler = (e: KeyboardEvent) => {
-      if (showFeedback) return;
-      if (e.key >= '1' && e.key <= '4' && question) {
+      if (showFeedback && (e.key === 'Enter' || e.key === ' ')) {
+        e.preventDefault();
+        goToNext();
+        return;
+      }
+      if (!showFeedback && e.key >= '1' && e.key <= '4' && question) {
         const idx = parseInt(e.key, 10) - 1;
         if (idx < question.options.length) {
           e.preventDefault();
@@ -129,7 +133,7 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [showFeedback, question]);
+  }, [showFeedback, question, goToNext]);
 
   const handleAnswer = useCallback((answer: string) => {
     if (showFeedback || !question) return;
