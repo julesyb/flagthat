@@ -19,7 +19,7 @@ import { getStats, getDayStreak, getDailyChallenge, DailyChallengeData, getSetti
 import { generateQuestions, getDailyNumber } from '../utils/gameEngine';
 import { RootStackParamList } from '../types/navigation';
 import { GameMode, UserStats, GameQuestion } from '../types';
-import { PlayIcon, ChevronRightIcon, ClockIcon, UsersIcon, EyeIcon, MapPinIcon, LinkIcon, CalendarIcon, CrosshairIcon, LightningIcon } from '../components/Icons';
+import { PlayIcon, ChevronRightIcon, ClockIcon, UsersIcon, EyeIcon, CalendarIcon, CrosshairIcon, LightningIcon, GearIcon } from '../components/Icons';
 import FlagImage from '../components/FlagImage';
 import BottomNav from '../components/BottomNav';
 
@@ -233,6 +233,13 @@ export default function HomeScreen({ navigation }: Props) {
               </>
             )}
           </View>
+          <TouchableOpacity
+            style={s.settingsBtn}
+            onPress={() => navigation.navigate('Settings')}
+            activeOpacity={0.6}
+          >
+            <GearIcon size={20} color={colors.textTertiary} />
+          </TouchableOpacity>
         </View>
 
         {/* ── DAILY CHALLENGE ── */}
@@ -432,46 +439,6 @@ export default function HomeScreen({ navigation }: Props) {
             <ChevronRightIcon size={18} color={colors.rule} />
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={s.modeCard}
-            activeOpacity={0.85}
-            onPress={() => {
-              hapticTap();
-              navigation.navigate('Game', {
-                config: { mode: 'medium', category: 'all', questionCount: 10, displayMode: 'map' },
-              });
-            }}
-          >
-            <View style={s.modeIcon}>
-              <MapPinIcon size={18} color={colors.white} />
-            </View>
-            <View style={s.modeText}>
-              <Text style={s.modeTitle}>Map Mode</Text>
-              <Text style={s.modeSub}>Identify countries on the map</Text>
-            </View>
-            <ChevronRightIcon size={18} color={colors.rule} />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={s.modeCard}
-            activeOpacity={0.85}
-            onPress={() => {
-              hapticTap();
-              navigation.navigate('CapitalConnection', {
-                config: { mode: 'capitalconnection', category: 'all', questionCount: 10, displayMode: 'flag' },
-              });
-            }}
-          >
-            <View style={s.modeIcon}>
-              <LinkIcon size={18} color={colors.white} />
-            </View>
-            <View style={s.modeText}>
-              <Text style={s.modeTitle}>Capital Quiz</Text>
-              <Text style={s.modeSub}>Name the capital city</Text>
-            </View>
-            <ChevronRightIcon size={18} color={colors.rule} />
-          </TouchableOpacity>
-
           {weakFlagCount > 0 && (
             <TouchableOpacity
               style={[s.modeCard, { borderColor: colors.accent, borderWidth: 1.5 }]}
@@ -566,19 +533,24 @@ const s = StyleSheet.create({
   wordmark: {},
   wmLine1: {
     fontFamily: fontFamily.display,
-    fontSize: 36,
-    lineHeight: 38,
+    fontSize: 34,
+    lineHeight: 36,
     color: colors.ink,
     letterSpacing: -0.5,
   },
   wmLine2: {
     fontFamily: fontFamily.displayItalic,
-    fontSize: 36,
-    lineHeight: 38,
+    fontSize: 34,
+    lineHeight: 36,
     color: colors.accent,
   },
   headerRight: {
     alignItems: 'flex-end',
+    flex: 1,
+  },
+  settingsBtn: {
+    padding: spacing.sm,
+    marginLeft: spacing.sm,
   },
   streakVal: {
     fontFamily: fontFamily.display,
@@ -635,7 +607,7 @@ const s = StyleSheet.create({
   },
   dailyTitle: {
     fontFamily: fontFamily.bodyBold,
-    fontSize: 15,
+    fontSize: 17,
     color: colors.ink,
     marginBottom: 2,
   },
@@ -644,9 +616,9 @@ const s = StyleSheet.create({
   },
   dailySub: {
     fontFamily: fontFamily.body,
-    fontSize: 12,
+    fontSize: 14,
     color: colors.textTertiary,
-    lineHeight: 16,
+    lineHeight: 18,
   },
   dailyScore: {
     fontFamily: fontFamily.display,
@@ -665,7 +637,7 @@ const s = StyleSheet.create({
   },
   heroLabel: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 10,
+    fontSize: 11,
     letterSpacing: 1.5,
     textTransform: 'uppercase',
     color: colors.whiteAlpha45,
@@ -709,7 +681,7 @@ const s = StyleSheet.create({
   },
   optText: {
     fontFamily: fontFamily.bodyMedium,
-    fontSize: 14,
+    fontSize: 16,
     color: colors.whiteAlpha70,
     textAlign: 'center',
   },
@@ -728,7 +700,7 @@ const s = StyleSheet.create({
   },
   teaserResultText: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 16,
+    fontSize: 18,
     letterSpacing: 1,
     textTransform: 'uppercase',
     color: colors.white,
@@ -738,7 +710,7 @@ const s = StyleSheet.create({
   },
   teaserResultWrong: {
     color: colors.white,
-    fontSize: 18,
+    fontSize: 20,
   },
   teaserPlayBtn: {
     flexDirection: 'row',
@@ -758,7 +730,7 @@ const s = StyleSheet.create({
   },
   teaserPlayText: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 15,
+    fontSize: 17,
     letterSpacing: 1.5,
     textTransform: 'uppercase',
     color: colors.white,
@@ -788,7 +760,7 @@ const s = StyleSheet.create({
   },
   playBtnText: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 17,
+    fontSize: 19,
     letterSpacing: 1.5,
     textTransform: 'uppercase',
     color: colors.white,
@@ -817,7 +789,7 @@ const s = StyleSheet.create({
   },
   configLbl: {
     fontFamily: fontFamily.bodyMedium,
-    fontSize: 13,
+    fontSize: 15,
     color: colors.ink,
     minWidth: 58,
     flexShrink: 0,
@@ -844,7 +816,7 @@ const s = StyleSheet.create({
   },
   segBtnText: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 13,
+    fontSize: 14,
     textTransform: 'uppercase',
     color: colors.textTertiary,
   },
@@ -859,7 +831,7 @@ const s = StyleSheet.create({
   },
   sectionLbl: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 10,
+    fontSize: 11,
     letterSpacing: 1.2,
     textTransform: 'uppercase',
     color: colors.textTertiary,
@@ -890,15 +862,15 @@ const s = StyleSheet.create({
   },
   modeTitle: {
     fontFamily: fontFamily.bodyBold,
-    fontSize: 15,
+    fontSize: 17,
     color: colors.ink,
     marginBottom: 2,
   },
   modeSub: {
     fontFamily: fontFamily.body,
-    fontSize: 12,
+    fontSize: 14,
     color: colors.textTertiary,
-    lineHeight: 16,
+    lineHeight: 18,
   },
 
   // ── Stats row
@@ -927,7 +899,7 @@ const s = StyleSheet.create({
   },
   statLbl: {
     fontFamily: fontFamily.bodyMedium,
-    fontSize: 10,
+    fontSize: 12,
     letterSpacing: 0.8,
     textTransform: 'uppercase',
     color: colors.textTertiary,

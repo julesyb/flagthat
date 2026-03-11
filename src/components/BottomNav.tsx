@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 9,
+    fontSize: 10,
     letterSpacing: 1,
     textTransform: 'uppercase',
     color: colors.textTertiary,

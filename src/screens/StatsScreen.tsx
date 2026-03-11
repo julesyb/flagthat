@@ -305,7 +305,7 @@ export default function StatsScreen() {
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  loadingText: { fontFamily: fontFamily.body, fontSize: 17, color: colors.textSecondary },
+  loadingText: { fontFamily: fontFamily.body, fontSize: 18, color: colors.textSecondary },
   content: { padding: spacing.md, paddingBottom: spacing.xxl },
 
   // ── Challenge Card
@@ -317,7 +317,7 @@ const s = StyleSheet.create({
   },
   cardEyebrow: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 10,
+    fontSize: 11,
     letterSpacing: 1.5,
     textTransform: 'uppercase',
     color: colors.accent,
@@ -332,7 +332,7 @@ const s = StyleSheet.create({
   },
   cardSub: {
     fontFamily: fontFamily.body,
-    fontSize: 13,
+    fontSize: 14,
     color: colors.whiteAlpha45,
     marginTop: 8,
   },
@@ -352,7 +352,7 @@ const s = StyleSheet.create({
   },
   pillText: {
     fontFamily: fontFamily.bodyMedium,
-    fontSize: 12,
+    fontSize: 13,
     color: colors.whiteAlpha60,
   },
   pillBold: {
@@ -369,7 +369,7 @@ const s = StyleSheet.create({
   },
   shareBtnText: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 13,
+    fontSize: 14,
     letterSpacing: 0.5,
     textTransform: 'uppercase',
     color: colors.white,
@@ -393,7 +393,7 @@ const s = StyleSheet.create({
   },
   tileLabel: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 10,
+    fontSize: 11,
     letterSpacing: 1,
     textTransform: 'uppercase',
     color: colors.textTertiary,
@@ -409,12 +409,12 @@ const s = StyleSheet.create({
   },
   tileUnit: {
     fontFamily: fontFamily.bodyMedium,
-    fontSize: 14,
+    fontSize: 15,
     color: colors.textTertiary,
   },
   tileSub: {
     fontFamily: fontFamily.body,
-    fontSize: 12,
+    fontSize: 13,
     color: colors.textTertiary,
     marginTop: 4,
   },
@@ -440,19 +440,19 @@ const s = StyleSheet.create({
   },
   progressLabelBold: {
     fontFamily: fontFamily.bodyBold,
-    fontSize: 11,
+    fontSize: 12,
     color: colors.ink,
   },
   progressLabelMuted: {
     fontFamily: fontFamily.body,
-    fontSize: 11,
+    fontSize: 12,
     color: colors.textTertiary,
   },
 
   // ── Section
   sectionTitle: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 18,
+    fontSize: 19,
     letterSpacing: 0.5,
     textTransform: 'uppercase',
     color: colors.ink,
@@ -468,7 +468,7 @@ const s = StyleSheet.create({
   },
   sectionMeta: {
     fontFamily: fontFamily.body,
-    fontSize: 12,
+    fontSize: 13,
     color: colors.textTertiary,
   },
 
@@ -487,12 +487,12 @@ const s = StyleSheet.create({
   },
   modeName: {
     fontFamily: fontFamily.bodyBold,
-    fontSize: 15,
+    fontSize: 16,
     color: colors.ink,
   },
   modeDetail: {
     fontFamily: fontFamily.body,
-    fontSize: 12,
+    fontSize: 13,
     color: colors.textTertiary,
     marginTop: 2,
   },
@@ -505,7 +505,7 @@ const s = StyleSheet.create({
   badgeUnplayed: { backgroundColor: colors.surfaceSecondary },
   badgeText: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 11,
+    fontSize: 12,
     letterSpacing: 0.5,
     textTransform: 'uppercase',
   },
@@ -534,7 +534,7 @@ const s = StyleSheet.create({
   },
   rankName: {
     fontFamily: fontFamily.bodyMedium,
-    fontSize: 14,
+    fontSize: 15,
     color: colors.ink,
     flex: 1,
   },
@@ -546,7 +546,7 @@ const s = StyleSheet.create({
   },
   scoreBadgeText: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 11,
+    fontSize: 12,
     color: colors.success,
   },
   scoreBadgeWrong: {
@@ -581,7 +581,7 @@ const s = StyleSheet.create({
   },
   badgeName: {
     fontFamily: fontFamily.bodyBold,
-    fontSize: 13,
+    fontSize: 14,
     color: colors.ink,
     marginBottom: 3,
   },
@@ -590,9 +590,9 @@ const s = StyleSheet.create({
   },
   badgeDesc: {
     fontFamily: fontFamily.body,
-    fontSize: 11,
+    fontSize: 12,
     color: colors.textSecondary,
-    lineHeight: 15,
+    lineHeight: 16,
   },
   badgeDescLocked: {
     color: colors.textTertiary,
@@ -606,7 +606,7 @@ const s = StyleSheet.create({
   },
   settingsLinkText: {
     fontFamily: fontFamily.bodyMedium,
-    fontSize: 15,
+    fontSize: 16,
     color: colors.textTertiary,
   },
 });

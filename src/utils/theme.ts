@@ -139,73 +139,73 @@ export const fontFamily = {
 
 export const typography = {
   hero: {
-    fontSize: 52,
+    fontSize: 53,
     fontFamily: fontFamily.display,
     letterSpacing: -1,
   },
   title: {
-    fontSize: 28,
+    fontSize: 29,
     fontFamily: fontFamily.display,
     letterSpacing: -0.5,
   },
   heading: {
-    fontSize: 22,
+    fontSize: 23,
     fontFamily: fontFamily.uiLabel,
     letterSpacing: 0.3,
   },
   headingUpper: {
-    fontSize: 22,
+    fontSize: 23,
     fontFamily: fontFamily.uiLabel,
     letterSpacing: 0.3,
     textTransform: 'uppercase' as const,
   },
   body: {
-    fontSize: 17,
+    fontSize: 18,
     fontFamily: fontFamily.body,
   },
   bodyBold: {
-    fontSize: 17,
+    fontSize: 18,
     fontFamily: fontFamily.bodyBold,
   },
   caption: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: fontFamily.body,
   },
   captionBold: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: fontFamily.uiLabelMedium,
     letterSpacing: 0.2,
   },
   label: {
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: fontFamily.bodyMedium,
   },
   eyebrow: {
-    fontSize: 10,
+    fontSize: 11,
     fontFamily: fontFamily.uiLabel,
     letterSpacing: 2,
     textTransform: 'uppercase' as const,
   },
   sectionLabel: {
-    fontSize: 9,
+    fontSize: 10,
     fontFamily: fontFamily.uiLabel,
     letterSpacing: 2,
     textTransform: 'uppercase' as const,
   },
   cardTitle: {
-    fontSize: 20,
+    fontSize: 21,
     fontFamily: fontFamily.uiLabel,
     letterSpacing: 1,
     textTransform: 'uppercase' as const,
   },
   heroCardTitle: {
-    fontSize: 26,
+    fontSize: 27,
     fontFamily: fontFamily.uiLabel,
     letterSpacing: 1.2,
     textTransform: 'uppercase' as const,
   },
   countNumber: {
-    fontSize: 52,
+    fontSize: 53,
     fontFamily: fontFamily.display,
     letterSpacing: -1,
   },
@@ -227,7 +227,7 @@ export const buttons = {
   },
   primaryText: {
     fontFamily: 'Barlow_600SemiBold',
-    fontSize: 18,
+    fontSize: 19,
     letterSpacing: 0.8,
     textTransform: 'uppercase' as const,
     color: palette.white,
@@ -243,7 +243,7 @@ export const buttons = {
   },
   secondaryText: {
     fontFamily: 'Barlow_600SemiBold',
-    fontSize: 18,
+    fontSize: 19,
     letterSpacing: 0.8,
     textTransform: 'uppercase' as const,
     color: palette.ink,
@@ -262,7 +262,7 @@ export const buttons = {
   },
   chipText: {
     fontFamily: 'Barlow_500Medium',
-    fontSize: 11,
+    fontSize: 12,
     letterSpacing: 0.8,
     textTransform: 'uppercase' as const,
     color: palette.slate,
@@ -278,7 +278,7 @@ export const nav = {
     width: 60,
   },
   backText: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: 'Barlow_500Medium',
     letterSpacing: 0.3,
     color: palette.muted,
