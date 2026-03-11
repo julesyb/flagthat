@@ -34,6 +34,8 @@ export interface BadgeData {
   lastGamePerfect10: boolean;
   lastGameSRank: boolean;
   earnedPracticePerfect: boolean;
+  earnedQuickDraw: boolean;
+  earnedRegionAce: boolean;
 }
 
 const DEFAULT_BADGE_DATA: BadgeData = {
@@ -42,6 +44,8 @@ const DEFAULT_BADGE_DATA: BadgeData = {
   lastGamePerfect10: false,
   lastGameSRank: false,
   earnedPracticePerfect: false,
+  earnedQuickDraw: false,
+  earnedRegionAce: false,
 };
 
 export async function getBadgeData(): Promise<BadgeData> {

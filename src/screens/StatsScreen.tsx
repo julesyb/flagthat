@@ -24,7 +24,7 @@ import BottomNav from '../components/BottomNav';
 import ScreenContainer from '../components/ScreenContainer';
 import { useNavTabs } from '../hooks/useNavTabs';
 import { evaluateBadges, BADGES, TIER_COLORS, BadgeIcon, BadgeCheckContext, getBadgeProgress } from '../utils/badges';
-import { FlagIcon, GlobeIcon, CheckIcon, PlayIcon, LightningIcon, CalendarIcon, ClockIcon, CrosshairIcon, LinkIcon, HeartIcon, ChevronRightIcon, BarChartIcon } from '../components/Icons';
+import { FlagIcon, GlobeIcon, CheckIcon, PlayIcon, LightningIcon, CalendarIcon, ClockIcon, CrosshairIcon, LinkIcon, HeartIcon, ChevronRightIcon, BarChartIcon, CompassIcon } from '../components/Icons';
 
 const RANK_COLORS = [colors.gradeS, colors.textTertiary, colors.warning];
 
@@ -218,6 +218,8 @@ export default function StatsScreen() {
       weakFlagCount,
       adsWatched,
       earnedPracticePerfect: badgeData.earnedPracticePerfect,
+      earnedQuickDraw: badgeData.earnedQuickDraw,
+      earnedRegionAce: badgeData.earnedRegionAce,
     });
   }, [stats, flagStats, dayStreak, bestDayStreak, badgeData, weakFlagCount, adsWatched]);
 
@@ -323,6 +325,8 @@ export default function StatsScreen() {
     weakFlagCount,
     adsWatched,
     earnedPracticePerfect: badgeData.earnedPracticePerfect,
+    earnedQuickDraw: badgeData.earnedQuickDraw,
+    earnedRegionAce: badgeData.earnedRegionAce,
   } : null;
 
   // Region accuracy data (only regions with games played)
@@ -354,6 +358,7 @@ export default function StatsScreen() {
       case 'crosshair': return <CrosshairIcon size={size} color={iconColor} />;
       case 'link': return <LinkIcon size={size} color={iconColor} />;
       case 'heart': return <HeartIcon size={size} color={iconColor} filled />;
+      case 'compass': return <CompassIcon size={size} color={iconColor} />;
       default: return <FlagIcon size={size} color={iconColor} />;
     }
   };

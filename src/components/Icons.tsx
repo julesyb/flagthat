@@ -222,6 +222,15 @@ export function MapPinIcon({ size = 16, color = colors.textSecondary, strokeWidt
   );
 }
 
+export function CompassIcon({ size = 16, color = colors.textSecondary, strokeWidth = 1.5 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+      <Circle cx={12} cy={12} r={10} />
+      <Polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill={color} stroke="none" />
+    </Svg>
+  );
+}
+
 export function ChevronDownIcon({ size = 16, color = colors.textTertiary, strokeWidth = 2 }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">

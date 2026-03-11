@@ -23,7 +23,7 @@ import { BaselineRegionId, UserStats, GameMode } from '../types';
 import { t } from '../utils/i18n';
 import { hapticCorrect, hapticTap, playCelebrationSound } from '../utils/feedback';
 import { FlagImageSmall } from '../components/FlagImage';
-import { CheckIcon, CrossIcon, ChevronRightIcon, BarChartIcon, FlagIcon, GlobeIcon, PlayIcon, LightningIcon, CalendarIcon, ClockIcon, CrosshairIcon, LinkIcon, HeartIcon, UsersIcon } from '../components/Icons';
+import { CheckIcon, CrossIcon, ChevronRightIcon, BarChartIcon, FlagIcon, GlobeIcon, PlayIcon, LightningIcon, CalendarIcon, ClockIcon, CrosshairIcon, LinkIcon, HeartIcon, UsersIcon, CompassIcon } from '../components/Icons';
 import BottomNav from '../components/BottomNav';
 import ScreenContainer from '../components/ScreenContainer';
 import { useNavTabs } from '../hooks/useNavTabs';
@@ -230,6 +230,8 @@ export default function ResultsScreen({ route, navigation }: Props) {
         weakFlagCount: preMissed.length,
         adsWatched: preSupport.totalAdsWatched,
         earnedPracticePerfect: preBadgeData.earnedPracticePerfect,
+        earnedQuickDraw: preBadgeData.earnedQuickDraw,
+        earnedRegionAce: preBadgeData.earnedRegionAce,
       }).map((b) => b.id));
 
       const wasNewBestStreak = streak > preStats.bestStreak;
@@ -265,11 +267,28 @@ export default function ResultsScreen({ route, navigation }: Props) {
         getStats(), getFlagStats(), getDayStreakInfo(), getBadgeData(), getMissedFlagIds(), getSupportData(),
       ]);
 
-      // Persist practice_perfect as sticky once earned
+      // Persist sticky badge flags once conditions are met
+      const stickyUpdates: Partial<typeof postBadgeData> = {};
       const postCountriesSeen = Object.values(postFlagStats).filter((s) => s.right > 0).length;
       if (!postBadgeData.earnedPracticePerfect && postCountriesSeen > 0 && postMissed.length === 0 && postStats.totalGamesPlayed >= 5) {
-        await saveBadgeData({ earnedPracticePerfect: true });
-        postBadgeData.earnedPracticePerfect = true;
+        stickyUpdates.earnedPracticePerfect = true;
+      }
+      if (!postBadgeData.earnedQuickDraw && results.some((r) => r.correct && r.timeTaken < 1500)) {
+        stickyUpdates.earnedQuickDraw = true;
+      }
+      if (!postBadgeData.earnedRegionAce) {
+        const regions = ['africa', 'asia', 'europe', 'americas', 'oceania'] as const;
+        for (const region of regions) {
+          const rs = postStats.categoryStats[region];
+          if (rs && rs.total >= 20 && Math.round((rs.correct / rs.total) * 100) >= 90) {
+            stickyUpdates.earnedRegionAce = true;
+            break;
+          }
+        }
+      }
+      if (Object.keys(stickyUpdates).length > 0) {
+        await saveBadgeData(stickyUpdates);
+        Object.assign(postBadgeData, stickyUpdates);
       }
 
       const postBadges = evaluateBadges({
@@ -282,6 +301,8 @@ export default function ResultsScreen({ route, navigation }: Props) {
         weakFlagCount: postMissed.length,
         adsWatched: postSupport.totalAdsWatched,
         earnedPracticePerfect: postBadgeData.earnedPracticePerfect,
+        earnedQuickDraw: postBadgeData.earnedQuickDraw,
+        earnedRegionAce: postBadgeData.earnedRegionAce,
       });
 
       setOverallStats(postStats);
@@ -479,6 +500,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
       case 'crosshair': return <CrosshairIcon size={size} color={tierColor} />;
       case 'link': return <LinkIcon size={size} color={tierColor} />;
       case 'heart': return <HeartIcon size={size} color={tierColor} filled />;
+      case 'compass': return <CompassIcon size={size} color={tierColor} />;
       default: return <FlagIcon size={size} color={tierColor} />;
     }
   };
