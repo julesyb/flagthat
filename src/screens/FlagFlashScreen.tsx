@@ -292,8 +292,9 @@ export default function FlagFlashScreen({ route, navigation }: Props) {
 
   // Tutorial screen
   if (phase === 'tutorial') {
-    // Native always uses tilt. Mobile web uses tilt if permission granted (unknown yet).
-    // Show tilt instructions for native/mobile web, button instructions for desktop web.
+    // Native always uses tilt. Desktop web uses buttons/keyboard.
+    // Mobile web shows tilt instructions but notes button fallback
+    // in case motion permission is denied.
     const showTiltTutorial = !isWeb || isMobileWeb;
 
     return (
@@ -329,6 +330,11 @@ export default function FlagFlashScreen({ route, navigation }: Props) {
                 </View>
                 <Text style={styles.stepText}>Skip / Pass</Text>
               </View>
+              {isMobileWeb && (
+                <Text style={styles.tiltFallbackNote}>
+                  If motion is unavailable, tap buttons instead
+                </Text>
+              )}
             </>
           ) : (
             <>
@@ -542,6 +548,12 @@ const styles = StyleSheet.create({
   tiltDemoText: {
     ...typography.captionBold,
     color: colors.white,
+  },
+  tiltFallbackNote: {
+    ...typography.caption,
+    color: colors.whiteAlpha45,
+    textAlign: 'center',
+    marginTop: spacing.xs,
   },
   readyButton: {
     ...buttons.primary,

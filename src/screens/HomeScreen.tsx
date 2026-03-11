@@ -565,7 +565,7 @@ const s = StyleSheet.create({
     letterSpacing: 1,
     textTransform: 'uppercase',
     color: colors.accent,
-    marginTop: 1,
+    marginTop: spacing.xxs,
   },
   streakLblMuted: {
     fontFamily: fontFamily.uiLabel,
@@ -573,7 +573,7 @@ const s = StyleSheet.create({
     letterSpacing: 1,
     textTransform: 'uppercase',
     color: colors.textTertiary,
-    marginTop: 1,
+    marginTop: spacing.xxs,
   },
 
   // ── Daily Challenge
@@ -584,11 +584,11 @@ const s = StyleSheet.create({
     borderWidth: 2,
     borderColor: colors.accent,
     borderRadius: borderRadius.lg,
-    padding: 14,
-    paddingHorizontal: 16,
+    padding: spacing.md,
+    paddingHorizontal: spacing.md,
     marginHorizontal: spacing.md,
     marginTop: spacing.md,
-    gap: 12,
+    gap: spacing.md,
   },
   dailyCardDone: {
     borderColor: colors.rule,
@@ -632,8 +632,8 @@ const s = StyleSheet.create({
     marginHorizontal: spacing.md,
     marginTop: spacing.md,
     borderRadius: borderRadius.xl,
-    padding: 22,
-    paddingTop: 24,
+    padding: spacing.lg,
+    paddingTop: spacing.lg,
   },
   heroLabel: {
     fontFamily: fontFamily.uiLabel,
@@ -641,7 +641,7 @@ const s = StyleSheet.create({
     letterSpacing: 1.5,
     textTransform: 'uppercase',
     color: colors.whiteAlpha45,
-    marginBottom: 18,
+    marginBottom: spacing.md,
   },
   flagWrap: {
     width: '100%',
@@ -652,12 +652,12 @@ const s = StyleSheet.create({
 
   // Options 2x2
   optsGrid: {
-    marginTop: 16,
-    gap: 7,
+    marginTop: spacing.md,
+    gap: spacing.sm,
   },
   optsRow: {
     flexDirection: 'row',
-    gap: 7,
+    gap: spacing.sm,
   },
   optWrap: {
     flex: 1,
@@ -667,8 +667,8 @@ const s = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: colors.darkBorder,
     borderRadius: borderRadius.md,
-    paddingVertical: 13,
-    paddingHorizontal: 10,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.sm,
     alignItems: 'center',
   },
   optCorrect: {
@@ -694,9 +694,9 @@ const s = StyleSheet.create({
 
   // ── Teaser result
   teaserResult: {
-    marginTop: 16,
+    marginTop: spacing.md,
     alignItems: 'center',
-    gap: 12,
+    gap: spacing.md,
   },
   teaserResultText: {
     fontFamily: fontFamily.uiLabel,
@@ -716,9 +716,9 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 14,
-    paddingHorizontal: 28,
+    gap: spacing.sm,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.xl,
     borderRadius: borderRadius.md,
     width: '100%',
   },
@@ -739,22 +739,22 @@ const s = StyleSheet.create({
   // ── Play button
   playWrap: {
     paddingHorizontal: spacing.md,
-    paddingTop: 10,
+    paddingTop: spacing.sm,
   },
   playBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 10,
+    gap: spacing.sm,
     backgroundColor: colors.ink,
     borderRadius: borderRadius.lg,
-    paddingVertical: 18,
+    paddingVertical: spacing.md + spacing.xxs,
   },
   playBolt: {
     width: 24,
     height: 24,
     backgroundColor: colors.accent,
-    borderRadius: 6,
+    borderRadius: borderRadius.sm,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -769,7 +769,7 @@ const s = StyleSheet.create({
   // ── Config card
   configCard: {
     marginHorizontal: spacing.md,
-    marginTop: 10,
+    marginTop: spacing.sm,
     backgroundColor: colors.white,
     borderRadius: borderRadius.lg,
     borderWidth: 1,
@@ -779,9 +779,9 @@ const s = StyleSheet.create({
   configRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 13,
-    paddingHorizontal: 16,
-    gap: 10,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.md,
+    gap: spacing.sm,
   },
   configDivider: {
     height: 1,
@@ -797,13 +797,13 @@ const s = StyleSheet.create({
   segRow: {
     flexDirection: 'row',
     flex: 1,
-    gap: 4,
+    gap: spacing.xs,
     justifyContent: 'flex-end',
   },
   segBtn: {
     flex: 1,
     maxWidth: 54,
-    paddingVertical: 7,
+    paddingVertical: spacing.sm,
     backgroundColor: colors.surfaceSecondary,
     borderWidth: 1.5,
     borderColor: colors.rule,
@@ -827,7 +827,7 @@ const s = StyleSheet.create({
   // ── Game modes
   sectionWrap: {
     paddingHorizontal: spacing.md,
-    marginTop: 10,
+    marginTop: spacing.sm,
   },
   sectionLbl: {
     fontFamily: fontFamily.uiLabel,
@@ -835,7 +835,7 @@ const s = StyleSheet.create({
     letterSpacing: 1.2,
     textTransform: 'uppercase',
     color: colors.textTertiary,
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   modeCard: {
     flexDirection: 'row',
@@ -844,10 +844,10 @@ const s = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.rule,
     borderRadius: borderRadius.lg,
-    padding: 14,
-    paddingHorizontal: 16,
-    marginBottom: 7,
-    gap: 12,
+    padding: spacing.md,
+    paddingHorizontal: spacing.md,
+    marginBottom: spacing.sm,
+    gap: spacing.md,
   },
   modeIcon: {
     width: 40,
@@ -876,11 +876,11 @@ const s = StyleSheet.create({
   // ── Stats row
   statsWrap: {
     paddingHorizontal: spacing.md,
-    marginTop: 10,
+    marginTop: spacing.sm,
   },
   statsRow: {
     flexDirection: 'row',
-    gap: 7,
+    gap: spacing.sm,
   },
   statTile: {
     flex: 1,
@@ -888,7 +888,7 @@ const s = StyleSheet.create({
     borderRadius: borderRadius.lg,
     borderWidth: 1,
     borderColor: colors.rule,
-    padding: 14,
+    padding: spacing.md,
     alignItems: 'center',
   },
   statVal: {
@@ -903,6 +903,6 @@ const s = StyleSheet.create({
     letterSpacing: 0.8,
     textTransform: 'uppercase',
     color: colors.textTertiary,
-    marginTop: 4,
+    marginTop: spacing.xs,
   },
 });
