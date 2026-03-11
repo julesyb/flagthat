@@ -274,9 +274,9 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
             <Text style={styles.score}>
               {results.filter((r) => r.correct).length} correct
             </Text>
-          </View>
-        }
-      />
+          )}
+        </View>
+      </View>
 
       <Animated.View
         style={[
