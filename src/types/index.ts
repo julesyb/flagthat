@@ -40,6 +40,7 @@ export interface GameConfig {
   timeLimit?: number; // seconds, for FlagFlash
   displayMode?: DisplayMode; // flag (default) or map
   autocomplete?: boolean; // enable autocomplete suggestions in hard mode
+  guessLimit?: number; // max wrong guesses before game over (0 = unlimited, default 3)
 }
 
 export interface GameQuestion {

@@ -180,7 +180,6 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
           />
         </View>
 
-        <Text style={styles.regionHint}>{question.flag.region}</Text>
         <Text style={styles.prompt}>What is the capital?</Text>
 
         <View style={styles.optionsContainer}>
@@ -222,9 +221,7 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
             {selectedAnswer === question.correctCapital ? (
               <Text style={styles.feedbackCorrect}>Correct!</Text>
             ) : (
-              <Text style={styles.feedbackWrong}>
-                It was {question.correctCapital}
-              </Text>
+              <Text style={styles.feedbackWrong}>Wrong</Text>
             )}
           </View>
         )}

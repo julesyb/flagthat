@@ -55,24 +55,27 @@ interface FakeFlag {
   type: 'triband_h' | 'triband_v' | 'bicolor' | 'cross' | 'chevron';
   colors: string[];
   hasSymbol: boolean;
-  symbolType?: 'circle' | 'star' | 'crescent';
+  symbolType?: 'star' | 'crescent';
   symbolColor?: string;
   reason: string;
 }
 
 function generateFakeFlag(): FakeFlag {
   const types: FakeFlag['type'][] = ['triband_h', 'triband_v', 'bicolor', 'cross', 'chevron'];
-  const symbolTypes: FakeFlag['symbolType'][] = ['circle', 'star', 'crescent'];
+  // Only 1 symbol type (no circle — avoids clashing with triangular shapes like chevron)
+  const symbolTypes: NonNullable<FakeFlag['symbolType']>[] = ['star', 'crescent'];
 
   // Try up to 10 times to generate a flag that doesn't match a known real flag
   for (let attempt = 0; attempt < 10; attempt++) {
     const type = types[Math.floor(Math.random() * types.length)];
     const shuffledColors = shuffleArray([...FLAG_COLORS]);
-    const flagColors = shuffledColors.slice(0, 3);
+    // Max 3 base colors for the layout (+ 1 symbol color = max 4 total)
+    const numBaseColors = type === 'bicolor' ? 2 : 3;
+    const flagColors = shuffledColors.slice(0, numBaseColors);
 
-    // Always add a symbol to make it clearly fake
+    // Always add a single symbol/crest to make it clearly fake
     const symbolType = symbolTypes[Math.floor(Math.random() * symbolTypes.length)];
-    const symbolColor = shuffledColors[3] || '#FFFFFF';
+    const symbolColor = shuffledColors[numBaseColors] || '#FFFFFF';
 
     // Check if this combo matches a known real flag (ignoring symbol)
     const sortedColors = [...flagColors].sort().join(',');
@@ -109,8 +112,6 @@ function FakeFlagSvg({ flag, width, height }: { flag: FakeFlag; width: number; h
     const r = Math.min(width, height) * 0.12;
 
     switch (flag.symbolType) {
-      case 'circle':
-        return <Circle cx={cx} cy={cy} r={r} fill={flag.symbolColor} />;
       case 'star': {
         const points: string[] = [];
         for (let i = 0; i < 5; i++) {
@@ -411,7 +412,7 @@ const styles = StyleSheet.create({
     height: 80,
     overflow: 'hidden',
     borderRadius: 0,
-    backgroundColor: colors.surfaceSecondary,
+    backgroundColor: 'transparent',
   },
   revealInfo: { alignItems: 'center', gap: spacing.xxs },
   fakeLabel: { fontFamily: fontFamily.uiLabel, fontSize: 14, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase' },

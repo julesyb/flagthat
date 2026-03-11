@@ -362,7 +362,6 @@ export default function FlagFlashScreen({ route, navigation }: Props) {
               />
             )}
             <Text style={styles.flagName}>{currentQuestion.flag.name}</Text>
-            <Text style={styles.flagRegion}>{currentQuestion.flag.region}</Text>
           </>
         )}
       </View>

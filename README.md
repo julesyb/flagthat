@@ -5,7 +5,7 @@ A mobile flag quiz app built with React Native and Expo. Test your knowledge of 
 ## Game Modes
 
 - **Quick Play** - Choose 2 Pick, 4 Pick, or Free-form, hit Play Now
-- **Game Mode** - Full control: pick difficulty, display mode (flag or map), category filter, question count
+- **Game Mode** - Full control: pick difficulty, display mode (flag or map), category filter, question count, lives (3 default, 5, or unlimited)
 - **Timed Quiz** - 60 seconds, answer as many as you can
 - **FlagFlash** - Party mode, hold phone on forehead, tilt to answer
 - **Flag Puzzle** - Flag reveals tile by tile, guess before time runs out
