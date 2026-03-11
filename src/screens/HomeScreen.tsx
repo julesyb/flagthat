@@ -15,11 +15,11 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, fontFamily, spacing, borderRadius } from '../utils/theme';
 import { getTotalFlagCount } from '../data';
 import { initAudio, hapticTap, hapticCorrect, hapticWrong, playWrongSound, setSoundsEnabled, setHapticsEnabled } from '../utils/feedback';
-import { getStats, getDayStreak, getDailyChallenge, DailyChallengeData, getSettings } from '../utils/storage';
+import { getStats, getDayStreak, getDailyChallenge, DailyChallengeData, getSettings, getMissedFlagIds } from '../utils/storage';
 import { generateQuestions, getDailyNumber } from '../utils/gameEngine';
 import { RootStackParamList } from '../types/navigation';
 import { GameMode, UserStats, GameQuestion } from '../types';
-import { PlayIcon, ChevronRightIcon, ClockIcon, UsersIcon, EyeIcon, MapPinIcon, LinkIcon, CalendarIcon } from '../components/Icons';
+import { PlayIcon, ChevronRightIcon, ClockIcon, UsersIcon, EyeIcon, MapPinIcon, LinkIcon, CalendarIcon, CrosshairIcon } from '../components/Icons';
 import FlagImage from '../components/FlagImage';
 import BottomNav from '../components/BottomNav';
 
@@ -175,6 +175,7 @@ export default function HomeScreen({ navigation }: Props) {
   const [dayStreak, setDayStreak] = useState(0);
   const [teaserKey, setTeaserKey] = useState(0);
   const [dailyDone, setDailyDone] = useState<DailyChallengeData | null>(null);
+  const [weakFlagCount, setWeakFlagCount] = useState(0);
 
   useEffect(() => {
     initAudio();
@@ -189,6 +190,7 @@ export default function HomeScreen({ navigation }: Props) {
       getStats().then(setStats);
       getDayStreak().then(setDayStreak);
       getDailyChallenge().then(setDailyDone);
+      getMissedFlagIds().then((ids) => setWeakFlagCount(ids.length));
       setTeaserKey((k) => k + 1);
     }, []),
   );
@@ -424,6 +426,28 @@ export default function HomeScreen({ navigation }: Props) {
             </View>
             <ChevronRightIcon size={18} color={colors.rule} />
           </TouchableOpacity>
+
+          {weakFlagCount > 0 && (
+            <TouchableOpacity
+              style={[s.modeCard, { borderColor: colors.accent, borderWidth: 1.5 }]}
+              activeOpacity={0.85}
+              onPress={() => {
+                hapticTap();
+                navigation.navigate('Game', {
+                  config: { mode: 'practice', category: 'all', questionCount: weakFlagCount, displayMode: 'flag' },
+                });
+              }}
+            >
+              <View style={[s.modeIcon, { backgroundColor: colors.accent }]}>
+                <CrosshairIcon size={18} color={colors.white} />
+              </View>
+              <View style={s.modeText}>
+                <Text style={s.modeTitle}>Practice Weak Flags</Text>
+                <Text style={s.modeSub}>{weakFlagCount} flag{weakFlagCount !== 1 ? 's' : ''} to review</Text>
+              </View>
+              <ChevronRightIcon size={18} color={colors.accent} />
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* ── YOUR STATS ── */}

@@ -109,6 +109,22 @@ export function generateQuestions(config: GameConfig): GameQuestion[] {
   });
 }
 
+export function generatePracticeQuestions(flagIds: string[]): GameQuestion[] {
+  const allFlags = getAllFlags();
+  const flagMap = new Map(allFlags.map((f) => [f.id, f]));
+  const practiceFlags = flagIds
+    .map((id) => flagMap.get(id))
+    .filter((f): f is FlagItem => f !== undefined);
+
+  if (practiceFlags.length === 0) return [];
+
+  const shuffled = shuffleArray(practiceFlags);
+  return shuffled.map((flag) => {
+    const options = generateOptions(flag, allFlags, 'medium');
+    return { flag, options };
+  });
+}
+
 function generateOptions(correctFlag: FlagItem, pool: FlagItem[], mode: GameMode): string[] {
   if (mode === 'hard' || mode === 'flagflash' || mode === 'flagpuzzle') return [];
 

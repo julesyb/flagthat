@@ -14,7 +14,8 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { colors, spacing, typography, fontFamily, nav, buttons, borderRadius } from '../utils/theme';
 import { GameQuestion, GameResult } from '../types';
-import { generateQuestions, generateDailyQuestions, checkAnswer } from '../utils/gameEngine';
+import { generateQuestions, generateDailyQuestions, generatePracticeQuestions, checkAnswer } from '../utils/gameEngine';
+import { getMissedFlagIds } from '../utils/storage';
 import { hapticCorrect, hapticWrong, hapticTap, playCorrectSound, playWrongSound } from '../utils/feedback';
 import FlagImage from '../components/FlagImage';
 import MapImage from '../components/MapImage';
@@ -46,17 +47,24 @@ export default function GameScreen({ route, navigation }: Props) {
   const { fadeAnim, streakScale, shakeAnim, animateStreak, animateWrong, animateTransition } = useGameAnimations();
 
   useEffect(() => {
-    let q: GameQuestion[];
     if (config.mode === 'daily') {
-      q = generateDailyQuestions();
+      const q = generateDailyQuestions();
+      setQuestions(q);
+      setQuestionStartTime(Date.now());
+    } else if (config.mode === 'practice') {
+      getMissedFlagIds().then((ids) => {
+        const q = generatePracticeQuestions(ids);
+        setQuestions(q);
+        setQuestionStartTime(Date.now());
+      });
     } else {
       const timeAttackConfig = isTimeAttack
         ? { ...config, questionCount: 999 }
         : config;
-      q = generateQuestions(timeAttackConfig);
+      const q = generateQuestions(timeAttackConfig);
+      setQuestions(q);
+      setQuestionStartTime(Date.now());
     }
-    setQuestions(q);
-    setQuestionStartTime(Date.now());
   }, []);
 
   // Countdown timer for timeattack mode

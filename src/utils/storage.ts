@@ -57,6 +57,7 @@ const DEFAULT_STATS: UserStats = {
     impostor: { correct: 0, total: 0 },
     capitalconnection: { correct: 0, total: 0 },
     daily: { correct: 0, total: 0 },
+    practice: { correct: 0, total: 0 },
   },
   categoryStats: {},
 };
