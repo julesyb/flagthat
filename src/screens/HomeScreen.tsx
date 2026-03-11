@@ -19,7 +19,7 @@ import { getStats, getDayStreak, getDailyChallenge, DailyChallengeData, getSetti
 import { generateQuestions, getDailyNumber } from '../utils/gameEngine';
 import { RootStackParamList } from '../types/navigation';
 import { GameMode, UserStats, GameQuestion } from '../types';
-import { PlayIcon, ChevronRightIcon, ClockIcon, UsersIcon, EyeIcon, MapPinIcon, LinkIcon, CalendarIcon, CrosshairIcon } from '../components/Icons';
+import { PlayIcon, ChevronRightIcon, ClockIcon, UsersIcon, EyeIcon, MapPinIcon, LinkIcon, CalendarIcon, CrosshairIcon, LightningIcon } from '../components/Icons';
 import FlagImage from '../components/FlagImage';
 import BottomNav from '../components/BottomNav';
 
@@ -368,6 +368,26 @@ export default function HomeScreen({ navigation }: Props) {
             <View style={s.modeText}>
               <Text style={s.modeTitle}>Timed Quiz</Text>
               <Text style={s.modeSub}>60 seconds - how many can you get?</Text>
+            </View>
+            <ChevronRightIcon size={18} color={colors.rule} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={s.modeCard}
+            activeOpacity={0.85}
+            onPress={() => {
+              hapticTap();
+              navigation.navigate('FlagFlash', {
+                config: { mode: 'flagflash', category: 'all', questionCount: 999, timeLimit: 60, displayMode: 'flag' },
+              });
+            }}
+          >
+            <View style={s.modeIcon}>
+              <LightningIcon size={18} color={colors.white} />
+            </View>
+            <View style={s.modeText}>
+              <Text style={s.modeTitle}>FlagFlash</Text>
+              <Text style={s.modeSub}>Party mode - tilt your phone to play</Text>
             </View>
             <ChevronRightIcon size={18} color={colors.rule} />
           </TouchableOpacity>

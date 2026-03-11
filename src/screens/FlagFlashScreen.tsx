@@ -1,5 +1,3 @@
-// Do not remove — FlagFlash is complete but temporarily hidden from the game mode selector.
-// It will be re-enabled once tilt/party mode input is finalized.
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
@@ -32,6 +30,33 @@ type Phase = 'tutorial' | 'countdown' | 'playing';
 
 const isWeb = Platform.OS === 'web';
 
+// Detect mobile web (phone browser) vs desktop web
+function getIsMobileWeb(): boolean {
+  if (!isWeb) return false;
+  if (typeof navigator === 'undefined') return false;
+  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
+const isMobileWeb = getIsMobileWeb();
+
+// Request DeviceMotion permission on iOS 13+ (required for tilt on mobile Safari)
+async function requestMotionPermission(): Promise<boolean> {
+  if (typeof DeviceMotionEvent === 'undefined') return false;
+  const DME = DeviceMotionEvent as unknown as {
+    requestPermission?: () => Promise<'granted' | 'denied'>;
+  };
+  if (typeof DME.requestPermission === 'function') {
+    try {
+      const result = await DME.requestPermission();
+      return result === 'granted';
+    } catch {
+      return false;
+    }
+  }
+  // Android Chrome and older iOS don't need permission
+  return true;
+}
+
 export default function FlagFlashScreen({ route, navigation }: Props) {
   const { config } = route.params;
   const [questions, setQuestions] = useState<GameQuestion[]>([]);
@@ -41,6 +66,7 @@ export default function FlagFlashScreen({ route, navigation }: Props) {
   const [tiltState, setTiltState] = useState<TiltState>('neutral');
   const [phase, setPhase] = useState<Phase>('tutorial');
   const [countdown, setCountdown] = useState(3);
+  const [motionGranted, setMotionGranted] = useState(false);
   const questionStartTime = useRef(Date.now());
   const isProcessing = useRef(false);
   const tiltCooldown = useRef(false);
@@ -133,7 +159,36 @@ export default function FlagFlashScreen({ route, navigation }: Props) {
     };
   }, [phase, currentIndex, questions]);
 
-  // Web keyboard controls
+  // Mobile web tilt detection via DeviceMotion API
+  useEffect(() => {
+    if (!isMobileWeb) return;
+    if (phase !== 'playing') return;
+    if (!motionGranted) return;
+
+    const handleMotion = (e: DeviceMotionEvent) => {
+      if (isProcessing.current || tiltCooldown.current) return;
+      const acc = e.accelerationIncludingGravity;
+      if (!acc || acc.z == null) return;
+
+      // Normalize: on mobile web, z ~= 9.8 when flat face-up.
+      // Tilted toward user (screen faces away, forehead pose tilted down): z decreases.
+      // Tilted away from user (screen faces user, forehead pose tilted up): z stays high.
+      // We use y-axis which changes more reliably with forward/backward tilt in portrait:
+      // y ~= 0 when vertical, y > 5 tilted forward (face down), y < -5 tilted backward (face up)
+      const y = acc.y ?? 0;
+
+      if (y > 6) {
+        handleTilt('correct'); // Tilted forward/down
+      } else if (y < -6) {
+        handleTilt('skip'); // Tilted backward/up
+      }
+    };
+
+    window.addEventListener('devicemotion', handleMotion as EventListener);
+    return () => window.removeEventListener('devicemotion', handleMotion as EventListener);
+  }, [phase, currentIndex, questions, motionGranted]);
+
+  // Web keyboard controls (desktop web fallback)
   useEffect(() => {
     if (!isWeb) return;
     if (phase !== 'playing') return;
@@ -211,8 +266,20 @@ export default function FlagFlashScreen({ route, navigation }: Props) {
     navigation.navigate('Home');
   };
 
+  const handleReady = useCallback(async () => {
+    if (isMobileWeb) {
+      const granted = await requestMotionPermission();
+      setMotionGranted(granted);
+    }
+    setPhase('countdown');
+  }, []);
+
   // Tutorial screen
   if (phase === 'tutorial') {
+    // Mobile web gets the same tilt instructions as native (hold on forehead)
+    // Desktop web gets keyboard/button instructions
+    const showTiltTutorial = !isWeb || isMobileWeb;
+
     return (
       <View style={styles.tutorialContainer}>
         <StatusBar hidden />
@@ -220,28 +287,7 @@ export default function FlagFlashScreen({ route, navigation }: Props) {
         <Text style={styles.tutorialSubtitle}>How to play</Text>
 
         <View style={styles.tutorialSteps}>
-          {isWeb ? (
-            <>
-              <View style={styles.tutorialStep}>
-                <View style={styles.stepIconBox}>
-                  <Text style={styles.stepIconText}>?</Text>
-                </View>
-                <Text style={styles.stepText}>A flag name appears on screen</Text>
-              </View>
-              <View style={styles.tutorialStep}>
-                <View style={[styles.tiltDemo, { backgroundColor: colors.success }]}>
-                  <Text style={styles.tiltDemoText}>CORRECT</Text>
-                </View>
-                <Text style={styles.stepText}>Click or press Left arrow</Text>
-              </View>
-              <View style={styles.tutorialStep}>
-                <View style={[styles.tiltDemo, { backgroundColor: colors.error }]}>
-                  <Text style={styles.tiltDemoText}>SKIP</Text>
-                </View>
-                <Text style={styles.stepText}>Click or press Right arrow</Text>
-              </View>
-            </>
-          ) : (
+          {showTiltTutorial ? (
             <>
               <View style={styles.tutorialStep}>
                 <View style={styles.stepIconBox}>
@@ -268,12 +314,33 @@ export default function FlagFlashScreen({ route, navigation }: Props) {
                 <Text style={styles.stepText}>Skip / Pass</Text>
               </View>
             </>
+          ) : (
+            <>
+              <View style={styles.tutorialStep}>
+                <View style={styles.stepIconBox}>
+                  <Text style={styles.stepIconText}>?</Text>
+                </View>
+                <Text style={styles.stepText}>A flag name appears on screen</Text>
+              </View>
+              <View style={styles.tutorialStep}>
+                <View style={[styles.tiltDemo, { backgroundColor: colors.success }]}>
+                  <Text style={styles.tiltDemoText}>CORRECT</Text>
+                </View>
+                <Text style={styles.stepText}>Click or press Left arrow</Text>
+              </View>
+              <View style={styles.tutorialStep}>
+                <View style={[styles.tiltDemo, { backgroundColor: colors.error }]}>
+                  <Text style={styles.tiltDemoText}>SKIP</Text>
+                </View>
+                <Text style={styles.stepText}>Click or press Right arrow</Text>
+              </View>
+            </>
           )}
         </View>
 
         <TouchableOpacity
           style={styles.readyButton}
-          onPress={() => setPhase('countdown')}
+          onPress={handleReady}
           activeOpacity={0.8}
         >
           <Text style={styles.readyButtonText}>Ready!</Text>
@@ -296,7 +363,7 @@ export default function FlagFlashScreen({ route, navigation }: Props) {
       <View style={styles.countdownContainer}>
         <StatusBar hidden />
         <Text style={styles.countdownHint}>
-          {isWeb ? 'Get ready...' : 'Hold phone on forehead'}
+          {isWeb && !isMobileWeb ? 'Get ready...' : 'Hold phone on forehead'}
         </Text>
         <Text style={styles.countdownNumber}>{countdown}</Text>
       </View>
