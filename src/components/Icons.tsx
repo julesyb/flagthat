@@ -1,11 +1,20 @@
 import React from 'react';
-import Svg, { Path, Circle, Line, Rect, Polyline } from 'react-native-svg';
+import Svg, { Path, Circle, Line, Rect, Polyline, Polygon } from 'react-native-svg';
 
 interface IconProps {
   size?: number;
   color?: string;
   strokeWidth?: number;
   filled?: boolean;
+}
+
+// Play triangle — main play button icon
+export function PlayIcon({ size = 16, color = '#FFFFFF' }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Polygon points="6,3 20,12 6,21" fill={color} />
+    </Svg>
+  );
 }
 
 // Lightning bolt — Quick Play / action icon

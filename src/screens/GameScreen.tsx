@@ -21,7 +21,6 @@ import MapImage from '../components/MapImage';
 import { useGameAnimations } from '../hooks/useGameAnimations';
 import { getFlagByName, getFlagsForCategory } from '../data';
 import { RootStackParamList } from '../types/navigation';
-import { ChevronRightIcon } from '../components/Icons';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Game'>;
 
@@ -385,18 +384,6 @@ export default function GameScreen({ route, navigation }: Props) {
                 It was {currentQuestion.flag.name}
               </Text>
             )}
-            {!isTimeAttack && (
-              <TouchableOpacity
-                style={styles.nextButton}
-                onPress={goToNext}
-                activeOpacity={0.7}
-                accessibilityRole="button"
-                accessibilityLabel="Next question"
-              >
-                <Text style={styles.nextButtonText}>Next</Text>
-                <ChevronRightIcon size={16} color={colors.white} />
-              </TouchableOpacity>
-            )}
           </View>
         )}
       </Animated.View>
@@ -608,21 +595,5 @@ const styles = StyleSheet.create({
   feedbackWrong: {
     ...typography.heading,
     color: colors.error,
-  },
-  nextButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    backgroundColor: colors.ink,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: borderRadius.md,
-    marginTop: spacing.md,
-  },
-  nextButtonText: {
-    ...typography.captionBold,
-    color: colors.white,
-    textTransform: 'uppercase',
   },
 });

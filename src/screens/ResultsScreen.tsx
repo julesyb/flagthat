@@ -158,7 +158,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
             activeOpacity={0.7}
             accessibilityLabel="Play again"
           >
-            <Text style={styles.primaryButtonText}>Play Again</Text>
+            <Text style={styles.primaryButtonText}>Play</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.secondaryButton}
@@ -214,7 +214,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
             activeOpacity={0.7}
             accessibilityLabel="Play again"
           >
-            <Text style={styles.primaryButtonText}>Play Again</Text>
+            <Text style={styles.primaryButtonText}>Play</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.secondaryButton}
@@ -333,15 +333,21 @@ const styles = StyleSheet.create({
   secondaryButton: {
     ...buttons.secondary,
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   secondaryButtonText: {
     ...buttons.secondaryText,
+    textAlign: 'center',
   },
   primaryButton: {
     ...buttons.primary,
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   primaryButtonText: {
     ...buttons.primaryText,
+    textAlign: 'center',
   },
 });

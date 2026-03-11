@@ -21,7 +21,6 @@ import {
 } from '../types';
 import { getCategoryCount, getTotalFlagCount } from '../data';
 import { RootStackParamList } from '../types/navigation';
-import { FlagIcon, MapPinIcon } from '../components/Icons';
 import BottomNav from '../components/BottomNav';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'GameSetup'>;
@@ -86,7 +85,7 @@ function OptionChipRow({
 }
 
 export default function GameSetupScreen({ navigation }: Props) {
-  const [displayMode, setDisplayMode] = useState<DisplayMode>('flag');
+  const displayMode: DisplayMode = 'flag';
   const [mode, setMode] = useState<GameMode>('easy');
   const [selectedCategory, setSelectedCategory] = useState<CategoryId>('all');
   const [questionCount, setQuestionCount] = useState(10);
@@ -103,7 +102,6 @@ export default function GameSetupScreen({ navigation }: Props) {
   const isImpostor = mode === 'impostor';
   const isCapitalConnection = mode === 'capitalconnection';
   const hasTimeLimit = isFlagFlash || isFlagPuzzle || isTimeAttack;
-  const showDisplayToggle = !isNeighbors && !isImpostor && !isCapitalConnection;
 
   // Set sensible default time limit when mode changes
   useEffect(() => {
@@ -178,42 +176,6 @@ export default function GameSetupScreen({ navigation }: Props) {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        {/* Display Mode */}
-        {showDisplayToggle && (
-          <>
-            <Text style={styles.sectionTitle}>Display</Text>
-            <View style={styles.displayToggleRow}>
-              {(['flag', 'map'] as DisplayMode[]).map((dm) => {
-                const isActive = displayMode === dm;
-                return (
-                  <TouchableOpacity
-                    key={dm}
-                    style={[styles.displayToggle, isActive && styles.displayToggleActive]}
-                    onPress={() => setDisplayMode(dm)}
-                    activeOpacity={0.7}
-                    accessibilityRole="button"
-                    accessibilityState={{ selected: isActive }}
-                    accessibilityLabel={dm === 'flag' ? 'Flag Mode' : 'Map Mode'}
-                  >
-                    <View style={[styles.displayToggleIconWrapper, isActive && styles.displayToggleIconWrapperActive]}>
-                      {dm === 'flag' ? (
-                        <FlagIcon size={24} color={isActive ? colors.ink : colors.textSecondary} />
-                      ) : (
-                        <MapPinIcon size={24} color={isActive ? colors.ink : colors.textSecondary} />
-                      )}
-                    </View>
-                    <Text style={[styles.displayToggleText, isActive && styles.displayToggleTextActive]}>
-                      {dm === 'flag' ? 'Flag Mode' : 'Map Mode'}
-                    </Text>
-                    <Text style={[styles.displayToggleDesc, isActive && styles.displayToggleDescActive]}>
-                      {dm === 'flag' ? 'Identify the flag' : 'Identify the country on a map'}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          </>
-        )}
 
         {/* Game Mode */}
         <Text style={styles.sectionTitle}>Game Mode</Text>

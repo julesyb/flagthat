@@ -1,11 +1,10 @@
-import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   SafeAreaView,
-  ScrollView,
   Animated,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -18,88 +17,118 @@ import { FlagItem, GameResult } from '../types';
 import { countries } from '../data/countries';
 import { countryCapitals } from '../data/countryCapitals';
 import FlagImage from '../components/FlagImage';
-import { CheckIcon, CrossIcon, ClockIcon } from '../components/Icons';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CapitalConnection'>;
 
-const PAIRS_PER_ROUND = 6;
-const ROUND_TIME = 60; // seconds
-
-interface RoundData {
-  flags: FlagItem[];
-  capitals: { id: string; capital: string }[];
-  shuffledCapitals: { id: string; capital: string }[];
+interface QuestionData {
+  flag: FlagItem;
+  correctCapital: string;
+  options: string[];
 }
 
-function generateRounds(count: number): RoundData[] {
-  // Only use countries that have a capital
+function generateQuestions(count: number): QuestionData[] {
   const eligible = countries.filter((c) => countryCapitals[c.id]);
-  const rounds: RoundData[] = [];
-  const usedIds = new Set<string>();
+  const selected = shuffleArray(eligible).slice(0, count);
 
-  for (let i = 0; i < count; i++) {
-    const available = eligible.filter((c) => !usedIds.has(c.id));
-    const pool = available.length >= PAIRS_PER_ROUND ? available : eligible;
-    const selected = shuffleArray(pool).slice(0, PAIRS_PER_ROUND);
-    selected.forEach((f) => usedIds.add(f.id));
+  return selected.map((flag) => {
+    const correctCapital = countryCapitals[flag.id];
+    // Pick 3 wrong capitals from other countries
+    const otherCapitals = eligible
+      .filter((c) => c.id !== flag.id)
+      .map((c) => countryCapitals[c.id]);
+    const wrongOptions = shuffleArray(otherCapitals).slice(0, 3);
+    const options = shuffleArray([correctCapital, ...wrongOptions]);
 
-    const capitals = selected.map((f) => ({
-      id: f.id,
-      capital: countryCapitals[f.id],
-    }));
-
-    rounds.push({
-      flags: selected,
-      capitals,
-      shuffledCapitals: shuffleArray([...capitals]),
-    });
-  }
-  return rounds;
+    return { flag, correctCapital, options };
+  });
 }
 
 export default function CapitalConnectionScreen({ navigation, route }: Props) {
   const { config } = route.params;
-  const rounds = useMemo(() => generateRounds(config.questionCount), [config.questionCount]);
-  const [roundIndex, setRoundIndex] = useState(0);
-  const [pairs, setPairs] = useState<Record<string, string>>({}); // flagId -> capitalId
-  const [selectedFlag, setSelectedFlag] = useState<string | null>(null);
-  const [submitted, setSubmitted] = useState(false);
+  const questions = useMemo(() => generateQuestions(config.questionCount), [config.questionCount]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+  const [showFeedback, setShowFeedback] = useState(false);
   const [results, setResults] = useState<GameResult[]>([]);
-  const [timer, setTimer] = useState(ROUND_TIME);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [currentStreak, setCurrentStreak] = useState(0);
   const fadeAnim = useRef(new Animated.Value(1)).current;
-  const handleSubmitRef = useRef<(() => void) | null>(null);
+  const questionStartTime = useRef(Date.now());
+  const autoAdvanceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingResultsRef = useRef<GameResult[] | null>(null);
 
-  const round = rounds[roundIndex] ?? null;
-  const isLastRound = roundIndex >= rounds.length - 1;
-  const correctCount = results.filter((r) => r.correct).length;
-  const allPaired = Object.keys(pairs).length === PAIRS_PER_ROUND;
-
-  // Timer
+  // Clean up auto-advance timer on unmount
   useEffect(() => {
-    if (!round || submitted) {
-      if (timerRef.current) clearInterval(timerRef.current);
-      return;
+    return () => {
+      if (autoAdvanceRef.current) clearTimeout(autoAdvanceRef.current);
+    };
+  }, []);
+
+  const question = questions[currentIndex] ?? null;
+  const correctCount = results.filter((r) => r.correct).length;
+  const progress = questions.length > 0 ? (currentIndex + 1) / questions.length : 0;
+
+  const goToNext = useCallback(() => {
+    if (autoAdvanceRef.current) {
+      clearTimeout(autoAdvanceRef.current);
+      autoAdvanceRef.current = null;
+    }
+    const newResults = pendingResultsRef.current;
+    if (!newResults) return;
+    pendingResultsRef.current = null;
+
+    if (currentIndex < questions.length - 1) {
+      fadeAnim.setValue(1);
+      Animated.timing(fadeAnim, { toValue: 0, duration: 100, useNativeDriver: true }).start(() => {
+        setResults(newResults);
+        setCurrentIndex((i) => i + 1);
+        setSelectedAnswer(null);
+        setShowFeedback(false);
+        questionStartTime.current = Date.now();
+        Animated.timing(fadeAnim, { toValue: 1, duration: 150, useNativeDriver: true }).start();
+      });
+    } else {
+      const correct = newResults.filter((r) => r.correct).length;
+      const streak = getStreakFromResults(newResults);
+      updateStats(correct, newResults.length, streak, 'capitalconnection', config.category);
+      updateFlagResults(newResults);
+      navigation.replace('Results', { results: newResults, config });
+    }
+  }, [currentIndex, questions, navigation, config, fadeAnim]);
+
+  const handleAnswer = useCallback((answer: string) => {
+    if (showFeedback || !question) return;
+    hapticTap();
+
+    const correct = answer === question.correctCapital;
+    const timeTaken = Date.now() - questionStartTime.current;
+
+    setSelectedAnswer(answer);
+    setShowFeedback(true);
+
+    if (correct) {
+      hapticCorrect();
+      setCurrentStreak((s) => s + 1);
+    } else {
+      hapticWrong();
+      playWrongSound();
+      setCurrentStreak(0);
     }
 
-    setTimer(ROUND_TIME);
-    timerRef.current = setInterval(() => {
-      setTimer((t) => {
-        if (t <= 1) {
-          // Auto-submit when timer runs out
-          handleSubmitRef.current?.();
-          return 0;
-        }
-        return t - 1;
-      });
-    }, 1000);
-
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
+    const result: GameResult = {
+      question: { flag: question.flag, options: question.options },
+      userAnswer: answer,
+      correct,
+      timeTaken,
     };
-  }, [roundIndex, submitted, round]);
 
-  if (!round) {
+    const newResults = [...results, result];
+    pendingResultsRef.current = newResults;
+
+    const feedbackDelay = correct ? 600 : 1200;
+    autoAdvanceRef.current = setTimeout(() => goToNext(), feedbackDelay);
+  }, [showFeedback, question, results, goToNext]);
+
+  if (!question) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.emptyState}>
@@ -115,107 +144,15 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
     );
   }
 
-  const handleFlagTap = (flagId: string) => {
-    if (submitted) return;
-    hapticTap();
-
-    if (selectedFlag === flagId) {
-      setSelectedFlag(null);
-      return;
-    }
-
-    // If this flag is already paired, unpair it
-    if (pairs[flagId]) {
-      setPairs((prev) => {
-        const next = { ...prev };
-        delete next[flagId];
-        return next;
-      });
-    }
-
-    setSelectedFlag(flagId);
-  };
-
-  const handleCapitalTap = (capitalId: string) => {
-    if (submitted || !selectedFlag) return;
-    hapticTap();
-
-    // Check if this capital is already assigned to another flag
-    const existingFlag = Object.entries(pairs).find(([, cId]) => cId === capitalId)?.[0];
-
-    setPairs((prev) => {
-      const next = { ...prev };
-      // Remove old assignment for this capital
-      if (existingFlag) delete next[existingFlag];
-      // Assign to selected flag
-      next[selectedFlag] = capitalId;
-      return next;
-    });
-    setSelectedFlag(null);
-  };
-
-  const handleSubmit = useCallback(() => {
-    if (submitted) return;
-    setSubmitted(true);
-    if (timerRef.current) clearInterval(timerRef.current);
-
-    let correctCount = 0;
-    const roundResults: GameResult[] = round.flags.map((flag) => {
-      const pairedCapitalId = pairs[flag.id];
-      const isCorrect = pairedCapitalId === flag.id;
-      if (isCorrect) correctCount++;
-
-      return {
-        question: { flag, options: [countryCapitals[flag.id]] },
-        userAnswer: pairedCapitalId ? countryCapitals[pairedCapitalId] || 'None' : 'None',
-        correct: isCorrect,
-        timeTaken: (ROUND_TIME - timer) * 1000,
-      };
-    });
-
-    if (correctCount === PAIRS_PER_ROUND) {
-      hapticCorrect();
-    } else {
-      hapticWrong();
-      playWrongSound();
-    }
-
-    setResults((prev) => [...prev, ...roundResults]);
-  }, [submitted, round, pairs, timer]);
-
-  // Keep ref updated
-  handleSubmitRef.current = handleSubmit;
-
-  const handleNext = () => {
-    if (isLastRound) {
-      const finalResults = [...results];
-      const correct = finalResults.filter((r) => r.correct).length;
-      const streak = getStreakFromResults(finalResults);
-      updateStats(correct, finalResults.length, streak, 'capitalconnection', config.category);
-      updateFlagResults(finalResults);
-      navigation.replace('Results', { results: finalResults, config });
-      return;
-    }
-
-    fadeAnim.setValue(1);
-    Animated.timing(fadeAnim, { toValue: 0, duration: 120, useNativeDriver: true }).start(() => {
-      setRoundIndex((i) => i + 1);
-      setPairs({});
-      setSelectedFlag(null);
-      setSubmitted(false);
-      Animated.timing(fadeAnim, { toValue: 1, duration: 180, useNativeDriver: true }).start();
-    });
-  };
-
-  const pairedCapitalIds = new Set(Object.values(pairs));
-  const inversePairs = Object.fromEntries(Object.entries(pairs).map(([k, v]) => [v, k]));
-
   return (
     <SafeAreaView style={styles.container}>
-      {/* Top Bar */}
+      <View style={styles.progressBar}>
+        <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
+      </View>
+
       <View style={styles.topBar}>
         <TouchableOpacity
-          onPress={() => navigation.goBack()}
+          onPress={() => navigation.popToTop()}
           style={styles.exitButton}
           accessibilityRole="button"
         >
@@ -223,164 +160,75 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
         </TouchableOpacity>
         <View style={styles.centerInfo}>
           <Text style={styles.counter}>
-            {roundIndex + 1} / {rounds.length}
+            {currentIndex + 1} / {questions.length}
           </Text>
-          <Text style={styles.scoreText}>{correctCount} correct</Text>
-          <View style={styles.timerRow}>
-            <ClockIcon size={14} color={timer <= 10 ? colors.accent : colors.textTertiary} />
-            <Text style={[styles.timerText, timer <= 10 && styles.timerTextUrgent]}>
-              {timer}s
-            </Text>
-          </View>
+          {currentStreak >= 2 ? (
+            <Text style={styles.streakText}>{currentStreak}x streak</Text>
+          ) : (
+            <Text style={styles.scoreText}>{correctCount} correct</Text>
+          )}
         </View>
         <View style={styles.spacer} />
       </View>
 
-      <ScrollView
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
-      >
-        <Animated.View style={{ opacity: fadeAnim }}>
-          <Text style={styles.prompt}>Match flags to capitals</Text>
+      <Animated.View style={[styles.questionContainer, { opacity: fadeAnim }]}>
+        <View style={styles.flagContainer}>
+          <FlagImage
+            countryCode={question.flag.id}
+            emoji={question.flag.emoji}
+            size="hero"
+          />
+        </View>
 
-          {/* Flags Row */}
-          <Text style={styles.sectionLabel}>Flags</Text>
-          <View style={styles.flagsRow}>
-            {round.flags.map((flag) => {
-              const isActive = selectedFlag === flag.id;
-              const isPaired = !!pairs[flag.id];
-              const isCorrect = submitted && pairs[flag.id] === flag.id;
-              const isWrong = submitted && pairs[flag.id] && pairs[flag.id] !== flag.id;
+        <Text style={styles.regionHint}>{question.flag.region}</Text>
+        <Text style={styles.prompt}>What is the capital?</Text>
 
-              return (
-                <TouchableOpacity
-                  key={flag.id}
-                  style={[
-                    styles.flagCard,
-                    isActive && styles.flagCardActive,
-                    isPaired && !submitted && styles.flagCardPaired,
-                    isCorrect && styles.flagCardCorrect,
-                    isWrong && styles.flagCardWrong,
-                  ]}
-                  onPress={() => handleFlagTap(flag.id)}
-                  activeOpacity={0.7}
-                  disabled={submitted}
-                >
-                  <FlagImage
-                    countryCode={flag.id}
-                    emoji={flag.emoji}
-                    size="small"
-                  />
-                  {submitted && (
-                    <View style={styles.flagResultIcon}>
-                      {isCorrect ? (
-                        <CheckIcon size={12} color={colors.success} />
-                      ) : (
-                        <CrossIcon size={12} color={colors.error} />
-                      )}
-                    </View>
-                  )}
-                  {isPaired && !submitted && (
-                    <View style={styles.pairedDot} />
-                  )}
-                </TouchableOpacity>
-              );
-            })}
+        <View style={styles.optionsContainer}>
+          {question.options.map((option, index) => {
+            const isSelected = selectedAnswer === option;
+            const isCorrect = option === question.correctCapital;
+
+            let optionStyle = styles.optionButton;
+            let textStyle = styles.optionText;
+
+            if (showFeedback) {
+              if (isCorrect) {
+                optionStyle = { ...styles.optionButton, ...styles.optionCorrect };
+                textStyle = { ...styles.optionText, ...styles.optionTextFeedback };
+              } else if (isSelected && !isCorrect) {
+                optionStyle = { ...styles.optionButton, ...styles.optionWrong };
+                textStyle = { ...styles.optionText, ...styles.optionTextFeedback };
+              }
+            }
+
+            return (
+              <TouchableOpacity
+                key={`${currentIndex}-${index}`}
+                style={optionStyle}
+                onPress={() => handleAnswer(option)}
+                disabled={showFeedback}
+                activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel={option}
+              >
+                <Text style={textStyle}>{option}</Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+
+        {showFeedback && (
+          <View style={styles.feedbackContainer}>
+            {selectedAnswer === question.correctCapital ? (
+              <Text style={styles.feedbackCorrect}>Correct!</Text>
+            ) : (
+              <Text style={styles.feedbackWrong}>
+                It was {question.correctCapital}
+              </Text>
+            )}
           </View>
-
-          {/* Capitals List */}
-          <Text style={styles.sectionLabel}>Capitals</Text>
-          <View style={styles.capitalsList}>
-            {round.shuffledCapitals.map((cap) => {
-              const isUsed = pairedCapitalIds.has(cap.id);
-              const pairedFlagId = inversePairs[cap.id];
-              const isCorrect = submitted && pairedFlagId === cap.id;
-              const isWrong = submitted && pairedFlagId && pairedFlagId !== cap.id;
-              const isUnmatched = submitted && !pairedFlagId;
-
-              return (
-                <TouchableOpacity
-                  key={cap.id}
-                  style={[
-                    styles.capitalCard,
-                    isUsed && !submitted && styles.capitalCardUsed,
-                    isCorrect && styles.capitalCardCorrect,
-                    isWrong && styles.capitalCardWrong,
-                    isUnmatched && styles.capitalCardWrong,
-                  ]}
-                  onPress={() => handleCapitalTap(cap.id)}
-                  activeOpacity={0.7}
-                  disabled={submitted || !selectedFlag}
-                >
-                  <Text
-                    style={[
-                      styles.capitalText,
-                      isUsed && !submitted && styles.capitalTextUsed,
-                      isCorrect && styles.capitalTextCorrect,
-                      isWrong && styles.capitalTextWrong,
-                    ]}
-                  >
-                    {cap.capital}
-                  </Text>
-                  {submitted && isCorrect && (
-                    <CheckIcon size={14} color={colors.success} />
-                  )}
-                  {submitted && (isWrong || isUnmatched) && (
-                    <CrossIcon size={14} color={colors.error} />
-                  )}
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-
-          {/* After submission: show correct answers */}
-          {submitted && (
-            <View style={styles.answerCard}>
-              <Text style={styles.answerTitle}>Correct Answers</Text>
-              {round.flags.map((flag) => (
-                <View key={flag.id} style={styles.answerRow}>
-                  <FlagImage countryCode={flag.id} emoji={flag.emoji} size="small" />
-                  <View style={styles.answerText}>
-                    <Text style={styles.answerCountry}>{flag.name}</Text>
-                    <Text style={styles.answerCapital}>{countryCapitals[flag.id]}</Text>
-                  </View>
-                  {pairs[flag.id] === flag.id ? (
-                    <CheckIcon size={16} color={colors.success} />
-                  ) : (
-                    <CrossIcon size={16} color={colors.error} />
-                  )}
-                </View>
-              ))}
-            </View>
-          )}
-        </Animated.View>
-      </ScrollView>
-
-      {/* Bottom Action */}
-      <View style={styles.bottomBar}>
-        {!submitted ? (
-          <TouchableOpacity
-            style={[styles.actionButton, !allPaired && styles.actionButtonDisabled]}
-            onPress={handleSubmit}
-            activeOpacity={0.8}
-            disabled={!allPaired}
-          >
-            <Text style={styles.actionButtonText}>
-              Submit ({Object.keys(pairs).length}/{PAIRS_PER_ROUND} paired)
-            </Text>
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={handleNext}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.actionButtonText}>
-              {isLastRound ? 'See Results' : 'Next'}
-            </Text>
-          </TouchableOpacity>
         )}
-      </View>
+      </Animated.View>
     </SafeAreaView>
   );
 }
@@ -389,6 +237,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+    alignItems: 'center',
+  },
+  progressBar: {
+    height: 3,
+    backgroundColor: colors.border,
+    width: '100%',
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: colors.ink,
   },
   topBar: {
     flexDirection: 'row',
@@ -396,6 +254,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
+    width: '100%',
+    maxWidth: 480,
   },
   exitButton: {
     padding: spacing.sm,
@@ -415,166 +275,77 @@ const styles = StyleSheet.create({
     ...typography.bodyBold,
     color: colors.text,
   },
-  timerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  timerText: {
-    ...typography.captionBold,
-    color: colors.textTertiary,
-  },
-  timerTextUrgent: {
-    color: colors.accent,
-  },
-  content: {
-    padding: spacing.lg,
-    paddingBottom: 120,
-  },
-  prompt: {
-    ...typography.headingUpper,
-    color: colors.text,
-    textAlign: 'center',
-    marginBottom: spacing.lg,
-  },
-  sectionLabel: {
-    ...typography.eyebrow,
-    color: colors.textTertiary,
-    marginBottom: spacing.sm,
-  },
-  flagsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-    justifyContent: 'center',
-    marginBottom: spacing.lg,
-  },
-  flagCard: {
-    alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderWidth: 2,
-    borderColor: colors.border,
-    borderRadius: borderRadius.md,
-    padding: spacing.xs,
-  },
-  flagCardActive: {
-    borderColor: colors.ink,
-    backgroundColor: colors.surfaceSecondary,
-  },
-  flagCardPaired: {
-    borderColor: colors.slate,
-  },
-  flagCardCorrect: {
-    borderColor: colors.success,
-    backgroundColor: colors.successBg,
-  },
-  flagCardWrong: {
-    borderColor: colors.error,
-    backgroundColor: colors.errorBg,
-  },
-  flagResultIcon: {
-    position: 'absolute',
-    top: -4,
-    right: -4,
-  },
-  pairedDot: {
-    position: 'absolute',
-    bottom: 2,
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: colors.ink,
-  },
-  capitalsList: {
-    gap: spacing.sm,
-    marginBottom: spacing.lg,
-  },
-  capitalCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: colors.surface,
-    borderWidth: 2,
-    borderColor: colors.border,
-    borderRadius: borderRadius.md,
-    paddingVertical: spacing.sm + spacing.xs,
-    paddingHorizontal: spacing.md,
-  },
-  capitalCardUsed: {
-    borderColor: colors.slate,
-    backgroundColor: colors.surfaceSecondary,
-  },
-  capitalCardCorrect: {
-    borderColor: colors.success,
-    backgroundColor: colors.successBg,
-  },
-  capitalCardWrong: {
-    borderColor: colors.error,
-    backgroundColor: colors.errorBg,
-  },
-  capitalText: {
-    fontFamily: fontFamily.bodyMedium,
-    fontSize: 16,
-    color: colors.ink,
-  },
-  capitalTextUsed: {
-    color: colors.slate,
-  },
-  capitalTextCorrect: {
+  scoreText: {
+    ...typography.caption,
     color: colors.success,
   },
-  capitalTextWrong: {
-    color: colors.error,
-  },
-  answerCard: {
-    marginTop: spacing.lg,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: borderRadius.md,
-    padding: spacing.md,
-    gap: spacing.sm,
-  },
-  answerTitle: {
-    ...typography.captionBold,
-    color: colors.textSecondary,
-    textTransform: 'uppercase',
-    marginBottom: spacing.xs,
-  },
-  answerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  answerText: {
-    flex: 1,
-  },
-  answerCountry: {
-    fontFamily: fontFamily.bodyBold,
-    fontSize: 14,
-    color: colors.ink,
-  },
-  answerCapital: {
-    fontFamily: fontFamily.body,
-    fontSize: 12,
-    color: colors.textTertiary,
-  },
-  bottomBar: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    padding: spacing.lg,
-    paddingBottom: spacing.xl,
-    backgroundColor: colors.background,
-    borderTopWidth: 1,
-    borderTopColor: colors.rule,
+  streakText: {
+    ...typography.caption,
+    color: colors.accent,
   },
   spacer: { width: 60 },
-  scoreText: { ...typography.caption, color: colors.success },
-  actionButton: { ...buttons.primary },
-  actionButtonDisabled: { opacity: 0.4 },
-  actionButtonText: { ...buttons.primaryText },
+  questionContainer: {
+    flex: 1,
+    padding: spacing.lg,
+    justifyContent: 'center',
+    width: '100%',
+    maxWidth: 480,
+  },
+  flagContainer: {
+    alignItems: 'center',
+    marginBottom: spacing.md,
+  },
+  regionHint: {
+    ...typography.captionBold,
+    color: colors.textTertiary,
+    textAlign: 'center',
+    marginBottom: spacing.xs,
+  },
+  prompt: {
+    ...typography.caption,
+    color: colors.textTertiary,
+    textAlign: 'center',
+    marginBottom: spacing.md,
+  },
+  optionsContainer: {
+    gap: spacing.xs,
+  },
+  optionButton: {
+    backgroundColor: colors.surface,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: colors.border,
+    borderRadius: borderRadius.md,
+  },
+  optionCorrect: {
+    backgroundColor: colors.success,
+    borderColor: colors.success,
+  },
+  optionWrong: {
+    backgroundColor: colors.error,
+    borderColor: colors.error,
+  },
+  optionText: {
+    ...typography.bodyBold,
+    color: colors.text,
+  },
+  optionTextFeedback: {
+    color: colors.white,
+  },
+  feedbackContainer: {
+    marginTop: spacing.lg,
+    alignItems: 'center',
+  },
+  feedbackCorrect: {
+    ...typography.heading,
+    color: colors.success,
+  },
+  feedbackWrong: {
+    ...typography.heading,
+    color: colors.error,
+  },
   emptyState: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing.xl },
   emptyTitle: { ...typography.heading, color: colors.text, marginBottom: spacing.sm },
   emptyBody: { ...typography.body, color: colors.textSecondary, textAlign: 'center', marginBottom: spacing.xl },

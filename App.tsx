@@ -27,19 +27,20 @@ import CapitalConnectionScreen from './src/screens/CapitalConnectionScreen';
 import ErrorBoundary from './src/components/ErrorBoundary';
 import { ChevronLeftIcon } from './src/components/Icons';
 import { RootStackParamList } from './src/types/navigation';
-import { colors, typography, fontFamily } from './src/utils/theme';
+import { colors } from './src/utils/theme';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function HomeBackButton({ onPress }: { onPress: () => void }) {
   return (
     <TouchableOpacity
-      style={{ flexDirection: 'row', alignItems: 'center', marginLeft: -8, paddingRight: 12 }}
+      style={{ marginLeft: -8, padding: 8 }}
       onPress={onPress}
       activeOpacity={0.7}
+      accessibilityRole="button"
+      accessibilityLabel="Go back"
     >
-      <ChevronLeftIcon size={20} color={colors.textTertiary} />
-      <Text style={{ fontFamily: fontFamily.uiLabelMedium, fontSize: 13, letterSpacing: 0.3, color: colors.textTertiary, textTransform: 'uppercase', marginLeft: 2 }}>Play</Text>
+      <ChevronLeftIcon size={22} color={colors.ink} />
     </TouchableOpacity>
   );
 }

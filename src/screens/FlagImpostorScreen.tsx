@@ -34,6 +34,23 @@ const FLAG_COLORS = [
   '#003893', '#FCD116', '#C8102E', '#00843D', '#E30A17', '#002664',
 ];
 
+// Known real-flag color combos to avoid generating (type + sorted colors)
+const REAL_FLAG_COMBOS = new Set([
+  'triband_h:#000000,#CE1126,#FFFFFF',   // Egypt-like
+  'triband_h:#003DA5,#CE1126,#FFFFFF',   // France/Netherlands-like
+  'triband_v:#003DA5,#CE1126,#FFFFFF',   // France
+  'triband_v:#009739,#CE1126,#FFFFFF',   // Italy
+  'triband_h:#000000,#CE1126,#FFCD00',   // Germany
+  'triband_h:#003DA5,#FFFFFF,#EF3340',   // Luxembourg/Netherlands
+  'triband_v:#009739,#FF6600,#FFFFFF',   // Ireland
+  'triband_h:#003DA5,#FFFFFF,#CE1126',   // Russia
+  'bicolor:#003DA5,#FFCD00',             // Ukraine
+  'triband_v:#003DA5,#FFCD00,#EF3340',   // Romania/Chad
+  'triband_h:#009739,#FFCD00,#EF3340',   // Lithuania
+  'triband_v:#003DA5,#FFFFFF,#EF3340',   // France
+  'triband_h:#000000,#EF3340,#FFCD00',   // Germany/Belgium
+]);
+
 interface FakeFlag {
   type: 'triband_h' | 'triband_v' | 'bicolor' | 'cross' | 'chevron';
   colors: string[];
@@ -45,18 +62,41 @@ interface FakeFlag {
 
 function generateFakeFlag(): FakeFlag {
   const types: FakeFlag['type'][] = ['triband_h', 'triband_v', 'bicolor', 'cross', 'chevron'];
-  const type = types[Math.floor(Math.random() * types.length)];
-  const shuffledColors = shuffleArray([...FLAG_COLORS]);
-  const flagColors = shuffledColors.slice(0, 3);
-  const hasSymbol = Math.random() > 0.4;
   const symbolTypes: FakeFlag['symbolType'][] = ['circle', 'star', 'crescent'];
 
+  // Try up to 10 times to generate a flag that doesn't match a known real flag
+  for (let attempt = 0; attempt < 10; attempt++) {
+    const type = types[Math.floor(Math.random() * types.length)];
+    const shuffledColors = shuffleArray([...FLAG_COLORS]);
+    const flagColors = shuffledColors.slice(0, 3);
+
+    // Always add a symbol to make it clearly fake
+    const symbolType = symbolTypes[Math.floor(Math.random() * symbolTypes.length)];
+    const symbolColor = shuffledColors[3] || '#FFFFFF';
+
+    // Check if this combo matches a known real flag (ignoring symbol)
+    const sortedColors = [...flagColors].sort().join(',');
+    const comboKey = `${type}:${sortedColors}`;
+    if (REAL_FLAG_COMBOS.has(comboKey)) continue;
+
+    return {
+      type,
+      colors: flagColors,
+      hasSymbol: true,
+      symbolType,
+      symbolColor,
+      reason: 'Procedurally generated, no real country uses this combination',
+    };
+  }
+
+  // Fallback: use chevron with symbol (very unlikely to be a real flag)
+  const shuffledColors = shuffleArray([...FLAG_COLORS]);
   return {
-    type,
-    colors: flagColors,
-    hasSymbol,
-    symbolType: hasSymbol ? symbolTypes[Math.floor(Math.random() * symbolTypes.length)] : undefined,
-    symbolColor: hasSymbol ? shuffledColors[3] || '#FFFFFF' : undefined,
+    type: 'chevron',
+    colors: shuffledColors.slice(0, 3),
+    hasSymbol: true,
+    symbolType: 'star',
+    symbolColor: shuffledColors[3] || '#FFFFFF',
     reason: 'Procedurally generated, no real country uses this combination',
   };
 }
@@ -230,8 +270,8 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
     });
   };
 
-  const FLAG_W = 140;
-  const FLAG_H = 93;
+  const FLAG_W = 120;
+  const FLAG_H = 80;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -367,12 +407,10 @@ const styles = StyleSheet.create({
   gridCardCorrect: { borderColor: colors.success, backgroundColor: colors.successBg },
   gridCardWrong: { borderColor: colors.error, backgroundColor: colors.errorBg },
   flagWrapper: {
-    width: 140,
-    height: 93,
+    width: 120,
+    height: 80,
     overflow: 'hidden',
-    borderRadius: borderRadius.sm,
-    borderWidth: 1,
-    borderColor: colors.rule2,
+    borderRadius: 0,
     backgroundColor: colors.surfaceSecondary,
   },
   revealInfo: { alignItems: 'center', gap: spacing.xxs },

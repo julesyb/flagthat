@@ -10,8 +10,10 @@ interface MapImageProps {
   style?: object;
 }
 
-// CartoDB Positron no-labels — simple country outlines, no roads or terrain
+// CartoDB Positron no-labels — simple country outlines
+// Use @2x tiles for better quality on retina screens
 const TILE_URL = 'https://basemaps.cartocdn.com/light_nolabels';
+const MAX_ZOOM = 5; // Cap zoom to avoid showing city roads and minor boundaries
 const TILE_SIZE = 256;
 
 function latLngToTile(lat: number, lng: number, zoom: number) {
@@ -88,7 +90,7 @@ export default function MapImage({ countryCode, size = 'hero', style }: MapImage
     );
   }
 
-  const zoom = coord.zoom + zoomDelta;
+  const zoom = Math.min(coord.zoom + zoomDelta, MAX_ZOOM);
   const gridSize = (() => {
     if (size === 'small' || size === 'medium') return 3;
     if (zoom <= 2) return 11;
@@ -162,7 +164,10 @@ export default function MapImage({ countryCode, size = 'hero', style }: MapImage
   }
 
   const handleZoomIn = () => {
-    setZoomDelta((d) => Math.min(d + 1, 6));
+    setZoomDelta((d) => {
+      const newZoom = coord.zoom + d + 1;
+      return newZoom <= MAX_ZOOM ? d + 1 : d;
+    });
   };
 
   const handleZoomOut = () => {

@@ -19,7 +19,7 @@ import { getStats, getDayStreak } from '../utils/storage';
 import { generateQuestions } from '../utils/gameEngine';
 import { RootStackParamList } from '../types/navigation';
 import { GameMode, UserStats, GameQuestion } from '../types';
-import { LightningIcon, CrosshairIcon, ChevronRightIcon, ClockIcon, UsersIcon, EyeIcon, LinkIcon } from '../components/Icons';
+import { PlayIcon, ChevronRightIcon, ClockIcon, UsersIcon, EyeIcon, MapPinIcon, LinkIcon } from '../components/Icons';
 import FlagImage from '../components/FlagImage';
 import BottomNav from '../components/BottomNav';
 
@@ -45,19 +45,10 @@ function FlagTeaser() {
   }, []);
 
   const [picked, setPicked] = useState<string | null>(null);
-  const coverOpacity = useRef(new Animated.Value(1)).current;
   const optAnims = useRef([0, 1, 2, 3].map(() => new Animated.Value(0))).current;
 
   useEffect(() => {
-    // Reveal flag
-    Animated.timing(coverOpacity, {
-      toValue: 0,
-      duration: 600,
-      delay: 500,
-      useNativeDriver: true,
-    }).start();
-
-    // Pop in options after reveal
+    // Pop in options after a short delay
     const timer = setTimeout(() => {
       Animated.stagger(
         100,
@@ -65,7 +56,7 @@ function FlagTeaser() {
           Animated.spring(a, { toValue: 1, useNativeDriver: true, tension: 120, friction: 10 }),
         ),
       ).start();
-    }, 900);
+    }, 400);
     return () => clearTimeout(timer);
   }, []);
 
@@ -92,9 +83,6 @@ function FlagTeaser() {
           size="hero"
           style={{ width: '100%' }}
         />
-        <Animated.View style={[s.flagCover, { opacity: coverOpacity }]}>
-          <Text style={s.coverQ}>?</Text>
-        </Animated.View>
       </View>
 
       {/* Options 2x2 */}
@@ -245,7 +233,7 @@ export default function HomeScreen({ navigation }: Props) {
         <View style={s.playWrap}>
           <TouchableOpacity style={s.playBtn} onPress={play} activeOpacity={0.85}>
             <View style={s.playBolt}>
-              <LightningIcon size={14} color={colors.white} filled />
+              <PlayIcon size={14} color={colors.white} />
             </View>
             <Text style={s.playBtnText}>Play Now</Text>
           </TouchableOpacity>
@@ -296,32 +284,6 @@ export default function HomeScreen({ navigation }: Props) {
         {/* ── GAME MODES ── */}
         <View style={s.sectionWrap}>
           <Text style={s.sectionLbl}>Game modes</Text>
-
-          <TouchableOpacity style={s.modeCard} activeOpacity={0.85} onPress={play}>
-            <View style={s.modeIcon}>
-              <LightningIcon size={18} color={colors.white} filled />
-            </View>
-            <View style={s.modeText}>
-              <Text style={s.modeTitle}>Quick Play</Text>
-              <Text style={s.modeSub}>{questionCountAll ? `All ${totalFlags}` : questionCount} random flags, all {totalFlags} countries</Text>
-            </View>
-            <ChevronRightIcon size={18} color={colors.rule} />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={s.modeCard}
-            activeOpacity={0.85}
-            onPress={() => { hapticTap(); navigation.navigate('GameSetup'); }}
-          >
-            <View style={s.modeIcon}>
-              <CrosshairIcon size={18} color={colors.white} />
-            </View>
-            <View style={s.modeText}>
-              <Text style={s.modeTitle}>Game Mode</Text>
-              <Text style={s.modeSub}>Choose difficulty and region</Text>
-            </View>
-            <ChevronRightIcon size={18} color={colors.rule} />
-          </TouchableOpacity>
 
           <TouchableOpacity
             style={s.modeCard}
@@ -388,8 +350,28 @@ export default function HomeScreen({ navigation }: Props) {
             activeOpacity={0.85}
             onPress={() => {
               hapticTap();
+              navigation.navigate('Game', {
+                config: { mode: 'medium', category: 'all', questionCount: 10, displayMode: 'map' },
+              });
+            }}
+          >
+            <View style={s.modeIcon}>
+              <MapPinIcon size={18} color={colors.white} />
+            </View>
+            <View style={s.modeText}>
+              <Text style={s.modeTitle}>Map Mode</Text>
+              <Text style={s.modeSub}>Identify countries on the map</Text>
+            </View>
+            <ChevronRightIcon size={18} color={colors.rule} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={s.modeCard}
+            activeOpacity={0.85}
+            onPress={() => {
+              hapticTap();
               navigation.navigate('CapitalConnection', {
-                config: { mode: 'capitalconnection', category: 'all', questionCount: 5, displayMode: 'flag' },
+                config: { mode: 'capitalconnection', category: 'all', questionCount: 10, displayMode: 'flag' },
               });
             }}
           >
@@ -397,8 +379,8 @@ export default function HomeScreen({ navigation }: Props) {
               <LinkIcon size={18} color={colors.white} />
             </View>
             <View style={s.modeText}>
-              <Text style={s.modeTitle}>Capital Connection</Text>
-              <Text style={s.modeSub}>Match flags to their capitals</Text>
+              <Text style={s.modeTitle}>Capital Quiz</Text>
+              <Text style={s.modeSub}>Name the capital city</Text>
             </View>
             <ChevronRightIcon size={18} color={colors.rule} />
           </TouchableOpacity>
@@ -535,17 +517,6 @@ const s = StyleSheet.create({
     aspectRatio: 3 / 2,
     overflow: 'hidden',
     position: 'relative',
-  },
-  flagCover: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: colors.ink,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  coverQ: {
-    fontFamily: fontFamily.display,
-    fontSize: 52,
-    color: colors.whiteAlpha15,
   },
 
   // Options 2x2
@@ -783,15 +754,15 @@ const s = StyleSheet.create({
     alignItems: 'center',
   },
   statVal: {
-    fontFamily: fontFamily.display,
+    fontFamily: fontFamily.uiLabel,
     fontSize: 22,
     color: colors.ink,
     lineHeight: 26,
   },
   statLbl: {
-    fontFamily: fontFamily.uiLabel,
-    fontSize: 9,
-    letterSpacing: 1,
+    fontFamily: fontFamily.bodyMedium,
+    fontSize: 10,
+    letterSpacing: 0.8,
     textTransform: 'uppercase',
     color: colors.textTertiary,
     marginTop: 4,

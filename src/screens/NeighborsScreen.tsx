@@ -194,20 +194,28 @@ export default function NeighborsScreen({ navigation, route }: Props) {
                   style={[
                     styles.optionCard,
                     isSelected && !submitted && styles.optionSelected,
-                    showCorrect && styles.optionCorrect,
+                    showCorrect && isSelected && styles.optionCorrect,
+                    showCorrect && !isSelected && styles.optionMissed,
                     showWrong && styles.optionWrong,
-                    showMissed && styles.optionMissed,
                   ]}
                   onPress={() => toggleSelect(flag.id)}
                   activeOpacity={0.7}
                   disabled={submitted}
                 >
                   <FlagImage countryCode={flag.id} emoji={flag.emoji} size="small" />
-                  {submitted && (
-                    <View style={styles.resultBadge}>
-                      {showCorrect && isSelected && <CheckIcon size={14} color={colors.success} />}
-                      {showMissed && <CrossIcon size={14} color={colors.warning} />}
-                      {showWrong && <CrossIcon size={14} color={colors.error} />}
+                  {submitted && showCorrect && isSelected && (
+                    <View style={[styles.resultBadgeCircle, styles.resultBadgeCorrect]}>
+                      <CheckIcon size={12} color={colors.white} />
+                    </View>
+                  )}
+                  {submitted && showMissed && (
+                    <View style={[styles.resultBadgeCircle, styles.resultBadgeMissed]}>
+                      <Text style={styles.resultBadgeText}>!</Text>
+                    </View>
+                  )}
+                  {submitted && showWrong && (
+                    <View style={[styles.resultBadgeCircle, styles.resultBadgeWrong]}>
+                      <CrossIcon size={12} color={colors.white} />
                     </View>
                   )}
                   {!submitted && isSelected && (
@@ -216,11 +224,22 @@ export default function NeighborsScreen({ navigation, route }: Props) {
                     </View>
                   )}
                   <Text
-                    style={[styles.optionName, submitted && isNeighbor && styles.optionNameCorrect]}
+                    style={[
+                      styles.optionName,
+                      submitted && showCorrect && isSelected && styles.optionNameCorrect,
+                      submitted && showMissed && styles.optionNameMissed,
+                      submitted && showWrong && styles.optionNameWrong,
+                    ]}
                     numberOfLines={1}
                   >
                     {flag.name}
                   </Text>
+                  {submitted && showMissed && (
+                    <Text style={styles.missedLabel}>Missed</Text>
+                  )}
+                  {submitted && showWrong && (
+                    <Text style={styles.wrongLabel}>Not a neighbor</Text>
+                  )}
                 </TouchableOpacity>
               );
             })}
@@ -312,7 +331,24 @@ const styles = StyleSheet.create({
   optionMissed: { borderColor: colors.warning, backgroundColor: colors.warningBg },
   optionName: { fontFamily: fontFamily.bodyMedium, fontSize: 11, color: colors.textSecondary, textAlign: 'center' },
   optionNameCorrect: { color: colors.success, fontFamily: fontFamily.bodyBold },
-  resultBadge: { position: 'absolute', top: spacing.xs, right: spacing.xs },
+  optionNameMissed: { color: colors.warning, fontFamily: fontFamily.bodyBold },
+  optionNameWrong: { color: colors.error },
+  missedLabel: { fontFamily: fontFamily.uiLabel, fontSize: 8, letterSpacing: 1, color: colors.warning, textTransform: 'uppercase' },
+  wrongLabel: { fontFamily: fontFamily.uiLabel, fontSize: 8, letterSpacing: 0.5, color: colors.error, textTransform: 'uppercase' },
+  resultBadgeCircle: {
+    position: 'absolute',
+    top: spacing.xs,
+    right: spacing.xs,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  resultBadgeCorrect: { backgroundColor: colors.success },
+  resultBadgeMissed: { backgroundColor: colors.warning },
+  resultBadgeWrong: { backgroundColor: colors.error },
+  resultBadgeText: { fontFamily: fontFamily.uiLabel, fontSize: 12, color: colors.white },
   checkBadge: {
     position: 'absolute',
     top: spacing.xs,
