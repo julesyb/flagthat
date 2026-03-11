@@ -71,6 +71,45 @@ export interface BadgeCheckContext {
   adsWatched: number;
 }
 
+export interface BadgeProgress {
+  progress: number;
+  target: number;
+  pct: number; // 0-100
+}
+
+// Returns progress toward a badge (null if not trackable or already earned)
+export function getBadgeProgress(badge: Badge, ctx: BadgeCheckContext): BadgeProgress | null {
+  const totalFlags = getTotalFlagCount();
+  const countriesSeen = Object.values(ctx.flagStats).filter((s) => s.right > 0).length;
+
+  let progress = 0;
+  let target = 0;
+
+  switch (badge.id) {
+    case 'first_flag': progress = ctx.stats.totalGamesPlayed; target = 1; break;
+    case 'globe_trotter': progress = countriesSeen; target = 50; break;
+    case 'world_citizen': progress = countriesSeen; target = 100; break;
+    case 'flag_master': progress = countriesSeen; target = totalFlags; break;
+    case 'ten_timer': progress = ctx.stats.totalGamesPlayed; target = 10; break;
+    case 'century_club': progress = ctx.stats.totalGamesPlayed; target = 100; break;
+    case 'hot_streak': progress = ctx.stats.bestStreak; target = 10; break;
+    case 'on_fire': progress = ctx.stats.bestStreak; target = 25; break;
+    case 'unstoppable': progress = ctx.stats.bestStreak; target = 50; break;
+    case 'day_tripper': progress = ctx.dayStreak; target = 3; break;
+    case 'week_warrior': progress = ctx.dayStreak; target = 7; break;
+    case 'month_master': progress = ctx.dayStreak; target = 30; break;
+    case 'speed_demon': progress = ctx.stats.bestTimeAttackScore || 0; target = 15; break;
+    case 'lightning_round': progress = ctx.stats.bestTimeAttackScore || 0; target = 25; break;
+    case 'daily_devotee': progress = ctx.dailyChallengesCompleted; target = 7; break;
+    case 'daily_legend': progress = ctx.dailyChallengesCompleted; target = 30; break;
+    default: return null;
+  }
+
+  if (target === 0) return null;
+  const clamped = Math.min(progress, target);
+  return { progress: clamped, target, pct: Math.round((clamped / target) * 100) };
+}
+
 export function evaluateBadges(ctx: BadgeCheckContext): EarnedBadge[] {
   const earned: EarnedBadge[] = [];
   const totalFlags = getTotalFlagCount();

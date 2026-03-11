@@ -7,7 +7,9 @@ const DAY_STREAK_KEY = '@flagsareus_day_streak';
 const DAILY_CHALLENGE_KEY = '@flagsareus_daily_challenge';
 const SETTINGS_KEY = '@flagsareus_settings';
 const BADGE_DATA_KEY = '@flagsareus_badge_data';
+const GAME_HISTORY_KEY = '@flagsareus_game_history';
 const SUPPORT_KEY = '@flagsareus_support';
+const BASELINE_KEY = '@flagsareus_baseline';
 
 // ─── Badge Tracking Data ───────────────────────────────────
 export interface BadgeData {
@@ -184,6 +186,7 @@ export async function resetStats(): Promise<void> {
     await AsyncStorage.removeItem(DAY_STREAK_KEY);
     await AsyncStorage.removeItem(BADGE_DATA_KEY);
     await AsyncStorage.removeItem(DAILY_CHALLENGE_KEY);
+    await AsyncStorage.removeItem(GAME_HISTORY_KEY);
     await AsyncStorage.removeItem(BASELINE_KEY);
   } catch {
     // Silently fail
@@ -318,6 +321,37 @@ export async function getMissedFlagIds(): Promise<string[]> {
     .map(([id]) => id);
 }
 
+// ─── Game History (last 50 games for score distribution) ─────
+export interface GameHistoryEntry {
+  accuracy: number; // 0-100
+  mode: GameMode;
+  date: string;
+}
+
+const MAX_GAME_HISTORY = 50;
+
+export async function getGameHistory(): Promise<GameHistoryEntry[]> {
+  try {
+    const json = await AsyncStorage.getItem(GAME_HISTORY_KEY);
+    if (json) return JSON.parse(json);
+    return [];
+  } catch {
+    return [];
+  }
+}
+
+export async function addGameHistoryEntry(accuracy: number, mode: GameMode): Promise<void> {
+  try {
+    const history = await getGameHistory();
+    history.push({ accuracy, mode, date: getTodayDate() });
+    // Keep only the most recent entries
+    const trimmed = history.slice(-MAX_GAME_HISTORY);
+    await AsyncStorage.setItem(GAME_HISTORY_KEY, JSON.stringify(trimmed));
+  } catch {
+    // Silently fail
+  }
+}
+
 // ─── Support (Opt-in Ad Tracking) ─────────────────────────
 export interface SupportData {
   totalAdsWatched: number;
@@ -351,4 +385,80 @@ export async function recordAdWatched(): Promise<SupportData> {
   } catch {
     return { ...DEFAULT_SUPPORT };
   }
+}
+
+// ─── Baseline Data ────────────────────────────────────────
+export interface BaselineRegionResult {
+  accuracy: number;
+  correct: number;
+  total: number;
+  completedAt: string;
+}
+
+export interface BaselineData {
+  regions: Partial<Record<BaselineRegionId, BaselineRegionResult>>;
+  startedAt: string;
+  completedAt: string | null;
+  skipped?: boolean;
+}
+
+const BASELINE_REGIONS: BaselineRegionId[] = ['africa', 'asia', 'europe', 'americas', 'oceania'];
+
+export async function getBaselineData(): Promise<BaselineData | null> {
+  try {
+    const json = await AsyncStorage.getItem(BASELINE_KEY);
+    if (json) return JSON.parse(json);
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+export async function saveBaselineResult(
+  region: BaselineRegionId,
+  results: GameResult[],
+): Promise<BaselineData> {
+  const existing = await getBaselineData();
+  const correct = results.filter((r) => r.correct).length;
+  const total = results.length;
+  const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
+
+  const data: BaselineData = existing ?? {
+    regions: {},
+    startedAt: new Date().toISOString(),
+    completedAt: null,
+  };
+
+  data.regions[region] = {
+    accuracy,
+    correct,
+    total,
+    completedAt: new Date().toISOString(),
+  };
+
+  // Check if all 5 regions are done
+  const allDone = BASELINE_REGIONS.every((r) => data.regions[r]);
+  if (allDone && !data.completedAt) {
+    data.completedAt = new Date().toISOString();
+  }
+
+  await AsyncStorage.setItem(BASELINE_KEY, JSON.stringify(data));
+  return data;
+}
+
+export async function hasCompletedOnboarding(): Promise<boolean> {
+  const data = await getBaselineData();
+  if (!data) return false;
+  return data.completedAt !== null || data.skipped === true;
+}
+
+export async function skipOnboarding(): Promise<void> {
+  const existing = await getBaselineData();
+  const data: BaselineData = existing ?? {
+    regions: {},
+    startedAt: new Date().toISOString(),
+    completedAt: null,
+  };
+  data.skipped = true;
+  await AsyncStorage.setItem(BASELINE_KEY, JSON.stringify(data));
 }
