@@ -1,6 +1,7 @@
 import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import { getSettings, saveSettings, getDayStreak } from './storage';
+import { colors } from './theme';
 import { t } from './i18n';
 
 // Channel for Android
@@ -55,7 +56,7 @@ export async function setupAndroidChannel(): Promise<void> {
       name: t('notification.channelName'),
       importance: Notifications.AndroidImportance.DEFAULT,
       vibrationPattern: [0, 250],
-      lightColor: '#E5271C',
+      lightColor: colors.accent,
     });
   }
 }
