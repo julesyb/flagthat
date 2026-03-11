@@ -263,6 +263,28 @@ export default function StatsScreen() {
     return candidates[0];
   }, [stats, earnedBadges, flagStats, dayStreak]);
 
+  // Score distribution: bucket accuracies into ranges
+  // (must be above the early return to satisfy Rules of Hooks)
+  const distribution = React.useMemo(() => {
+    if (gameHistory.length === 0) return null;
+    const buckets = [
+      { label: '90-100', min: 90, max: 100, count: 0 },
+      { label: '70-89', min: 70, max: 89, count: 0 },
+      { label: '50-69', min: 50, max: 69, count: 0 },
+      { label: '0-49', min: 0, max: 49, count: 0 },
+    ];
+    for (const entry of gameHistory) {
+      for (const bucket of buckets) {
+        if (entry.accuracy >= bucket.min && entry.accuracy <= bucket.max) {
+          bucket.count++;
+          break;
+        }
+      }
+    }
+    const maxCount = Math.max(...buckets.map((b) => b.count), 1);
+    return { buckets, maxCount, total: gameHistory.length };
+  }, [gameHistory]);
+
   if (!stats) {
     return (
       <SafeAreaView style={s.container}>
@@ -294,27 +316,6 @@ export default function StatsScreen() {
     weakFlagCount,
     adsWatched,
   } : null;
-
-  // Score distribution: bucket accuracies into ranges
-  const distribution = React.useMemo(() => {
-    if (gameHistory.length === 0) return null;
-    const buckets = [
-      { label: '90-100', min: 90, max: 100, count: 0 },
-      { label: '70-89', min: 70, max: 89, count: 0 },
-      { label: '50-69', min: 50, max: 69, count: 0 },
-      { label: '0-49', min: 0, max: 49, count: 0 },
-    ];
-    for (const entry of gameHistory) {
-      for (const bucket of buckets) {
-        if (entry.accuracy >= bucket.min && entry.accuracy <= bucket.max) {
-          bucket.count++;
-          break;
-        }
-      }
-    }
-    const maxCount = Math.max(...buckets.map((b) => b.count), 1);
-    return { buckets, maxCount, total: gameHistory.length };
-  }, [gameHistory]);
 
   // Region accuracy data (only regions with games played)
   const regionData = REGIONS
