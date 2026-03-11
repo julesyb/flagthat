@@ -4,12 +4,15 @@ import { getTotalFlagCount } from '../data';
 
 export type BadgeTier = 'bronze' | 'silver' | 'gold' | 'platinum';
 
+export type BadgeIcon = 'flag' | 'globe' | 'check' | 'play' | 'lightning' | 'calendar' | 'clock' | 'crosshair' | 'link' | 'eye';
+
 export interface Badge {
   id: string;
   name: string;
   description: string;
   tier: BadgeTier;
   category: 'progression' | 'accuracy' | 'streak' | 'mode' | 'category' | 'fun';
+  icon: BadgeIcon;
 }
 
 export interface EarnedBadge extends Badge {
@@ -25,34 +28,34 @@ export const TIER_COLORS: Record<BadgeTier, string> = {
 
 export const BADGES: Badge[] = [
   // ── Progression
-  { id: 'first_flag', name: 'First Flag', description: 'Complete your first game', tier: 'bronze', category: 'progression' },
-  { id: 'globe_trotter', name: 'Globe Trotter', description: 'Identify 50 unique flags', tier: 'silver', category: 'progression' },
-  { id: 'world_citizen', name: 'World Citizen', description: 'Identify 100 unique flags', tier: 'gold', category: 'progression' },
-  { id: 'flag_master', name: 'Flag Master', description: 'Identify all flags at least once', tier: 'platinum', category: 'progression' },
-  { id: 'ten_timer', name: 'Ten-Timer', description: 'Play 10 games', tier: 'bronze', category: 'progression' },
-  { id: 'century_club', name: 'Century Club', description: 'Play 100 games', tier: 'gold', category: 'progression' },
+  { id: 'first_flag', name: 'First Flag', description: 'Complete your first game', tier: 'bronze', category: 'progression', icon: 'flag' },
+  { id: 'globe_trotter', name: 'Globe Trotter', description: 'Identify 50 unique flags', tier: 'silver', category: 'progression', icon: 'globe' },
+  { id: 'world_citizen', name: 'World Citizen', description: 'Identify 100 unique flags', tier: 'gold', category: 'progression', icon: 'globe' },
+  { id: 'flag_master', name: 'Flag Master', description: 'Identify all flags at least once', tier: 'platinum', category: 'progression', icon: 'flag' },
+  { id: 'ten_timer', name: 'Ten-Timer', description: 'Play 10 games', tier: 'bronze', category: 'progression', icon: 'play' },
+  { id: 'century_club', name: 'Century Club', description: 'Play 100 games', tier: 'gold', category: 'progression', icon: 'play' },
 
   // ── Accuracy
-  { id: 'perfect_10', name: 'Perfect 10', description: 'Score 10/10 on any game', tier: 'gold', category: 'accuracy' },
-  { id: 's_rank', name: 'S-Rank', description: 'Earn 95%+ accuracy in a game', tier: 'silver', category: 'accuracy' },
+  { id: 'perfect_10', name: 'Perfect 10', description: 'Score 10/10 on any game', tier: 'gold', category: 'accuracy', icon: 'check' },
+  { id: 's_rank', name: 'S-Rank', description: 'Earn 95%+ accuracy in a game', tier: 'silver', category: 'accuracy', icon: 'lightning' },
 
   // ── Streak
-  { id: 'hot_streak', name: 'Hot Streak', description: '10 correct in a row', tier: 'bronze', category: 'streak' },
-  { id: 'on_fire', name: 'On Fire', description: '25 correct in a row', tier: 'silver', category: 'streak' },
-  { id: 'unstoppable', name: 'Unstoppable', description: '50 correct in a row', tier: 'gold', category: 'streak' },
-  { id: 'day_tripper', name: 'Day Tripper', description: '3-day play streak', tier: 'bronze', category: 'streak' },
-  { id: 'week_warrior', name: 'Week Warrior', description: '7-day play streak', tier: 'silver', category: 'streak' },
-  { id: 'month_master', name: 'Month Master', description: '30-day play streak', tier: 'gold', category: 'streak' },
+  { id: 'hot_streak', name: 'Hot Streak', description: '10 correct in a row', tier: 'bronze', category: 'streak', icon: 'lightning' },
+  { id: 'on_fire', name: 'On Fire', description: '25 correct in a row', tier: 'silver', category: 'streak', icon: 'lightning' },
+  { id: 'unstoppable', name: 'Unstoppable', description: '50 correct in a row', tier: 'gold', category: 'streak', icon: 'lightning' },
+  { id: 'day_tripper', name: 'Day Tripper', description: '3-day play streak', tier: 'bronze', category: 'streak', icon: 'calendar' },
+  { id: 'week_warrior', name: 'Week Warrior', description: '7-day play streak', tier: 'silver', category: 'streak', icon: 'calendar' },
+  { id: 'month_master', name: 'Month Master', description: '30-day play streak', tier: 'gold', category: 'streak', icon: 'calendar' },
 
   // ── Mode-specific
-  { id: 'speed_demon', name: 'Speed Demon', description: '15+ in Timed Quiz', tier: 'silver', category: 'mode' },
-  { id: 'lightning_round', name: 'Lightning Round', description: '25+ in Timed Quiz', tier: 'gold', category: 'mode' },
-  { id: 'daily_devotee', name: 'Daily Devotee', description: 'Complete 7 daily challenges', tier: 'silver', category: 'mode' },
-  { id: 'daily_legend', name: 'Daily Legend', description: 'Complete 30 daily challenges', tier: 'gold', category: 'mode' },
+  { id: 'speed_demon', name: 'Speed Demon', description: '15+ in Timed Quiz', tier: 'silver', category: 'mode', icon: 'clock' },
+  { id: 'lightning_round', name: 'Lightning Round', description: '25+ in Timed Quiz', tier: 'gold', category: 'mode', icon: 'clock' },
+  { id: 'daily_devotee', name: 'Daily Devotee', description: 'Complete 7 daily challenges', tier: 'silver', category: 'mode', icon: 'calendar' },
+  { id: 'daily_legend', name: 'Daily Legend', description: 'Complete 30 daily challenges', tier: 'gold', category: 'mode', icon: 'calendar' },
 
   // ── Fun/Hidden
-  { id: 'practice_perfect', name: 'Practice Perfect', description: 'Clear all flags from practice', tier: 'gold', category: 'fun' },
-  { id: 'shared_spirit', name: 'Shared Spirit', description: 'Share your results', tier: 'bronze', category: 'fun' },
+  { id: 'practice_perfect', name: 'Practice Perfect', description: 'Clear all flags from practice', tier: 'gold', category: 'fun', icon: 'crosshair' },
+  { id: 'shared_spirit', name: 'Shared Spirit', description: 'Share your results', tier: 'bronze', category: 'fun', icon: 'link' },
 ];
 
 export interface BadgeCheckContext {

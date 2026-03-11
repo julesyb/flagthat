@@ -137,75 +137,95 @@ export const fontFamily = {
   bodyBold: 'Barlow_600SemiBold',
 };
 
+// ---- Type scale — single source of truth for every font size ----
+// 13-step ramp. Every fontSize in the app must reference this scale.
+export const fontSize = {
+  xxs: 10,        // micro labels, bottom nav tabs, eyebrow, small caps
+  sm: 12,         // chips, badge text, progress labels
+  caption: 14,    // captions, subtitles, segment buttons
+  body: 16,       // body text, labels, options
+  lg: 18,         // emphasized body, card titles, nav header
+  xl: 20,         // buttons, section titles, score displays
+  heading: 22,    // stat values, headings
+  title: 28,      // title-level display
+  wordmark: 34,   // app wordmark
+  stat: 38,       // large stat tile numbers
+  gameTitle: 42,  // gameplay large titles (FlagFlash)
+  hero: 52,       // hero display numbers
+  gameFeedback: 56, // gameplay feedback text (FlagFlash)
+  grade: 72,      // grade letter
+  countdown: 120, // full-screen countdown numbers
+};
+
 export const typography = {
   hero: {
-    fontSize: 53,
+    fontSize: fontSize.hero,
     fontFamily: fontFamily.display,
     letterSpacing: -1,
   },
   title: {
-    fontSize: 29,
+    fontSize: fontSize.title,
     fontFamily: fontFamily.display,
     letterSpacing: -0.5,
   },
   heading: {
-    fontSize: 23,
+    fontSize: fontSize.heading,
     fontFamily: fontFamily.uiLabel,
     letterSpacing: 0.3,
   },
   headingUpper: {
-    fontSize: 23,
+    fontSize: fontSize.heading,
     fontFamily: fontFamily.uiLabel,
     letterSpacing: 0.3,
     textTransform: 'uppercase' as const,
   },
   body: {
-    fontSize: 18,
+    fontSize: fontSize.lg,
     fontFamily: fontFamily.body,
   },
   bodyBold: {
-    fontSize: 18,
+    fontSize: fontSize.lg,
     fontFamily: fontFamily.bodyBold,
   },
   caption: {
-    fontSize: 14,
+    fontSize: fontSize.caption,
     fontFamily: fontFamily.body,
   },
   captionBold: {
-    fontSize: 14,
+    fontSize: fontSize.caption,
     fontFamily: fontFamily.uiLabelMedium,
     letterSpacing: 0.2,
   },
   label: {
-    fontSize: 16,
+    fontSize: fontSize.body,
     fontFamily: fontFamily.bodyMedium,
   },
   eyebrow: {
-    fontSize: 11,
+    fontSize: fontSize.xxs,
     fontFamily: fontFamily.uiLabel,
     letterSpacing: 2,
     textTransform: 'uppercase' as const,
   },
   sectionLabel: {
-    fontSize: 10,
+    fontSize: fontSize.xxs,
     fontFamily: fontFamily.uiLabel,
     letterSpacing: 2,
     textTransform: 'uppercase' as const,
   },
   cardTitle: {
-    fontSize: 21,
+    fontSize: fontSize.heading,
     fontFamily: fontFamily.uiLabel,
     letterSpacing: 1,
     textTransform: 'uppercase' as const,
   },
   heroCardTitle: {
-    fontSize: 27,
+    fontSize: fontSize.title,
     fontFamily: fontFamily.uiLabel,
     letterSpacing: 1.2,
     textTransform: 'uppercase' as const,
   },
   countNumber: {
-    fontSize: 53,
+    fontSize: fontSize.hero,
     fontFamily: fontFamily.display,
     letterSpacing: -1,
   },
@@ -227,7 +247,7 @@ export const buttons = {
   },
   primaryText: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 19,
+    fontSize: fontSize.xl,
     letterSpacing: 0.8,
     textTransform: 'uppercase' as const,
     color: palette.white,
@@ -243,7 +263,7 @@ export const buttons = {
   },
   secondaryText: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 19,
+    fontSize: fontSize.xl,
     letterSpacing: 0.8,
     textTransform: 'uppercase' as const,
     color: palette.ink,
@@ -262,7 +282,7 @@ export const buttons = {
   },
   chipText: {
     fontFamily: fontFamily.bodyMedium,
-    fontSize: 12,
+    fontSize: fontSize.sm,
     letterSpacing: 0.8,
     textTransform: 'uppercase' as const,
     color: palette.slate,
@@ -278,7 +298,7 @@ export const nav = {
     width: 60,
   },
   backText: {
-    fontSize: 14,
+    fontSize: fontSize.caption,
     fontFamily: fontFamily.bodyMedium,
     letterSpacing: 0.3,
     color: palette.muted,

@@ -8,7 +8,7 @@ import {
   Animated,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily, buttons, borderRadius } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius } from '../utils/theme';
 import { hapticTap, hapticCorrect, hapticWrong, playWrongSound } from '../utils/feedback';
 import { shuffleArray } from '../utils/gameEngine';
 import { RootStackParamList } from '../types/navigation';
@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
     width: 60,
   },
   exitText: {
-    fontSize: 13,
+    fontSize: fontSize.caption,
     fontFamily: fontFamily.uiLabelMedium,
     letterSpacing: 0.5,
     color: colors.textTertiary,

@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, useWindowDimensions } from 'react-native';
 import { Image } from 'expo-image';
-import { colors, fontFamily, borderRadius } from '../utils/theme';
+import { colors, fontFamily, fontSize, borderRadius } from '../utils/theme';
 import { countryCoordinates } from '../data/countryCoordinates';
 
 interface MapImageProps {
@@ -257,7 +257,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.sm,
   },
   fallbackText: {
-    fontSize: 24,
+    fontSize: fontSize.heading,
     color: colors.textTertiary,
   },
   pinMarker: {
@@ -307,7 +307,7 @@ const styles = StyleSheet.create({
   },
   zoomText: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 20,
+    fontSize: fontSize.xl,
     color: colors.ink,
     lineHeight: 22,
   },

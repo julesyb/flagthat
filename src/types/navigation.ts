@@ -9,7 +9,7 @@ export type RootStackParamList = {
   Neighbors: { config: GameConfig };
   FlagImpostor: { config: GameConfig };
   CapitalConnection: { config: GameConfig };
-  Results: { results: GameResult[]; config: GameConfig };
+  Results: { results: GameResult[]; config: GameConfig; reviewOnly?: boolean };
   Stats: undefined;
   Settings: undefined;
   Browse: { region?: string } | undefined;
