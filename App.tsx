@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet, Platform } from 'react-native';
 import { useFonts } from 'expo-font';
 import {
   LibreBaskerville_700Bold,
@@ -18,6 +18,7 @@ import GameSetupScreen from './src/screens/GameSetupScreen';
 import GameScreen from './src/screens/GameScreen';
 import ResultsScreen from './src/screens/ResultsScreen';
 import StatsScreen from './src/screens/StatsScreen';
+import SettingsScreen from './src/screens/SettingsScreen';
 import BrowseScreen from './src/screens/BrowseScreen';
 import FlagFlashScreen from './src/screens/FlagFlashScreen';
 import FlagPuzzleScreen from './src/screens/FlagPuzzleScreen';
@@ -64,6 +65,12 @@ const screenOptions = {
 };
 
 function AppContent() {
+  useEffect(() => {
+    if (Platform.OS === 'web') {
+      document.title = 'Flag That';
+    }
+  }, []);
+
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={screenOptions}>
@@ -113,13 +120,25 @@ function AppContent() {
         <Stack.Screen
           name="Results"
           component={ResultsScreen}
-          options={{ title: 'Results', headerLeft: () => null, gestureEnabled: false }}
+          options={({ navigation }) => ({
+            title: 'Results',
+            headerLeft: () => <HomeBackButton onPress={() => navigation.navigate('Home')} />,
+            gestureEnabled: false,
+          })}
         />
         <Stack.Screen
           name="Stats"
           component={StatsScreen}
           options={({ navigation }) => ({
             title: 'Statistics',
+            headerLeft: () => <HomeBackButton onPress={() => navigation.navigate('Home')} />,
+          })}
+        />
+        <Stack.Screen
+          name="Settings"
+          component={SettingsScreen}
+          options={({ navigation }) => ({
+            title: 'Settings',
             headerLeft: () => <HomeBackButton onPress={() => navigation.navigate('Home')} />,
           })}
         />

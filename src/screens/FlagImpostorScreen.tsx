@@ -8,7 +8,7 @@ import {
   ScrollView,
   Animated,
 } from 'react-native';
-import Svg, { Rect, Circle, Path, G } from 'react-native-svg';
+import Svg, { Rect, Path } from 'react-native-svg';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { colors, spacing, typography, fontFamily, buttons, borderRadius } from '../utils/theme';
 import { hapticTap, hapticCorrect, hapticWrong, playWrongSound } from '../utils/feedback';
@@ -55,15 +55,15 @@ interface FakeFlag {
   type: 'triband_h' | 'triband_v' | 'bicolor' | 'cross' | 'chevron';
   colors: string[];
   hasSymbol: boolean;
-  symbolType?: 'star' | 'crescent';
+  symbolType?: 'star' | 'diamond';
   symbolColor?: string;
   reason: string;
 }
 
 function generateFakeFlag(): FakeFlag {
   const types: FakeFlag['type'][] = ['triband_h', 'triband_v', 'bicolor', 'cross', 'chevron'];
-  // Only 1 symbol type (no circle — avoids clashing with triangular shapes like chevron)
-  const symbolTypes: NonNullable<FakeFlag['symbolType']>[] = ['star', 'crescent'];
+  // Only geometric shapes — no circles
+  const symbolTypes: NonNullable<FakeFlag['symbolType']>[] = ['star', 'diamond'];
 
   // Try up to 10 times to generate a flag that doesn't match a known real flag
   for (let attempt = 0; attempt < 10; attempt++) {
@@ -120,12 +120,12 @@ function FakeFlagSvg({ flag, width, height }: { flag: FakeFlag; width: number; h
         }
         return <Path d={`M ${points.join(' L ')} Z`} fill={flag.symbolColor} />;
       }
-      case 'crescent':
+      case 'diamond':
         return (
-          <G>
-            <Circle cx={cx} cy={cy} r={r} fill={flag.symbolColor} />
-            <Circle cx={cx + r * 0.35} cy={cy} r={r * 0.8} fill={flag.colors[flag.type === 'triband_h' ? 1 : 0]} />
-          </G>
+          <Path
+            d={`M ${cx} ${cy - r} L ${cx + r} ${cy} L ${cx} ${cy + r} L ${cx - r} ${cy} Z`}
+            fill={flag.symbolColor}
+          />
         );
       default:
         return null;
@@ -210,6 +210,9 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const roundStartTime = useRef(Date.now());
 
+  const guessLimit = config.guessLimit ?? 0;
+  const wrongCount = results.filter((r) => !r.correct).length;
+
   const round = rounds[roundIndex] ?? null;
   const isLastRound = roundIndex >= rounds.length - 1;
   const correctCount = results.filter((r) => r.correct).length;
@@ -251,14 +254,18 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
     }]);
   };
 
+  const finishGame = (finalResults: GameResult[]) => {
+    const correct = finalResults.filter((r) => r.correct).length;
+    const streak = getStreakFromResults(finalResults);
+    updateStats(correct, finalResults.length, streak, 'impostor', config.category);
+    updateFlagResults(finalResults);
+    navigation.replace('Results', { results: finalResults, config });
+  };
+
   const handleNext = () => {
-    if (isLastRound) {
-      const finalResults = [...results];
-      const correct = finalResults.filter((r) => r.correct).length;
-      const streak = getStreakFromResults(finalResults);
-      updateStats(correct, finalResults.length, streak, 'impostor', config.category);
-      updateFlagResults(finalResults);
-      navigation.replace('Results', { results: finalResults, config });
+    const isEliminated = guessLimit > 0 && results.filter((r) => !r.correct).length >= guessLimit;
+    if (isLastRound || isEliminated) {
+      finishGame([...results]);
       return;
     }
 
@@ -284,7 +291,11 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
           <Text style={styles.counter}>{roundIndex + 1} / {rounds.length}</Text>
           <Text style={styles.scoreText}>{correctCount} correct</Text>
         </View>
-        <View style={styles.spacer} />
+        {guessLimit > 0 ? (
+          <Text style={styles.livesText}>{Math.max(0, guessLimit - wrongCount)} {guessLimit - wrongCount === 1 ? 'life' : 'lives'}</Text>
+        ) : (
+          <View style={styles.spacer} />
+        )}
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -390,6 +401,7 @@ const styles = StyleSheet.create({
   counter: { ...typography.bodyBold, color: colors.text },
   scoreText: { ...typography.caption, color: colors.success },
   spacer: { width: 60 },
+  livesText: { ...typography.bodyBold, color: colors.error, width: 60, textAlign: 'right' },
   content: { padding: spacing.lg, paddingBottom: 120 },
   prompt: { ...typography.headingUpper, color: colors.text, textAlign: 'center', marginBottom: spacing.xs },
   subtitle: { ...typography.caption, color: colors.textTertiary, textAlign: 'center', marginBottom: spacing.xl },

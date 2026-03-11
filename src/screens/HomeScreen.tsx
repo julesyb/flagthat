@@ -14,19 +14,19 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, fontFamily, spacing, borderRadius } from '../utils/theme';
 import { getTotalFlagCount } from '../data';
-import { initAudio, hapticTap, hapticCorrect, hapticWrong, playWrongSound } from '../utils/feedback';
-import { getStats, getDayStreak } from '../utils/storage';
-import { generateQuestions } from '../utils/gameEngine';
+import { initAudio, hapticTap, hapticCorrect, hapticWrong, playWrongSound, setSoundsEnabled, setHapticsEnabled } from '../utils/feedback';
+import { getStats, getDayStreak, getDailyChallenge, DailyChallengeData, getSettings, getMissedFlagIds } from '../utils/storage';
+import { generateQuestions, getDailyNumber } from '../utils/gameEngine';
 import { RootStackParamList } from '../types/navigation';
 import { GameMode, UserStats, GameQuestion } from '../types';
-import { PlayIcon, ChevronRightIcon, ClockIcon, UsersIcon, EyeIcon, MapPinIcon, LinkIcon } from '../components/Icons';
+import { PlayIcon, ChevronRightIcon, ClockIcon, UsersIcon, EyeIcon, MapPinIcon, LinkIcon, CalendarIcon, CrosshairIcon } from '../components/Icons';
 import FlagImage from '../components/FlagImage';
 import BottomNav from '../components/BottomNav';
 
 const MODES: { key: GameMode; label: string }[] = [
-  { key: 'easy', label: '2 Pick' },
-  { key: 'medium', label: '4 Pick' },
-  { key: 'hard', label: 'Free' },
+  { key: 'easy', label: 'Easy' },
+  { key: 'medium', label: 'Medium' },
+  { key: 'hard', label: 'Hard' },
 ];
 
 const QUESTION_COUNTS = [5, 10, 15, 20];
@@ -144,7 +144,7 @@ function FlagTeaser() {
         </View>
       ) : (
         <View style={s.teaserResult}>
-          <Text style={s.teaserResultText}>
+          <Text style={[s.teaserResultText, picked === question.flag.name ? s.teaserResultCorrect : s.teaserResultWrong]}>
             {picked === question.flag.name ? 'Correct!' : question.flag.name}
           </Text>
           <TouchableOpacity
@@ -174,15 +174,24 @@ export default function HomeScreen({ navigation }: Props) {
   const [stats, setStats] = useState<UserStats | null>(null);
   const [dayStreak, setDayStreak] = useState(0);
   const [teaserKey, setTeaserKey] = useState(0);
+  const [dailyDone, setDailyDone] = useState<DailyChallengeData | null>(null);
+  const [weakFlagCount, setWeakFlagCount] = useState(0);
+  const [autocomplete, setAutocomplete] = useState(false);
 
   useEffect(() => {
     initAudio();
+    getSettings().then((s) => {
+      setSoundsEnabled(s.soundEnabled);
+      setHapticsEnabled(s.hapticsEnabled);
+    });
   }, []);
 
   useFocusEffect(
     useCallback(() => {
       getStats().then(setStats);
       getDayStreak().then(setDayStreak);
+      getDailyChallenge().then(setDailyDone);
+      getMissedFlagIds().then((ids) => setWeakFlagCount(ids.length));
       setTeaserKey((k) => k + 1);
     }, []),
   );
@@ -190,7 +199,7 @@ export default function HomeScreen({ navigation }: Props) {
   const play = () => {
     hapticTap();
     navigation.navigate('Game', {
-      config: { mode, category: 'all', questionCount: questionCountAll ? totalFlags : questionCount, displayMode: 'flag' },
+      config: { mode, category: 'all', questionCount: questionCountAll ? totalFlags : questionCount, displayMode: 'flag', ...(mode === 'hard' && { autocomplete }) },
     });
   };
 
@@ -225,6 +234,40 @@ export default function HomeScreen({ navigation }: Props) {
             )}
           </View>
         </View>
+
+        {/* ── DAILY CHALLENGE ── */}
+        <TouchableOpacity
+          style={[s.dailyCard, dailyDone?.completed && s.dailyCardDone]}
+          activeOpacity={0.85}
+          onPress={() => {
+            hapticTap();
+            if (!dailyDone?.completed) {
+              navigation.navigate('Game', {
+                config: { mode: 'daily', category: 'all', questionCount: 10, displayMode: 'flag' },
+              });
+            }
+          }}
+          disabled={dailyDone?.completed}
+        >
+          <View style={s.dailyLeft}>
+            <CalendarIcon size={18} color={dailyDone?.completed ? colors.textTertiary : colors.accent} />
+          </View>
+          <View style={s.dailyContent}>
+            <Text style={[s.dailyTitle, dailyDone?.completed && s.dailyTitleDone]}>
+              Daily #{getDailyNumber()}
+            </Text>
+            <Text style={s.dailySub}>
+              {dailyDone?.completed
+                ? `${dailyDone.score}/10 - Come back tomorrow`
+                : '10 flags, same for everyone'}
+            </Text>
+          </View>
+          {dailyDone?.completed ? (
+            <Text style={s.dailyScore}>{dailyDone.score}/10</Text>
+          ) : (
+            <ChevronRightIcon size={18} color={colors.accent} />
+          )}
+        </TouchableOpacity>
 
         {/* ── FLAG TEASER ── */}
         <FlagTeaser key={teaserKey} />
@@ -265,7 +308,7 @@ export default function HomeScreen({ navigation }: Props) {
           </View>
           <View style={s.configDivider} />
           <View style={s.configRow}>
-            <Text style={s.configLbl}>Options</Text>
+            <Text style={s.configLbl}>Difficulty</Text>
             <View style={s.segRow}>
               {MODES.map((m) => (
                 <TouchableOpacity
@@ -279,6 +322,30 @@ export default function HomeScreen({ navigation }: Props) {
               ))}
             </View>
           </View>
+          {mode === 'hard' && (
+            <>
+              <View style={s.configDivider} />
+              <View style={s.configRow}>
+                <Text style={s.configLbl}>Hints</Text>
+                <View style={s.segRow}>
+                  <TouchableOpacity
+                    style={[s.segBtn, !autocomplete && s.segBtnOn]}
+                    onPress={() => { hapticTap(); setAutocomplete(false); }}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={[s.segBtnText, !autocomplete && s.segBtnTextOn]}>Off</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[s.segBtn, autocomplete && s.segBtnOn]}
+                    onPress={() => { hapticTap(); setAutocomplete(true); }}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={[s.segBtnText, autocomplete && s.segBtnTextOn]}>On</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </>
+          )}
         </View>
 
         {/* ── GAME MODES ── */}
@@ -384,6 +451,28 @@ export default function HomeScreen({ navigation }: Props) {
             </View>
             <ChevronRightIcon size={18} color={colors.rule} />
           </TouchableOpacity>
+
+          {weakFlagCount > 0 && (
+            <TouchableOpacity
+              style={[s.modeCard, { borderColor: colors.accent, borderWidth: 1.5 }]}
+              activeOpacity={0.85}
+              onPress={() => {
+                hapticTap();
+                navigation.navigate('Game', {
+                  config: { mode: 'practice', category: 'all', questionCount: weakFlagCount, displayMode: 'flag' },
+                });
+              }}
+            >
+              <View style={[s.modeIcon, { backgroundColor: colors.accent }]}>
+                <CrosshairIcon size={18} color={colors.white} />
+              </View>
+              <View style={s.modeText}>
+                <Text style={s.modeTitle}>Practice Weak Flags</Text>
+                <Text style={s.modeSub}>{weakFlagCount} flag{weakFlagCount !== 1 ? 's' : ''} to review</Text>
+              </View>
+              <ChevronRightIcon size={18} color={colors.accent} />
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* ── YOUR STATS ── */}
@@ -457,15 +546,15 @@ const s = StyleSheet.create({
   wordmark: {},
   wmLine1: {
     fontFamily: fontFamily.display,
-    fontSize: 26,
-    lineHeight: 26,
+    fontSize: 36,
+    lineHeight: 38,
     color: colors.ink,
     letterSpacing: -0.5,
   },
   wmLine2: {
     fontFamily: fontFamily.displayItalic,
-    fontSize: 26,
-    lineHeight: 26,
+    fontSize: 36,
+    lineHeight: 38,
     color: colors.accent,
   },
   headerRight: {
@@ -493,6 +582,56 @@ const s = StyleSheet.create({
     textTransform: 'uppercase',
     color: colors.textTertiary,
     marginTop: 1,
+  },
+
+  // ── Daily Challenge
+  dailyCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.white,
+    borderWidth: 2,
+    borderColor: colors.accent,
+    borderRadius: borderRadius.lg,
+    padding: 14,
+    paddingHorizontal: 16,
+    marginHorizontal: spacing.md,
+    marginTop: spacing.md,
+    gap: 12,
+  },
+  dailyCardDone: {
+    borderColor: colors.rule,
+    opacity: 0.7,
+  },
+  dailyLeft: {
+    width: 40,
+    height: 40,
+    backgroundColor: colors.accentBg,
+    borderRadius: borderRadius.md,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dailyContent: {
+    flex: 1,
+  },
+  dailyTitle: {
+    fontFamily: fontFamily.bodyBold,
+    fontSize: 15,
+    color: colors.ink,
+    marginBottom: 2,
+  },
+  dailyTitleDone: {
+    color: colors.textTertiary,
+  },
+  dailySub: {
+    fontFamily: fontFamily.body,
+    fontSize: 12,
+    color: colors.textTertiary,
+    lineHeight: 16,
+  },
+  dailyScore: {
+    fontFamily: fontFamily.display,
+    fontSize: 20,
+    color: colors.textTertiary,
   },
 
   // ── Hero flag teaser
@@ -572,7 +711,14 @@ const s = StyleSheet.create({
     fontSize: 16,
     letterSpacing: 1,
     textTransform: 'uppercase',
-    color: colors.whiteAlpha70,
+    color: colors.white,
+  },
+  teaserResultCorrect: {
+    color: colors.successTextOnDark,
+  },
+  teaserResultWrong: {
+    color: colors.white,
+    fontSize: 18,
   },
   teaserPlayBtn: {
     flexDirection: 'row',

@@ -14,8 +14,9 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { colors, spacing, typography, fontFamily, nav, buttons, borderRadius } from '../utils/theme';
 import { GameQuestion, GameResult } from '../types';
-import { generateQuestions, checkAnswer } from '../utils/gameEngine';
-import { hapticCorrect, hapticWrong, hapticTap, playWrongSound } from '../utils/feedback';
+import { generateQuestions, generateDailyQuestions, generatePracticeQuestions, checkAnswer } from '../utils/gameEngine';
+import { getMissedFlagIds } from '../utils/storage';
+import { hapticCorrect, hapticWrong, hapticTap, playCorrectSound, playWrongSound } from '../utils/feedback';
 import FlagImage from '../components/FlagImage';
 import MapImage from '../components/MapImage';
 import { useGameAnimations } from '../hooks/useGameAnimations';
@@ -46,12 +47,24 @@ export default function GameScreen({ route, navigation }: Props) {
   const { fadeAnim, streakScale, shakeAnim, animateStreak, animateWrong, animateTransition } = useGameAnimations();
 
   useEffect(() => {
-    const timeAttackConfig = isTimeAttack
-      ? { ...config, questionCount: 999 }
-      : config;
-    const q = generateQuestions(timeAttackConfig);
-    setQuestions(q);
-    setQuestionStartTime(Date.now());
+    if (config.mode === 'daily') {
+      const q = generateDailyQuestions();
+      setQuestions(q);
+      setQuestionStartTime(Date.now());
+    } else if (config.mode === 'practice') {
+      getMissedFlagIds().then((ids) => {
+        const q = generatePracticeQuestions(ids);
+        setQuestions(q);
+        setQuestionStartTime(Date.now());
+      });
+    } else {
+      const timeAttackConfig = isTimeAttack
+        ? { ...config, questionCount: 999 }
+        : config;
+      const q = generateQuestions(timeAttackConfig);
+      setQuestions(q);
+      setQuestionStartTime(Date.now());
+    }
   }, []);
 
   // Countdown timer for timeattack mode
@@ -153,6 +166,7 @@ export default function GameScreen({ route, navigation }: Props) {
 
       if (correct) {
         hapticCorrect();
+        playCorrectSound();
         setCurrentStreak((s) => s + 1);
         animateStreak();
       } else {
@@ -407,7 +421,9 @@ export default function GameScreen({ route, navigation }: Props) {
             {lastAnswerCorrect ? (
               <Text style={styles.feedbackCorrect} accessibilityLiveRegion="polite">Correct!</Text>
             ) : (
-              <Text style={styles.feedbackWrong} accessibilityLiveRegion="polite">Wrong</Text>
+              <Text style={styles.feedbackWrong} accessibilityLiveRegion="polite">
+                {currentQuestion.flag.name}
+              </Text>
             )}
           </View>
         )}

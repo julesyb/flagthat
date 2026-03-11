@@ -1,5 +1,5 @@
 import { GameMode, FlagItem, GameQuestion, GameResult, GameConfig } from '../types';
-import { getFlagsForCategory } from '../data';
+import { getFlagsForCategory, getAllFlags } from '../data';
 import { countryAliases, twinPairs } from '../data/countryAliases';
 import { colors } from './theme';
 
@@ -10,6 +10,88 @@ export function shuffleArray<T>(array: T[]): T[] {
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
   return shuffled;
+}
+
+// Seeded PRNG (mulberry32) - deterministic shuffle for daily challenge
+function seededRandom(seed: number): () => number {
+  let s = seed | 0;
+  return () => {
+    s = (s + 0x6d2b79f5) | 0;
+    let t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function seededShuffle<T>(array: T[], seed: number): T[] {
+  const shuffled = [...array];
+  const rng = seededRandom(seed);
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+// Returns a numeric seed from a date string like "2026-03-11"
+function dateSeed(dateStr: string): number {
+  let hash = 0;
+  for (let i = 0; i < dateStr.length; i++) {
+    hash = ((hash << 5) - hash + dateStr.charCodeAt(i)) | 0;
+  }
+  return hash;
+}
+
+export function getTodayDateString(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+export function getDailyNumber(): number {
+  const start = new Date('2026-03-11T00:00:00Z').getTime();
+  const now = new Date(getTodayDateString() + 'T00:00:00Z').getTime();
+  return Math.floor((now - start) / 86400000) + 1;
+}
+
+export function generateDailyQuestions(dateStr?: string): GameQuestion[] {
+  const date = dateStr || getTodayDateString();
+  const seed = dateSeed(date);
+  const allFlags = getAllFlags();
+  const shuffled = seededShuffle(allFlags, seed);
+  const selected = shuffled.slice(0, 10);
+
+  const rng = seededRandom(seed + 1000);
+
+  return selected.map((flag) => {
+    const otherFlags = allFlags.filter((f) => f.id !== flag.id);
+    const twinNames = twinPairs[flag.name] || [];
+    const twins = otherFlags.filter((f) => twinNames.includes(f.name));
+    const nonTwins = otherFlags.filter((f) => !twinNames.includes(f.name));
+
+    // Pick 3 wrong answers, prioritizing twins
+    const wrongCount = 3;
+    const seededShuffleTwins = [...twins].sort(() => rng() - 0.5);
+    const selectedTwins = seededShuffleTwins.slice(0, wrongCount);
+    const remaining = wrongCount - selectedTwins.length;
+    const seededShuffleOthers = [...nonTwins].sort(() => rng() - 0.5);
+    const selectedOthers = seededShuffleOthers.slice(0, remaining);
+
+    const wrongOptions = [...selectedTwins, ...selectedOthers].map((f) => f.name);
+    const allOptions = [flag.name, ...wrongOptions];
+    // Deterministic shuffle of options
+    const options = allOptions.sort(() => rng() - 0.5);
+
+    return { flag, options };
+  });
+}
+
+export function generateDailyShareGrid(results: GameResult[]): string {
+  const dailyNum = getDailyNumber();
+  const correct = results.filter((r) => r.correct).length;
+  const grid = results.map((r) => (r.correct ? '\u2b1b' : '\u2b1c')).join('');
+  // Split into rows of 5
+  const row1 = grid.slice(0, 5);
+  const row2 = grid.slice(5, 10);
+  return `Flag That #${dailyNum}\n${correct}/10\n\n${row1}\n${row2}\n\nflagthat.app`;
 }
 
 export function generateQuestions(config: GameConfig): GameQuestion[] {
@@ -23,6 +105,22 @@ export function generateQuestions(config: GameConfig): GameQuestion[] {
 
   return selectedFlags.map((flag) => {
     const options = generateOptions(flag, categoryFlags, config.mode);
+    return { flag, options };
+  });
+}
+
+export function generatePracticeQuestions(flagIds: string[]): GameQuestion[] {
+  const allFlags = getAllFlags();
+  const flagMap = new Map(allFlags.map((f) => [f.id, f]));
+  const practiceFlags = flagIds
+    .map((id) => flagMap.get(id))
+    .filter((f): f is FlagItem => f !== undefined);
+
+  if (practiceFlags.length === 0) return [];
+
+  const shuffled = shuffleArray(practiceFlags);
+  return shuffled.map((flag) => {
+    const options = generateOptions(flag, allFlags, 'medium');
     return { flag, options };
   });
 }

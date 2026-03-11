@@ -16,6 +16,15 @@
       "bundleIdentifier": "com.flagsareus.app",
       "infoPlist": {
         "CFBundleDisplayName": "Flag That"
+      },
+      "privacyManifests": {
+        "NSPrivacyCollectedDataTypes": [],
+        "NSPrivacyAccessedAPITypes": [
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+            "NSPrivacyAccessedAPITypeReasons": ["CA92.1"]
+          }
+        ]
       }
     },
     "android": {

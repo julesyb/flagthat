@@ -4,6 +4,91 @@ import { UserStats, GameMode, CategoryId, GameResult } from '../types';
 const STATS_KEY = '@flagsareus_stats';
 const FLAG_STATS_KEY = '@flagsareus_flag_stats';
 const DAY_STREAK_KEY = '@flagsareus_day_streak';
+const DAILY_CHALLENGE_KEY = '@flagsareus_daily_challenge';
+const SETTINGS_KEY = '@flagsareus_settings';
+const BADGE_DATA_KEY = '@flagsareus_badge_data';
+
+// ─── Badge Tracking Data ───────────────────────────────────
+export interface BadgeData {
+  dailyChallengesCompleted: number;
+  hasShared: boolean;
+  lastGamePerfect10: boolean;
+  lastGameSRank: boolean;
+}
+
+const DEFAULT_BADGE_DATA: BadgeData = {
+  dailyChallengesCompleted: 0,
+  hasShared: false,
+  lastGamePerfect10: false,
+  lastGameSRank: false,
+};
+
+export async function getBadgeData(): Promise<BadgeData> {
+  try {
+    const json = await AsyncStorage.getItem(BADGE_DATA_KEY);
+    if (json) return { ...DEFAULT_BADGE_DATA, ...JSON.parse(json) };
+    return { ...DEFAULT_BADGE_DATA };
+  } catch {
+    return { ...DEFAULT_BADGE_DATA };
+  }
+}
+
+export async function saveBadgeData(data: Partial<BadgeData>): Promise<void> {
+  try {
+    const current = await getBadgeData();
+    const updated = { ...current, ...data };
+    await AsyncStorage.setItem(BADGE_DATA_KEY, JSON.stringify(updated));
+  } catch {
+    // Silently fail
+  }
+}
+
+export async function markShared(): Promise<void> {
+  await saveBadgeData({ hasShared: true });
+}
+
+export async function incrementDailyChallenges(): Promise<void> {
+  const data = await getBadgeData();
+  await saveBadgeData({ dailyChallengesCompleted: data.dailyChallengesCompleted + 1 });
+}
+
+export async function updateLastGameBadgeFlags(correct: number, total: number): Promise<void> {
+  const data = await getBadgeData();
+  const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
+  await saveBadgeData({
+    lastGamePerfect10: data.lastGamePerfect10 || (correct === total && total >= 10),
+    lastGameSRank: data.lastGameSRank || (accuracy >= 95 && total >= 5),
+  });
+}
+
+// ─── App Settings ──────────────────────────────────────────
+export interface AppSettings {
+  soundEnabled: boolean;
+  hapticsEnabled: boolean;
+}
+
+const DEFAULT_SETTINGS: AppSettings = {
+  soundEnabled: true,
+  hapticsEnabled: true,
+};
+
+export async function getSettings(): Promise<AppSettings> {
+  try {
+    const json = await AsyncStorage.getItem(SETTINGS_KEY);
+    if (json) return { ...DEFAULT_SETTINGS, ...JSON.parse(json) };
+    return { ...DEFAULT_SETTINGS };
+  } catch {
+    return { ...DEFAULT_SETTINGS };
+  }
+}
+
+export async function saveSettings(settings: AppSettings): Promise<void> {
+  try {
+    await AsyncStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  } catch {
+    // Silently fail
+  }
+}
 
 function getTodayDate(): string {
   return new Date().toISOString().slice(0, 10);
@@ -25,6 +110,8 @@ const DEFAULT_STATS: UserStats = {
     neighbors: { correct: 0, total: 0 },
     impostor: { correct: 0, total: 0 },
     capitalconnection: { correct: 0, total: 0 },
+    daily: { correct: 0, total: 0 },
+    practice: { correct: 0, total: 0 },
   },
   categoryStats: {},
 };
@@ -85,6 +172,8 @@ export async function resetStats(): Promise<void> {
     await AsyncStorage.removeItem(STATS_KEY);
     await AsyncStorage.removeItem(FLAG_STATS_KEY);
     await AsyncStorage.removeItem(DAY_STREAK_KEY);
+    await AsyncStorage.removeItem(BADGE_DATA_KEY);
+    await AsyncStorage.removeItem(DAILY_CHALLENGE_KEY);
   } catch {
     // Silently fail
   }
@@ -123,6 +212,42 @@ async function recordDayPlayed(): Promise<number> {
     return streak;
   } catch {
     return 0;
+  }
+}
+
+// ─── Daily Challenge ───────────────────────────────────────
+export interface DailyChallengeData {
+  date: string;
+  completed: boolean;
+  results: GameResult[];
+  score: number;
+}
+
+export async function getDailyChallenge(): Promise<DailyChallengeData | null> {
+  try {
+    const json = await AsyncStorage.getItem(DAILY_CHALLENGE_KEY);
+    if (!json) return null;
+    const data = JSON.parse(json);
+    const today = getTodayDate();
+    if (data.date !== today) return null;
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+export async function saveDailyChallenge(results: GameResult[]): Promise<void> {
+  try {
+    const score = results.filter((r) => r.correct).length;
+    const data: DailyChallengeData = {
+      date: getTodayDate(),
+      completed: true,
+      results,
+      score,
+    };
+    await AsyncStorage.setItem(DAILY_CHALLENGE_KEY, JSON.stringify(data));
+  } catch {
+    // Silently fail
   }
 }
 

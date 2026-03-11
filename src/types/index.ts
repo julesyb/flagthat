@@ -1,4 +1,4 @@
-export type GameMode = 'easy' | 'medium' | 'hard' | 'flagflash' | 'flagpuzzle' | 'timeattack' | 'neighbors' | 'impostor' | 'capitalconnection';
+export type GameMode = 'easy' | 'medium' | 'hard' | 'flagflash' | 'flagpuzzle' | 'timeattack' | 'neighbors' | 'impostor' | 'capitalconnection' | 'daily' | 'practice';
 
 export type DisplayMode = 'flag' | 'map';
 
@@ -76,6 +76,8 @@ export const GAME_MODES: Record<GameMode, { label: string; description: string; 
   neighbors: { label: 'Neighbors', description: 'Find all bordering countries', icon: 'NB' },
   impostor: { label: 'Flag Impostor', description: 'Spot the fake flag', icon: 'FI' },
   capitalconnection: { label: 'Capital Connection', description: 'Match flags to capitals', icon: 'CC' },
+  daily: { label: 'Daily', description: 'Same 10 flags for everyone', icon: 'D' },
+  practice: { label: 'Practice', description: 'Review your weak flags', icon: 'PR' },
 };
 
 export const CATEGORIES: CategoryInfo[] = [

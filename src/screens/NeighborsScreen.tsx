@@ -91,6 +91,9 @@ export default function NeighborsScreen({ navigation, route }: Props) {
     );
   }
 
+  const guessLimit = config.guessLimit ?? 0;
+  const wrongCount = results.filter((r) => !r.correct).length;
+
   const round = rounds[roundIndex];
   const isLastRound = roundIndex >= rounds.length - 1;
   const neighborSet = new Set(round.neighborIds);
@@ -127,13 +130,14 @@ export default function NeighborsScreen({ navigation, route }: Props) {
   };
 
   const handleNext = () => {
-    if (isLastRound) {
-      const finalResults = [...results];
-      const correct = finalResults.filter((r) => r.correct).length;
-      const streak = getStreakFromResults(finalResults);
-      updateStats(correct, finalResults.length, streak, 'neighbors', config.category);
-      updateFlagResults(finalResults);
-      navigation.replace('Results', { results: finalResults, config });
+    const currentResults = [...results];
+    const isEliminated = guessLimit > 0 && currentResults.filter((r) => !r.correct).length >= guessLimit;
+    if (isLastRound || isEliminated) {
+      const correct = currentResults.filter((r) => r.correct).length;
+      const streak = getStreakFromResults(currentResults);
+      updateStats(correct, currentResults.length, streak, 'neighbors', config.category);
+      updateFlagResults(currentResults);
+      navigation.replace('Results', { results: currentResults, config });
       return;
     }
 
@@ -164,7 +168,11 @@ export default function NeighborsScreen({ navigation, route }: Props) {
           </Text>
           <Text style={styles.scoreText}>{correctCount} correct</Text>
         </View>
-        <View style={styles.spacer} />
+        {guessLimit > 0 ? (
+          <Text style={styles.livesText}>{Math.max(0, guessLimit - wrongCount)} {guessLimit - wrongCount === 1 ? 'life' : 'lives'}</Text>
+        ) : (
+          <View style={styles.spacer} />
+        )}
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -309,6 +317,7 @@ const styles = StyleSheet.create({
   counter: { ...typography.bodyBold, color: colors.text },
   scoreText: { ...typography.caption, color: colors.success },
   spacer: { width: 60 },
+  livesText: { ...typography.bodyBold, color: colors.error, width: 60, textAlign: 'right' },
   content: { padding: spacing.lg, paddingBottom: 120 },
   prompt: { ...typography.headingUpper, color: colors.text, textAlign: 'center', marginBottom: spacing.lg },
   flagCenter: { alignItems: 'center', marginBottom: spacing.lg },

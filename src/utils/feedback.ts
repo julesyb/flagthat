@@ -11,13 +11,27 @@ const SOUNDS = {
 } as const;
 
 let soundsEnabled = true;
+let hapticsEnabled = true;
 
 export function setSoundsEnabled(enabled: boolean) {
   soundsEnabled = enabled;
 }
 
+export function getSoundsEnabled(): boolean {
+  return soundsEnabled;
+}
+
+export function setHapticsEnabled(enabled: boolean) {
+  hapticsEnabled = enabled;
+}
+
+export function getHapticsEnabled(): boolean {
+  return hapticsEnabled;
+}
+
 // Haptic feedback
 export async function hapticCorrect() {
+  if (!hapticsEnabled) return;
   try {
     await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   } catch {
@@ -26,18 +40,21 @@ export async function hapticCorrect() {
 }
 
 export async function hapticWrong() {
+  if (!hapticsEnabled) return;
   try {
     await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
   } catch {}
 }
 
 export async function hapticTap() {
+  if (!hapticsEnabled) return;
   try {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   } catch {}
 }
 
 export async function hapticHeavy() {
+  if (!hapticsEnabled) return;
   try {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
   } catch {}

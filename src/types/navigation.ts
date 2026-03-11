@@ -11,5 +11,6 @@ export type RootStackParamList = {
   CapitalConnection: { config: GameConfig };
   Results: { results: GameResult[]; config: GameConfig };
   Stats: undefined;
+  Settings: undefined;
   Browse: { region?: string } | undefined;
 };

@@ -11,11 +11,12 @@ import {
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { colors, spacing, typography, fontFamily, buttons, borderRadius } from '../utils/theme';
-import { calculateAccuracy, getStreakFromResults, getGrade } from '../utils/gameEngine';
-import { updateStats, updateFlagResults } from '../utils/storage';
+import { calculateAccuracy, getStreakFromResults, getGrade, generateDailyShareGrid, getDailyNumber } from '../utils/gameEngine';
+import { updateStats, updateFlagResults, saveDailyChallenge, incrementDailyChallenges, updateLastGameBadgeFlags, markShared } from '../utils/storage';
 import { hapticCorrect, playCelebrationSound } from '../utils/feedback';
 import { FlagImageSmall } from '../components/FlagImage';
 import { CheckIcon, CrossIcon } from '../components/Icons';
+import BottomNav from '../components/BottomNav';
 import { GAME_MODES, CATEGORIES } from '../types';
 import { RootStackParamList } from '../types/navigation';
 
@@ -35,9 +36,16 @@ export default function ResultsScreen({ route, navigation }: Props) {
   const gradeScale = useRef(new Animated.Value(0)).current;
   const confettiOpacity = useRef(new Animated.Value(0)).current;
 
+  const isDaily = config.mode === 'daily';
+
   useEffect(() => {
     updateStats(correct, results.length, streak, config.mode, config.category);
     updateFlagResults(results);
+    updateLastGameBadgeFlags(correct, results.length);
+    if (isDaily) {
+      saveDailyChallenge(results);
+      incrementDailyChallenges();
+    }
 
     Animated.spring(gradeScale, {
       toValue: 1,
@@ -70,25 +78,33 @@ export default function ResultsScreen({ route, navigation }: Props) {
   const modeLabel = GAME_MODES[config.mode].label;
 
   const handleShare = async () => {
-    const message =
-      `Flag That\n` +
-      `${modeLabel} - ${categoryLabel}\n` +
-      `Score: ${correct}/${results.length} (${accuracy}%)\n` +
-      `Grade: ${grade.label} | Streak: ${streak}\n` +
-      (isPerfect ? 'PERFECT SCORE!\n' : '') +
-      `Can you beat my score?\n` +
-      `https://flagthat.app`;
+    const message = isDaily
+      ? generateDailyShareGrid(results)
+      : `Flag That\n` +
+        `${modeLabel} - ${categoryLabel}\n` +
+        `Score: ${correct}/${results.length} (${accuracy}%)\n` +
+        `Grade: ${grade.label} | Streak: ${streak}\n` +
+        (isPerfect ? 'PERFECT SCORE!\n' : '') +
+        `Can you beat my score?\n` +
+        `https://flagthat.app`;
 
     try {
       await Share.share({ message });
+      markShared();
     } catch {
       // Share cancelled
     }
   };
 
+  const dailyNumber = isDaily ? getDailyNumber() : 0;
+
   const goHome = () => navigation.popToTop();
 
   const playAgain = () => {
+    if (isDaily) {
+      navigation.popToTop();
+      return;
+    }
     if (config.mode === 'flagflash') {
       navigation.replace('FlagFlash', { config });
     } else if (config.mode === 'flagpuzzle') {
@@ -124,8 +140,29 @@ export default function ResultsScreen({ route, navigation }: Props) {
         >
           <Text style={[styles.grade, { color: grade.color }]}>{grade.label}</Text>
           <Text style={styles.accuracy}>{accuracy}%</Text>
-          <Text style={styles.modeCategoryLabel}>{modeLabel} / {categoryLabel}</Text>
+          <Text style={styles.modeCategoryLabel}>
+            {isDaily ? `Daily #${dailyNumber}` : `${modeLabel} / ${categoryLabel}`}
+          </Text>
         </Animated.View>
+
+        {isDaily && (
+          <View style={styles.dailyGridCard}>
+            <Text style={styles.dailyGridTitle}>Flag That #{dailyNumber}</Text>
+            <Text style={styles.dailyGridScore}>{correct}/10</Text>
+            <View style={styles.dailyGrid}>
+              <View style={styles.dailyGridRow}>
+                {results.slice(0, 5).map((r, i) => (
+                  <View key={i} style={[styles.dailyCell, r.correct ? styles.dailyCellCorrect : styles.dailyCellWrong]} />
+                ))}
+              </View>
+              <View style={styles.dailyGridRow}>
+                {results.slice(5, 10).map((r, i) => (
+                  <View key={i} style={[styles.dailyCell, r.correct ? styles.dailyCellCorrect : styles.dailyCellWrong]} />
+                ))}
+              </View>
+            </View>
+          </View>
+        )}
 
         <View style={styles.statsRow}>
           <View style={styles.statCard}>
@@ -158,16 +195,18 @@ export default function ResultsScreen({ route, navigation }: Props) {
             activeOpacity={0.7}
             accessibilityLabel="Play again"
           >
-            <Text style={styles.primaryButtonText}>Play</Text>
+            <Text style={styles.primaryButtonText}>{isDaily ? 'Home' : 'Play'}</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.secondaryButton}
-            onPress={goHome}
-            activeOpacity={0.7}
-            accessibilityLabel="Go home"
-          >
-            <Text style={styles.secondaryButtonText}>Home</Text>
-          </TouchableOpacity>
+          {!isDaily && (
+            <TouchableOpacity
+              style={styles.secondaryButton}
+              onPress={goHome}
+              activeOpacity={0.7}
+              accessibilityLabel="Go home"
+            >
+              <Text style={styles.secondaryButtonText}>Home</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         <Text style={styles.reviewTitle}>Review</Text>
@@ -214,7 +253,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
             activeOpacity={0.7}
             accessibilityLabel="Play again"
           >
-            <Text style={styles.primaryButtonText}>Play</Text>
+            <Text style={styles.primaryButtonText}>{isDaily ? 'Home' : 'Play'}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.secondaryButton}
@@ -226,6 +265,15 @@ export default function ResultsScreen({ route, navigation }: Props) {
           </TouchableOpacity>
         </View>
       </ScrollView>
+      <BottomNav
+        activeTab="Play"
+        onNavigate={(tab) => {
+          if (tab === 'Play') navigation.popToTop();
+          else if (tab === 'Modes') navigation.navigate('GameSetup');
+          else if (tab === 'Stats') navigation.navigate('Stats');
+          else if (tab === 'Browse') navigation.navigate('Browse');
+        }}
+      />
     </SafeAreaView>
   );
 }
@@ -349,5 +397,44 @@ const styles = StyleSheet.create({
   primaryButtonText: {
     ...buttons.primaryText,
     textAlign: 'center',
+  },
+  dailyGridCard: {
+    backgroundColor: colors.primary,
+    borderRadius: borderRadius.xl,
+    padding: spacing.lg,
+    alignItems: 'center',
+    marginBottom: spacing.lg,
+  },
+  dailyGridTitle: {
+    fontFamily: fontFamily.uiLabel,
+    fontSize: 12,
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
+    color: colors.whiteAlpha45,
+    marginBottom: spacing.sm,
+  },
+  dailyGridScore: {
+    fontFamily: fontFamily.display,
+    fontSize: 36,
+    color: colors.white,
+    marginBottom: spacing.md,
+  },
+  dailyGrid: {
+    gap: 6,
+  },
+  dailyGridRow: {
+    flexDirection: 'row',
+    gap: 6,
+  },
+  dailyCell: {
+    width: 44,
+    height: 44,
+    borderRadius: borderRadius.sm,
+  },
+  dailyCellCorrect: {
+    backgroundColor: colors.success,
+  },
+  dailyCellWrong: {
+    backgroundColor: colors.whiteAlpha20,
   },
 });
