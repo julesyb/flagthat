@@ -8,7 +8,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily, buttons } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, buttons, borderRadius } from '../utils/theme';
 import {
   GameMode,
   DisplayMode,
@@ -21,12 +21,15 @@ import {
 } from '../types';
 import { getCategoryCount, getTotalFlagCount } from '../data';
 import { RootStackParamList } from '../types/navigation';
+import { FlagIcon, MapPinIcon } from '../components/Icons';
+import BottomNav from '../components/BottomNav';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'GameSetup'>;
 
 const QUESTION_COUNTS = [10, 20, 50, 100];
 const FLAGFLASH_TIMES = [15, 30, 60, 90];
 const FLAGPUZZLE_TIMES = [15, 30, 60];
+const TIMEATTACK_TIMES = [30, 60, 90, 120];
 
 // Extracted: reusable row of option chips with "All" toggle
 function OptionChipRow({
@@ -94,8 +97,8 @@ export default function GameSetupScreen({ navigation }: Props) {
   const totalFlags = getTotalFlagCount();
   const isFlagFlash = mode === 'flagflash';
   const isFlagPuzzle = mode === 'flagpuzzle';
-  const hasTimeLimit = isFlagFlash || isFlagPuzzle;
-  const showQuestionCount = !isFlagFlash; // FlagFlash is time-only, no question count
+  const isTimeAttack = mode === 'timeattack';
+  const hasTimeLimit = isFlagFlash || isFlagPuzzle || isTimeAttack;
 
   const handleFilterTypeSelect = (type: CategoryType) => {
     if (filterType === type) {
@@ -104,6 +107,9 @@ export default function GameSetupScreen({ navigation }: Props) {
     } else {
       setFilterType(type);
       setSelectedCategory('all');
+      if (type === 'theme') {
+        setQuestionCountAll(true);
+      }
     }
   };
 
@@ -119,12 +125,14 @@ export default function GameSetupScreen({ navigation }: Props) {
     const config: GameConfig = {
       mode,
       category: selectedCategory,
-      questionCount: isFlagFlash ? 999 : effectiveQuestionCount,
+      questionCount: (isFlagFlash || isTimeAttack) ? 999 : effectiveQuestionCount,
       displayMode,
       ...(hasTimeLimit && { timeLimit }),
     };
 
-    if (isFlagFlash) {
+    if (isTimeAttack) {
+      navigation.navigate('Game', { config });
+    } else if (isFlagFlash) {
       navigation.navigate('FlagFlash', { config });
     } else if (isFlagPuzzle) {
       navigation.navigate('FlagPuzzle', { config });
@@ -137,11 +145,18 @@ export default function GameSetupScreen({ navigation }: Props) {
     ? CATEGORIES.filter((c) => c.type === filterType)
     : [];
 
-  const timeLimitOptions = isFlagPuzzle ? FLAGPUZZLE_TIMES : FLAGFLASH_TIMES;
+  const getTimeLimitOptions = () => {
+    if (isFlagPuzzle) return FLAGPUZZLE_TIMES;
+    if (isTimeAttack) return TIMEATTACK_TIMES;
+    return FLAGFLASH_TIMES;
+  };
+
+  const showQuestionCount = !isFlagFlash && !isTimeAttack;
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
+        style={styles.scrollView}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
@@ -160,9 +175,13 @@ export default function GameSetupScreen({ navigation }: Props) {
                 accessibilityState={{ selected: isActive }}
                 accessibilityLabel={dm === 'flag' ? 'Flag Mode' : 'Map Mode'}
               >
-                <Text style={[styles.displayToggleIcon, isActive && styles.displayToggleIconActive]}>
-                  {dm === 'flag' ? '\u2691' : '\u2609'}
-                </Text>
+                <View style={[styles.displayToggleIconWrapper, isActive && styles.displayToggleIconWrapperActive]}>
+                  {dm === 'flag' ? (
+                    <FlagIcon size={24} color={isActive ? colors.ink : colors.textSecondary} />
+                  ) : (
+                    <MapPinIcon size={24} color={isActive ? colors.ink : colors.textSecondary} />
+                  )}
+                </View>
                 <Text style={[styles.displayToggleText, isActive && styles.displayToggleTextActive]}>
                   {dm === 'flag' ? 'Flag Mode' : 'Map Mode'}
                 </Text>
@@ -264,12 +283,72 @@ export default function GameSetupScreen({ navigation }: Props) {
         {hasTimeLimit && (
           <>
             <Text style={styles.sectionTitle}>Time Limit</Text>
-            <OptionChipRow
-              options={timeLimitOptions}
-              selected={timeLimit}
-              onSelect={setTimeLimit}
-              suffix="s"
-            />
+            <View style={styles.optionRow}>
+              {getTimeLimitOptions().map((t) => (
+                <TouchableOpacity
+                  key={t}
+                  style={[
+                    styles.optionChip,
+                    timeLimit === t && styles.optionChipActive,
+                  ]}
+                  onPress={() => setTimeLimit(t)}
+                  activeOpacity={0.7}
+                >
+                  <Text
+                    style={[
+                      styles.optionLabel,
+                      timeLimit === t && styles.optionLabelActive,
+                    ]}
+                  >
+                    {t}s
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            {isFlagPuzzle && (
+              <>
+                <Text style={styles.sectionTitle}>Questions</Text>
+                <View style={styles.optionRow}>
+                  {QUESTION_COUNTS.map((count) => (
+                    <TouchableOpacity
+                      key={count}
+                      style={[
+                        styles.optionChip,
+                        !questionCountAll && questionCount === count && styles.optionChipActive,
+                      ]}
+                      onPress={() => { setQuestionCount(count); setQuestionCountAll(false); }}
+                      activeOpacity={0.7}
+                    >
+                      <Text
+                        style={[
+                          styles.optionLabel,
+                          !questionCountAll && questionCount === count && styles.optionLabelActive,
+                        ]}
+                      >
+                        {count}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                  <TouchableOpacity
+                    style={[
+                      styles.optionChip,
+                      questionCountAll && styles.optionChipActive,
+                    ]}
+                    onPress={() => setQuestionCountAll(true)}
+                    activeOpacity={0.7}
+                  >
+                    <Text
+                      style={[
+                        styles.optionLabel,
+                        questionCountAll && styles.optionLabelActive,
+                      ]}
+                    >
+                      All
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            )}
           </>
         )}
 
@@ -289,17 +368,31 @@ export default function GameSetupScreen({ navigation }: Props) {
         )}
 
         <TouchableOpacity
-          style={[styles.startButton, (isFlagFlash || isFlagPuzzle) && styles.startButtonParty]}
+          style={[styles.startButton, (isFlagFlash || isFlagPuzzle || isTimeAttack) && styles.startButtonParty]}
           onPress={startGame}
           activeOpacity={0.8}
           accessibilityRole="button"
           accessibilityLabel={isFlagFlash ? 'Start FlagFlash' : isFlagPuzzle ? 'Start Flag Puzzle' : 'Start Game'}
         >
           <Text style={styles.startButtonText}>
-            {isFlagFlash ? 'Start FlagFlash' : isFlagPuzzle ? 'Start Flag Puzzle' : 'Start Game'}
+            {isTimeAttack
+              ? 'Start Time Attack'
+              : isFlagFlash
+                ? 'Start FlagFlash'
+                : isFlagPuzzle
+                  ? 'Start Flag Puzzle'
+                  : 'Start Game'}
           </Text>
         </TouchableOpacity>
       </ScrollView>
+      <BottomNav
+        activeTab="Modes"
+        onNavigate={(tab) => {
+          if (tab === 'Play') navigation.navigate('Home');
+          else if (tab === 'Stats') navigation.navigate('Stats');
+          else if (tab === 'Browse') navigation.navigate('Browse');
+        }}
+      />
     </SafeAreaView>
   );
 }
@@ -308,6 +401,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  scrollView: {
+    flex: 1,
   },
   content: {
     padding: spacing.lg,
@@ -325,19 +421,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 2,
     borderColor: colors.border,
+    borderRadius: borderRadius.md,
   },
   displayToggleActive: {
     borderColor: colors.ink,
     backgroundColor: colors.surfaceSecondary,
   },
-  displayToggleIcon: {
-    fontSize: 24,
-    color: colors.textSecondary,
+  displayToggleIconWrapper: {
     marginBottom: spacing.xs,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  displayToggleIconActive: {
-    color: colors.ink,
-  },
+  displayToggleIconWrapperActive: {},
   displayToggleText: {
     ...typography.bodyBold,
     color: colors.text,
@@ -379,6 +474,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 2,
     borderColor: colors.border,
+    borderRadius: borderRadius.md,
   },
   modeCardActive: {
     borderColor: colors.ink,
@@ -391,6 +487,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: spacing.xs,
+    borderRadius: borderRadius.sm,
   },
   modeIconBadgeActive: {
     backgroundColor: colors.ink,
@@ -431,6 +528,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 2,
     borderColor: colors.border,
+    borderRadius: borderRadius.md,
   },
   filterTypeChipActive: {
     borderColor: colors.ink,
@@ -456,6 +554,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     borderWidth: 2,
     borderColor: colors.border,
+    borderRadius: borderRadius.md,
     gap: spacing.sm,
   },
   categoryChipActive: {
@@ -468,6 +567,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surfaceSecondary,
     justifyContent: 'center',
     alignItems: 'center',
+    borderRadius: borderRadius.sm,
   },
   categoryIconBadgeActive: {
     backgroundColor: colors.ink,
@@ -510,6 +610,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 2,
     borderColor: colors.border,
+    borderRadius: borderRadius.md,
   },
   optionChipActive: {
     borderColor: colors.ink,

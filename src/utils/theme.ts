@@ -3,10 +3,11 @@
 // Voice: Intelligent. Editorial. Authoritative.
 //
 // Rules:
-// — No rounded corners. Sharp geometry only.
+// — Rounded corners on cards and interactive elements (sm–xl scale).
 // — No gradients. Flat color planes.
 // — No drop shadows except offset hard shadows on hover.
 // — Accent red appears maximum twice per screen.
+// — No emoji anywhere in the UI. Use SVG icons from Icons.tsx.
 // =====================
 
 // ---- Single source of truth for every color value ----
@@ -74,7 +75,20 @@ export const colors = {
   whiteAlpha50: 'rgba(255,255,255,0.50)',
   whiteAlpha60: 'rgba(255,255,255,0.60)',
   whiteAlpha70: 'rgba(255,255,255,0.70)',
-  whiteAlpha90: 'rgba(255,255,255,0.92)',
+
+  // Dark surface feedback (on dark/navy backgrounds)
+  darkSurface: 'rgba(255,255,255,0.07)',
+  darkBorder: 'rgba(255,255,255,0.1)',
+  successOnDark: 'rgba(56,195,100,0.2)',
+  successBorderOnDark: 'rgba(56,195,100,0.5)',
+  successTextOnDark: '#7ee8a2',
+  errorOnDark: 'rgba(207,35,24,0.2)',
+  errorBorderOnDark: 'rgba(207,35,24,0.45)',
+  errorTextOnDark: '#f8a09a',
+
+  // Map
+  mapBackground: '#e8e4df',
+  mapZoomSurface: 'rgba(255,255,255,0.92)',
 };
 
 export const spacing = {
@@ -89,11 +103,11 @@ export const spacing = {
 
 export const borderRadius = {
   none: 0,
-  sm: 0,
-  md: 0,
-  lg: 0,
-  xl: 0,
-  full: 0,
+  sm: 8,
+  md: 10,
+  lg: 14,
+  xl: 18,
+  full: 999,
 };
 
 // Font family names — these must match the keys used when loading fonts
@@ -120,13 +134,11 @@ export const typography = {
     fontFamily: fontFamily.display,
     letterSpacing: -0.5,
   },
-  // General-purpose heading — NO uppercase (use headingUpper for that)
   heading: {
     fontSize: 22,
     fontFamily: fontFamily.uiLabel,
     letterSpacing: 1,
   },
-  // Heading variant with uppercase — for section titles and UI labels
   headingUpper: {
     fontSize: 22,
     fontFamily: fontFamily.uiLabel,
@@ -154,7 +166,6 @@ export const typography = {
     fontSize: 15,
     fontFamily: fontFamily.bodyMedium,
   },
-  // Editorial-specific styles from the template
   eyebrow: {
     fontSize: 10,
     fontFamily: fontFamily.uiLabel,
@@ -186,20 +197,19 @@ export const typography = {
   },
 };
 
-// ---- Standard border widths (single source of truth) ----
 export const borders = {
   thin: 1,
   medium: 1.5,
   thick: 2,
 };
 
-// ---- Common interactive element styles ----
 export const buttons = {
   primary: {
     backgroundColor: palette.ink,
     paddingVertical: 16,
     paddingHorizontal: 24,
     alignItems: 'center' as const,
+    borderRadius: borderRadius.lg,
   },
   primaryText: {
     fontFamily: 'BarlowCondensed_700Bold',
@@ -215,6 +225,7 @@ export const buttons = {
     alignItems: 'center' as const,
     borderWidth: 2,
     borderColor: palette.ink,
+    borderRadius: borderRadius.lg,
   },
   secondaryText: {
     fontFamily: 'BarlowCondensed_700Bold',
@@ -229,6 +240,7 @@ export const buttons = {
     borderWidth: 1,
     borderColor: palette.rule,
     backgroundColor: palette.white,
+    borderRadius: borderRadius.sm,
   },
   chipActive: {
     backgroundColor: palette.ink,
@@ -246,7 +258,6 @@ export const buttons = {
   },
 };
 
-// ---- Standard nav bar element ----
 export const nav = {
   backButton: {
     padding: 8,

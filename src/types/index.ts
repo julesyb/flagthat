@@ -1,4 +1,4 @@
-export type GameMode = 'easy' | 'medium' | 'hard' | 'flagflash' | 'flagpuzzle';
+export type GameMode = 'easy' | 'medium' | 'hard' | 'flagflash' | 'flagpuzzle' | 'timeattack';
 
 export type DisplayMode = 'flag' | 'map';
 
@@ -68,6 +68,7 @@ export const GAME_MODES: Record<GameMode, { label: string; description: string; 
   hard: { label: 'Hard', description: 'Type the answer', icon: 'H' },
   flagflash: { label: 'FlagFlash', description: 'Party mode - tilt to play', icon: '!' },
   flagpuzzle: { label: 'Flag Puzzle', description: 'Flag reveals over time', icon: '?' },
+  timeattack: { label: 'Time Attack', description: '60s - how many can you get?', icon: '60' },
 };
 
 export const CATEGORIES: CategoryInfo[] = [

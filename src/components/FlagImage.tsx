@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import { Image } from 'expo-image';
-import { colors } from '../utils/theme';
+import { colors, fontFamily, borderRadius } from '../utils/theme';
 
 interface FlagImageProps {
   countryCode: string;
@@ -35,15 +35,15 @@ export default function FlagImage({ countryCode, size = 'large', emoji, style }:
 
   return (
     <View style={[styles.container, dimensions, style]}>
-      {!loaded && emoji && (
+      {!loaded && (
         <View style={[styles.emojiOverlay, dimensions]}>
-          <Text style={[styles.emojiText, { fontSize: dimensions.height * 0.6 }]}>{emoji}</Text>
+          <Text style={styles.placeholderText}>{countryCode.toUpperCase()}</Text>
         </View>
       )}
       <Image
         source={{ uri: getFlagUrl(countryCode, requestWidth) }}
         style={[styles.image, dimensions]}
-        contentFit="cover"
+        contentFit="contain"
         transition={200}
         onLoad={() => setLoaded(true)}
       />
@@ -58,13 +58,13 @@ export function FlagImageSmall({ countryCode, emoji }: { countryCode: string; em
     <View style={styles.smallContainer}>
       {!loaded && (
         <View style={[styles.emojiOverlay, { width: 56, height: 37 }]}>
-          <Text style={styles.smallEmojiText}>{emoji}</Text>
+          <Text style={styles.placeholderText}>{countryCode.toUpperCase()}</Text>
         </View>
       )}
       <Image
         source={{ uri: getFlagUrl(countryCode, 112) }}
         style={styles.smallImage}
-        contentFit="cover"
+        contentFit="contain"
         transition={150}
         onLoad={() => setLoaded(true)}
       />
@@ -75,11 +75,14 @@ export function FlagImageSmall({ countryCode, emoji }: { countryCode: string; em
 const styles = StyleSheet.create({
   container: {
     overflow: 'hidden',
-    backgroundColor: 'transparent',
+    backgroundColor: colors.surfaceSecondary,
     borderWidth: 1,
     borderColor: colors.rule2,
+    borderRadius: borderRadius.sm,
   },
-  image: {},
+  image: {
+    backgroundColor: 'transparent',
+  },
   emojiOverlay: {
     position: 'absolute',
     zIndex: 1,
@@ -87,23 +90,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: colors.border,
   },
-  emojiText: {
+  placeholderText: {
+    fontFamily: 'BarlowCondensed_600SemiBold',
+    fontSize: 12,
+    letterSpacing: 1,
+    color: colors.textTertiary,
     textAlign: 'center',
   },
   smallContainer: {
     width: 56,
     height: 37,
     overflow: 'hidden',
-    backgroundColor: colors.border,
+    backgroundColor: colors.surfaceSecondary,
     borderWidth: 1,
     borderColor: colors.rule2,
+    borderRadius: borderRadius.sm,
   },
   smallImage: {
     width: 56,
     height: 37,
-  },
-  smallEmojiText: {
-    fontSize: 18,
-    textAlign: 'center',
+    backgroundColor: 'transparent',
   },
 });

@@ -10,7 +10,7 @@ import {
   Keyboard,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, buttons } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, nav, buttons, borderRadius } from '../utils/theme';
 import { GameQuestion, GameResult } from '../types';
 import { generateQuestions, checkAnswer } from '../utils/gameEngine';
 import { hapticCorrect, hapticWrong, hapticTap, playCorrectSound, playWrongSound } from '../utils/feedback';
@@ -25,6 +25,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Game'>;
 
 export default function GameScreen({ route, navigation }: Props) {
   const { config } = route.params;
+  const isTimeAttack = config.mode === 'timeattack';
   const [questions, setQuestions] = useState<GameQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [results, setResults] = useState<GameResult[]>([]);
@@ -34,21 +35,41 @@ export default function GameScreen({ route, navigation }: Props) {
   const [lastAnswerCorrect, setLastAnswerCorrect] = useState(false);
   const [currentStreak, setCurrentStreak] = useState(0);
   const [questionStartTime, setQuestionStartTime] = useState(Date.now());
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const { fadeAnim, streakScale, shakeAnim, animateStreak, animateWrong, animateTransition } = useGameAnimations();
+  const [timeLeft, setTimeLeft] = useState(config.timeLimit || 60);
+  const fadeAnim = useRef(new Animated.Value(1)).current;
+  const streakScale = useRef(new Animated.Value(1)).current;
+  const shakeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    const q = generateQuestions(config);
+    const timeAttackConfig = isTimeAttack
+      ? { ...config, questionCount: 999 }
+      : config;
+    const q = generateQuestions(timeAttackConfig);
     setQuestions(q);
     setQuestionStartTime(Date.now());
   }, []);
 
+  // Countdown timer for timeattack mode
   useEffect(() => {
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
-  }, []);
+    if (!isTimeAttack) return;
+    const interval = setInterval(() => {
+      setTimeLeft((t) => {
+        if (t <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return t - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [isTimeAttack]);
+
+  // When timeLeft hits 0, navigate to results
+  useEffect(() => {
+    if (isTimeAttack && timeLeft === 0 && results.length > 0) {
+      navigation.replace('Results', { results, config });
+    }
+  }, [timeLeft]);
 
   const currentQuestion = questions[currentIndex];
   const isHard = config.mode === 'hard';
@@ -93,7 +114,11 @@ export default function GameScreen({ route, navigation }: Props) {
 
       const newResults = [...results, result];
 
-      timeoutRef.current = setTimeout(() => {
+      const feedbackDelay = isTimeAttack
+        ? (correct ? 300 : 600)
+        : (correct ? 600 : 1200);
+
+      setTimeout(() => {
         if (currentIndex < questions.length - 1) {
           animateTransition();
           setResults(newResults);
@@ -105,11 +130,12 @@ export default function GameScreen({ route, navigation }: Props) {
           setQuestionStartTime(Date.now());
           Keyboard.dismiss();
         } else {
+          // Questions exhausted (unlikely for timeattack with 999)
           navigation.replace('Results', { results: newResults, config });
         }
-      }, correct ? 600 : 1200);
+      }, feedbackDelay);
     },
-    [showFeedback, currentQuestion, questionStartTime, results, currentIndex, questions, navigation, config, animateStreak, animateWrong, animateTransition],
+    [showFeedback, currentQuestion, questionStartTime, results, currentIndex, questions, fadeAnim, navigation, config, isTimeAttack],
   );
 
   const handleSubmitHard = () => {
@@ -130,18 +156,52 @@ export default function GameScreen({ route, navigation }: Props) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.progressBar}>
-        <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
-      </View>
+      {isTimeAttack ? (
+        <View style={styles.timerBar}>
+          <Text style={[styles.timerText, timeLeft <= 10 && styles.timerTextUrgent]}>
+            {timeLeft}s
+          </Text>
+          <View style={[styles.timerFill, { width: `${(timeLeft / (config.timeLimit || 60)) * 100}%` }]} />
+        </View>
+      ) : (
+        <View style={styles.progressBar}>
+          <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
+        </View>
+      )}
 
-      <GameTopBar
-        currentIndex={currentIndex}
-        totalQuestions={questions.length}
-        correctCount={correctCount}
-        currentStreak={currentStreak}
-        streakScale={streakScale}
-        onExit={() => navigation.popToTop()}
-      />
+      <View style={styles.topBar}>
+        <TouchableOpacity
+          onPress={() => navigation.popToTop()}
+          style={styles.quitButton}
+        >
+          <Text style={styles.quitText}>Exit</Text>
+        </TouchableOpacity>
+        <View style={styles.centerInfo}>
+          {isTimeAttack ? (
+            <Text style={styles.counter}>
+              {results.filter((r) => r.correct).length} correct
+            </Text>
+          ) : (
+            <Text style={styles.counter}>
+              {currentIndex + 1} / {questions.length}
+            </Text>
+          )}
+          {currentStreak >= 2 ? (
+            <Animated.Text
+              style={[styles.streakText, { transform: [{ scale: streakScale }] }]}
+            >
+              {currentStreak}x streak
+            </Animated.Text>
+          ) : (
+            !isTimeAttack && (
+              <Text style={styles.score}>
+                {results.filter((r) => r.correct).length} correct
+              </Text>
+            )
+          )}
+        </View>
+        <View style={styles.quitSpacer} />
+      </View>
 
       <Animated.View
         style={[
@@ -287,6 +347,61 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: colors.ink,
   },
+  timerBar: {
+    height: 28,
+    backgroundColor: colors.border,
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  timerText: {
+    ...typography.captionBold,
+    color: colors.text,
+    textAlign: 'center',
+    zIndex: 1,
+  },
+  timerTextUrgent: {
+    color: colors.error,
+  },
+  timerFill: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    backgroundColor: colors.accent,
+    opacity: 0.15,
+    borderRadius: borderRadius.none,
+  },
+  topBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+  },
+  quitButton: {
+    ...nav.backButton,
+  },
+  quitText: {
+    ...nav.backText,
+  },
+  centerInfo: {
+    alignItems: 'center',
+  },
+  counter: {
+    ...typography.bodyBold,
+    color: colors.text,
+  },
+  streakText: {
+    ...typography.caption,
+    color: colors.accent,
+  },
+  score: {
+    ...typography.caption,
+    color: colors.success,
+  },
+  quitSpacer: {
+    width: 60,
+  },
   questionContainer: {
     flex: 1,
     padding: spacing.lg,
@@ -324,6 +439,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 2,
     borderColor: colors.border,
+    borderRadius: borderRadius.md,
   },
   optionButtonMap: {
     padding: spacing.xs,
@@ -331,6 +447,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: colors.border,
     backgroundColor: colors.white,
+    borderRadius: borderRadius.md,
   },
   optionCorrect: {
     backgroundColor: colors.success,
@@ -365,6 +482,7 @@ const styles = StyleSheet.create({
     color: colors.text,
     borderWidth: 1,
     borderColor: colors.border,
+    borderRadius: borderRadius.md,
     textAlign: 'center',
   },
   submitButton: {

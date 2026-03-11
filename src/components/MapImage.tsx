@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, useWindowDimensions } from 'react-native';
 import { Image } from 'expo-image';
-import { colors, fontFamily } from '../utils/theme';
+import { colors, fontFamily, borderRadius } from '../utils/theme';
 import { countryCoordinates } from '../data/countryCoordinates';
 
 interface MapImageProps {
@@ -83,13 +83,18 @@ export default function MapImage({ countryCode, size = 'hero', style }: MapImage
   if (!coord) {
     return (
       <View style={[styles.fallback, dimensions, style]}>
-        <Text style={styles.fallbackText}>?</Text>
+        <Text style={styles.fallbackText}>-</Text>
       </View>
     );
   }
 
   const zoom = coord.zoom + zoomDelta;
-  const gridSize = size === 'small' || size === 'medium' ? 3 : 7;
+  const gridSize = (() => {
+    if (size === 'small' || size === 'medium') return 3;
+    if (zoom <= 2) return 11;
+    if (zoom <= 4) return 9;
+    return 7;
+  })();
   const totalPx = gridSize * TILE_SIZE;
 
   const tiles = useMemo(() => getTileGrid(coord.lat, coord.lng, zoom, gridSize), [coord.lat, coord.lng, zoom, gridSize]);
@@ -157,11 +162,11 @@ export default function MapImage({ countryCode, size = 'hero', style }: MapImage
   }
 
   const handleZoomIn = () => {
-    setZoomDelta((d) => Math.min(d + 1, 4));
+    setZoomDelta((d) => Math.min(d + 1, 6));
   };
 
   const handleZoomOut = () => {
-    setZoomDelta((d) => Math.max(d - 1, -2));
+    setZoomDelta((d) => Math.max(d - 1, -(coord.zoom - 1)));
   };
 
   // Interactive: ScrollView with pinch-to-zoom + pan
@@ -233,9 +238,10 @@ export function MapImageSmall({ countryCode }: { countryCode: string }) {
 const styles = StyleSheet.create({
   container: {
     overflow: 'hidden',
-    backgroundColor: colors.surfaceSecondary,
+    backgroundColor: colors.mapBackground,
     borderWidth: 1,
     borderColor: colors.rule2,
+    borderRadius: borderRadius.sm,
   },
   fallback: {
     backgroundColor: colors.border,
@@ -243,6 +249,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: colors.rule2,
+    borderRadius: borderRadius.sm,
   },
   fallbackText: {
     fontSize: 24,
@@ -286,11 +293,12 @@ const styles = StyleSheet.create({
   zoomButton: {
     width: 36,
     height: 36,
-    backgroundColor: colors.whiteAlpha90,
+    backgroundColor: colors.mapZoomSurface,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
     borderColor: colors.rule2,
+    borderRadius: borderRadius.sm,
   },
   zoomText: {
     fontFamily: fontFamily.uiLabel,

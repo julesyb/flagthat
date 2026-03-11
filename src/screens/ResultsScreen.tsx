@@ -10,11 +10,12 @@ import {
   Share,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily, buttons } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, buttons, borderRadius } from '../utils/theme';
 import { calculateAccuracy, getStreakFromResults, getGrade } from '../utils/gameEngine';
 import { updateStats, updateFlagResults } from '../utils/storage';
 import { hapticCorrect, playCelebrationSound } from '../utils/feedback';
 import { FlagImageSmall } from '../components/FlagImage';
+import { CheckIcon, CrossIcon } from '../components/Icons';
 import { GAME_MODES, CATEGORIES } from '../types';
 import { RootStackParamList } from '../types/navigation';
 
@@ -114,7 +115,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
         >
           <Text style={[styles.grade, { color: grade.color }]}>{grade.label}</Text>
           <Text style={styles.accuracy}>{accuracy}%</Text>
-          <Text style={styles.modeCategoryLabel}>{modeLabel} {'\u2022'} {categoryLabel}</Text>
+          <Text style={styles.modeCategoryLabel}>{modeLabel} / {categoryLabel}</Text>
         </Animated.View>
 
         <View style={styles.statsRow}>
@@ -166,9 +167,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
                 <Text style={styles.reviewAnswer}>Skipped</Text>
               )}
             </View>
-            <Text style={[styles.reviewIcon, result.correct ? { color: colors.success } : { color: colors.error }]}>
-              {result.correct ? '\u2713' : '\u2717'}
-            </Text>
+            {result.correct ? <CheckIcon size={20} color={colors.success} /> : <CrossIcon size={20} color={colors.error} />}
           </View>
         ))}
 
@@ -211,6 +210,7 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     alignItems: 'center',
     marginBottom: spacing.md,
+    borderRadius: borderRadius.md,
   },
   celebrationText: {
     ...typography.headingUpper,
@@ -247,6 +247,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: colors.border,
+    borderRadius: borderRadius.md,
   },
   statValue: {
     ...typography.heading,
@@ -276,6 +277,7 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     marginBottom: spacing.sm,
     borderLeftWidth: 4,
+    borderRadius: borderRadius.md,
     gap: spacing.md,
   },
   reviewCorrect: {
@@ -295,10 +297,6 @@ const styles = StyleSheet.create({
     ...typography.caption,
     color: colors.error,
     marginTop: spacing.xxs,
-  },
-  reviewIcon: {
-    ...typography.heading,
-    marginLeft: spacing.sm,
   },
   buttonRow: {
     flexDirection: 'row',

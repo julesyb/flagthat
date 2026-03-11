@@ -32,6 +32,20 @@ export function generateQuestions(config: GameConfig): GameQuestion[] {
 
 function generateOptions(correctFlag: FlagItem, allFlags: FlagItem[], mode: GameMode): string[] {
   if (mode === 'hard' || mode === 'flagflash' || mode === 'flagpuzzle') return [];
+  if (mode === 'timeattack') {
+    // Time attack uses 4 options like medium
+    const choiceCount = 4;
+    const otherFlags = allFlags.filter((f) => f.id !== correctFlag.id);
+    const twinNames = twinPairs[correctFlag.name] || [];
+    const twinFlags = otherFlags.filter((f) => twinNames.includes(f.name));
+    const nonTwinFlags = otherFlags.filter((f) => !twinNames.includes(f.name));
+    const wrongCount = choiceCount - 1;
+    const selectedTwins = shuffleArray(twinFlags).slice(0, wrongCount);
+    const remainingCount = wrongCount - selectedTwins.length;
+    const selectedOthers = shuffleArray(nonTwinFlags).slice(0, remainingCount);
+    const wrongOptions = [...selectedTwins, ...selectedOthers].map((f) => f.name);
+    return shuffleArray([correctFlag.name, ...wrongOptions]);
+  }
 
   const choiceCount = mode === 'easy' ? 2 : 4;
   const otherFlags = allFlags.filter((f) => f.id !== correctFlag.id);

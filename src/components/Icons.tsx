@@ -1,5 +1,5 @@
 import React from 'react';
-import Svg, { Path, Circle, Line, Rect } from 'react-native-svg';
+import Svg, { Path, Circle, Line, Rect, Polyline } from 'react-native-svg';
 
 interface IconProps {
   size?: number;
@@ -8,7 +8,7 @@ interface IconProps {
   filled?: boolean;
 }
 
-// Lightning bolt — Quick Play hero icon
+// Lightning bolt — Quick Play / action icon
 export function LightningIcon({ size = 18, color = '#FFFFFF', strokeWidth = 1.5, filled = false }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill={filled ? color : 'none'} stroke={color} strokeWidth={strokeWidth}>
@@ -17,7 +17,7 @@ export function LightningIcon({ size = 18, color = '#FFFFFF', strokeWidth = 1.5,
   );
 }
 
-// Crosshair — Custom Game icon
+// Crosshair — Custom Game / Modes icon
 export function CrosshairIcon({ size = 16, color = '#4B5563', strokeWidth = 1.5 }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth}>
@@ -58,6 +58,64 @@ export function GlobeIcon({ size = 16, color = '#4B5563', strokeWidth = 1.5 }: I
       <Circle cx={12} cy={12} r={9} />
       <Line x1={3} y1={12} x2={21} y2={12} />
       <Path d="M12 3 C8 7 8 17 12 21 C16 17 16 7 12 3Z" />
+    </Svg>
+  );
+}
+
+// Chevron right — navigation / disclosure indicator
+export function ChevronRightIcon({ size = 16, color = '#9CA3AF', strokeWidth = 2 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth}>
+      <Polyline points="9 6 15 12 9 18" />
+    </Svg>
+  );
+}
+
+// Checkmark — correct answer
+export function CheckIcon({ size = 16, color = '#16A34A', strokeWidth = 2.5 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth}>
+      <Polyline points="4 12 10 18 20 6" />
+    </Svg>
+  );
+}
+
+// Cross / X — wrong answer
+export function CrossIcon({ size = 16, color = '#DC2626', strokeWidth = 2.5 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth}>
+      <Line x1={6} y1={6} x2={18} y2={18} />
+      <Line x1={18} y1={6} x2={6} y2={18} />
+    </Svg>
+  );
+}
+
+// Clock — time limit / time attack
+export function ClockIcon({ size = 16, color = '#4B5563', strokeWidth = 1.5 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth}>
+      <Circle cx={12} cy={12} r={9} />
+      <Polyline points="12 7 12 12 15 15" />
+    </Svg>
+  );
+}
+
+// Flag — flag display mode toggle
+export function FlagIcon({ size = 16, color = '#4B5563', strokeWidth = 1.5 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth}>
+      <Path d="M4 21V4" />
+      <Path d="M4 4 C4 4 7 2 10 4 C13 6 16 4 20 4 L20 15 C20 15 17 17 14 15 C11 13 8 15 4 15" />
+    </Svg>
+  );
+}
+
+// Map pin — map display mode toggle
+export function MapPinIcon({ size = 16, color = '#4B5563', strokeWidth = 1.5 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth}>
+      <Path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+      <Circle cx={12} cy={9} r={2.5} />
     </Svg>
   );
 }
