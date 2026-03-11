@@ -9,6 +9,7 @@ import {
   Animated,
   Keyboard,
   ScrollView,
+  ActivityIndicator,
   useWindowDimensions,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -25,7 +26,7 @@ import { RootStackParamList } from '../types/navigation';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Game'>;
 
-const MAX_GAME_WIDTH = 480;
+const MAX_GAME_WIDTH = 600;
 
 export default function GameScreen({ route, navigation }: Props) {
   const { config } = route.params;
@@ -224,7 +225,8 @@ export default function GameScreen({ route, navigation }: Props) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading...</Text>
+          <ActivityIndicator size="large" color={colors.ink} />
+          <Text style={styles.loadingText}>Loading</Text>
         </View>
       </SafeAreaView>
     );

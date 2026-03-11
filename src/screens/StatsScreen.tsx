@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
   SafeAreaView,
+  ActivityIndicator,
   Share,
 } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
@@ -66,7 +67,7 @@ export default function StatsScreen() {
     return (
       <SafeAreaView style={s.container}>
         <View style={s.loadingContainer}>
-          <Text style={s.loadingText}>Loading...</Text>
+          <ActivityIndicator size="large" color={colors.ink} />
         </View>
       </SafeAreaView>
     );
