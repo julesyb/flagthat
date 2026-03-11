@@ -27,6 +27,7 @@ import { useGameAnimations } from '../hooks/useGameAnimations';
 import { getFlagByName, getFlagsForCategory } from '../data';
 import { RootStackParamList } from '../types/navigation';
 import GameTopBar from '../components/GameTopBar';
+import GameFeedback from '../components/GameFeedback';
 import ScreenContainer from '../components/ScreenContainer';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Game'>;
@@ -456,15 +457,7 @@ export default function GameScreen({ route, navigation }: Props) {
         )}
 
         {showFeedback && (
-          <View style={styles.feedbackContainer}>
-            {lastAnswerCorrect ? (
-              <Text style={styles.feedbackCorrect} accessibilityLiveRegion="polite">{t('common.correct')}</Text>
-            ) : (
-              <Text style={styles.feedbackWrong} accessibilityLiveRegion="polite">
-                {flagName(currentQuestion.flag)}
-              </Text>
-            )}
-          </View>
+          <GameFeedback correct={lastAnswerCorrect} correctAnswer={flagName(currentQuestion.flag)} />
         )}
       </Animated.View>
       </ScreenContainer>
@@ -678,17 +671,5 @@ const styles = StyleSheet.create({
   },
   submitButtonText: {
     ...buttons.primaryText,
-  },
-  feedbackContainer: {
-    marginTop: spacing.lg,
-    alignItems: 'center',
-  },
-  feedbackCorrect: {
-    ...typography.heading,
-    color: colors.success,
-  },
-  feedbackWrong: {
-    ...typography.heading,
-    color: colors.error,
   },
 });

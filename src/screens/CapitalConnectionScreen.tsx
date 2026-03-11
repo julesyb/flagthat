@@ -20,6 +20,7 @@ import { countryCapitals } from '../data/countryCapitals';
 import { countryCities } from '../data/countryCities';
 import FlagImage from '../components/FlagImage';
 import GameTopBar from '../components/GameTopBar';
+import GameFeedback from '../components/GameFeedback';
 import ScreenContainer from '../components/ScreenContainer';
 import { t } from '../utils/i18n';
 import { flagName } from '../data/countryNames';
@@ -269,13 +270,10 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
         </View>
 
         {showFeedback && (
-          <View style={styles.feedbackContainer}>
-            {selectedAnswer === question.correctCapital ? (
-              <Text style={styles.feedbackCorrect} accessibilityLiveRegion="polite">{t('common.correct')}</Text>
-            ) : (
-              <Text style={styles.feedbackWrong} accessibilityLiveRegion="polite">{question.correctCapital}</Text>
-            )}
-          </View>
+          <GameFeedback
+            correct={selectedAnswer === question.correctCapital}
+            correctAnswer={question.correctCapital}
+          />
         )}
       </Animated.View>
       </ScreenContainer>
@@ -366,18 +364,6 @@ const styles = StyleSheet.create({
   },
   optionTextFeedback: {
     color: colors.white,
-  },
-  feedbackContainer: {
-    marginTop: spacing.lg,
-    alignItems: 'center',
-  },
-  feedbackCorrect: {
-    ...typography.heading,
-    color: colors.success,
-  },
-  feedbackWrong: {
-    ...typography.heading,
-    color: colors.error,
   },
   emptyState: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing.xl },
   emptyTitle: { ...typography.heading, color: colors.text, marginBottom: spacing.sm },
