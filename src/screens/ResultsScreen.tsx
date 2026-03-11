@@ -13,6 +13,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { colors, spacing, typography, fontFamily, buttons, borderRadius } from '../utils/theme';
 import { calculateAccuracy, getStreakFromResults, getGrade, generateDailyShareGrid, getDailyNumber } from '../utils/gameEngine';
 import { updateStats, updateFlagResults, saveDailyChallenge, incrementDailyChallenges, updateLastGameBadgeFlags, markShared } from '../utils/storage';
+import { t } from '../utils/i18n';
 import { hapticCorrect, playCelebrationSound } from '../utils/feedback';
 import { FlagImageSmall } from '../components/FlagImage';
 import { CheckIcon, CrossIcon } from '../components/Icons';
@@ -84,9 +85,8 @@ export default function ResultsScreen({ route, navigation }: Props) {
         `${modeLabel} - ${categoryLabel}\n` +
         `Score: ${correct}/${results.length} (${accuracy}%)\n` +
         `Grade: ${grade.label} | Streak: ${streak}\n` +
-        (isPerfect ? 'PERFECT SCORE!\n' : '') +
-        `Can you beat my score?\n` +
-        `https://flagthat.app`;
+        (isPerfect ? t('results.perfectShareNote') + '\n' : '') +
+        t('results.shareFooter');
 
     try {
       await Share.share({ message });
@@ -128,7 +128,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
       >
         {isPerfect && (
           <Animated.View style={[styles.celebrationBanner, { opacity: confettiOpacity }]}>
-            <Text style={styles.celebrationText}>PERFECT SCORE</Text>
+            <Text style={styles.celebrationText}>{t('results.perfectScore')}</Text>
           </Animated.View>
         )}
 
@@ -141,13 +141,13 @@ export default function ResultsScreen({ route, navigation }: Props) {
           <Text style={[styles.grade, { color: grade.color }]}>{grade.label}</Text>
           <Text style={styles.accuracy}>{accuracy}%</Text>
           <Text style={styles.modeCategoryLabel}>
-            {isDaily ? `Daily #${dailyNumber}` : `${modeLabel} / ${categoryLabel}`}
+            {isDaily ? t('results.dailyTitle', { number: dailyNumber }) : `${modeLabel} / ${categoryLabel}`}
           </Text>
         </Animated.View>
 
         {isDaily && (
           <View style={styles.dailyGridCard}>
-            <Text style={styles.dailyGridTitle}>Flag That #{dailyNumber}</Text>
+            <Text style={styles.dailyGridTitle}>{t('results.shareTitle', { number: dailyNumber })}</Text>
             <Text style={styles.dailyGridScore}>{correct}/10</Text>
             <View style={styles.dailyGrid}>
               <View style={styles.dailyGridRow}>
@@ -167,15 +167,15 @@ export default function ResultsScreen({ route, navigation }: Props) {
         <View style={styles.statsRow}>
           <View style={styles.statCard}>
             <Text style={styles.statValue}>{correct}/{results.length}</Text>
-            <Text style={styles.statLabel}>Correct</Text>
+            <Text style={styles.statLabel}>{t('results.correct')}</Text>
           </View>
           <View style={styles.statCard}>
             <Text style={styles.statValue}>{streak}</Text>
-            <Text style={styles.statLabel}>Best Streak</Text>
+            <Text style={styles.statLabel}>{t('results.bestStreak')}</Text>
           </View>
           <View style={styles.statCard}>
             <Text style={styles.statValue}>{avgTime}s</Text>
-            <Text style={styles.statLabel}>Avg Time</Text>
+            <Text style={styles.statLabel}>{t('results.avgTime')}</Text>
           </View>
         </View>
 
@@ -187,7 +187,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
             activeOpacity={0.7}
             accessibilityLabel="Share results"
           >
-            <Text style={styles.secondaryButtonText}>Share</Text>
+            <Text style={styles.secondaryButtonText}>{t('common.share')}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.primaryButton}
@@ -195,7 +195,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
             activeOpacity={0.7}
             accessibilityLabel="Play again"
           >
-            <Text style={styles.primaryButtonText}>{isDaily ? 'Home' : 'Play'}</Text>
+            <Text style={styles.primaryButtonText}>{isDaily ? t('common.home') : t('common.play')}</Text>
           </TouchableOpacity>
           {!isDaily && (
             <TouchableOpacity
@@ -204,12 +204,12 @@ export default function ResultsScreen({ route, navigation }: Props) {
               activeOpacity={0.7}
               accessibilityLabel="Go home"
             >
-              <Text style={styles.secondaryButtonText}>Home</Text>
+              <Text style={styles.secondaryButtonText}>{t('common.home')}</Text>
             </TouchableOpacity>
           )}
         </View>
 
-        <Text style={styles.reviewTitle}>Review</Text>
+        <Text style={styles.reviewTitle}>{t('common.review')}</Text>
         {results.map((result, index) => (
           <View
             key={index}
@@ -226,11 +226,11 @@ export default function ResultsScreen({ route, navigation }: Props) {
               <Text style={styles.reviewName}>{result.question.flag.name}</Text>
               {!result.correct && result.userAnswer !== 'SKIPPED' && (
                 <Text style={styles.reviewAnswer}>
-                  You said: {result.userAnswer}
+                  {t('results.youSaid', { answer: result.userAnswer })}
                 </Text>
               )}
               {result.userAnswer === 'SKIPPED' && (
-                <Text style={styles.reviewAnswer}>Skipped</Text>
+                <Text style={styles.reviewAnswer}>{t('results.skipped')}</Text>
               )}
             </View>
             {result.correct ? <CheckIcon size={20} color={colors.success} /> : <CrossIcon size={20} color={colors.error} />}
@@ -245,7 +245,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
             activeOpacity={0.7}
             accessibilityLabel="Share results"
           >
-            <Text style={styles.secondaryButtonText}>Share</Text>
+            <Text style={styles.secondaryButtonText}>{t('common.share')}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.primaryButton}
@@ -253,7 +253,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
             activeOpacity={0.7}
             accessibilityLabel="Play again"
           >
-            <Text style={styles.primaryButtonText}>{isDaily ? 'Home' : 'Play'}</Text>
+            <Text style={styles.primaryButtonText}>{isDaily ? t('common.home') : t('common.play')}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.secondaryButton}
@@ -261,7 +261,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
             activeOpacity={0.7}
             accessibilityLabel="Go home"
           >
-            <Text style={styles.secondaryButtonText}>Home</Text>
+            <Text style={styles.secondaryButtonText}>{t('common.home')}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

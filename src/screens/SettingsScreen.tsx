@@ -20,8 +20,9 @@ import {
   setSoundsEnabled,
   setHapticsEnabled,
 } from '../utils/feedback';
-import { toggleDailyReminder, getPermissionStatus } from '../utils/notifications';
-import { BellIcon } from '../components/Icons';
+import { toggleDailyReminder } from '../utils/notifications';
+import { t, setLocale, getLocale, SUPPORTED_LOCALES, LocaleCode } from '../utils/i18n';
+import { ChevronRightIcon } from '../components/Icons';
 import BottomNav from '../components/BottomNav';
 
 export default function SettingsScreen() {
@@ -32,7 +33,9 @@ export default function SettingsScreen() {
     dailyReminderEnabled: false,
     reminderHour: 9,
     reminderMinute: 0,
+    locale: null,
   });
+  const [, forceRender] = useState(0);
 
   useFocusEffect(
     useCallback(() => {
@@ -61,18 +64,17 @@ export default function SettingsScreen() {
 
     if (enabled && !result && Platform.OS !== 'web') {
       Alert.alert(
-        'Notifications Disabled',
-        'Allow notifications in your device settings to enable daily reminders.',
+        t('settings.notificationsDisabled'),
+        t('settings.notificationsAlert'),
         [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Open Settings', onPress: () => Linking.openSettings() },
+          { text: t('common.cancel'), style: 'cancel' },
+          { text: t('settings.openSettings'), onPress: () => Linking.openSettings() },
         ],
       );
     }
   };
 
   const cycleReminderTime = async () => {
-    // Cycle through common reminder times
     const times = [
       { h: 7, m: 0 },
       { h: 8, m: 0 },
@@ -84,7 +86,7 @@ export default function SettingsScreen() {
       { h: 21, m: 0 },
     ];
     const currentIdx = times.findIndex(
-      (t) => t.h === settings.reminderHour && t.m === settings.reminderMinute,
+      (ti) => ti.h === settings.reminderHour && ti.m === settings.reminderMinute,
     );
     const next = times[(currentIdx + 1) % times.length];
     const updated = { ...settings, reminderHour: next.h, reminderMinute: next.m };
@@ -103,20 +105,33 @@ export default function SettingsScreen() {
     return `${h}:${m} ${period}`;
   };
 
+  const cycleLanguage = async () => {
+    const current = getLocale();
+    const idx = SUPPORTED_LOCALES.findIndex((l) => l.code === current);
+    const next = SUPPORTED_LOCALES[(idx + 1) % SUPPORTED_LOCALES.length];
+    setLocale(next.code);
+    const updated = { ...settings, locale: next.code };
+    setSettings(updated);
+    await saveSettings(updated);
+    forceRender((n) => n + 1);
+  };
+
+  const currentLocaleName = SUPPORTED_LOCALES.find((l) => l.code === getLocale())?.name ?? 'English';
+
   const handleReset = async () => {
     if (Platform.OS === 'web') {
-      const confirmed = window.confirm('Reset all data?\n\nThis will clear all stats, streaks, and progress. This cannot be undone.');
+      const confirmed = window.confirm(t('settings.resetConfirmWeb'));
       if (confirmed) {
         await resetStats();
       }
     } else {
       Alert.alert(
-        'Reset All Data',
-        'This will clear all stats, streaks, and progress. This cannot be undone.',
+        t('settings.resetConfirmTitle'),
+        t('settings.resetConfirmMsg'),
         [
-          { text: 'Cancel', style: 'cancel' },
+          { text: t('common.cancel'), style: 'cancel' },
           {
-            text: 'Reset',
+            text: t('settings.reset'),
             style: 'destructive',
             onPress: () => resetStats(),
           },
@@ -133,13 +148,13 @@ export default function SettingsScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Sound & Haptics */}
-        <Text style={styles.sectionTitle}>Sound & Haptics</Text>
+        <Text style={styles.sectionTitle}>{t('settings.soundHaptics')}</Text>
 
         <View style={styles.settingCard}>
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
-              <Text style={styles.settingLabel}>Sound Effects</Text>
-              <Text style={styles.settingDesc}>Correct, wrong, and celebration sounds</Text>
+              <Text style={styles.settingLabel}>{t('settings.soundEffects')}</Text>
+              <Text style={styles.settingDesc}>{t('settings.soundDesc')}</Text>
             </View>
             <Switch
               value={settings.soundEnabled}
@@ -151,8 +166,8 @@ export default function SettingsScreen() {
           <View style={styles.settingDivider} />
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
-              <Text style={styles.settingLabel}>Haptics</Text>
-              <Text style={styles.settingDesc}>Vibration feedback on answers</Text>
+              <Text style={styles.settingLabel}>{t('settings.haptics')}</Text>
+              <Text style={styles.settingDesc}>{t('settings.hapticsDesc')}</Text>
             </View>
             <Switch
               value={settings.hapticsEnabled}
@@ -164,16 +179,16 @@ export default function SettingsScreen() {
         </View>
 
         {/* Notifications */}
-        <Text style={styles.sectionTitle}>Notifications</Text>
+        <Text style={styles.sectionTitle}>{t('settings.notifications')}</Text>
 
         <View style={styles.settingCard}>
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
-              <Text style={styles.settingLabel}>Daily Challenge Reminder</Text>
+              <Text style={styles.settingLabel}>{t('settings.dailyReminder')}</Text>
               <Text style={styles.settingDesc}>
                 {Platform.OS === 'web'
-                  ? 'Available on iOS and Android'
-                  : 'Get reminded to play each day'}
+                  ? t('settings.reminderDescWeb')
+                  : t('settings.reminderDescMobile')}
               </Text>
             </View>
             <Switch
@@ -194,9 +209,9 @@ export default function SettingsScreen() {
               >
                 <View style={styles.settingInfo}>
                   <Text style={[styles.settingLabel, !settings.dailyReminderEnabled && styles.settingDisabled]}>
-                    Reminder Time
+                    {t('settings.reminderTime')}
                   </Text>
-                  <Text style={styles.settingDesc}>Tap to change</Text>
+                  <Text style={styles.settingDesc}>{t('settings.tapToChange')}</Text>
                 </View>
                 <Text style={[styles.settingTimeValue, !settings.dailyReminderEnabled && styles.settingDisabled]}>
                   {formatTime(settings.reminderHour, settings.reminderMinute)}
@@ -206,12 +221,29 @@ export default function SettingsScreen() {
           )}
         </View>
 
+        {/* Language */}
+        <Text style={styles.sectionTitle}>{t('settings.language')}</Text>
+
+        <View style={styles.settingCard}>
+          <TouchableOpacity
+            style={styles.settingRow}
+            onPress={cycleLanguage}
+            activeOpacity={0.7}
+          >
+            <View style={styles.settingInfo}>
+              <Text style={styles.settingLabel}>{currentLocaleName}</Text>
+              <Text style={styles.settingDesc}>{t('settings.languageDesc')}</Text>
+            </View>
+            <ChevronRightIcon size={18} color={colors.textTertiary} />
+          </TouchableOpacity>
+        </View>
+
         {/* About */}
-        <Text style={styles.sectionTitle}>About</Text>
+        <Text style={styles.sectionTitle}>{t('settings.about')}</Text>
 
         <View style={styles.settingCard}>
           <View style={styles.settingRow}>
-            <Text style={styles.settingLabel}>Version</Text>
+            <Text style={styles.settingLabel}>{t('settings.version')}</Text>
             <Text style={styles.settingValue}>1.0.0</Text>
           </View>
           <View style={styles.settingDivider} />
@@ -220,20 +252,20 @@ export default function SettingsScreen() {
             onPress={() => Linking.openURL('https://flagthat.app/privacy')}
             activeOpacity={0.7}
           >
-            <Text style={styles.settingLabel}>Privacy Policy</Text>
+            <Text style={styles.settingLabel}>{t('settings.privacyPolicy')}</Text>
             <Text style={styles.settingChevron}>&rsaquo;</Text>
           </TouchableOpacity>
         </View>
 
         {/* Danger zone */}
-        <Text style={styles.sectionTitle}>Data</Text>
+        <Text style={styles.sectionTitle}>{t('settings.data')}</Text>
 
         <TouchableOpacity
           style={styles.resetButton}
           onPress={handleReset}
           activeOpacity={0.7}
         >
-          <Text style={styles.resetButtonText}>Reset All Data</Text>
+          <Text style={styles.resetButtonText}>{t('settings.resetAllData')}</Text>
         </TouchableOpacity>
       </ScrollView>
       <BottomNav activeTab="Stats" onNavigate={(tab) => {

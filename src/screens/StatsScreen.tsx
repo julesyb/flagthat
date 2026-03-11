@@ -16,6 +16,7 @@ import { UserStats, GAME_MODES, GameMode } from '../types';
 import { getStats, getFlagStats, FlagStats, getDayStreak, markShared, getBadgeData, getMissedFlagIds, BadgeData } from '../utils/storage';
 import { getAllFlags, getTotalFlagCount } from '../data';
 import { hapticTap } from '../utils/feedback';
+import { t } from '../utils/i18n';
 import { FlagImageSmall } from '../components/FlagImage';
 import BottomNav from '../components/BottomNav';
 import { evaluateBadges, BADGES, TIER_COLORS, Badge, EarnedBadge, BadgeTier } from '../utils/badges';
@@ -66,7 +67,7 @@ export default function StatsScreen() {
     return (
       <SafeAreaView style={s.container}>
         <View style={s.loadingContainer}>
-          <Text style={s.loadingText}>Loading...</Text>
+          <Text style={s.loadingText}>{t('common.loading')}</Text>
         </View>
       </SafeAreaView>
     );
@@ -114,10 +115,10 @@ export default function StatsScreen() {
   const earnedIds = new Set(earnedBadges.map((b) => b.id));
 
   const accuracyLabel =
-    overallAccuracy === 100 ? 'Perfect' :
-    overallAccuracy >= 90 ? 'Excellent' :
-    overallAccuracy >= 70 ? 'Great' :
-    overallAccuracy > 0 ? 'Keep going' : '';
+    overallAccuracy === 100 ? t('stats.perfect') :
+    overallAccuracy >= 90 ? t('stats.excellent') :
+    overallAccuracy >= 70 ? t('stats.great') :
+    overallAccuracy > 0 ? t('stats.keepGoing') : '';
 
   return (
     <SafeAreaView style={s.container}>
@@ -128,7 +129,7 @@ export default function StatsScreen() {
       >
         {/* ── CHALLENGE CARD ── */}
         <View style={s.challengeCard}>
-          <Text style={s.cardEyebrow}>Your results</Text>
+          <Text style={s.cardEyebrow}>{t('stats.yourResults')}</Text>
           <Text style={s.cardHeadline}>
             {stats.bestStreak} Streak{'\n'}{overallAccuracy}% Acc.
           </Text>
@@ -137,15 +138,15 @@ export default function StatsScreen() {
           </Text>
           <View style={s.cardPills}>
             <View style={s.pill}>
-              <Text style={s.pillText}><Text style={s.pillBold}>{stats.bestStreak}</Text> best streak</Text>
+              <Text style={s.pillText}><Text style={s.pillBold}>{stats.bestStreak}</Text> {t('stats.bestStreak')}</Text>
             </View>
             {dayStreak > 0 && (
               <View style={s.pill}>
-                <Text style={s.pillText}><Text style={s.pillBold}>{dayStreak}</Text> day streak</Text>
+                <Text style={s.pillText}><Text style={s.pillBold}>{dayStreak}</Text> {t('stats.dayStreak')}</Text>
               </View>
             )}
             <View style={s.pill}>
-              <Text style={s.pillText}><Text style={s.pillBold}>{countriesSeen}/{totalFlags}</Text> countries</Text>
+              <Text style={s.pillText}><Text style={s.pillBold}>{countriesSeen}/{totalFlags}</Text> {t('home.countries')}</Text>
             </View>
           </View>
           <TouchableOpacity style={s.shareBtn} onPress={handleShare} activeOpacity={0.85}>
@@ -157,12 +158,12 @@ export default function StatsScreen() {
         <View style={s.tileGrid}>
           <View style={s.tileRow}>
             <View style={[s.tile, s.tileDark]}>
-              <Text style={[s.tileLabel, s.tileLabelDark]}>Best Streak</Text>
+              <Text style={[s.tileLabel, s.tileLabelDark]}>{t('stats.bestStreak')}</Text>
               <Text style={[s.tileVal, { color: colors.white }]}>{stats.bestStreak}</Text>
-              <Text style={[s.tileSub, s.tileSubDark]}>Personal best</Text>
+              <Text style={[s.tileSub, s.tileSubDark]}>{t('stats.personalBest')}</Text>
             </View>
             <View style={s.tile}>
-              <Text style={s.tileLabel}>Accuracy</Text>
+              <Text style={s.tileLabel}>{t('stats.accuracy')}</Text>
               <Text style={s.tileVal}>{overallAccuracy}<Text style={s.tileUnit}>%</Text></Text>
               {accuracyLabel ? (
                 <Text style={[s.tileSub, overallAccuracy >= 70 && { color: colors.success }]}>{accuracyLabel}</Text>
@@ -171,41 +172,41 @@ export default function StatsScreen() {
           </View>
           <View style={s.tileRow}>
             <View style={s.tile}>
-              <Text style={s.tileLabel}>Games Played</Text>
+              <Text style={s.tileLabel}>{t('stats.gamesPlayed')}</Text>
               <Text style={s.tileVal}>{stats.totalGamesPlayed}</Text>
             </View>
             <View style={s.tile}>
-              <Text style={s.tileLabel}>Day Streak</Text>
+              <Text style={s.tileLabel}>{t('stats.dayStreak')}</Text>
               <Text style={s.tileVal}>{dayStreak}</Text>
-              {dayStreak > 0 && <Text style={s.tileSub}>Play tomorrow</Text>}
+              {dayStreak > 0 && <Text style={s.tileSub}>{t('stats.playTomorrow')}</Text>}
             </View>
           </View>
 
           {/* Progress tile - full width */}
           <View style={[s.tile, s.tileFull]}>
-            <Text style={s.tileLabel}>Countries Unlocked</Text>
-            <Text style={s.tileVal}>{countriesSeen}<Text style={s.tileUnit}>/ {totalFlags}</Text></Text>
+            <Text style={s.tileLabel}>{t('stats.countriesUnlocked')}</Text>
+            <Text style={s.tileVal}>{countriesSeen}<Text style={s.tileUnit}>{t('stats.countriesOf', { seen: countriesSeen, total: totalFlags })}</Text></Text>
             <View style={s.progressWrap}>
               <View style={[s.progressFill, { width: `${progressPct}%` }]} />
             </View>
             <View style={s.progressLabels}>
-              <Text style={s.progressLabelBold}>{progressPct}% complete</Text>
-              <Text style={s.progressLabelMuted}>{totalFlags - countriesSeen} to go</Text>
+              <Text style={s.progressLabelBold}>{t('stats.percentComplete', { pct: progressPct })}</Text>
+              <Text style={s.progressLabelMuted}>{t('stats.toGo', { count: totalFlags - countriesSeen })}</Text>
             </View>
           </View>
 
           {(stats.bestTimeAttackScore || 0) > 0 && (
             <View style={[s.tile, s.tileFull]}>
-              <Text style={s.tileLabel}>Best Timed Quiz</Text>
-              <Text style={s.tileVal}>{stats.bestTimeAttackScore}<Text style={s.tileUnit}> in 60s</Text></Text>
+              <Text style={s.tileLabel}>{t('stats.bestTimedQuiz')}</Text>
+              <Text style={s.tileVal}>{stats.bestTimeAttackScore}<Text style={s.tileUnit}> {t('stats.in60s')}</Text></Text>
             </View>
           )}
         </View>
 
         {/* ── BADGES ── */}
         <View style={s.sectionHeader}>
-          <Text style={s.sectionTitle}>Badges</Text>
-          <Text style={s.sectionMeta}>{earnedBadges.length}/{BADGES.length} earned</Text>
+          <Text style={s.sectionTitle}>{t('stats.badges')}</Text>
+          <Text style={s.sectionMeta}>{t('stats.badgesEarned', { earned: earnedBadges.length, total: BADGES.length })}</Text>
         </View>
         <View style={s.badgeGrid}>
           {BADGES.map((badge) => {
@@ -221,7 +222,7 @@ export default function StatsScreen() {
         </View>
 
         {/* ── BY MODE ── */}
-        <Text style={s.sectionTitle}>By Mode</Text>
+        <Text style={s.sectionTitle}>{t('stats.byMode')}</Text>
         {(Object.keys(GAME_MODES) as GameMode[])
           .filter((m) => !GAME_MODES[m].hidden && m !== 'daily' && m !== 'practice')
           .map((m) => {
@@ -231,14 +232,14 @@ export default function StatsScreen() {
             return (
               <View key={m} style={s.modeCard}>
                 <View style={{ flex: 1 }}>
-                  <Text style={s.modeName}>{GAME_MODES[m].label}</Text>
+                  <Text style={s.modeName}>{t(`modes.${m}`)}</Text>
                   <Text style={s.modeDetail}>
-                    {played ? `${ms.correct}/${ms.total} correct - ${acc}%` : 'Not played yet'}
+                    {played ? t('stats.modeCorrect', { correct: ms.correct, total: ms.total, pct: acc }) : t('stats.notPlayedYet')}
                   </Text>
                 </View>
                 <View style={[s.badge, played ? s.badgePlayed : s.badgeUnplayed]}>
                   <Text style={[s.badgeText, played ? s.badgeTextPlayed : s.badgeTextUnplayed]}>
-                    {played ? `${acc}%` : 'New'}
+                    {played ? `${acc}%` : t('common.new')}
                   </Text>
                 </View>
               </View>
@@ -249,8 +250,8 @@ export default function StatsScreen() {
         {top10.length > 0 && (
           <>
             <View style={s.sectionHeader}>
-              <Text style={s.sectionTitle}>Best Flags</Text>
-              <Text style={s.sectionMeta}>Always right</Text>
+              <Text style={s.sectionTitle}>{t('stats.bestFlags')}</Text>
+              <Text style={s.sectionMeta}>{t('stats.alwaysRight')}</Text>
             </View>
             {top10.map(([id, fs], i) => (
               <View key={id} style={s.rankRow}>
@@ -269,8 +270,8 @@ export default function StatsScreen() {
         {bottom10.length > 0 && (
           <>
             <View style={s.sectionHeader}>
-              <Text style={s.sectionTitle}>Weak Flags</Text>
-              <Text style={s.sectionMeta}>Practice these</Text>
+              <Text style={s.sectionTitle}>{t('stats.weakFlags')}</Text>
+              <Text style={s.sectionMeta}>{t('stats.practiceThese')}</Text>
             </View>
             {bottom10.map(([id, fs], i) => (
               <View key={id} style={s.rankRow}>
@@ -290,7 +291,7 @@ export default function StatsScreen() {
           onPress={() => navigation.navigate('Settings')}
           activeOpacity={0.7}
         >
-          <Text style={s.settingsLinkText}>Settings</Text>
+          <Text style={s.settingsLinkText}>{t('app.settings')}</Text>
         </TouchableOpacity>
       </ScrollView>
       <BottomNav activeTab="Stats" onNavigate={(tab) => {

@@ -68,6 +68,7 @@ export interface AppSettings {
   dailyReminderEnabled: boolean;
   reminderHour: number; // 0-23
   reminderMinute: number; // 0-59
+  locale: string | null; // null = auto-detect from device
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
@@ -76,6 +77,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   dailyReminderEnabled: false,
   reminderHour: 9,
   reminderMinute: 0,
+  locale: null,
 };
 
 export async function getSettings(): Promise<AppSettings> {

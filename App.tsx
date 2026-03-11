@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet, Platform } from 'react-native';
 import { useFonts } from 'expo-font';
 import {
@@ -30,6 +30,7 @@ import { ChevronLeftIcon } from './src/components/Icons';
 import { RootStackParamList } from './src/types/navigation';
 import { colors } from './src/utils/theme';
 import { configureNotificationHandler, syncNotificationSchedule } from './src/utils/notifications';
+import { initLocale, t } from './src/utils/i18n';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -69,12 +70,17 @@ const screenOptions = {
 configureNotificationHandler();
 
 function AppContent() {
+  const [localeReady, setLocaleReady] = useState(false);
+
   useEffect(() => {
     if (Platform.OS === 'web') {
       document.title = 'Flag That';
     }
-    // Sync notification schedule on app start (re-schedules if enabled)
-    syncNotificationSchedule();
+    // Initialize locale from saved settings, then sync notifications
+    initLocale().then(() => {
+      setLocaleReady(true);
+      syncNotificationSchedule();
+    });
   }, []);
 
   return (

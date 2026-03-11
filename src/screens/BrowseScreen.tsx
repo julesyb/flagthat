@@ -16,11 +16,20 @@ import { RootStackParamList } from '../types/navigation';
 import { getAllFlags } from '../data';
 import FlagImage from '../components/FlagImage';
 import { getMissedFlagIds, getFlagStats, FlagStats } from '../utils/storage';
+import { t } from '../utils/i18n';
 import BottomNav from '../components/BottomNav';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Browse'>;
 
-const REGIONS = ['All', 'Africa', 'Asia', 'Europe', 'Americas', 'Oceania'];
+const REGIONS = ['All', 'Africa', 'Asia', 'Europe', 'Americas', 'Oceania'] as const;
+const REGION_KEYS: Record<string, string> = {
+  'All': 'browse.all',
+  'Africa': 'browse.africa',
+  'Asia': 'browse.asia',
+  'Europe': 'browse.europe',
+  'Americas': 'browse.americas',
+  'Oceania': 'browse.oceania',
+};
 const PRACTICE_MORE = 'Practice More';
 
 export default function BrowseScreen({ route, navigation }: Props) {
@@ -83,7 +92,7 @@ export default function BrowseScreen({ route, navigation }: Props) {
           <Text style={styles.flagRegion}>
             {item.region}
             {showWrongCount
-              ? ` · missed ${stats.wrong} time${stats.wrong !== 1 ? 's' : ''}`
+              ? ` · ${stats.wrong === 1 ? t('browse.missedCount', { count: stats.wrong }) : t('browse.missedCountPlural', { count: stats.wrong })}`
               : ''}
           </Text>
         </View>
@@ -98,7 +107,7 @@ export default function BrowseScreen({ route, navigation }: Props) {
           style={styles.searchInput}
           value={searchQuery}
           onChangeText={setSearchQuery}
-          placeholder="Search flags..."
+          placeholder={t('browse.searchPlaceholder')}
           placeholderTextColor={colors.textTertiary}
           clearButtonMode="while-editing"
           accessibilityLabel="Search flags"
@@ -122,7 +131,7 @@ export default function BrowseScreen({ route, navigation }: Props) {
                 selectedFilter === filter && styles.regionLabelActive,
               ]}
             >
-              {filter}
+              {filter === PRACTICE_MORE ? t('browse.practiceMore') : (REGION_KEYS[filter] ? t(REGION_KEYS[filter]) : filter)}
             </Text>
           </TouchableOpacity>
         ))}
@@ -130,8 +139,8 @@ export default function BrowseScreen({ route, navigation }: Props) {
 
       <Text style={styles.resultCount}>
         {selectedFilter === PRACTICE_MORE && filteredFlags.length === 0
-          ? 'No missed flags yet - keep playing!'
-          : `${filteredFlags.length} flag${filteredFlags.length !== 1 ? 's' : ''}`}
+          ? t('browse.noMissedFlags')
+          : filteredFlags.length === 1 ? t('browse.flagCount', { count: filteredFlags.length }) : t('browse.flagCountPlural', { count: filteredFlags.length })}
       </Text>
 
       <FlatList

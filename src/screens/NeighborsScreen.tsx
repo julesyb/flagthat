@@ -13,6 +13,7 @@ import { colors, spacing, typography, fontFamily, buttons, borderRadius } from '
 import { hapticTap, hapticCorrect, hapticWrong, playWrongSound } from '../utils/feedback';
 import { updateStats, updateFlagResults } from '../utils/storage';
 import { shuffleArray, getStreakFromResults } from '../utils/gameEngine';
+import { t } from '../utils/i18n';
 import { RootStackParamList } from '../types/navigation';
 import { FlagItem, GameResult } from '../types';
 import { countries } from '../data/countries';
@@ -79,12 +80,12 @@ export default function NeighborsScreen({ navigation, route }: Props) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.emptyState}>
-          <Text style={styles.emptyTitle}>No countries available</Text>
+          <Text style={styles.emptyTitle}>{t('neighbors.noCountries')}</Text>
           <Text style={styles.emptyBody}>
-            There are no countries with land borders in the selected category.
+            {t('neighbors.noCountriesDesc')}
           </Text>
           <TouchableOpacity style={styles.emptyButton} onPress={() => navigation.goBack()}>
-            <Text style={styles.emptyButtonText}>Go Back</Text>
+            <Text style={styles.emptyButtonText}>{t('common.goBack')}</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -160,16 +161,16 @@ export default function NeighborsScreen({ navigation, route }: Props) {
           accessibilityRole="button"
           accessibilityLabel="Exit game"
         >
-          <Text style={styles.exitText}>Exit</Text>
+          <Text style={styles.exitText}>{t('common.exit')}</Text>
         </TouchableOpacity>
         <View style={styles.centerInfo}>
           <Text style={styles.counter}>
-            {roundIndex + 1} / {rounds.length}
+            {t('game.questionOf', { current: roundIndex + 1, total: rounds.length })}
           </Text>
-          <Text style={styles.scoreText}>{correctCount} correct</Text>
+          <Text style={styles.scoreText}>{t('game.correctCount', { count: correctCount })}</Text>
         </View>
         {guessLimit > 0 ? (
-          <Text style={styles.livesText}>{Math.max(0, guessLimit - wrongCount)} {guessLimit - wrongCount === 1 ? 'life' : 'lives'}</Text>
+          <Text style={styles.livesText}>{guessLimit - wrongCount === 1 ? t('game.life', { count: Math.max(0, guessLimit - wrongCount) }) : t('game.lives', { count: Math.max(0, guessLimit - wrongCount) })}</Text>
         ) : (
           <View style={styles.spacer} />
         )}
@@ -177,7 +178,7 @@ export default function NeighborsScreen({ navigation, route }: Props) {
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Animated.View style={{ opacity: fadeAnim }}>
-          <Text style={styles.prompt}>Select all neighboring countries</Text>
+          <Text style={styles.prompt}>{t('neighbors.selectAll')}</Text>
 
           <View style={styles.flagCenter}>
             <FlagImage
@@ -243,10 +244,10 @@ export default function NeighborsScreen({ navigation, route }: Props) {
                     {flag.name}
                   </Text>
                   {submitted && showMissed && (
-                    <Text style={styles.missedLabel}>Missed</Text>
+                    <Text style={styles.missedLabel}>{t('neighbors.missed')}</Text>
                   )}
                   {submitted && showWrong && (
-                    <Text style={styles.wrongLabel}>Not a neighbor</Text>
+                    <Text style={styles.wrongLabel}>{t('neighbors.notANeighbor')}</Text>
                   )}
                 </TouchableOpacity>
               );
@@ -256,7 +257,7 @@ export default function NeighborsScreen({ navigation, route }: Props) {
           {submitted && (
             <View style={styles.mapSection}>
               <Text style={styles.mapLabel}>
-                {round.country.name} has {round.neighborIds.length} neighbor{round.neighborIds.length !== 1 ? 's' : ''}
+                {round.neighborIds.length === 1 ? t('neighbors.neighborCount', { name: round.country.name, count: round.neighborIds.length }) : t('neighbors.neighborCountPlural', { name: round.country.name, count: round.neighborIds.length })}
               </Text>
               <MapImage countryCode={round.country.id} size="hero" />
               <View style={styles.neighborList}>
@@ -284,11 +285,11 @@ export default function NeighborsScreen({ navigation, route }: Props) {
             activeOpacity={0.8}
             disabled={selected.size === 0}
           >
-            <Text style={styles.actionButtonText}>Submit ({selected.size} selected)</Text>
+            <Text style={styles.actionButtonText}>{t('neighbors.submitSelected', { count: selected.size })}</Text>
           </TouchableOpacity>
         ) : (
           <TouchableOpacity style={styles.actionButton} onPress={handleNext} activeOpacity={0.8}>
-            <Text style={styles.actionButtonText}>{isLastRound ? 'See Results' : 'Next'}</Text>
+            <Text style={styles.actionButtonText}>{isLastRound ? t('common.seeResults') : t('common.next')}</Text>
           </TouchableOpacity>
         )}
       </View>
