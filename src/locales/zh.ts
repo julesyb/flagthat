@@ -25,7 +25,7 @@ const zh: typeof en = {
   },
 
   nav: {
-    play: '\u5f00\u59cb',
+    home: '\u9996\u9875',
     modes: '\u6a21\u5f0f',
     stats: '\u7edf\u8ba1',
     browse: '\u6d4f\u89c8',
@@ -66,10 +66,6 @@ const zh: typeof en = {
     practiceWeak: '\u7ec3\u4e60\u5f31\u9879\u56fd\u65d7',
     flagsToReview: '{count}\u9762\u56fd\u65d7\u5f85\u590d\u4e60',
     flagsToReviewPlural: '{count}\u9762\u56fd\u65d7\u5f85\u590d\u4e60',
-    yourStats: '\u4f60\u7684\u7edf\u8ba1',
-    bestStreak: '\u6700\u4f73\u8fde\u80dc',
-    best60s: '\u6700\u4f73 60s',
-    accuracy: '\u51c6\u786e\u7387',
     onboardingScores: '\u5f97\u5206',
   },
 
@@ -155,7 +151,6 @@ const zh: typeof en = {
     countriesGames: '{countries}\u4e2a\u56fd\u5bb6 - {games}\u573a\u6e38\u620f',
     bestStreak: '\u6700\u4f73\u8fde\u80dc',
     personalBest: '\u4e2a\u4eba\u6700\u4f73',
-    accuracy: '\u51c6\u786e\u7387',
     perfect: '\u5b8c\u7f8e',
     excellent: '\u4f18\u79c0',
     great: '\u5f88\u68d2',

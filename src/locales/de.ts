@@ -25,7 +25,7 @@ const de: typeof en = {
   },
 
   nav: {
-    play: 'Spielen',
+    home: 'Start',
     modes: 'Modi',
     stats: 'Stats',
     browse: 'Stöbern',
@@ -66,10 +66,6 @@ const de: typeof en = {
     practiceWeak: 'Schwache Flaggen \u00fcben',
     flagsToReview: '{count} Flagge zum \u00dcben',
     flagsToReviewPlural: '{count} Flaggen zum \u00dcben',
-    yourStats: 'Deine Statistiken',
-    bestStreak: 'Beste Serie',
-    best60s: 'Beste 60s',
-    accuracy: 'Genauigkeit',
     onboardingScores: 'Ergebnisse',
   },
 

@@ -215,10 +215,6 @@ export default function HomeScreen({ navigation }: Props) {
   const onboardingCount = baseline ? ONBOARDING_REGIONS.filter((r) => baseline.regions[r]).length : 0;
   const nextRegion = baseline ? ONBOARDING_REGIONS.find((r) => !baseline.regions[r]) ?? 'africa' : 'africa';
 
-  const hasPlayed = stats !== null && stats.totalGamesPlayed > 0;
-  const accuracy = stats && stats.totalAnswered > 0
-    ? Math.round((stats.totalCorrect / stats.totalAnswered) * 100)
-    : 0;
 
   return (
     <SafeAreaView style={s.container}>
@@ -536,33 +532,13 @@ export default function HomeScreen({ navigation }: Props) {
         {/* ── SUPPORT ── */}
         <SupportCard gamesPlayed={stats?.totalGamesPlayed ?? 0} />
 
-        {/* ── YOUR STATS ── */}
-        {hasPlayed && (
-          <View style={s.statsWrap}>
-            <Text style={s.sectionLbl}>{t('home.yourStats')}</Text>
-            <View style={s.statsRow}>
-              <View style={[s.statTile, { borderTopColor: colors.teal }]}>
-                <Text style={s.statVal}>{stats!.bestStreak}</Text>
-                <Text style={s.statLbl}>{t('home.bestStreak')}</Text>
-              </View>
-              <View style={[s.statTile, { borderTopColor: colors.amber }]}>
-                <Text style={s.statVal}>{stats!.bestTimeAttackScore}</Text>
-                <Text style={s.statLbl}>{t('home.best60s')}</Text>
-              </View>
-              <View style={[s.statTile, { borderTopColor: colors.blue }]}>
-                <Text style={s.statVal}>{accuracy}%</Text>
-                <Text style={s.statLbl}>{t('home.accuracy')}</Text>
-              </View>
-            </View>
-          </View>
-        )}
 
         <View style={{ height: spacing.md }} />
         </ScreenContainer>
       </ScrollView>
 
       {/* ── BOTTOM NAV ── */}
-      <BottomNav activeTab="Play" onNavigate={onNavigate} />
+      <BottomNav activeTab="Home" onNavigate={onNavigate} />
     </SafeAreaView>
   );
 }
@@ -1007,37 +983,4 @@ const s = StyleSheet.create({
     lineHeight: 18,
   },
 
-  // ── Stats row
-  statsWrap: {
-    paddingHorizontal: spacing.md,
-    marginTop: spacing.lg,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-  },
-  statTile: {
-    flex: 1,
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
-    borderWidth: 2,
-    borderColor: colors.rule,
-    borderTopWidth: 3,
-    padding: spacing.md,
-    alignItems: 'center',
-  },
-  statVal: {
-    fontFamily: fontFamily.uiLabel,
-    fontSize: fontSize.heading,
-    color: colors.ink,
-    lineHeight: 26,
-  },
-  statLbl: {
-    fontFamily: fontFamily.bodyMedium,
-    fontSize: fontSize.sm,
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
-    color: colors.textTertiary,
-    marginTop: spacing.xs,
-  },
 });

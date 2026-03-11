@@ -665,7 +665,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
         <View style={{ height: spacing.lg }} />
         </ScreenContainer>
       </ScrollView>
-      <BottomNav activeTab="Play" onNavigate={onNavigate} />
+      <BottomNav activeTab="Home" onNavigate={onNavigate} />
     </SafeAreaView>
   );
 }

@@ -25,7 +25,7 @@ const ptBR: typeof en = {
   },
 
   nav: {
-    play: 'Jogar',
+    home: 'Início',
     modes: 'Modos',
     stats: 'Stats',
     browse: 'Explorar',
@@ -66,10 +66,6 @@ const ptBR: typeof en = {
     practiceWeak: 'Praticar bandeiras dif\u00edceis',
     flagsToReview: '{count} bandeira para revisar',
     flagsToReviewPlural: '{count} bandeiras para revisar',
-    yourStats: 'Suas estat\u00edsticas',
-    bestStreak: 'Melhor sequ\u00eancia',
-    best60s: 'Melhor 60s',
-    accuracy: 'Precis\u00e3o',
     onboardingScores: 'Pontua\u00e7\u00f5es',
   },
 
@@ -155,7 +151,6 @@ const ptBR: typeof en = {
     countriesGames: '{countries} pa\u00edses - {games} jogos',
     bestStreak: 'Melhor sequ\u00eancia',
     personalBest: 'Recorde pessoal',
-    accuracy: 'Precis\u00e3o',
     perfect: 'Perfeito',
     excellent: 'Excelente',
     great: '\u00d3timo',

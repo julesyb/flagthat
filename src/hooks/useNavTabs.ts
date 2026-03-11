@@ -6,7 +6,7 @@ import { TabId } from '../components/BottomNav';
 import { hapticTap } from '../utils/feedback';
 
 const TAB_ROUTES: Record<TabId, keyof RootStackParamList> = {
-  Play: 'Home',
+  Home: 'Home',
   Modes: 'GameSetup',
   Stats: 'Stats',
   Browse: 'Browse',

@@ -325,7 +325,7 @@ export default function SettingsScreen() {
         </TouchableOpacity>
         </ScreenContainer>
       </ScrollView>
-      <BottomNav activeTab="Play" onNavigate={onNavigate} />
+      <BottomNav activeTab="Home" onNavigate={onNavigate} />
     </SafeAreaView>
   );
 }
