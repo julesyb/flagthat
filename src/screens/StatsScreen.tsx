@@ -14,30 +14,19 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
 import { colors, spacing, fontFamily, fontSize, borderRadius } from '../utils/theme';
-import { UserStats, GameMode, CategoryId } from '../types';
+import { UserStats, CategoryId } from '../types';
 import { getStats, getFlagStats, FlagStats, getDayStreak, getBadgeData, getMissedFlagIds, BadgeData, getSupportData, getGameHistory, GameHistoryEntry, getBaselineData, BaselineData } from '../utils/storage';
 import { getAllFlags, getTotalFlagCount } from '../data';
-import { getGrade } from '../utils/gameEngine';
+
 import { t } from '../utils/i18n';
 import { FlagImageSmall } from '../components/FlagImage';
 import BottomNav from '../components/BottomNav';
 import ScreenContainer from '../components/ScreenContainer';
 import { useNavTabs } from '../hooks/useNavTabs';
 import { evaluateBadges, BADGES, TIER_COLORS, BadgeIcon, BadgeCheckContext, getBadgeProgress } from '../utils/badges';
-import { FlagIcon, GlobeIcon, CheckIcon, PlayIcon, LightningIcon, CalendarIcon, ClockIcon, CrosshairIcon, LinkIcon, HeartIcon, ChevronRightIcon, BarChartIcon } from '../components/Icons';
+import { FlagIcon, GlobeIcon, CheckIcon, PlayIcon, LightningIcon, CalendarIcon, ClockIcon, CrosshairIcon, LinkIcon, HeartIcon, ChevronRightIcon } from '../components/Icons';
 
 const RANK_COLORS = [colors.gradeS, colors.textTertiary, colors.warning];
-
-const MODE_BREAKDOWN: { key: GameMode; labelKey: string }[] = [
-  { key: 'easy', labelKey: 'modes.easy' },
-  { key: 'medium', labelKey: 'modes.medium' },
-  { key: 'hard', labelKey: 'modes.hard' },
-  { key: 'timeattack', labelKey: 'modes.timeattack' },
-  { key: 'daily', labelKey: 'modes.daily' },
-  { key: 'neighbors', labelKey: 'modes.neighbors' },
-  { key: 'impostor', labelKey: 'modes.impostor' },
-  { key: 'capitalconnection', labelKey: 'modes.capitalconnection' },
-];
 
 const REGIONS: CategoryId[] = ['africa', 'asia', 'europe', 'americas', 'oceania'];
 
@@ -58,12 +47,10 @@ export default function StatsScreen() {
   const heroSlide = useRef(new Animated.Value(12)).current;
   const countAnim = useRef(new Animated.Value(0)).current;
   const [displayAcc, setDisplayAcc] = useState(0);
-  const gradeScale = useRef(new Animated.Value(0)).current;
-  const gradeOpacity = useRef(new Animated.Value(0)).current;
   const progressFade = useRef(new Animated.Value(0)).current;
   const progressBarAnim = useRef(new Animated.Value(0)).current;
   const regionFade = useRef(new Animated.Value(0)).current;
-  const modeFade = useRef(new Animated.Value(0)).current;
+
   const restFade = useRef(new Animated.Value(0)).current;
 
   const flagNameMap = React.useMemo(() => {
@@ -89,12 +76,9 @@ export default function StatsScreen() {
       heroSlide.setValue(12);
       countAnim.setValue(0);
       setDisplayAcc(0);
-      gradeScale.setValue(0);
-      gradeOpacity.setValue(0);
       progressFade.setValue(0);
       progressBarAnim.setValue(0);
       regionFade.setValue(0);
-      modeFade.setValue(0);
       restFade.setValue(0);
 
       async function loadData() {
@@ -131,19 +115,8 @@ export default function StatsScreen() {
               easing: Easing.out(Easing.cubic), useNativeDriver: false,
             }).start();
 
-            // Phase 3: Grade springs in after count-up
-            const gradeDelay = 1200;
-            Animated.parallel([
-              Animated.spring(gradeScale, {
-                toValue: 1, friction: 4, tension: 100, delay: gradeDelay, useNativeDriver: true,
-              }),
-              Animated.timing(gradeOpacity, {
-                toValue: 1, duration: 200, delay: gradeDelay, useNativeDriver: true,
-              }),
-            ]).start();
-
-            // Phase 4: Progress section
-            const progressDelay = gradeDelay + 300;
+            // Phase 3: Progress section
+            const progressDelay = 1500;
             Animated.timing(progressFade, {
               toValue: 1, duration: 300, delay: progressDelay, useNativeDriver: true,
             }).start();
@@ -152,19 +125,14 @@ export default function StatsScreen() {
               easing: Easing.out(Easing.cubic), useNativeDriver: false,
             }).start();
 
-            // Phase 5: Region breakdown
+            // Phase 4: Region breakdown
             Animated.timing(regionFade, {
               toValue: 1, duration: 300, delay: progressDelay + 300, useNativeDriver: true,
             }).start();
 
-            // Phase 6: Mode breakdown
-            Animated.timing(modeFade, {
-              toValue: 1, duration: 300, delay: progressDelay + 500, useNativeDriver: true,
-            }).start();
-
-            // Phase 7: Rest (badges, ranks, settings)
+            // Phase 5: Rest (badges, ranks, settings)
             Animated.timing(restFade, {
-              toValue: 1, duration: 400, delay: progressDelay + 700, useNativeDriver: true,
+              toValue: 1, duration: 400, delay: progressDelay + 500, useNativeDriver: true,
             }).start();
           }
         } catch {
@@ -303,10 +271,7 @@ export default function StatsScreen() {
   const overallAccuracy = stats.totalAnswered > 0
     ? Math.round((stats.totalCorrect / stats.totalAnswered) * 100) : 0;
   const progressPct = totalFlags > 0 ? Math.round((countriesSeen / totalFlags) * 100) : 0;
-  const grade = overallAccuracy > 0 ? getGrade(overallAccuracy) : null;
   const earnedIds = new Set(earnedBadges.map((b) => b.id));
-
-  const playedModes = MODE_BREAKDOWN.filter(({ key }) => stats.modeStats[key].total > 0);
 
   // Badge check context for progress bars
   const badgeCtx: BadgeCheckContext | null = badgeData ? {
@@ -352,44 +317,23 @@ export default function StatsScreen() {
     }
   };
 
-  const accuracyLabel =
-    overallAccuracy === 100 ? t('stats.perfect') :
-    overallAccuracy >= 90 ? t('stats.excellent') :
-    overallAccuracy >= 70 ? t('stats.great') :
-    overallAccuracy > 0 ? t('stats.keepGoing') : '';
-
   return (
     <SafeAreaView style={s.container}>
       <ScrollView style={{ flex: 1 }} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         <ScreenContainer>
 
         {/* ══════════════════════════════════════════════════════════
-            HERO: Grade + animated accuracy count-up
+            HERO: animated accuracy count-up
             Mirrors the Results page hero reveal for cohesion
             ══════════════════════════════════════════════════════════ */}
         <Animated.View style={[
           s.heroCard,
           { opacity: heroFade, transform: [{ translateY: heroSlide }] },
         ]}>
-          <Text style={s.heroEyebrow}>{t('stats.overallGrade')}</Text>
+          <Text style={s.heroEyebrow}>{t('stats.overallAccuracy')}</Text>
 
           {/* Animated accuracy number */}
           <Text style={s.heroAccuracy}>{displayAcc}%</Text>
-
-          {/* Grade springs in after count-up */}
-          {grade && (
-            <Animated.View style={[
-              s.heroGradeWrap,
-              { opacity: gradeOpacity, transform: [{ scale: gradeScale }] },
-            ]}>
-              <Text style={[s.heroGrade, { color: grade.color }]}>{grade.label}</Text>
-              {accuracyLabel ? (
-                <Text style={[s.heroAccLabel, overallAccuracy >= 70 && { color: colors.successTextOnDark }]}>
-                  {accuracyLabel}
-                </Text>
-              ) : null}
-            </Animated.View>
-          )}
 
           <View style={s.heroDivider} />
 
@@ -527,31 +471,6 @@ export default function StatsScreen() {
                 return (
                   <View key={id} style={s.modeRow}>
                     <Text style={s.modeLabel}>{t(`categories.${id}`)}</Text>
-                    <View style={s.modeBarWrap}>
-                      <View style={[s.modeBarFill, { width: `${barWidth}%` }, pct >= 70 && s.modeBarGood]} />
-                    </View>
-                    <Text style={[s.modePct, pct >= 70 && s.modePctGood]}>{pct}%</Text>
-                  </View>
-                );
-              })}
-            </View>
-          </Animated.View>
-        )}
-
-        {/* ── MODE BREAKDOWN ── */}
-        {playedModes.length > 0 && (
-          <Animated.View style={{ opacity: modeFade }}>
-            <View style={s.sectionHeader}>
-              <Text style={s.sectionTitle}>{t('stats.byModeLabel')}</Text>
-            </View>
-            <View style={s.modeBreakdown}>
-              {playedModes.map(({ key, labelKey }) => {
-                const ms = stats.modeStats[key];
-                const pct = ms.total > 0 ? Math.round((ms.correct / ms.total) * 100) : 0;
-                const barWidth = Math.max(pct, 2);
-                return (
-                  <View key={key} style={s.modeRow}>
-                    <Text style={s.modeLabel}>{t(labelKey)}</Text>
                     <View style={s.modeBarWrap}>
                       <View style={[s.modeBarFill, { width: `${barWidth}%` }, pct >= 70 && s.modeBarGood]} />
                     </View>
@@ -710,22 +629,6 @@ const s = StyleSheet.create({
     color: colors.white,
     letterSpacing: -3,
     lineHeight: 120,
-  },
-  heroGradeWrap: {
-    alignItems: 'center',
-    marginTop: spacing.xs,
-    marginBottom: spacing.sm,
-  },
-  heroGrade: {
-    fontFamily: fontFamily.display,
-    fontSize: fontSize.gameTitle, // 42px
-    letterSpacing: -1,
-  },
-  heroAccLabel: {
-    fontFamily: fontFamily.bodyMedium,
-    fontSize: fontSize.caption,
-    color: colors.whiteAlpha45,
-    marginTop: spacing.xxs,
   },
   heroDivider: {
     height: 1,
