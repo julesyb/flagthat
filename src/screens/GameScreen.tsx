@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   SafeAreaView,
   Animated,
   Keyboard,
+  ScrollView,
   useWindowDimensions,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -18,7 +19,7 @@ import { hapticCorrect, hapticWrong, hapticTap, playCorrectSound, playWrongSound
 import FlagImage from '../components/FlagImage';
 import MapImage from '../components/MapImage';
 import { useGameAnimations } from '../hooks/useGameAnimations';
-import { getFlagByName } from '../data';
+import { getFlagByName, getFlagsForCategory } from '../data';
 import { RootStackParamList } from '../types/navigation';
 import { ChevronRightIcon } from '../components/Icons';
 
@@ -93,6 +94,20 @@ export default function GameScreen({ route, navigation }: Props) {
   const currentQuestion = questions[currentIndex];
   const isHard = config.mode === 'hard';
   const isMapMode = config.displayMode === 'map';
+  const isAutocomplete = isHard && config.autocomplete === true;
+
+  const categoryCountryNames = useMemo(
+    () => getFlagsForCategory(config.category).map((f) => f.name).sort(),
+    [config.category],
+  );
+
+  const suggestions = useMemo(() => {
+    if (!isAutocomplete || textInput.trim().length < 1 || showFeedback) return [];
+    const query = textInput.trim().toLowerCase();
+    return categoryCountryNames
+      .filter((name) => name.toLowerCase().includes(query))
+      .slice(0, 5);
+  }, [isAutocomplete, textInput, showFeedback, categoryCountryNames]);
   const progress = questions.length > 0 ? (currentIndex + 1) / questions.length : 0;
 
   const goToNext = useCallback(() => {
@@ -168,6 +183,11 @@ export default function GameScreen({ route, navigation }: Props) {
     if (textInput.trim().length > 0) {
       handleAnswer(textInput.trim());
     }
+  };
+
+  const handleSelectSuggestion = (name: string) => {
+    setTextInput(name);
+    handleAnswer(name);
   };
 
   if (questions.length === 0) {
@@ -275,6 +295,24 @@ export default function GameScreen({ route, navigation }: Props) {
               editable={!showFeedback}
               accessibilityLabel="Type your answer"
             />
+            {suggestions.length > 0 && (
+              <ScrollView
+                style={styles.suggestionsContainer}
+                keyboardShouldPersistTaps="handled"
+                nestedScrollEnabled
+              >
+                {suggestions.map((name) => (
+                  <TouchableOpacity
+                    key={name}
+                    style={styles.suggestionItem}
+                    onPress={() => handleSelectSuggestion(name)}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={styles.suggestionText}>{name}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            )}
             <TouchableOpacity
               style={[
                 styles.submitButton,
@@ -522,6 +560,23 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     gap: spacing.md,
+  },
+  suggestionsContainer: {
+    maxHeight: 200,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: borderRadius.md,
+  },
+  suggestionItem: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  suggestionText: {
+    ...typography.body,
+    color: colors.text,
   },
   textInput: {
     backgroundColor: colors.surface,

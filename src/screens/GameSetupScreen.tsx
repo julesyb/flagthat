@@ -93,6 +93,7 @@ export default function GameSetupScreen({ navigation }: Props) {
   const [questionCountAll, setQuestionCountAll] = useState(false);
   const [timeLimit, setTimeLimit] = useState(60);
   const [filterType, setFilterType] = useState<CategoryType | null>(null);
+  const [autocomplete, setAutocomplete] = useState(false);
 
   const totalFlags = getTotalFlagCount();
   const isFlagFlash = mode === 'flagflash';
@@ -134,6 +135,7 @@ export default function GameSetupScreen({ navigation }: Props) {
       questionCount: (isFlagFlash || isTimeAttack) ? 999 : effectiveQuestionCount,
       displayMode,
       ...(hasTimeLimit && { timeLimit }),
+      ...(mode === 'hard' && { autocomplete }),
     };
 
     if (isTimeAttack) {
@@ -228,6 +230,41 @@ export default function GameSetupScreen({ navigation }: Props) {
             );
           })}
         </View>
+
+        {/* Autocomplete toggle (only for Hard mode) */}
+        {mode === 'hard' && (
+          <>
+            <Text style={styles.sectionTitle}>Autocomplete</Text>
+            <View style={styles.displayToggleRow}>
+              {([false, true] as const).map((val) => {
+                const isActive = autocomplete === val;
+                return (
+                  <TouchableOpacity
+                    key={String(val)}
+                    style={[styles.displayToggle, isActive && styles.displayToggleActive]}
+                    onPress={() => setAutocomplete(val)}
+                    activeOpacity={0.7}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: isActive }}
+                    accessibilityLabel={val ? 'Autocomplete On' : 'Autocomplete Off'}
+                  >
+                    <View style={[styles.displayToggleIconWrapper, isActive && styles.displayToggleIconWrapperActive]}>
+                      <Text style={[styles.modeIconText, isActive && styles.modeIconTextActive]}>
+                        {val ? 'On' : 'Off'}
+                      </Text>
+                    </View>
+                    <Text style={[styles.displayToggleText, isActive && styles.displayToggleTextActive]}>
+                      {val ? 'On' : 'Off'}
+                    </Text>
+                    <Text style={[styles.displayToggleDesc, isActive && styles.displayToggleDescActive]}>
+                      {val ? 'Show suggestions as you type' : 'Type the full answer'}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </>
+        )}
 
         {/* Filter */}
         <Text style={styles.sectionTitle}>Filter</Text>

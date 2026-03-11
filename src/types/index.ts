@@ -39,6 +39,7 @@ export interface GameConfig {
   questionCount: number;
   timeLimit?: number; // seconds, for FlagFlash
   displayMode?: DisplayMode; // flag (default) or map
+  autocomplete?: boolean; // enable autocomplete suggestions in hard mode
 }
 
 export interface GameQuestion {
