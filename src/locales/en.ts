@@ -68,10 +68,6 @@ const en = {
     practiceWeak: 'Practice Weak Flags',
     flagsToReview: '{count} flag to review',
     flagsToReviewPlural: '{count} flags to review',
-    yourStats: 'Your stats',
-    bestStreak: 'Best Streak',
-    best60s: 'Best 60s',
-    accuracy: 'Accuracy',
     onboardingScores: 'Scores',
   },
 

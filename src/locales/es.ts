@@ -66,10 +66,6 @@ const es: typeof en = {
     practiceWeak: 'Practicar banderas dif\u00edciles',
     flagsToReview: '{count} bandera por revisar',
     flagsToReviewPlural: '{count} banderas por revisar',
-    yourStats: 'Tus estad\u00edsticas',
-    bestStreak: 'Mejor racha',
-    best60s: 'Mejor 60s',
-    accuracy: 'Precisi\u00f3n',
     onboardingScores: 'Puntuaciones',
   },
 
@@ -155,7 +151,6 @@ const es: typeof en = {
     countriesGames: '{countries} pa\u00edses - {games} partidas jugadas',
     bestStreak: 'Mejor racha',
     personalBest: 'R\u00e9cord personal',
-    accuracy: 'Precisi\u00f3n',
     perfect: 'Perfecto',
     excellent: 'Excelente',
     great: 'Muy bien',

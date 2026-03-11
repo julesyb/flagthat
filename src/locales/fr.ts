@@ -66,10 +66,6 @@ const fr: typeof en = {
     practiceWeak: 'R\u00e9viser les drapeaux difficiles',
     flagsToReview: '{count} drapeau \u00e0 r\u00e9viser',
     flagsToReviewPlural: '{count} drapeaux \u00e0 r\u00e9viser',
-    yourStats: 'Vos stats',
-    bestStreak: 'Meilleure s\u00e9rie',
-    best60s: 'Meilleur 60s',
-    accuracy: 'Pr\u00e9cision',
     onboardingScores: 'Scores',
   },
 
@@ -155,7 +151,6 @@ const fr: typeof en = {
     countriesGames: '{countries} pays - {games} parties jou\u00e9es',
     bestStreak: 'Meilleure s\u00e9rie',
     personalBest: 'Record personnel',
-    accuracy: 'Pr\u00e9cision',
     perfect: 'Parfait',
     excellent: 'Excellent',
     great: 'Tr\u00e8s bien',

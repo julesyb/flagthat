@@ -18,6 +18,16 @@ export function PlayIcon({ size = 16, color = colors.white }: IconProps) {
   );
 }
 
+// Home — simple house silhouette for nav
+export function HomeIcon({ size = 16, color = colors.textSecondary, strokeWidth = 1.5, filled = false }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill={filled ? color : 'none'} stroke={color} strokeWidth={strokeWidth}>
+      <Path d="M3 10.5L12 3L21 10.5V20C21 20.55 20.55 21 20 21H4C3.45 21 3 20.55 3 20V10.5Z" />
+      <Polyline points="9 21 9 14 15 14 15 21" />
+    </Svg>
+  );
+}
+
 // Lightning bolt — Quick Play / action icon
 export function LightningIcon({ size = 18, color = colors.white, strokeWidth = 1.5, filled = false }: IconProps) {
   return (

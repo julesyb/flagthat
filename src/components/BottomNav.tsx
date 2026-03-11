@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { colors, fontFamily, fontSize, spacing, layout } from '../utils/theme';
-import { LightningIcon, CrosshairIcon, BarChartIcon, GlobeIcon } from './Icons';
+import { HomeIcon, CrosshairIcon, BarChartIcon, GlobeIcon } from './Icons';
 import { t } from '../utils/i18n';
 
 export type TabId = 'Home' | 'Modes' | 'Stats' | 'Browse';
@@ -12,7 +12,7 @@ interface BottomNavProps {
 }
 
 const TAB_ICONS: Record<TabId, (active: boolean) => React.ReactNode> = {
-  Home: (active) => <LightningIcon size={20} color={active ? colors.ink : colors.textTertiary} filled={active} />,
+  Home: (active) => <HomeIcon size={20} color={active ? colors.ink : colors.textTertiary} filled={active} />,
   Modes: (active) => <CrosshairIcon size={20} color={active ? colors.ink : colors.textTertiary} />,
   Stats: (active) => <BarChartIcon size={20} color={active ? colors.ink : colors.textTertiary} />,
   Browse: (active) => <GlobeIcon size={20} color={active ? colors.ink : colors.textTertiary} />,
