@@ -129,6 +129,11 @@ const de: typeof en = {
     shareScore: '{correct}/10',
     shareFooter: 'Kannst du mich schlagen?\nhttps://flagthat.app',
     perfectShareNote: 'PERFEKTE PUNKTZAHL!',
+    newBest: 'Neuer Rekord',
+    badgesUnlocked: 'Abzeichen freigeschaltet',
+    yourProgress: 'Dein Fortschritt',
+    viewAllStats: 'Alle Statistiken',
+    gamesPlayed: '{count} Spiele gespielt',
   },
 
   stats: {

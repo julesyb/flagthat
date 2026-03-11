@@ -15,11 +15,12 @@ import { colors, spacing, fontFamily, fontSize, borderRadius } from '../utils/th
 import { UserStats } from '../types';
 import { getStats, getFlagStats, FlagStats, getDayStreak, getBadgeData, getMissedFlagIds, BadgeData } from '../utils/storage';
 import { getAllFlags, getTotalFlagCount } from '../data';
+import { getGrade } from '../utils/gameEngine';
 import { t } from '../utils/i18n';
 import { FlagImageSmall } from '../components/FlagImage';
 import BottomNav from '../components/BottomNav';
 import { evaluateBadges, BADGES, TIER_COLORS, BadgeIcon } from '../utils/badges';
-import { FlagIcon, GlobeIcon, CheckIcon, PlayIcon, LightningIcon, CalendarIcon, ClockIcon, CrosshairIcon, LinkIcon } from '../components/Icons';
+import { FlagIcon, GlobeIcon, CheckIcon, PlayIcon, LightningIcon, CalendarIcon, ClockIcon, CrosshairIcon, LinkIcon, ChevronRightIcon } from '../components/Icons';
 
 const RANK_COLORS = [colors.gradeS, colors.textTertiary, colors.warning];
 
@@ -60,7 +61,6 @@ export default function StatsScreen() {
             setWeakFlagCount(missed.length);
           }
         } catch (e) {
-          // Ensure we still show something even if storage fails
           if (!cancelled) {
             setStats((prev) => prev ?? {
               totalGamesPlayed: 0,
@@ -141,6 +141,7 @@ export default function StatsScreen() {
       ? Math.round((stats.totalCorrect / stats.totalAnswered) * 100)
       : 0;
   const progressPct = totalFlags > 0 ? Math.round((countriesSeen / totalFlags) * 100) : 0;
+  const grade = overallAccuracy > 0 ? getGrade(overallAccuracy) : null;
 
   const earnedIds = new Set(earnedBadges.map((b) => b.id));
 
@@ -174,54 +175,58 @@ export default function StatsScreen() {
         contentContainerStyle={s.content}
         showsVerticalScrollIndicator={false}
       >
-        {/* ── STAT TILES ── */}
-        <View style={s.tileGrid}>
-          <View style={s.tileRow}>
-            <View style={[s.tile, s.tileDark]}>
-              <Text style={[s.tileLabel, s.tileLabelDark]}>{t('stats.bestStreak')}</Text>
-              <Text style={[s.tileVal, { color: colors.white }]}>{stats.bestStreak}</Text>
-              <Text style={[s.tileSub, s.tileSubDark]}>{t('stats.personalBest')}</Text>
-            </View>
-            <View style={s.tile}>
-              <Text style={s.tileLabel}>{t('stats.accuracy')}</Text>
-              <Text style={s.tileVal}>{overallAccuracy}<Text style={s.tileUnit}>%</Text></Text>
+        {/* ── HERO SUMMARY ── */}
+        <View style={s.heroCard}>
+          <View style={s.heroTop}>
+            <View style={s.heroLeft}>
+              <Text style={s.heroLabel}>{t('stats.accuracy')}</Text>
+              <Text style={s.heroValue}>{overallAccuracy}<Text style={s.heroUnit}>%</Text></Text>
               {accuracyLabel ? (
-                <Text style={[s.tileSub, overallAccuracy >= 70 && { color: colors.success }]}>{accuracyLabel}</Text>
+                <Text style={[s.heroSub, overallAccuracy >= 70 && { color: colors.successTextOnDark }]}>{accuracyLabel}</Text>
               ) : null}
             </View>
+            {grade && (
+              <View style={s.heroGradeWrap}>
+                <Text style={[s.heroGrade, { color: grade.color }]}>{grade.label}</Text>
+              </View>
+            )}
           </View>
-          <View style={s.tileRow}>
-            <View style={s.tile}>
-              <Text style={s.tileLabel}>{t('stats.gamesPlayed')}</Text>
-              <Text style={s.tileVal}>{stats.totalGamesPlayed}</Text>
+          <View style={s.heroDivider} />
+          <View style={s.heroStatsRow}>
+            <View style={s.heroStatItem}>
+              <Text style={s.heroStatValue}>{stats.bestStreak}</Text>
+              <Text style={s.heroStatLabel}>{t('stats.bestStreak')}</Text>
             </View>
-            <View style={s.tile}>
-              <Text style={s.tileLabel}>{t('stats.dayStreak')}</Text>
-              <Text style={s.tileVal}>{dayStreak}</Text>
-              {dayStreak > 0 && <Text style={s.tileSub}>{t('stats.playTomorrow')}</Text>}
+            <View style={s.heroStatItem}>
+              <Text style={s.heroStatValue}>{stats.totalGamesPlayed}</Text>
+              <Text style={s.heroStatLabel}>{t('stats.gamesPlayed')}</Text>
             </View>
-          </View>
-
-          {/* Progress tile - full width */}
-          <View style={[s.tile, s.tileFull]}>
-            <Text style={s.tileLabel}>{t('stats.countriesUnlocked')}</Text>
-            <Text style={s.tileVal}>{countriesSeen}<Text style={s.tileUnit}>{t('stats.countriesOf', { seen: countriesSeen, total: totalFlags })}</Text></Text>
-            <View style={s.progressWrap}>
-              <View style={[s.progressFill, { width: `${progressPct}%` }]} />
-            </View>
-            <View style={s.progressLabels}>
-              <Text style={s.progressLabelBold}>{t('stats.percentComplete', { pct: progressPct })}</Text>
-              <Text style={s.progressLabelMuted}>{t('stats.toGo', { count: totalFlags - countriesSeen })}</Text>
+            <View style={s.heroStatItem}>
+              <Text style={s.heroStatValue}>{dayStreak}</Text>
+              <Text style={s.heroStatLabel}>{t('stats.dayStreak')}</Text>
             </View>
           </View>
-
-          {(stats.bestTimeAttackScore || 0) > 0 && (
-            <View style={[s.tile, s.tileFull]}>
-              <Text style={s.tileLabel}>{t('stats.bestTimedQuiz')}</Text>
-              <Text style={s.tileVal}>{stats.bestTimeAttackScore}<Text style={s.tileUnit}> {t('stats.in60s')}</Text></Text>
-            </View>
-          )}
         </View>
+
+        {/* ── PROGRESS ── */}
+        <View style={s.tile}>
+          <Text style={s.tileLabel}>{t('stats.countriesUnlocked')}</Text>
+          <Text style={s.tileVal}>{countriesSeen}<Text style={s.tileUnit}> / {totalFlags}</Text></Text>
+          <View style={s.progressWrap}>
+            <View style={[s.progressFill, { width: `${progressPct}%` }]} />
+          </View>
+          <View style={s.progressLabels}>
+            <Text style={s.progressLabelBold}>{t('stats.percentComplete', { pct: progressPct })}</Text>
+            <Text style={s.progressLabelMuted}>{t('stats.toGo', { count: totalFlags - countriesSeen })}</Text>
+          </View>
+        </View>
+
+        {(stats.bestTimeAttackScore || 0) > 0 && (
+          <View style={[s.tile, { marginTop: 8 }]}>
+            <Text style={s.tileLabel}>{t('stats.bestTimedQuiz')}</Text>
+            <Text style={s.tileVal}>{stats.bestTimeAttackScore}<Text style={s.tileUnit}> {t('stats.in60s')}</Text></Text>
+          </View>
+        )}
 
         {/* ── BADGES ── */}
         <View style={s.sectionHeader}>
@@ -290,6 +295,7 @@ export default function StatsScreen() {
           activeOpacity={0.7}
         >
           <Text style={s.settingsLinkText}>{t('app.settings')}</Text>
+          <ChevronRightIcon size={14} color={colors.textTertiary} />
         </TouchableOpacity>
       </ScrollView>
       <BottomNav activeTab="Stats" onNavigate={(tab) => {
@@ -307,21 +313,91 @@ const s = StyleSheet.create({
   loadingText: { fontFamily: fontFamily.body, fontSize: fontSize.lg, color: colors.textSecondary },
   content: { padding: spacing.md, paddingBottom: spacing.xxl },
 
-  // ── Tile Grid
-  tileGrid: { gap: 8, marginBottom: spacing.md },
-  tileRow: { flexDirection: 'row', gap: 8 },
-  tile: {
+  // ── Hero Summary Card
+  heroCard: {
+    backgroundColor: colors.ink,
+    borderRadius: borderRadius.xl,
+    padding: spacing.lg,
+    marginBottom: spacing.sm,
+  },
+  heroTop: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+  },
+  heroLeft: {
     flex: 1,
+  },
+  heroLabel: {
+    fontFamily: fontFamily.uiLabel,
+    fontSize: fontSize.xxs,
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
+    color: colors.whiteAlpha45,
+    marginBottom: spacing.xs,
+  },
+  heroValue: {
+    fontFamily: fontFamily.display,
+    fontSize: fontSize.hero,
+    color: colors.white,
+    letterSpacing: -1,
+    lineHeight: 56,
+  },
+  heroUnit: {
+    fontFamily: fontFamily.bodyMedium,
+    fontSize: fontSize.heading,
+    color: colors.whiteAlpha60,
+  },
+  heroSub: {
+    fontFamily: fontFamily.bodyMedium,
+    fontSize: fontSize.caption,
+    color: colors.whiteAlpha45,
+    marginTop: spacing.xxs,
+  },
+  heroGradeWrap: {
+    paddingLeft: spacing.md,
+    paddingTop: spacing.xs,
+  },
+  heroGrade: {
+    fontFamily: fontFamily.display,
+    fontSize: fontSize.gameTitle,
+    letterSpacing: -1,
+  },
+  heroDivider: {
+    height: 1,
+    backgroundColor: colors.whiteAlpha15,
+    marginVertical: spacing.md,
+  },
+  heroStatsRow: {
+    flexDirection: 'row',
+  },
+  heroStatItem: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  heroStatValue: {
+    fontFamily: fontFamily.display,
+    fontSize: fontSize.heading,
+    color: colors.white,
+    letterSpacing: -0.5,
+  },
+  heroStatLabel: {
+    fontFamily: fontFamily.uiLabel,
+    fontSize: fontSize.xxs,
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+    color: colors.whiteAlpha45,
+    marginTop: spacing.xxs,
+    textAlign: 'center',
+  },
+
+  // ── Tiles
+  tile: {
     backgroundColor: colors.surface,
     borderRadius: borderRadius.lg,
     borderWidth: 1,
     borderColor: colors.border,
     padding: 18,
-  },
-  tileFull: { flex: undefined },
-  tileDark: {
-    backgroundColor: colors.ink,
-    borderColor: colors.ink,
   },
   tileLabel: {
     fontFamily: fontFamily.uiLabel,
@@ -331,7 +407,6 @@ const s = StyleSheet.create({
     color: colors.textTertiary,
     marginBottom: spacing.sm,
   },
-  tileLabelDark: { color: colors.whiteAlpha45 },
   tileVal: {
     fontFamily: fontFamily.display,
     fontSize: fontSize.stat,
@@ -344,13 +419,6 @@ const s = StyleSheet.create({
     fontSize: fontSize.body,
     color: colors.textTertiary,
   },
-  tileSub: {
-    fontFamily: fontFamily.body,
-    fontSize: fontSize.caption,
-    color: colors.textTertiary,
-    marginTop: spacing.xs,
-  },
-  tileSubDark: { color: colors.whiteAlpha45 },
 
   // ── Progress
   progressWrap: {
@@ -384,12 +452,10 @@ const s = StyleSheet.create({
   // ── Section
   sectionTitle: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: fontSize.xl,
-    letterSpacing: 0.5,
+    fontSize: fontSize.xxs,
+    letterSpacing: 1.2,
     textTransform: 'uppercase',
-    color: colors.ink,
-    marginBottom: spacing.sm,
-    marginTop: spacing.lg,
+    color: colors.textTertiary,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -400,7 +466,7 @@ const s = StyleSheet.create({
   },
   sectionMeta: {
     fontFamily: fontFamily.body,
-    fontSize: fontSize.caption,
+    fontSize: fontSize.sm,
     color: colors.textTertiary,
   },
 
@@ -494,9 +560,12 @@ const s = StyleSheet.create({
 
   // ── Footer
   settingsLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
     marginTop: spacing.xl,
     padding: spacing.md,
-    alignItems: 'center',
   },
   settingsLinkText: {
     fontFamily: fontFamily.bodyMedium,

@@ -129,6 +129,11 @@ const zh: typeof en = {
     shareScore: '{correct}/10',
     shareFooter: '\u6765\u6311\u6218\u6211\u7684\u5206\u6570\uff01\nhttps://flagthat.app',
     perfectShareNote: '\u6ee1\u5206\uff01',
+    newBest: '\u65b0\u7eaa\u5f55',
+    badgesUnlocked: '\u89e3\u9501\u5fbd\u7ae0',
+    yourProgress: '\u4f60\u7684\u8fdb\u5ea6',
+    viewAllStats: '\u67e5\u770b\u6240\u6709\u7edf\u8ba1',
+    gamesPlayed: '{count}\u573a\u6e38\u620f',
   },
 
   stats: {

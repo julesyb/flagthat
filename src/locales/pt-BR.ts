@@ -129,6 +129,11 @@ const ptBR: typeof en = {
     shareScore: '{correct}/10',
     shareFooter: 'Pode me superar?\nhttps://flagthat.app',
     perfectShareNote: 'PONTUA\u00c7\u00c3O PERFEITA!',
+    newBest: 'Novo recorde',
+    badgesUnlocked: 'Medalhas desbloqueadas',
+    yourProgress: 'Seu progresso',
+    viewAllStats: 'Ver todas as estat\u00edsticas',
+    gamesPlayed: '{count} jogos',
   },
 
   stats: {

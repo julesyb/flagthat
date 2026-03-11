@@ -129,6 +129,11 @@ const es: typeof en = {
     shareScore: '{correct}/10',
     shareFooter: '\u00bfPuedes superar mi puntuaci\u00f3n?\nhttps://flagthat.app',
     perfectShareNote: '\u00a1PUNTUACI\u00d3N PERFECTA!',
+    newBest: 'Nuevo record',
+    badgesUnlocked: 'Insignias desbloqueadas',
+    yourProgress: 'Tu progreso',
+    viewAllStats: 'Ver todas las estad\u00edsticas',
+    gamesPlayed: '{count} partidas jugadas',
   },
 
   stats: {

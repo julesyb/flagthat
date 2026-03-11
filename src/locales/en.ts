@@ -134,6 +134,11 @@ const en = {
     shareScore: '{correct}/10',
     shareFooter: 'Can you beat my score?\nhttps://flagthat.app',
     perfectShareNote: 'PERFECT SCORE!',
+    newBest: 'New Best',
+    badgesUnlocked: 'Badges Unlocked',
+    yourProgress: 'Your Progress',
+    viewAllStats: 'View All Stats',
+    gamesPlayed: '{count} games played',
   },
 
   // ─── Stats Screen ────────────────────────────────────────
