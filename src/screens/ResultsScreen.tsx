@@ -7,14 +7,15 @@ import {
   ScrollView,
   SafeAreaView,
   Animated,
+  Easing,
   Share,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius } from '../utils/theme';
 import { calculateAccuracy, getStreakFromResults, getGrade, generateDailyShareGrid, getDailyNumber } from '../utils/gameEngine';
-import { updateStats, updateFlagResults, saveDailyChallenge, incrementDailyChallenges, updateLastGameBadgeFlags, markShared, getStats, getFlagStats, getDayStreak, getBadgeData, getMissedFlagIds, FlagStats } from '../utils/storage';
+import { updateStats, updateFlagResults, saveDailyChallenge, incrementDailyChallenges, updateLastGameBadgeFlags, markShared, getStats, getFlagStats, getDayStreak, getBadgeData, getMissedFlagIds } from '../utils/storage';
 import { t } from '../utils/i18n';
-import { hapticCorrect, playCelebrationSound } from '../utils/feedback';
+import { hapticCorrect, hapticTap, playCelebrationSound } from '../utils/feedback';
 import { FlagImageSmall } from '../components/FlagImage';
 import { CheckIcon, CrossIcon, ChevronRightIcon, BarChartIcon, FlagIcon, GlobeIcon, PlayIcon, LightningIcon, CalendarIcon, ClockIcon, CrosshairIcon, LinkIcon } from '../components/Icons';
 import BottomNav from '../components/BottomNav';
@@ -24,15 +25,6 @@ import { evaluateBadges, BADGES, TIER_COLORS, BadgeIcon, EarnedBadge } from '../
 import { getTotalFlagCount } from '../data';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Results'>;
-
-// Modes worth showing in the mode bar on stats
-const VISIBLE_MODES: { key: GameMode; label: string }[] = [
-  { key: 'easy', label: 'Easy' },
-  { key: 'medium', label: 'Med' },
-  { key: 'hard', label: 'Hard' },
-  { key: 'timeattack', label: '60s' },
-  { key: 'daily', label: 'Daily' },
-];
 
 export default function ResultsScreen({ route, navigation }: Props) {
   const { results, config, reviewOnly } = route.params;
@@ -46,24 +38,36 @@ export default function ResultsScreen({ route, navigation }: Props) {
   const isPerfect = accuracy === 100 && results.length > 0;
   const isDaily = config.mode === 'daily';
 
-  // Find fastest correct answer
   const fastestCorrect = results
     .filter((r) => r.correct)
     .reduce<{ name: string; time: number } | null>((best, r) => {
-      const t = r.timeTaken;
-      if (!best || t < best.time) return { name: r.question.flag.name, time: t };
+      if (!best || r.timeTaken < best.time) return { name: r.question.flag.name, time: r.timeTaken };
       return best;
     }, null);
 
-  // Animations
+  // ── Animation values ──
+  // Phase 1: Count-up (0 → accuracy%)
+  const countAnim = useRef(new Animated.Value(0)).current;
+  const [displayAcc, setDisplayAcc] = useState(0);
+  // Phase 2: Grade reveal (springs in after count-up)
   const gradeScale = useRef(new Animated.Value(0)).current;
+  const gradeOpacity = useRef(new Animated.Value(0)).current;
+  // Phase 3: Score line fade
+  const scoreFade = useRef(new Animated.Value(0)).current;
+  // Phase 4: Timeline dots (staggered springs)
+  const dotAnims = useRef(results.map(() => new Animated.Value(0))).current;
+  // Phase 5: Stats row
+  const statsFade = useRef(new Animated.Value(0)).current;
+  // Phase 6: Everything else
+  const restFade = useRef(new Animated.Value(0)).current;
+  // Perfect celebration
   const confettiOpacity = useRef(new Animated.Value(0)).current;
-  const insightsOpacity = useRef(new Animated.Value(0)).current;
-  const progressOpacity = useRef(new Animated.Value(0)).current;
+  // Review items
   const reviewAnims = useRef(results.map(() => new Animated.Value(0))).current;
-  const timelineOpacity = useRef(new Animated.Value(0)).current;
+  // Progress bar
+  const progressBarAnim = useRef(new Animated.Value(0)).current;
 
-  // Progress data loaded after stats update
+  // Progress data
   const [overallStats, setOverallStats] = useState<UserStats | null>(null);
   const [countriesSeen, setCountriesSeen] = useState(0);
   const [totalFlags, setTotalFlags] = useState(0);
@@ -76,15 +80,21 @@ export default function ResultsScreen({ route, navigation }: Props) {
   const [weakFlagCount, setWeakFlagCount] = useState(0);
 
   useEffect(() => {
+    // Listen to count-up animation for display
+    const listenerId = countAnim.addListener(({ value }) => {
+      setDisplayAcc(Math.round(value));
+    });
+    return () => countAnim.removeListener(listenerId);
+  }, [countAnim]);
+
+  useEffect(() => {
+    // ── Data processing ──
     async function processResults() {
-      // Snapshot pre-game state
       const [preStats, preFlagStats, preDayStreak, preBadgeData, preMissed] = await Promise.all([
         getStats(), getFlagStats(), getDayStreak(), getBadgeData(), getMissedFlagIds(),
       ]);
       const preBadgeIds = new Set(evaluateBadges({
-        stats: preStats,
-        flagStats: preFlagStats,
-        dayStreak: preDayStreak,
+        stats: preStats, flagStats: preFlagStats, dayStreak: preDayStreak,
         dailyChallengesCompleted: preBadgeData.dailyChallengesCompleted,
         hasShared: preBadgeData.hasShared,
         lastGamePerfect10: preBadgeData.lastGamePerfect10,
@@ -94,10 +104,8 @@ export default function ResultsScreen({ route, navigation }: Props) {
 
       const wasNewBestStreak = streak > preStats.bestStreak;
       const prevAcc = preStats.totalAnswered > 0
-        ? Math.round((preStats.totalCorrect / preStats.totalAnswered) * 100)
-        : null;
+        ? Math.round((preStats.totalCorrect / preStats.totalAnswered) * 100) : null;
 
-      // Count new countries learned this game
       let newCountries = 0;
       for (const r of results) {
         if (r.correct) {
@@ -106,7 +114,6 @@ export default function ResultsScreen({ route, navigation }: Props) {
         }
       }
 
-      // Update stats
       if (!reviewOnly) {
         await updateStats(correct, results.length, streak, config.mode, config.category);
         await updateFlagResults(results);
@@ -117,15 +124,11 @@ export default function ResultsScreen({ route, navigation }: Props) {
         }
       }
 
-      // Load post-game state
       const [postStats, postFlagStats, postDayStreak, postBadgeData, postMissed] = await Promise.all([
         getStats(), getFlagStats(), getDayStreak(), getBadgeData(), getMissedFlagIds(),
       ]);
-
       const postBadges = evaluateBadges({
-        stats: postStats,
-        flagStats: postFlagStats,
-        dayStreak: postDayStreak,
+        stats: postStats, flagStats: postFlagStats, dayStreak: postDayStreak,
         dailyChallengesCompleted: postBadgeData.dailyChallengesCompleted,
         hasShared: postBadgeData.hasShared,
         lastGamePerfect10: postBadgeData.lastGamePerfect10,
@@ -136,93 +139,130 @@ export default function ResultsScreen({ route, navigation }: Props) {
       setOverallStats(postStats);
       setDayStreakCount(postDayStreak);
       setTotalFlags(getTotalFlagCount());
-      setCountriesSeen(Object.values(postFlagStats).filter((fs) => fs.right > 0).length);
+      const seen = Object.values(postFlagStats).filter((fs) => fs.right > 0).length;
+      setCountriesSeen(seen);
       setNewBadges(postBadges.filter((b) => !preBadgeIds.has(b.id)));
       setTotalBadgesEarned(postBadges.length);
       setIsNewBestStreak(wasNewBestStreak && !reviewOnly);
       setNewCountriesCount(reviewOnly ? 0 : newCountries);
       setPrevAccuracy(prevAcc);
       setWeakFlagCount(postMissed.length);
-    }
 
+      // Animate progress bar after data loads
+      const totalF = getTotalFlagCount();
+      const pct = totalF > 0 ? seen / totalF : 0;
+      Animated.timing(progressBarAnim, {
+        toValue: pct,
+        duration: 800,
+        delay: 200,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: false,
+      }).start();
+    }
     processResults();
 
-    // Staggered entrance animations
-    Animated.spring(gradeScale, {
-      toValue: 1, friction: 4, tension: 80, delay: 200, useNativeDriver: true,
+    // ── Animation sequence ──
+    // Phase 1: Count-up (0 → accuracy)
+    Animated.timing(countAnim, {
+      toValue: accuracy,
+      duration: 1200,
+      delay: 300,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: false,
     }).start();
 
-    Animated.timing(timelineOpacity, {
-      toValue: 1, duration: 400, delay: 450, useNativeDriver: true,
+    // Phase 2: Grade reveal (after count-up)
+    const gradeDelay = 1500;
+    Animated.parallel([
+      Animated.spring(gradeScale, {
+        toValue: 1, friction: 4, tension: 100, delay: gradeDelay, useNativeDriver: true,
+      }),
+      Animated.timing(gradeOpacity, {
+        toValue: 1, duration: 200, delay: gradeDelay, useNativeDriver: true,
+      }),
+    ]).start();
+
+    // Phase 3: Score text
+    Animated.timing(scoreFade, {
+      toValue: 1, duration: 300, delay: gradeDelay + 200, useNativeDriver: true,
     }).start();
 
-    Animated.timing(insightsOpacity, {
-      toValue: 1, duration: 400, delay: 600, useNativeDriver: true,
-    }).start();
-
-    Animated.timing(progressOpacity, {
-      toValue: 1, duration: 400, delay: 800, useNativeDriver: true,
-    }).start();
-
+    // Phase 4: Timeline dots (staggered)
+    const dotsDelay = gradeDelay + 400;
     Animated.stagger(
-      50,
-      reviewAnims.map((a) =>
-        Animated.timing(a, { toValue: 1, duration: 250, delay: 1000, useNativeDriver: true }),
+      60,
+      dotAnims.map((a) =>
+        Animated.spring(a, { toValue: 1, friction: 6, tension: 120, delay: dotsDelay, useNativeDriver: true }),
       ),
     ).start();
 
+    // Phase 5: Stats
+    Animated.timing(statsFade, {
+      toValue: 1, duration: 400, delay: dotsDelay + results.length * 60 + 100, useNativeDriver: true,
+    }).start();
+
+    // Phase 6: Rest
+    const restDelay = dotsDelay + results.length * 60 + 400;
+    Animated.timing(restFade, {
+      toValue: 1, duration: 400, delay: restDelay, useNativeDriver: true,
+    }).start();
+
+    // Review items stagger
+    Animated.stagger(
+      40,
+      reviewAnims.map((a) =>
+        Animated.timing(a, { toValue: 1, duration: 200, delay: restDelay + 200, useNativeDriver: true }),
+      ),
+    ).start();
+
+    // Perfect celebration
     if (isPerfect) {
-      hapticCorrect();
-      playCelebrationSound();
+      setTimeout(() => {
+        hapticCorrect();
+        playCelebrationSound();
+      }, gradeDelay);
       const loopAnim = Animated.loop(
         Animated.sequence([
-          Animated.timing(confettiOpacity, { toValue: 1, duration: 500, useNativeDriver: true }),
+          Animated.timing(confettiOpacity, { toValue: 1, duration: 500, delay: gradeDelay, useNativeDriver: true }),
           Animated.timing(confettiOpacity, { toValue: 0.3, duration: 500, useNativeDriver: true }),
         ]),
       );
       loopAnim.start();
       return () => { loopAnim.stop(); };
+    } else if (accuracy >= 80) {
+      setTimeout(() => hapticTap(), gradeDelay);
     }
   }, []);
 
   const categoryLabel = config.category === 'all'
     ? t('categories.all') : t(`categories.${config.category}`);
   const modeLabel = t(`modes.${config.mode}`);
+  const dailyNumber = isDaily ? getDailyNumber() : 0;
 
   const handleShare = async () => {
     const message = isDaily
       ? generateDailyShareGrid(results)
       : `Flag That\n${modeLabel} - ${categoryLabel}\nScore: ${correct}/${results.length} (${accuracy}%)\nGrade: ${grade.label} | Streak: ${streak}\n${isPerfect ? t('results.perfectShareNote') + '\n' : ''}${t('results.shareFooter')}`;
-    try {
-      await Share.share({ message });
-      markShared();
-    } catch { /* cancelled */ }
+    try { await Share.share({ message }); markShared(); } catch { /* cancelled */ }
   };
 
-  const dailyNumber = isDaily ? getDailyNumber() : 0;
   const goHome = () => navigation.popToTop();
-
   const playAgain = () => {
     if (isDaily) { navigation.popToTop(); return; }
-    const modeScreenMap: Partial<Record<GameMode, keyof RootStackParamList>> = {
+    const map: Partial<Record<GameMode, keyof RootStackParamList>> = {
       flagflash: 'FlagFlash', flagpuzzle: 'FlagPuzzle', neighbors: 'Neighbors',
       impostor: 'FlagImpostor', capitalconnection: 'CapitalConnection',
     };
-    const screen = modeScreenMap[config.mode] || 'Game';
-    navigation.replace(screen as 'Game', { config });
+    navigation.replace((map[config.mode] || 'Game') as 'Game', { config });
   };
 
   const progressPct = totalFlags > 0 ? Math.round((countriesSeen / totalFlags) * 100) : 0;
-
-  // Accuracy vs average insight
   const accDiff = prevAccuracy !== null ? accuracy - prevAccuracy : null;
   const accInsight = prevAccuracy === null
     ? t('results.firstGame')
-    : accDiff !== null && accDiff > 0
-      ? t('results.aboveAverage', { pct: accDiff })
-      : accDiff !== null && accDiff < 0
-        ? t('results.belowAverage', { pct: Math.abs(accDiff) })
-        : null;
+    : accDiff !== null && accDiff > 0 ? t('results.aboveAverage', { pct: accDiff })
+    : accDiff !== null && accDiff < 0 ? t('results.belowAverage', { pct: Math.abs(accDiff) })
+    : null;
 
   const renderBadgeIcon = (icon: BadgeIcon, tierColor: string) => {
     const size = 18;
@@ -240,9 +280,16 @@ export default function ResultsScreen({ route, navigation }: Props) {
     }
   };
 
+  // Interpolate progress bar width
+  const progressBarWidth = progressBarAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0%', '100%'],
+  });
+
   return (
     <SafeAreaView style={st.container}>
       <ScrollView contentContainerStyle={st.content} showsVerticalScrollIndicator={false}>
+
         {/* ── PERFECT BANNER ── */}
         {isPerfect && (
           <Animated.View style={[st.celebrationBanner, { opacity: confettiOpacity }]}>
@@ -250,34 +297,58 @@ export default function ResultsScreen({ route, navigation }: Props) {
           </Animated.View>
         )}
 
-        {/* ── HERO GRADE ── */}
-        <Animated.View style={[st.heroCard, { transform: [{ scale: gradeScale }] }]}>
+        {/* ══════════════════════════════════════════════════════════
+            HERO: The score reveal. This IS the experience.
+            Phase 1: accuracy counts up  0% → 87%
+            Phase 2: grade letter springs in
+            Phase 3: "8/10 correct" fades in
+            ══════════════════════════════════════════════════════════ */}
+        <View style={st.heroCard}>
           <Text style={st.heroEyebrow}>
             {isDaily ? t('results.dailyTitle', { number: dailyNumber }) : `${modeLabel} / ${categoryLabel}`}
           </Text>
-          <View style={st.heroCenter}>
-            <Text style={[st.heroGrade, { color: grade.color }]}>{grade.label}</Text>
-            <View style={st.heroNumbers}>
-              <Text style={st.heroAccuracy}>{accuracy}%</Text>
-              <Text style={st.heroScoreText}>{correct}/{results.length} {t('results.correct').toLowerCase()}</Text>
-            </View>
-          </View>
-        </Animated.View>
 
-        {/* ── STREAK TIMELINE ── */}
-        <Animated.View style={[st.timelineCard, { opacity: timelineOpacity }]}>
+          {/* Count-up number */}
+          <Text style={st.heroAccuracy}>{displayAcc}%</Text>
+
+          {/* Grade letter (springs in after count-up) */}
+          <Animated.View style={[
+            st.heroGradeWrap,
+            { opacity: gradeOpacity, transform: [{ scale: gradeScale }] },
+          ]}>
+            <Text style={[st.heroGrade, { color: grade.color }]}>{grade.label}</Text>
+          </Animated.View>
+
+          {/* Score line */}
+          <Animated.Text style={[st.heroScoreText, { opacity: scoreFade }]}>
+            {correct}/{results.length} {t('results.correct').toLowerCase()}
+          </Animated.Text>
+        </View>
+
+        {/* ══════════════════════════════════════════════════════════
+            STREAK TIMELINE: Dots appear one-by-one showing the flow
+            ══════════════════════════════════════════════════════════ */}
+        <View style={st.timelineCard}>
           <View style={st.timelineDots}>
             {results.map((r, i) => (
-              <View
+              <Animated.View
                 key={i}
                 style={[
                   st.timelineDot,
                   r.correct ? st.timelineDotCorrect : st.timelineDotWrong,
+                  {
+                    opacity: dotAnims[i],
+                    transform: [{
+                      scale: dotAnims[i].interpolate({
+                        inputRange: [0, 1], outputRange: [0, 1],
+                      }),
+                    }],
+                  },
                 ]}
               />
             ))}
           </View>
-          <View style={st.timelineStats}>
+          <Animated.View style={[st.timelineStats, { opacity: statsFade }]}>
             <View style={st.timelineStat}>
               <Text style={st.timelineStatValue}>{streak}</Text>
               <Text style={st.timelineStatLabel}>{t('results.bestStreak')}</Text>
@@ -303,12 +374,12 @@ export default function ResultsScreen({ route, navigation }: Props) {
                 </View>
               </>
             )}
-          </View>
-        </Animated.View>
+          </Animated.View>
+        </View>
 
         {/* ── DAILY GRID ── */}
         {isDaily && (
-          <View style={st.dailyGridCard}>
+          <Animated.View style={[st.dailyGridCard, { opacity: statsFade }]}>
             <Text style={st.dailyGridTitle}>{t('results.shareTitle', { number: dailyNumber })}</Text>
             <View style={st.dailyGrid}>
               <View style={st.dailyGridRow}>
@@ -322,12 +393,12 @@ export default function ResultsScreen({ route, navigation }: Props) {
                 ))}
               </View>
             </View>
-          </View>
+          </Animated.View>
         )}
 
         {/* ── INSIGHT CHIPS ── */}
         {!reviewOnly && (
-          <Animated.View style={[st.insightRow, { opacity: insightsOpacity }]}>
+          <Animated.View style={[st.insightRow, { opacity: restFade }]}>
             {newCountriesCount > 0 && (
               <View style={st.insightChip}>
                 <GlobeIcon size={13} color={colors.success} />
@@ -347,14 +418,16 @@ export default function ResultsScreen({ route, navigation }: Props) {
             {dayStreakCount > 0 && (
               <View style={st.insightChip}>
                 <CalendarIcon size={13} color={colors.accent} />
-                <Text style={[st.insightText, { color: colors.accent }]}>{dayStreakCount} {t('stats.dayStreak').toLowerCase()}</Text>
+                <Text style={[st.insightText, { color: colors.accent }]}>
+                  {dayStreakCount} {t('stats.dayStreak').toLowerCase()}
+                </Text>
               </View>
             )}
           </Animated.View>
         )}
 
         {/* ── ACTION BUTTONS ── */}
-        <View style={st.buttonRow}>
+        <Animated.View style={[st.buttonRow, { opacity: restFade }]}>
           <TouchableOpacity style={st.secondaryButton} onPress={handleShare} activeOpacity={0.7}>
             <Text style={st.secondaryButtonText}>{t('common.share')}</Text>
           </TouchableOpacity>
@@ -366,11 +439,11 @@ export default function ResultsScreen({ route, navigation }: Props) {
               <Text style={st.secondaryButtonText}>{t('common.home')}</Text>
             </TouchableOpacity>
           )}
-        </View>
+        </Animated.View>
 
         {/* ── NEWLY EARNED BADGES ── */}
         {newBadges.length > 0 && (
-          <View style={st.badgesSection}>
+          <Animated.View style={[st.badgesSection, { opacity: restFade }]}>
             <View style={st.sectionHeader}>
               <Text style={st.sectionTitle}>{t('results.badgesUnlocked')}</Text>
               <Text style={st.sectionMeta}>
@@ -394,12 +467,12 @@ export default function ResultsScreen({ route, navigation }: Props) {
                 </View>
               );
             })}
-          </View>
+          </Animated.View>
         )}
 
-        {/* ── YOUR PROGRESS ── */}
+        {/* ── YOUR PROGRESS (animated bar) ── */}
         {overallStats && !reviewOnly && (
-          <Animated.View style={[st.progressSection, { opacity: progressOpacity }]}>
+          <Animated.View style={[st.progressSection, { opacity: restFade }]}>
             <View style={st.sectionHeader}>
               <Text style={st.sectionTitle}>{t('results.yourProgress')}</Text>
             </View>
@@ -417,22 +490,17 @@ export default function ResultsScreen({ route, navigation }: Props) {
                 </View>
               </View>
               <View style={st.progressBarWrap}>
-                <View style={[st.progressBarFill, { width: `${progressPct}%` }]} />
+                <Animated.View style={[st.progressBarFill, { width: progressBarWidth }]} />
               </View>
-              <Text style={st.progressPctLabel}>
-                {t('stats.percentComplete', { pct: progressPct })}
-              </Text>
+              <Text style={st.progressPctLabel}>{t('stats.percentComplete', { pct: progressPct })}</Text>
             </View>
 
-            {/* Practice weak CTA */}
             {weakFlagCount > 0 && (
               <TouchableOpacity
                 style={st.practiceButton}
-                onPress={() => {
-                  navigation.replace('Game', {
-                    config: { mode: 'practice', category: 'all', questionCount: weakFlagCount, displayMode: 'flag' },
-                  });
-                }}
+                onPress={() => navigation.replace('Game', {
+                  config: { mode: 'practice', category: 'all', questionCount: weakFlagCount, displayMode: 'flag' },
+                })}
                 activeOpacity={0.7}
               >
                 <CrosshairIcon size={16} color={colors.accent} />
@@ -442,11 +510,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
               </TouchableOpacity>
             )}
 
-            <TouchableOpacity
-              style={st.viewStatsButton}
-              onPress={() => navigation.navigate('Stats')}
-              activeOpacity={0.7}
-            >
+            <TouchableOpacity style={st.viewStatsButton} onPress={() => navigation.navigate('Stats')} activeOpacity={0.7}>
               <BarChartIcon size={16} color={colors.ink} />
               <Text style={st.viewStatsText}>{t('results.viewAllStats')}</Text>
               <ChevronRightIcon size={14} color={colors.textTertiary} />
@@ -455,10 +519,12 @@ export default function ResultsScreen({ route, navigation }: Props) {
         )}
 
         {/* ── REVIEW ── */}
-        <View style={st.sectionHeader}>
-          <Text style={st.sectionTitle}>{t('common.review')}</Text>
-          <Text style={st.sectionMeta}>{correct}/{results.length} {t('results.correct').toLowerCase()}</Text>
-        </View>
+        <Animated.View style={{ opacity: restFade }}>
+          <View style={st.sectionHeader}>
+            <Text style={st.sectionTitle}>{t('common.review')}</Text>
+            <Text style={st.sectionMeta}>{correct}/{results.length} {t('results.correct').toLowerCase()}</Text>
+          </View>
+        </Animated.View>
         {results.map((result, index) => {
           const itemTime = Math.round(result.timeTaken / 100) / 10;
           const isFastest = fastestCorrect && result.correct && result.timeTaken === fastestCorrect.time;
@@ -470,11 +536,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
                 result.correct ? st.reviewCorrect : st.reviewWrong,
                 {
                   opacity: reviewAnims[index],
-                  transform: [{
-                    translateY: reviewAnims[index].interpolate({
-                      inputRange: [0, 1], outputRange: [12, 0],
-                    }),
-                  }],
+                  transform: [{ translateY: reviewAnims[index].interpolate({ inputRange: [0, 1], outputRange: [8, 0] }) }],
                 },
               ]}
             >
@@ -493,10 +555,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
               </View>
               <View style={st.reviewRight}>
                 <Text style={[st.reviewTime, isFastest && st.reviewTimeFastest]}>{itemTime}s</Text>
-                {result.correct
-                  ? <CheckIcon size={18} color={colors.success} />
-                  : <CrossIcon size={18} color={colors.error} />
-                }
+                {result.correct ? <CheckIcon size={18} color={colors.success} /> : <CrossIcon size={18} color={colors.error} />}
               </View>
             </Animated.View>
           );
@@ -517,152 +576,101 @@ export default function ResultsScreen({ route, navigation }: Props) {
   );
 }
 
+// ─── Styles ────────────────────────────────────────────────────
 const st = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.md, paddingBottom: spacing.xxl },
 
   // ── Celebration
   celebrationBanner: {
-    backgroundColor: colors.warning,
-    padding: spacing.md,
-    alignItems: 'center',
-    marginBottom: spacing.sm,
-    borderRadius: borderRadius.md,
+    backgroundColor: colors.warning, padding: spacing.md,
+    alignItems: 'center', marginBottom: spacing.sm, borderRadius: borderRadius.md,
   },
   celebrationText: { ...typography.headingUpper, color: colors.primary },
 
-  // ── Hero Grade
+  // ── Hero (THE centerpiece)
   heroCard: {
     backgroundColor: colors.ink,
     borderRadius: borderRadius.xl,
-    padding: spacing.lg,
-    paddingVertical: spacing.xl,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.xl,
+    paddingBottom: spacing.lg,
     alignItems: 'center',
     marginBottom: spacing.sm,
   },
   heroEyebrow: {
-    fontFamily: fontFamily.uiLabel,
-    fontSize: fontSize.xxs,
-    letterSpacing: 1.5,
-    textTransform: 'uppercase',
-    color: colors.whiteAlpha45,
-    marginBottom: spacing.md,
-  },
-  heroCenter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.lg,
-  },
-  heroGrade: {
-    fontSize: fontSize.grade,
-    fontFamily: fontFamily.display,
-    letterSpacing: -1,
-  },
-  heroNumbers: {
-    alignItems: 'flex-start',
+    fontFamily: fontFamily.uiLabel, fontSize: fontSize.xxs,
+    letterSpacing: 1.5, textTransform: 'uppercase',
+    color: colors.whiteAlpha45, marginBottom: spacing.lg,
   },
   heroAccuracy: {
     fontFamily: fontFamily.display,
-    fontSize: fontSize.stat,
+    fontSize: fontSize.countdown, // 120px - THE number
     color: colors.white,
-    letterSpacing: -0.5,
-    lineHeight: 42,
+    letterSpacing: -3,
+    lineHeight: 120,
+  },
+  heroGradeWrap: {
+    marginTop: spacing.xs,
+    marginBottom: spacing.sm,
+  },
+  heroGrade: {
+    fontFamily: fontFamily.display,
+    fontSize: fontSize.gameTitle, // 42px
+    letterSpacing: -1,
   },
   heroScoreText: {
-    fontFamily: fontFamily.bodyMedium,
-    fontSize: fontSize.caption,
+    fontFamily: fontFamily.bodyMedium, fontSize: fontSize.lg,
     color: colors.whiteAlpha60,
-    marginTop: spacing.xxs,
   },
 
-  // ── Streak Timeline
+  // ── Timeline
   timelineCard: {
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: spacing.md,
+    backgroundColor: colors.surface, borderRadius: borderRadius.lg,
+    borderWidth: 1, borderColor: colors.border, padding: spacing.md,
     marginBottom: spacing.sm,
   },
   timelineDots: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 5,
+    flexDirection: 'row', flexWrap: 'wrap', gap: 6,
     marginBottom: spacing.md,
   },
   timelineDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 3,
+    width: 16, height: 16, borderRadius: 4,
   },
-  timelineDotCorrect: {
-    backgroundColor: colors.success,
-  },
-  timelineDotWrong: {
-    backgroundColor: colors.error,
-  },
-  timelineStats: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-  },
-  timelineStat: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  timelineDivider: {
-    width: 1,
-    height: 36,
-    backgroundColor: colors.border,
-  },
+  timelineDotCorrect: { backgroundColor: colors.success },
+  timelineDotWrong: { backgroundColor: colors.error },
+  timelineStats: { flexDirection: 'row', alignItems: 'flex-start' },
+  timelineStat: { flex: 1, alignItems: 'center' },
+  timelineDivider: { width: 1, height: 36, backgroundColor: colors.border },
   timelineStatValue: {
-    fontFamily: fontFamily.display,
-    fontSize: fontSize.heading,
-    color: colors.ink,
-    letterSpacing: -0.5,
+    fontFamily: fontFamily.display, fontSize: fontSize.heading,
+    color: colors.ink, letterSpacing: -0.5,
   },
   timelineStatUnit: {
-    fontFamily: fontFamily.bodyMedium,
-    fontSize: fontSize.caption,
-    color: colors.textTertiary,
+    fontFamily: fontFamily.bodyMedium, fontSize: fontSize.caption, color: colors.textTertiary,
   },
   timelineStatLabel: {
-    fontFamily: fontFamily.uiLabel,
-    fontSize: fontSize.xxs,
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
-    color: colors.textTertiary,
-    marginTop: spacing.xxs,
+    fontFamily: fontFamily.uiLabel, fontSize: fontSize.xxs, letterSpacing: 0.8,
+    textTransform: 'uppercase', color: colors.textTertiary, marginTop: spacing.xxs,
   },
   newBestPill: {
-    backgroundColor: colors.accentBg,
-    borderRadius: borderRadius.full,
-    paddingVertical: 2,
-    paddingHorizontal: 8,
-    marginTop: spacing.xxs,
+    backgroundColor: colors.accentBg, borderRadius: borderRadius.full,
+    paddingVertical: 2, paddingHorizontal: 8, marginTop: spacing.xxs,
   },
   newBestPillText: {
-    fontFamily: fontFamily.uiLabel,
-    fontSize: fontSize.xxs,
-    letterSpacing: 0.6,
-    textTransform: 'uppercase',
-    color: colors.accent,
+    fontFamily: fontFamily.uiLabel, fontSize: fontSize.xxs,
+    letterSpacing: 0.6, textTransform: 'uppercase', color: colors.accent,
   },
 
   // ── Daily Grid
   dailyGridCard: {
-    backgroundColor: colors.primaryLight,
-    borderRadius: borderRadius.lg,
-    padding: spacing.lg,
-    alignItems: 'center',
-    marginBottom: spacing.sm,
+    backgroundColor: colors.primaryLight, borderRadius: borderRadius.lg,
+    padding: spacing.lg, alignItems: 'center', marginBottom: spacing.sm,
   },
   dailyGridTitle: {
-    fontFamily: fontFamily.uiLabel,
-    fontSize: fontSize.sm,
-    letterSpacing: 1.5,
-    textTransform: 'uppercase',
-    color: colors.whiteAlpha45,
-    marginBottom: spacing.md,
+    fontFamily: fontFamily.uiLabel, fontSize: fontSize.sm,
+    letterSpacing: 1.5, textTransform: 'uppercase',
+    color: colors.whiteAlpha45, marginBottom: spacing.md,
   },
   dailyGrid: { gap: 6 },
   dailyGridRow: { flexDirection: 'row', gap: 6 },
@@ -670,29 +678,14 @@ const st = StyleSheet.create({
   dailyCellCorrect: { backgroundColor: colors.success },
   dailyCellWrong: { backgroundColor: colors.whiteAlpha20 },
 
-  // ── Insight Chips
-  insightRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: spacing.sm,
-  },
+  // ── Insights
+  insightRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: spacing.sm },
   insightChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: borderRadius.full,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
+    borderRadius: borderRadius.full, paddingVertical: 6, paddingHorizontal: 12,
   },
-  insightText: {
-    fontFamily: fontFamily.bodyMedium,
-    fontSize: fontSize.sm,
-    color: colors.textSecondary,
-  },
+  insightText: { fontFamily: fontFamily.bodyMedium, fontSize: fontSize.sm, color: colors.textSecondary },
 
   // ── Buttons
   buttonRow: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.md },
@@ -704,20 +697,11 @@ const st = StyleSheet.create({
   // ── Badges
   badgesSection: { marginBottom: spacing.md },
   badgeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: 14,
-    marginBottom: 6,
-    gap: 12,
+    flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface,
+    borderRadius: borderRadius.md, borderWidth: 1, borderColor: colors.border,
+    padding: 14, marginBottom: 6, gap: 12,
   },
-  badgeIconWrap: {
-    width: 36, height: 36, borderRadius: borderRadius.md,
-    justifyContent: 'center', alignItems: 'center',
-  },
+  badgeIconWrap: { width: 36, height: 36, borderRadius: borderRadius.md, justifyContent: 'center', alignItems: 'center' },
   badgeContent: { flex: 1 },
   badgeName: { fontFamily: fontFamily.bodyBold, fontSize: fontSize.caption, color: colors.ink, marginBottom: 2 },
   badgeDesc: { fontFamily: fontFamily.body, fontSize: fontSize.sm, color: colors.textSecondary },
@@ -727,11 +711,8 @@ const st = StyleSheet.create({
   // ── Progress
   progressSection: { marginBottom: spacing.md },
   progressCard: {
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: 18,
+    backgroundColor: colors.surface, borderRadius: borderRadius.lg,
+    borderWidth: 1, borderColor: colors.border, padding: 18,
   },
   progressTopRow: { flexDirection: 'row', gap: spacing.lg, marginBottom: 14 },
   progressStat: { alignItems: 'center', flex: 1 },
@@ -741,28 +722,22 @@ const st = StyleSheet.create({
     textTransform: 'uppercase', color: colors.textTertiary, marginTop: spacing.xxs, textAlign: 'center',
   },
   progressBarWrap: {
-    height: 7, backgroundColor: colors.border,
-    borderRadius: borderRadius.full, overflow: 'hidden',
+    height: 7, backgroundColor: colors.border, borderRadius: borderRadius.full, overflow: 'hidden',
   },
   progressBarFill: { height: '100%', backgroundColor: colors.accent, borderRadius: borderRadius.full },
   progressPctLabel: { fontFamily: fontFamily.bodyBold, fontSize: fontSize.sm, color: colors.ink, marginTop: 6 },
   practiceButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    backgroundColor: colors.accentBg,
-    borderRadius: borderRadius.lg,
-    borderWidth: 1.5,
-    borderColor: colors.accent,
-    padding: 14,
-    marginTop: 8,
+    flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
+    backgroundColor: colors.accentBg, borderRadius: borderRadius.lg,
+    borderWidth: 1.5, borderColor: colors.accent, padding: 14, marginTop: 8,
   },
   practiceButtonText: {
     fontFamily: fontFamily.uiLabel, fontSize: fontSize.caption,
     letterSpacing: 0.8, textTransform: 'uppercase', color: colors.accent,
   },
   practiceButtonMeta: {
-    fontFamily: fontFamily.body, fontSize: fontSize.sm, color: colors.textTertiary, flex: 1, textAlign: 'right',
+    fontFamily: fontFamily.body, fontSize: fontSize.sm,
+    color: colors.textTertiary, flex: 1, textAlign: 'right',
   },
   viewStatsButton: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
