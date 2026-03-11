@@ -70,8 +70,8 @@ const zh: typeof en = {
     bestStreak: '\u6700\u4f73\u8fde\u80dc',
     best60s: '\u6700\u4f73 60s',
     accuracy: '\u51c6\u786e\u7387',
-    onboardingProgress: '{completed}/{total} \u4e2a\u5730\u533a',
-    continueOnboarding: '\u7ee7\u7eed',
+    onboardingStart: '\u53c2\u52a0\u57fa\u7840\u6d4b\u9a8c',
+    onboardingNext: '\u4e0b\u4e00\u4e2a: {region}',
   },
 
   setup: {

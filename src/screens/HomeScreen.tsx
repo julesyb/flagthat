@@ -19,7 +19,7 @@ import { getStats, getDayStreak, getDailyChallenge, DailyChallengeData, getSetti
 import { generateQuestions, getDailyNumber } from '../utils/gameEngine';
 import { RootStackParamList } from '../types/navigation';
 import { GameMode, UserStats, GameQuestion } from '../types';
-import { PlayIcon, ChevronRightIcon, ClockIcon, UsersIcon, EyeIcon, CalendarIcon, CrosshairIcon, LightningIcon, GearIcon, CheckIcon } from '../components/Icons';
+import { PlayIcon, ChevronRightIcon, ClockIcon, UsersIcon, EyeIcon, CalendarIcon, CrosshairIcon, LightningIcon, GearIcon } from '../components/Icons';
 import FlagImage from '../components/FlagImage';
 import BottomNav from '../components/BottomNav';
 import { t } from '../utils/i18n';
@@ -206,6 +206,7 @@ export default function HomeScreen({ navigation }: Props) {
   const ONBOARDING_REGIONS = ['africa', 'asia', 'europe', 'americas', 'oceania'] as const;
   const onboardingComplete = baseline ? (baseline.completedAt !== null || baseline.skipped === true) : true;
   const onboardingCount = baseline ? ONBOARDING_REGIONS.filter((r) => baseline.regions[r]).length : 0;
+  const nextRegion = baseline ? ONBOARDING_REGIONS.find((r) => !baseline.regions[r]) ?? 'africa' : 'africa';
 
   const hasPlayed = stats !== null && stats.totalGamesPlayed > 0;
   const accuracy = stats && stats.totalAnswered > 0
@@ -256,33 +257,21 @@ export default function HomeScreen({ navigation }: Props) {
               navigation.navigate('Onboarding');
             }}
           >
-            <View style={s.onboardingTop}>
+            <View style={s.onboardingRow}>
               <View style={s.onboardingInfo}>
-                <Text style={s.onboardingTitle}>{t('onboarding.subtitle')}</Text>
+                <Text style={s.onboardingTitle}>
+                  {onboardingCount === 0
+                    ? t('home.onboardingStart')
+                    : t('home.onboardingNext', { region: t(`categories.${nextRegion}`) })}
+                </Text>
                 <Text style={s.onboardingSub}>
-                  {t('home.onboardingProgress', { completed: onboardingCount, total: ONBOARDING_REGIONS.length })}
+                  {onboardingCount}/{ONBOARDING_REGIONS.length}
                 </Text>
               </View>
-              <View style={s.onboardingBtn}>
-                <Text style={s.onboardingBtnText}>{t('home.continueOnboarding')}</Text>
-                <ChevronRightIcon size={14} color={colors.white} />
-              </View>
+              <ChevronRightIcon size={16} color={colors.accent} />
             </View>
             <View style={s.onboardingBarTrack}>
               <View style={[s.onboardingBarFill, { width: `${(onboardingCount / ONBOARDING_REGIONS.length) * 100}%` }]} />
-            </View>
-            <View style={s.onboardingDots}>
-              {ONBOARDING_REGIONS.map((r) => (
-                <View key={r} style={s.onboardingDotWrap}>
-                  {baseline?.regions[r] ? (
-                    <View style={s.onboardingDotDone}>
-                      <CheckIcon size={10} color={colors.white} />
-                    </View>
-                  ) : (
-                    <View style={s.onboardingDotPending} />
-                  )}
-                </View>
-              ))}
             </View>
           </TouchableOpacity>
         )}
@@ -628,83 +617,46 @@ const s = StyleSheet.create({
 
   // ── Onboarding progress
   onboardingCard: {
-    backgroundColor: colors.ink,
+    backgroundColor: colors.white,
+    borderWidth: 2,
+    borderColor: colors.ink,
     borderRadius: borderRadius.lg,
     marginHorizontal: spacing.md,
     marginTop: spacing.md,
     padding: spacing.md,
   },
-  onboardingTop: {
+  onboardingRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     marginBottom: spacing.sm,
   },
   onboardingInfo: {
     flex: 1,
-    marginRight: spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: spacing.sm,
   },
   onboardingTitle: {
     fontFamily: fontFamily.bodyBold,
     fontSize: fontSize.body,
-    color: colors.white,
-    marginBottom: spacing.xxs,
+    color: colors.ink,
+    flex: 1,
   },
   onboardingSub: {
-    fontFamily: fontFamily.body,
-    fontSize: fontSize.caption,
-    color: colors.whiteAlpha45,
-  },
-  onboardingBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    backgroundColor: colors.accent,
-    borderRadius: borderRadius.sm,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-  },
-  onboardingBtnText: {
-    fontFamily: fontFamily.uiLabel,
-    fontSize: fontSize.caption,
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
-    color: colors.white,
+    fontFamily: fontFamily.display,
+    fontSize: fontSize.body,
+    color: colors.textTertiary,
   },
   onboardingBarTrack: {
     height: 4,
-    backgroundColor: colors.darkBorder,
+    backgroundColor: colors.rule,
     borderRadius: 2,
     overflow: 'hidden',
-    marginBottom: spacing.sm,
   },
   onboardingBarFill: {
     height: 4,
-    backgroundColor: colors.success,
+    backgroundColor: colors.ink,
     borderRadius: 2,
-  },
-  onboardingDots: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.xs,
-  },
-  onboardingDotWrap: {
-    alignItems: 'center',
-  },
-  onboardingDotDone: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    backgroundColor: colors.success,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  onboardingDotPending: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: colors.darkBorder,
-    marginVertical: 5,
   },
 
   // ── Daily Challenge

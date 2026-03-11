@@ -70,8 +70,8 @@ const es: typeof en = {
     bestStreak: 'Mejor racha',
     best60s: 'Mejor 60s',
     accuracy: 'Precisi\u00f3n',
-    onboardingProgress: '{completed} de {total} regiones',
-    continueOnboarding: 'Continuar',
+    onboardingStart: 'Haz el quiz inicial',
+    onboardingNext: 'Siguiente: {region}',
   },
 
   setup: {
