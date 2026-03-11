@@ -267,7 +267,8 @@ export default function ResultsScreen({ route, navigation }: Props) {
 
       setOverallStats(postStats);
       setDayStreakCount(postDayStreakInfo.current);
-      setTotalFlags(getTotalFlagCount());
+      const totalF = getTotalFlagCount();
+      setTotalFlags(totalF);
       const seen = Object.values(postFlagStats).filter((fs) => fs.right > 0).length;
       setCountriesSeen(seen);
       setNewBadges(postBadges.filter((b) => !preBadgeIds.has(b.id)));
@@ -278,7 +279,6 @@ export default function ResultsScreen({ route, navigation }: Props) {
       setWeakFlagCount(postMissed.length);
 
       // Animate progress bar after data loads
-      const totalF = getTotalFlagCount();
       const pct = totalF > 0 ? seen / totalF : 0;
       Animated.timing(progressBarAnim, {
         toValue: pct,
