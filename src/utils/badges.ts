@@ -4,7 +4,7 @@ import { getTotalFlagCount } from '../data';
 
 export type BadgeTier = 'bronze' | 'silver' | 'gold' | 'platinum';
 
-export type BadgeIcon = 'flag' | 'globe' | 'check' | 'play' | 'lightning' | 'calendar' | 'clock' | 'crosshair' | 'link' | 'eye';
+export type BadgeIcon = 'flag' | 'globe' | 'check' | 'play' | 'lightning' | 'calendar' | 'clock' | 'crosshair' | 'link' | 'eye' | 'heart';
 
 export interface Badge {
   id: string;
@@ -56,6 +56,7 @@ export const BADGES: Badge[] = [
   // ── Fun/Hidden
   { id: 'practice_perfect', name: 'Practice Perfect', description: 'Clear all flags from practice', tier: 'gold', category: 'fun', icon: 'crosshair' },
   { id: 'shared_spirit', name: 'Shared Spirit', description: 'Share your results', tier: 'bronze', category: 'fun', icon: 'link' },
+  { id: 'supporter', name: 'Supporter', description: 'Support by watching a video', tier: 'bronze', category: 'fun', icon: 'heart' },
 ];
 
 export interface BadgeCheckContext {
@@ -67,6 +68,7 @@ export interface BadgeCheckContext {
   lastGamePerfect10: boolean;
   lastGameSRank: boolean;
   weakFlagCount: number;
+  adsWatched: number;
 }
 
 export function evaluateBadges(ctx: BadgeCheckContext): EarnedBadge[] {
@@ -110,6 +112,7 @@ export function evaluateBadges(ctx: BadgeCheckContext): EarnedBadge[] {
   // Fun
   check('practice_perfect', countriesSeen > 0 && ctx.weakFlagCount === 0 && ctx.stats.totalGamesPlayed >= 5);
   check('shared_spirit', ctx.hasShared);
+  check('supporter', ctx.adsWatched > 0);
 
   return earned;
 }

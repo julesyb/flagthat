@@ -70,6 +70,7 @@ const ptBR: typeof en = {
     bestStreak: 'Melhor sequ\u00eancia',
     best60s: 'Melhor 60s',
     accuracy: 'Precis\u00e3o',
+    onboardingScores: 'Pontua\u00e7\u00f5es',
   },
 
   setup: {
@@ -190,6 +191,17 @@ const ptBR: typeof en = {
     reset: 'Redefinir',
   },
 
+  support: {
+    title: 'Pague-nos um caf\u00e9',
+    subtitle: 'Flag That \u00e9 gratuito, sem an\u00fancios. Ajude a manter assim assistindo um v\u00eddeo curto. Totalmente opcional.',
+    watchButton: 'Assistir um v\u00eddeo',
+    watchAgain: 'Assistir',
+    thankYou: 'Voc\u00ea \u00e9 demais. Obrigado!',
+    totalWatched: 'Apoiado {count} vez',
+    totalWatchedPlural: 'Apoiado {count} vezes',
+    adFailed: 'Nada dispon\u00edvel agora. Tente mais tarde!',
+  },
+
   browse: {
     searchPlaceholder: 'Buscar bandeiras...',
     all: 'Todas',
@@ -279,11 +291,12 @@ const ptBR: typeof en = {
     daily_legend: { name: 'Lenda di\u00e1ria', description: '30 desafios di\u00e1rios completos' },
     practice_perfect: { name: 'Pr\u00e1tica perfeita', description: 'Sem bandeiras para praticar' },
     shared_spirit: { name: 'Esp\u00edrito compartilhador', description: 'Compartilhe seus resultados' },
+    supporter: { name: 'Apoiador', description: 'Apoie assistindo um v\u00eddeo' },
   },
 
   onboarding: {
     subtitle: 'Vamos ver seu n\u00edvel',
-    regionTest: 'Quiz de 10 bandeiras',
+    regionTest: 'Quiz de bandeiras',
     flagCount: '{count} bandeiras',
     completed: 'Feito',
     startPlaying: 'Come\u00e7ar a jogar',

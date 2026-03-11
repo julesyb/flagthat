@@ -16,7 +16,8 @@
       "bundleIdentifier": "com.flagsareus.app",
       "infoPlist": {
         "CFBundleDisplayName": "Flag That",
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSUserTrackingUsageDescription": "This allows Flag That to show you relevant ads when you choose to support the app by watching a video."
       },
       "privacyManifests": {
         "NSPrivacyCollectedDataTypes": [],
@@ -58,8 +59,8 @@
       [
         "react-native-google-mobile-ads",
         {
-          "androidAppId": "ca-app-pub-xxxxxxxxxxxxxxxx~yyyyyyyyyy",
-          "iosAppId": "ca-app-pub-xxxxxxxxxxxxxxxx~yyyyyyyyyy",
+          "androidAppId": "ca-app-pub-XXXXXXXXXXXXXXXX~YYYYYYYYYY",
+          "iosAppId": "ca-app-pub-XXXXXXXXXXXXXXXX~ZZZZZZZZZZ",
           "userTrackingUsageDescription": "This allows Flag That to show you more relevant ads.",
           "skAdNetworkItems": [
             "cstr6suwn9.skadnetwork",

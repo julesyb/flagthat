@@ -129,7 +129,7 @@ export function generatePracticeQuestions(flagIds: string[]): GameQuestion[] {
 function generateOptions(correctFlag: FlagItem, pool: FlagItem[], mode: GameMode): string[] {
   if (mode === 'hard' || mode === 'flagflash' || mode === 'flagpuzzle') return [];
 
-  const choiceCount = (mode === 'timeattack' || mode === 'medium') ? 4 : 2;
+  const choiceCount = (mode === 'timeattack' || mode === 'medium' || mode === 'baseline') ? 4 : 2;
   const otherFlags = pool.filter((f) => f.id !== correctFlag.id);
 
   // Prioritize twin flags as wrong options so look-alikes appear together

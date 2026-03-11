@@ -30,3 +30,13 @@ export async function shouldShowAd(): Promise<boolean> {
 export async function recordAdImpression(): Promise<void> {}
 
 export async function incrementGameCount(): Promise<void> {}
+
+export async function preloadRewardedAd(): Promise<void> {}
+
+export async function showRewardedAd(): Promise<boolean> {
+  return false;
+}
+
+export function isAdAvailable(): boolean {
+  return false;
+}

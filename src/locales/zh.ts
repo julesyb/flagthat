@@ -70,6 +70,7 @@ const zh: typeof en = {
     bestStreak: '\u6700\u4f73\u8fde\u80dc',
     best60s: '\u6700\u4f73 60s',
     accuracy: '\u51c6\u786e\u7387',
+    onboardingScores: '\u5f97\u5206',
   },
 
   setup: {
@@ -190,6 +191,17 @@ const zh: typeof en = {
     reset: '\u91cd\u7f6e',
   },
 
+  support: {
+    title: '\u8bf7\u6211\u4eec\u559d\u676f\u5496\u5561',
+    subtitle: 'Flag That \u514d\u8d39\u65e0\u5e7f\u544a\u3002\u770b\u4e00\u4e2a\u77ed\u89c6\u9891\u5e2e\u6211\u4eec\u4fdd\u6301\u8fd9\u6837\u3002\u5b8c\u5168\u81ea\u613f\u3002',
+    watchButton: '\u89c2\u770b\u89c6\u9891',
+    watchAgain: '\u89c2\u770b',
+    thankYou: '\u4f60\u592a\u68d2\u4e86\uff0c\u8c22\u8c22\uff01',
+    totalWatched: '\u5df2\u652f\u6301{count}\u6b21',
+    totalWatchedPlural: '\u5df2\u652f\u6301{count}\u6b21',
+    adFailed: '\u6682\u65e0\u53ef\u7528\u5185\u5bb9\uff0c\u8bf7\u7a0d\u540e\u518d\u8bd5\uff01',
+  },
+
   browse: {
     searchPlaceholder: '\u641c\u7d22\u56fd\u65d7...',
     all: '\u5168\u90e8',
@@ -279,6 +291,7 @@ const zh: typeof en = {
     daily_legend: { name: '\u6bcf\u65e5\u4f20\u5947', description: '\u5b8c\u621030\u6b21\u6bcf\u65e5\u6311\u6218' },
     practice_perfect: { name: '\u7ec3\u4e60\u5b8c\u7f8e', description: '\u6ca1\u6709\u9700\u8981\u7ec3\u4e60\u7684\u56fd\u65d7' },
     shared_spirit: { name: '\u5206\u4eab\u7cbe\u795e', description: '\u5206\u4eab\u4f60\u7684\u7ed3\u679c' },
+    supporter: { name: '\u652f\u6301\u8005', description: '\u89c2\u770b\u89c6\u9891\u652f\u6301\u5f00\u53d1' },
   },
 
   onboarding: {

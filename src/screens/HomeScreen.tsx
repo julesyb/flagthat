@@ -13,15 +13,17 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, fontFamily, fontSize, spacing, borderRadius } from '../utils/theme';
-import { getTotalFlagCount } from '../data';
+import { getTotalFlagCount, getCategoryCount } from '../data';
 import { initAudio, hapticTap, hapticCorrect, hapticWrong, playWrongSound, setSoundsEnabled, setHapticsEnabled } from '../utils/feedback';
-import { getStats, getDayStreak, getDailyChallenge, DailyChallengeData, getSettings, getMissedFlagIds } from '../utils/storage';
+import { getStats, getDayStreak, getDailyChallenge, DailyChallengeData, getSettings, getMissedFlagIds, getBaselineData, BaselineData } from '../utils/storage';
 import { generateQuestions, getDailyNumber } from '../utils/gameEngine';
 import { RootStackParamList } from '../types/navigation';
-import { GameMode, UserStats, GameQuestion } from '../types';
-import { PlayIcon, ChevronRightIcon, ClockIcon, UsersIcon, EyeIcon, CalendarIcon, CrosshairIcon, LightningIcon, GearIcon } from '../components/Icons';
+import { GameMode, UserStats, GameQuestion, CategoryId } from '../types';
+import { PlayIcon, ChevronRightIcon, ChevronDownIcon, ClockIcon, UsersIcon, EyeIcon, CalendarIcon, CrosshairIcon, LightningIcon, GearIcon } from '../components/Icons';
 import FlagImage from '../components/FlagImage';
 import BottomNav from '../components/BottomNav';
+import SupportCard from '../components/SupportCard';
+import { preloadRewardedAd } from '../utils/ads';
 import { t } from '../utils/i18n';
 import { translateName, flagName } from '../data/countryNames';
 
@@ -175,9 +177,12 @@ export default function HomeScreen({ navigation }: Props) {
   const [dailyDone, setDailyDone] = useState<DailyChallengeData | null>(null);
   const [weakFlagCount, setWeakFlagCount] = useState(0);
   const [autocomplete, setAutocomplete] = useState(false);
+  const [baseline, setBaseline] = useState<BaselineData | null>(null);
+  const [baselineExpanded, setBaselineExpanded] = useState(false);
 
   useEffect(() => {
     initAudio();
+    preloadRewardedAd();
     getSettings().then((s) => {
       setSoundsEnabled(s.soundEnabled);
       setHapticsEnabled(s.hapticsEnabled);
@@ -190,6 +195,7 @@ export default function HomeScreen({ navigation }: Props) {
       getDayStreak().then(setDayStreak);
       getDailyChallenge().then(setDailyDone);
       getMissedFlagIds().then((ids) => setWeakFlagCount(ids.length));
+      getBaselineData().then(setBaseline);
       setTeaserKey((k) => k + 1);
     }, []),
   );
@@ -200,6 +206,11 @@ export default function HomeScreen({ navigation }: Props) {
       config: { mode, category: 'all', questionCount: questionCountAll ? totalFlags : questionCount, displayMode: 'flag', ...(mode === 'hard' && { autocomplete }) },
     });
   };
+
+  const ONBOARDING_REGIONS = ['africa', 'asia', 'europe', 'americas', 'oceania'] as const;
+  const onboardingComplete = baseline ? (baseline.completedAt !== null || baseline.skipped === true) : true;
+  const onboardingCount = baseline ? ONBOARDING_REGIONS.filter((r) => baseline.regions[r]).length : 0;
+  const nextRegion = baseline ? ONBOARDING_REGIONS.find((r) => !baseline.regions[r]) ?? 'africa' : 'africa';
 
   const hasPlayed = stats !== null && stats.totalGamesPlayed > 0;
   const accuracy = stats && stats.totalAnswered > 0
@@ -239,6 +250,60 @@ export default function HomeScreen({ navigation }: Props) {
             <GearIcon size={20} color={colors.textTertiary} />
           </TouchableOpacity>
         </View>
+
+        {/* ── ONBOARDING PROGRESS ── */}
+        {!onboardingComplete && (
+          <View style={s.onboardingWrap}>
+            <TouchableOpacity
+              style={s.onboardingHeader}
+              activeOpacity={0.85}
+              onPress={() => {
+                hapticTap();
+                const count = getCategoryCount(nextRegion as CategoryId);
+                navigation.navigate('Game', {
+                  config: { mode: 'baseline', category: nextRegion as CategoryId, questionCount: count, displayMode: 'flag' },
+                });
+              }}
+            >
+              <View style={s.onboardingHeaderLeft}>
+                <Text style={s.onboardingHeaderTitle}>{t(`categories.${nextRegion}`)}</Text>
+                <View style={s.onboardingPip} />
+                <Text style={s.onboardingHeaderCount}>{onboardingCount}/{ONBOARDING_REGIONS.length}</Text>
+              </View>
+              <ChevronRightIcon size={16} color={colors.ink} />
+            </TouchableOpacity>
+            {onboardingCount > 0 && (
+              <TouchableOpacity
+                style={s.onboardingExpandBtn}
+                activeOpacity={0.7}
+                onPress={() => {
+                  hapticTap();
+                  setBaselineExpanded((v) => !v);
+                }}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <Text style={s.onboardingExpandText}>{t('home.onboardingScores')}</Text>
+                <View style={baselineExpanded ? { transform: [{ rotate: '180deg' }] } : undefined}>
+                  <ChevronDownIcon size={12} color={colors.textTertiary} />
+                </View>
+              </TouchableOpacity>
+            )}
+            {baselineExpanded && (
+              <View style={s.onboardingScoreList}>
+                {ONBOARDING_REGIONS.map((r) => {
+                  const result = baseline?.regions[r];
+                  if (!result) return null;
+                  return (
+                    <View key={r} style={s.onboardingScoreRow}>
+                      <Text style={s.onboardingScoreRegion}>{t(`categories.${r}`)}</Text>
+                      <Text style={s.onboardingScoreVal}>{result.accuracy}%</Text>
+                    </View>
+                  );
+                })}
+              </View>
+            )}
+          </View>
+        )}
 
         {/* ── DAILY CHALLENGE ── */}
         <TouchableOpacity
@@ -465,6 +530,9 @@ export default function HomeScreen({ navigation }: Props) {
           )}
         </View>
 
+        {/* ── SUPPORT ── */}
+        <SupportCard gamesPlayed={stats?.totalGamesPlayed ?? 0} />
+
         {/* ── YOUR STATS ── */}
         {hasPlayed && (
           <View style={s.statsWrap}>
@@ -577,6 +645,77 @@ const s = StyleSheet.create({
     textTransform: 'uppercase',
     color: colors.textTertiary,
     marginTop: spacing.xxs,
+  },
+
+  // ── Onboarding progress
+  onboardingWrap: {
+    marginHorizontal: spacing.md,
+    marginTop: spacing.md,
+    backgroundColor: colors.white,
+    borderWidth: 2,
+    borderColor: colors.ink,
+    borderRadius: borderRadius.lg,
+    overflow: 'hidden',
+  },
+  onboardingHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: spacing.md,
+  },
+  onboardingHeaderLeft: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  onboardingHeaderTitle: {
+    fontFamily: fontFamily.bodyBold,
+    fontSize: fontSize.lg,
+    color: colors.ink,
+  },
+  onboardingPip: {
+    width: 3,
+    height: 3,
+    borderRadius: 1.5,
+    backgroundColor: colors.textTertiary,
+  },
+  onboardingHeaderCount: {
+    fontFamily: fontFamily.body,
+    fontSize: fontSize.caption,
+    color: colors.textTertiary,
+  },
+  onboardingExpandBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.md,
+  },
+  onboardingExpandText: {
+    fontFamily: fontFamily.bodyMedium,
+    fontSize: fontSize.caption,
+    color: colors.textTertiary,
+  },
+  onboardingScoreList: {
+    borderTopWidth: 1,
+    borderTopColor: colors.rule,
+  },
+  onboardingScoreRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+  },
+  onboardingScoreRegion: {
+    fontFamily: fontFamily.body,
+    fontSize: fontSize.caption,
+    color: colors.textTertiary,
+    flex: 1,
+  },
+  onboardingScoreVal: {
+    fontFamily: fontFamily.uiLabel,
+    fontSize: fontSize.caption,
+    color: colors.success,
   },
 
   // ── Daily Challenge

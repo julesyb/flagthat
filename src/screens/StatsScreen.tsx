@@ -13,13 +13,13 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
 import { colors, spacing, fontFamily, fontSize, borderRadius } from '../utils/theme';
 import { UserStats } from '../types';
-import { getStats, getFlagStats, FlagStats, getDayStreak, getBadgeData, getMissedFlagIds, BadgeData } from '../utils/storage';
+import { getStats, getFlagStats, FlagStats, getDayStreak, getBadgeData, getMissedFlagIds, BadgeData, getSupportData } from '../utils/storage';
 import { getAllFlags, getTotalFlagCount } from '../data';
 import { t } from '../utils/i18n';
 import { FlagImageSmall } from '../components/FlagImage';
 import BottomNav from '../components/BottomNav';
 import { evaluateBadges, BADGES, TIER_COLORS, BadgeIcon } from '../utils/badges';
-import { FlagIcon, GlobeIcon, CheckIcon, PlayIcon, LightningIcon, CalendarIcon, ClockIcon, CrosshairIcon, LinkIcon } from '../components/Icons';
+import { FlagIcon, GlobeIcon, CheckIcon, PlayIcon, LightningIcon, CalendarIcon, ClockIcon, CrosshairIcon, LinkIcon, HeartIcon } from '../components/Icons';
 
 const RANK_COLORS = [colors.gradeS, colors.textTertiary, colors.warning];
 
@@ -30,6 +30,7 @@ export default function StatsScreen() {
   const [dayStreak, setDayStreak] = useState(0);
   const [badgeData, setBadgeData] = useState<BadgeData | null>(null);
   const [weakFlagCount, setWeakFlagCount] = useState(0);
+  const [adsWatched, setAdsWatched] = useState(0);
 
   const flagNameMap = React.useMemo(() => {
     const map: Record<string, string> = {};
@@ -45,12 +46,13 @@ export default function StatsScreen() {
 
       async function loadData() {
         try {
-          const [s, fs, ds, bd, missed] = await Promise.all([
+          const [s, fs, ds, bd, missed, support] = await Promise.all([
             getStats(),
             getFlagStats(),
             getDayStreak(),
             getBadgeData(),
             getMissedFlagIds(),
+            getSupportData(),
           ]);
           if (!cancelled) {
             setStats(s);
@@ -58,6 +60,7 @@ export default function StatsScreen() {
             setDayStreak(ds);
             setBadgeData(bd);
             setWeakFlagCount(missed.length);
+            setAdsWatched(support.totalAdsWatched);
           }
         } catch (e) {
           // Ensure we still show something even if storage fails
@@ -121,8 +124,9 @@ export default function StatsScreen() {
       lastGamePerfect10: badgeData.lastGamePerfect10,
       lastGameSRank: badgeData.lastGameSRank,
       weakFlagCount,
+      adsWatched,
     });
-  }, [stats, flagStats, dayStreak, badgeData, weakFlagCount]);
+  }, [stats, flagStats, dayStreak, badgeData, weakFlagCount, adsWatched]);
 
   if (!stats) {
     return (
@@ -158,6 +162,7 @@ export default function StatsScreen() {
       case 'clock': return <ClockIcon size={size} color={iconColor} />;
       case 'crosshair': return <CrosshairIcon size={size} color={iconColor} />;
       case 'link': return <LinkIcon size={size} color={iconColor} />;
+      case 'heart': return <HeartIcon size={size} color={iconColor} filled />;
       default: return <FlagIcon size={size} color={iconColor} />;
     }
   };
