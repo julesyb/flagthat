@@ -15,13 +15,22 @@ import {
   CategoryId,
   CategoryType,
   CATEGORIES,
-  CATEGORY_TYPE_LABELS,
   GameConfig,
 } from '../types';
 import { getCategoryCount, getTotalFlagCount } from '../data';
 import { RootStackParamList } from '../types/navigation';
 import BottomNav from '../components/BottomNav';
 import { t } from '../utils/i18n';
+import { hapticTap } from '../utils/feedback';
+import {
+  FlagIcon,
+  LightningIcon,
+  PuzzleIcon,
+  ClockIcon,
+  UsersIcon,
+  LinkIcon,
+  ChevronRightIcon,
+} from '../components/Icons';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'GameSetup'>;
 
@@ -31,70 +40,16 @@ const TIMEATTACK_TIMES = [30, 60, 90, 120];
 const DEFAULT_GUESS_LIMIT = 3;
 const GUESS_LIMIT_OPTIONS = [3, 5, 0] as const; // 0 = unlimited
 
-// Extracted: reusable row of option chips with "All" toggle
-function OptionChipRow({
-  options,
-  selected,
-  onSelect,
-  includeAll,
-  allSelected,
-  onSelectAll,
-  suffix,
-}: {
-  options: number[];
-  selected: number;
-  onSelect: (v: number) => void;
-  includeAll?: boolean;
-  allSelected?: boolean;
-  onSelectAll?: () => void;
-  suffix?: string;
-}) {
-  return (
-    <View style={styles.optionRow}>
-      {options.map((v) => {
-        const isActive = !allSelected && selected === v;
-        return (
-          <TouchableOpacity
-            key={v}
-            style={[styles.optionChip, isActive && styles.optionChipActive]}
-            onPress={() => onSelect(v)}
-            activeOpacity={0.7}
-            accessibilityRole="button"
-            accessibilityState={{ selected: isActive }}
-          >
-            <Text style={[styles.optionLabel, isActive && styles.optionLabelActive]}>
-              {v}{suffix ?? ''}
-            </Text>
-          </TouchableOpacity>
-        );
-      })}
-      {includeAll && onSelectAll && (
-        <TouchableOpacity
-          style={[styles.optionChip, allSelected && styles.optionChipActive]}
-          onPress={onSelectAll}
-          activeOpacity={0.7}
-          accessibilityRole="button"
-          accessibilityState={{ selected: !!allSelected }}
-        >
-          <Text style={[styles.optionLabel, allSelected && styles.optionLabelActive]}>
-            {t('common.all')}
-          </Text>
-        </TouchableOpacity>
-      )}
-    </View>
-  );
-}
-
 type SetupMode = 'quiz' | 'flagflash' | 'flagpuzzle' | 'timeattack' | 'neighbors' | 'capitalconnection';
 type QuizDifficulty = 'easy' | 'medium' | 'hard';
 
-const SETUP_MODES: { key: SetupMode; labelKey: string; descKey: string; icon: string }[] = [
-  { key: 'quiz', labelKey: 'setup.quiz', descKey: 'setup.quizDesc', icon: 'Q' },
-  { key: 'flagflash', labelKey: 'modes.flagflash', descKey: 'setup.flagPuzzleDesc', icon: '!!' },
-  { key: 'flagpuzzle', labelKey: 'setup.flagPuzzle', descKey: 'setup.flagPuzzleDesc', icon: '??' },
-  { key: 'timeattack', labelKey: 'setup.timedQuiz', descKey: 'setup.timedQuizDesc', icon: '00' },
-  { key: 'neighbors', labelKey: 'setup.neighbors', descKey: 'setup.neighborsDesc', icon: 'NB' },
-  { key: 'capitalconnection', labelKey: 'setup.capitalQuiz', descKey: 'setup.capitalQuizDesc', icon: 'CC' },
+const SETUP_MODES: { key: SetupMode; labelKey: string; descKey: string; icon: (active: boolean) => React.ReactNode }[] = [
+  { key: 'quiz', labelKey: 'setup.quiz', descKey: 'setup.quizDesc', icon: (a) => <FlagIcon size={18} color={a ? colors.white : colors.textSecondary} /> },
+  { key: 'flagflash', labelKey: 'setup.flagFlash', descKey: 'setup.flagFlashDesc', icon: (a) => <LightningIcon size={18} color={a ? colors.white : colors.textSecondary} /> },
+  { key: 'flagpuzzle', labelKey: 'setup.flagPuzzle', descKey: 'setup.flagPuzzleDesc', icon: (a) => <PuzzleIcon size={18} color={a ? colors.white : colors.textSecondary} /> },
+  { key: 'timeattack', labelKey: 'setup.timedQuiz', descKey: 'setup.timedQuizDesc', icon: (a) => <ClockIcon size={18} color={a ? colors.white : colors.textSecondary} /> },
+  { key: 'neighbors', labelKey: 'setup.neighbors', descKey: 'setup.neighborsDesc', icon: (a) => <UsersIcon size={18} color={a ? colors.white : colors.textSecondary} /> },
+  { key: 'capitalconnection', labelKey: 'setup.capitalQuiz', descKey: 'setup.capitalQuizDesc', icon: (a) => <LinkIcon size={18} color={a ? colors.white : colors.textSecondary} /> },
 ];
 
 const DIFFICULTIES: { key: QuizDifficulty; labelKey: string }[] = [
@@ -102,6 +57,34 @@ const DIFFICULTIES: { key: QuizDifficulty; labelKey: string }[] = [
   { key: 'medium', labelKey: 'common.medium' },
   { key: 'hard', labelKey: 'common.hard' },
 ];
+
+// Compact config row for secondary options (matches HomeScreen pattern)
+function ConfigRow({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <>
+      <View style={styles.configDivider} />
+      <View style={styles.configRow}>
+        <Text style={styles.configLbl}>{label}</Text>
+        <View style={styles.segRow}>{children}</View>
+      </View>
+    </>
+  );
+}
+
+// Small segmented button chip (matches HomeScreen segBtn)
+function SegBtn({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
+  return (
+    <TouchableOpacity
+      style={[styles.segBtn, active && styles.segBtnOn]}
+      onPress={() => { hapticTap(); onPress(); }}
+      activeOpacity={0.7}
+      accessibilityRole="button"
+      accessibilityState={{ selected: active }}
+    >
+      <Text style={[styles.segBtnText, active && styles.segBtnTextOn]}>{label}</Text>
+    </TouchableOpacity>
+  );
+}
 
 export default function GameSetupScreen({ navigation }: Props) {
   const [displayMode, setDisplayMode] = useState<DisplayMode>('flag');
@@ -130,12 +113,13 @@ export default function GameSetupScreen({ navigation }: Props) {
 
   // Set sensible default time limit when mode changes
   useEffect(() => {
-    if (isFlagFlash) setTimeLimit(60);
-    else if (isFlagPuzzle) setTimeLimit(15);
-    else if (isTimeAttack) setTimeLimit(60);
+    if (setupMode === 'flagflash') setTimeLimit(60);
+    else if (setupMode === 'flagpuzzle') setTimeLimit(15);
+    else if (setupMode === 'timeattack') setTimeLimit(60);
   }, [setupMode]);
 
   const handleFilterTypeSelect = (type: CategoryType) => {
+    hapticTap();
     if (filterType === type) {
       setFilterType(null);
       setSelectedCategory('all');
@@ -149,10 +133,12 @@ export default function GameSetupScreen({ navigation }: Props) {
   };
 
   const handleCategorySelect = (catId: CategoryId) => {
+    hapticTap();
     setSelectedCategory(selectedCategory === catId ? 'all' : catId);
   };
 
   const startGame = () => {
+    hapticTap();
     const effectiveQuestionCount = questionCountAll
       ? getCategoryCount(selectedCategory)
       : questionCount;
@@ -193,6 +179,10 @@ export default function GameSetupScreen({ navigation }: Props) {
 
   const showQuestionCount = !isTimeAttack && !isFlagPuzzle && !isFlagFlash && filterType !== 'theme';
 
+  const startButtonLabel = isQuiz
+    ? t('setup.startQuiz', { difficulty: t(DIFFICULTIES.find((d) => d.key === difficulty)?.labelKey ?? 'common.medium') })
+    : t('setup.startMode', { mode: t(SETUP_MODES.find((m) => m.key === setupMode)?.labelKey ?? 'setup.quiz') });
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
@@ -200,9 +190,10 @@ export default function GameSetupScreen({ navigation }: Props) {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
+        {/* Screen header */}
+        <Text style={styles.screenTitle}>{t('setup.gameMode')}</Text>
 
-        {/* Game Mode */}
-        <Text style={styles.sectionTitle}>{t('setup.gameMode')}</Text>
+        {/* Game Mode Grid */}
         <View style={styles.modeGrid}>
           {SETUP_MODES.map((m) => {
             const isActive = setupMode === m.key;
@@ -210,14 +201,14 @@ export default function GameSetupScreen({ navigation }: Props) {
               <TouchableOpacity
                 key={m.key}
                 style={[styles.modeCard, isActive && styles.modeCardActive]}
-                onPress={() => setSetupMode(m.key)}
+                onPress={() => { hapticTap(); setSetupMode(m.key); }}
                 activeOpacity={0.7}
                 accessibilityRole="button"
                 accessibilityState={{ selected: isActive }}
                 accessibilityLabel={`${t(m.labelKey)}: ${t(m.descKey)}`}
               >
                 <View style={[styles.modeIconBadge, isActive && styles.modeIconBadgeActive]}>
-                  <Text style={[styles.modeIconText, isActive && styles.modeIconTextActive]}>{m.icon}</Text>
+                  {m.icon(isActive)}
                 </View>
                 <Text style={[styles.modeLabel, isActive && styles.modeLabelActive]}>
                   {t(m.labelKey)}
@@ -230,109 +221,107 @@ export default function GameSetupScreen({ navigation }: Props) {
           })}
         </View>
 
-        {/* Difficulty (only for Quiz mode) */}
-        {isQuiz && (
-          <>
-            <Text style={styles.sectionTitle}>{t('home.difficulty')}</Text>
-            <View style={styles.optionRow}>
-              {DIFFICULTIES.map((d) => {
-                const isActive = difficulty === d.key;
-                return (
-                  <TouchableOpacity
-                    key={d.key}
-                    style={[styles.optionChip, isActive && styles.optionChipActive]}
-                    onPress={() => setDifficulty(d.key)}
-                    activeOpacity={0.7}
-                    accessibilityRole="button"
-                    accessibilityState={{ selected: isActive }}
-                  >
-                    <Text style={[styles.optionLabel, isActive && styles.optionLabelActive]}>{t(d.labelKey)}</Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          </>
-        )}
+        {/* Options card - compact rows matching HomeScreen config style */}
+        <View style={styles.configCard}>
+          {/* Difficulty (only for Quiz mode) */}
+          {isQuiz && (
+            <ConfigRow label={t('home.difficulty')}>
+              {DIFFICULTIES.map((d) => (
+                <SegBtn
+                  key={d.key}
+                  label={t(d.labelKey)}
+                  active={difficulty === d.key}
+                  onPress={() => setDifficulty(d.key)}
+                />
+              ))}
+            </ConfigRow>
+          )}
 
-        {/* Autocomplete (only for Hard quiz) */}
-        {isQuiz && difficulty === 'hard' && (
-          <>
-            <Text style={styles.sectionTitle}>{t('home.hints')}</Text>
-            <View style={styles.optionRow}>
-              <TouchableOpacity
-                style={[styles.optionChip, !autocomplete && styles.optionChipActive]}
-                onPress={() => setAutocomplete(false)}
-                activeOpacity={0.7}
-              >
-                <Text style={[styles.optionLabel, !autocomplete && styles.optionLabelActive]}>{t('common.off')}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.optionChip, autocomplete && styles.optionChipActive]}
-                onPress={() => setAutocomplete(true)}
-                activeOpacity={0.7}
-              >
-                <Text style={[styles.optionLabel, autocomplete && styles.optionLabelActive]}>{t('common.on')}</Text>
-              </TouchableOpacity>
-            </View>
-          </>
-        )}
+          {/* Autocomplete (only for Hard quiz) */}
+          {isQuiz && difficulty === 'hard' && (
+            <ConfigRow label={t('home.hints')}>
+              <SegBtn label={t('common.off')} active={!autocomplete} onPress={() => setAutocomplete(false)} />
+              <SegBtn label={t('common.on')} active={autocomplete} onPress={() => setAutocomplete(true)} />
+            </ConfigRow>
+          )}
 
-        {/* Display Mode (flag or map) */}
-        {showMapToggle && (
-          <>
-            <Text style={styles.sectionTitle}>Display</Text>
-            <View style={styles.optionRow}>
-              <TouchableOpacity
-                style={[styles.optionChip, displayMode === 'flag' && styles.optionChipActive]}
-                onPress={() => setDisplayMode('flag')}
-                activeOpacity={0.7}
-                accessibilityRole="button"
-                accessibilityState={{ selected: displayMode === 'flag' }}
-              >
-                <Text style={[styles.optionLabel, displayMode === 'flag' && styles.optionLabelActive]}>Flag</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.optionChip, displayMode === 'map' && styles.optionChipActive]}
-                onPress={() => setDisplayMode('map')}
-                activeOpacity={0.7}
-                accessibilityRole="button"
-                accessibilityState={{ selected: displayMode === 'map' }}
-              >
-                <Text style={[styles.optionLabel, displayMode === 'map' && styles.optionLabelActive]}>Map</Text>
-              </TouchableOpacity>
-            </View>
-          </>
-        )}
+          {/* Display Mode (flag or map) */}
+          {showMapToggle && (
+            <ConfigRow label={t('setup.display')}>
+              <SegBtn label={t('setup.displayFlag')} active={displayMode === 'flag'} onPress={() => setDisplayMode('flag')} />
+              <SegBtn label={t('setup.displayMap')} active={displayMode === 'map'} onPress={() => setDisplayMode('map')} />
+            </ConfigRow>
+          )}
 
-        {/* Guess Limit (only for standard quiz modes) */}
-        {showGuessLimit && (
-          <>
-            <Text style={styles.sectionTitle}>{t('setup.lives')}</Text>
-            <Text style={styles.filterHint}>{t('setup.livesDesc')}</Text>
-            <View style={styles.optionRow}>
-              {GUESS_LIMIT_OPTIONS.map((v) => {
-                const isActive = guessLimit === v;
-                return (
-                  <TouchableOpacity
-                    key={v}
-                    style={[styles.optionChip, isActive && styles.optionChipActive]}
-                    onPress={() => setGuessLimit(v)}
-                    activeOpacity={0.7}
-                    accessibilityRole="button"
-                    accessibilityState={{ selected: isActive }}
-                  >
-                    <Text style={[styles.optionLabel, isActive && styles.optionLabelActive]}>
-                      {v === 0 ? t('setup.unlimited') : v}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          </>
-        )}
+          {/* Guess Limit (only for standard quiz modes) */}
+          {showGuessLimit && (
+            <ConfigRow label={t('setup.lives')}>
+              {GUESS_LIMIT_OPTIONS.map((v) => (
+                <SegBtn
+                  key={v}
+                  label={v === 0 ? t('setup.unlimited') : String(v)}
+                  active={guessLimit === v}
+                  onPress={() => setGuessLimit(v)}
+                />
+              ))}
+            </ConfigRow>
+          )}
+
+          {/* Time Limit (only for FlagFlash/FlagPuzzle/TimeAttack) */}
+          {hasTimeLimit && (
+            <ConfigRow label={t('setup.timeLimit')}>
+              {getTimeLimitOptions().map((seconds) => (
+                <SegBtn
+                  key={seconds}
+                  label={t('setup.timeSuffix', { t: seconds })}
+                  active={timeLimit === seconds}
+                  onPress={() => setTimeLimit(seconds)}
+                />
+              ))}
+            </ConfigRow>
+          )}
+
+          {/* Question Count (for FlagPuzzle within time modes) */}
+          {hasTimeLimit && isFlagPuzzle && (
+            <ConfigRow label={t('setup.questions')}>
+              {QUESTION_COUNTS.map((count) => (
+                <SegBtn
+                  key={count}
+                  label={String(count)}
+                  active={!questionCountAll && questionCount === count}
+                  onPress={() => { setQuestionCount(count); setQuestionCountAll(false); }}
+                />
+              ))}
+              <SegBtn
+                label={t('common.all')}
+                active={questionCountAll}
+                onPress={() => setQuestionCountAll(true)}
+              />
+            </ConfigRow>
+          )}
+
+          {/* Question Count (everything except FlagFlash/TimeAttack/FlagPuzzle) */}
+          {showQuestionCount && (
+            <ConfigRow label={t('setup.questions')}>
+              {QUESTION_COUNTS.map((count) => (
+                <SegBtn
+                  key={count}
+                  label={String(count)}
+                  active={!questionCountAll && questionCount === count}
+                  onPress={() => { setQuestionCount(count); setQuestionCountAll(false); }}
+                />
+              ))}
+              <SegBtn
+                label={t('common.all')}
+                active={questionCountAll}
+                onPress={() => setQuestionCountAll(true)}
+              />
+            </ConfigRow>
+          )}
+        </View>
 
         {/* Filter */}
-        <Text style={styles.sectionTitle}>{t('setup.filter')}</Text>
+        <Text style={styles.sectionLabel}>{t('setup.filter')}</Text>
         <Text style={styles.filterHint}>{t('setup.filterDesc', { count: totalFlags })}</Text>
 
         <View style={styles.filterTypeRow}>
@@ -350,6 +339,12 @@ export default function GameSetupScreen({ navigation }: Props) {
                 <Text style={[styles.filterTypeText, isActive && styles.filterTypeTextActive]}>
                   {type === 'region' ? t('setup.byRegion') : t('setup.byTheme')}
                 </Text>
+                <View style={isActive ? styles.chevronDown : undefined}>
+                  <ChevronRightIcon
+                    size={14}
+                    color={isActive ? colors.white : colors.textTertiary}
+                  />
+                </View>
               </TouchableOpacity>
             );
           })}
@@ -370,9 +365,6 @@ export default function GameSetupScreen({ navigation }: Props) {
                   accessibilityState={{ selected: isActive }}
                   accessibilityLabel={`${t(`categories.${cat.id}`)}, ${count} flags`}
                 >
-                  <View style={[styles.categoryIconBadge, isActive && styles.categoryIconBadgeActive]}>
-                    <Text style={[styles.categoryIconText, isActive && styles.categoryIconTextActive]}>{cat.icon}</Text>
-                  </View>
                   <View style={styles.categoryTextGroup}>
                     <Text style={[styles.categoryLabel, isActive && styles.categoryLabelActive]}>
                       {t(`categories.${cat.id}`)}
@@ -387,106 +379,23 @@ export default function GameSetupScreen({ navigation }: Props) {
           </View>
         )}
 
-        {/* Time Limit (only for FlagFlash/FlagPuzzle) */}
-        {hasTimeLimit && (
-          <>
-            <Text style={styles.sectionTitle}>{t('setup.timeLimit')}</Text>
-            <View style={styles.optionRow}>
-              {getTimeLimitOptions().map((seconds) => (
-                <TouchableOpacity
-                  key={seconds}
-                  style={[
-                    styles.optionChip,
-                    timeLimit === seconds && styles.optionChipActive,
-                  ]}
-                  onPress={() => setTimeLimit(seconds)}
-                  activeOpacity={0.7}
-                >
-                  <Text
-                    style={[
-                      styles.optionLabel,
-                      timeLimit === seconds && styles.optionLabelActive,
-                    ]}
-                  >
-                    {t('setup.timeSuffix', { t: seconds })}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-            {isFlagPuzzle && (
-              <>
-                <Text style={styles.sectionTitle}>{t('setup.questions')}</Text>
-                <View style={styles.optionRow}>
-                  {QUESTION_COUNTS.map((count) => (
-                    <TouchableOpacity
-                      key={count}
-                      style={[
-                        styles.optionChip,
-                        !questionCountAll && questionCount === count && styles.optionChipActive,
-                      ]}
-                      onPress={() => { setQuestionCount(count); setQuestionCountAll(false); }}
-                      activeOpacity={0.7}
-                    >
-                      <Text
-                        style={[
-                          styles.optionLabel,
-                          !questionCountAll && questionCount === count && styles.optionLabelActive,
-                        ]}
-                      >
-                        {count}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                  <TouchableOpacity
-                    style={[
-                      styles.optionChip,
-                      questionCountAll && styles.optionChipActive,
-                    ]}
-                    onPress={() => setQuestionCountAll(true)}
-                    activeOpacity={0.7}
-                  >
-                    <Text
-                      style={[
-                        styles.optionLabel,
-                        questionCountAll && styles.optionLabelActive,
-                      ]}
-                    >
-                      {t('common.all')}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </>
-            )}
-          </>
-        )}
+        {/* Bottom spacing for scroll */}
+        <View style={{ height: spacing.md }} />
+      </ScrollView>
 
-        {/* Question Count (everything except FlagFlash) */}
-        {showQuestionCount && (
-          <>
-            <Text style={styles.sectionTitle}>{t('setup.questions')}</Text>
-            <OptionChipRow
-              options={QUESTION_COUNTS}
-              selected={questionCount}
-              onSelect={(v) => { setQuestionCount(v); setQuestionCountAll(false); }}
-              includeAll
-              allSelected={questionCountAll}
-              onSelectAll={() => setQuestionCountAll(true)}
-            />
-          </>
-        )}
-
+      {/* Pinned start button */}
+      <View style={styles.startButtonWrap}>
         <TouchableOpacity
           style={styles.startButton}
           onPress={startGame}
           activeOpacity={0.8}
           accessibilityRole="button"
-          accessibilityLabel={isQuiz ? t('setup.startQuiz', { difficulty: t(DIFFICULTIES.find((d) => d.key === difficulty)?.labelKey ?? 'common.medium') }) : t('setup.startMode', { mode: t(SETUP_MODES.find((m) => m.key === setupMode)?.labelKey ?? 'setup.quiz') })}
+          accessibilityLabel={startButtonLabel}
         >
-          <Text style={styles.startButtonText}>
-            {isQuiz ? t('setup.startQuiz', { difficulty: t(DIFFICULTIES.find((d) => d.key === difficulty)?.labelKey ?? 'common.medium') }) : t('setup.startMode', { mode: t(SETUP_MODES.find((m) => m.key === setupMode)?.labelKey ?? 'setup.quiz') })}
-          </Text>
+          <Text style={styles.startButtonText}>{startButtonLabel}</Text>
         </TouchableOpacity>
-      </ScrollView>
+      </View>
+
       <BottomNav
         activeTab="Modes"
         onNavigate={(tab) => {
@@ -509,20 +418,32 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: spacing.lg,
-    paddingBottom: spacing.xxl,
+    paddingTop: spacing.xl,
+    paddingBottom: spacing.md,
   },
-  sectionTitle: {
-    ...typography.headingUpper,
+
+  // Screen title - prominent heading for the page
+  screenTitle: {
+    ...typography.heading,
     color: colors.text,
     marginBottom: spacing.md,
+  },
+
+  // Section labels - small eyebrow style for form sections
+  sectionLabel: {
+    ...typography.eyebrow,
+    color: colors.textTertiary,
+    marginBottom: spacing.sm,
     marginTop: spacing.lg,
   },
+
   filterHint: {
     ...typography.caption,
     color: colors.textTertiary,
     marginBottom: spacing.md,
-    marginTop: -spacing.sm,
   },
+
+  // Mode grid - 2 column, hero element
   modeGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -540,7 +461,7 @@ const styles = StyleSheet.create({
   },
   modeCardActive: {
     borderColor: colors.ink,
-    backgroundColor: colors.surfaceSecondary,
+    backgroundColor: colors.ink,
   },
   modeIconBadge: {
     width: 36,
@@ -552,22 +473,14 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.sm,
   },
   modeIconBadgeActive: {
-    backgroundColor: colors.ink,
-  },
-  modeIconText: {
-    fontSize: 16,
-    fontFamily: fontFamily.uiLabel,
-    color: colors.textSecondary,
-  },
-  modeIconTextActive: {
-    color: colors.white,
+    backgroundColor: colors.whiteAlpha15,
   },
   modeLabel: {
     ...typography.bodyBold,
     color: colors.text,
   },
   modeLabelActive: {
-    color: colors.ink,
+    color: colors.white,
   },
   modeDesc: {
     ...typography.caption,
@@ -576,8 +489,67 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   modeDescActive: {
-    color: colors.slate,
+    color: colors.whiteAlpha60,
   },
+
+  // Config card - compact rows matching HomeScreen pattern
+  configCard: {
+    marginTop: spacing.lg,
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    borderColor: colors.rule,
+    overflow: 'hidden',
+  },
+  configDivider: {
+    height: 1,
+    backgroundColor: colors.rule,
+  },
+  configRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.md,
+    gap: spacing.sm,
+  },
+  configLbl: {
+    fontFamily: fontFamily.bodyMedium,
+    fontSize: 15,
+    color: colors.ink,
+    minWidth: 72,
+    flexShrink: 0,
+  },
+  segRow: {
+    flexDirection: 'row',
+    flex: 1,
+    gap: spacing.xs,
+    justifyContent: 'flex-end',
+  },
+  segBtn: {
+    flex: 1,
+    maxWidth: 80,
+    paddingVertical: spacing.sm,
+    backgroundColor: colors.surfaceSecondary,
+    borderWidth: 1.5,
+    borderColor: colors.rule,
+    borderRadius: borderRadius.sm,
+    alignItems: 'center',
+  },
+  segBtnOn: {
+    backgroundColor: colors.ink,
+    borderColor: colors.ink,
+  },
+  segBtnText: {
+    fontFamily: fontFamily.uiLabel,
+    fontSize: 14,
+    textTransform: 'uppercase',
+    color: colors.textTertiary,
+  },
+  segBtnTextOn: {
+    color: colors.white,
+  },
+
+  // Filter section
   filterTypeRow: {
     flexDirection: 'row',
     gap: spacing.sm,
@@ -585,24 +557,33 @@ const styles = StyleSheet.create({
   },
   filterTypeChip: {
     flex: 1,
+    flexDirection: 'row',
     backgroundColor: colors.surface,
-    padding: spacing.md,
+    paddingVertical: spacing.sm + 2,
+    paddingHorizontal: spacing.md,
     alignItems: 'center',
-    borderWidth: 2,
+    justifyContent: 'center',
+    gap: spacing.xs,
+    borderWidth: 1.5,
     borderColor: colors.border,
     borderRadius: borderRadius.md,
   },
   filterTypeChipActive: {
     borderColor: colors.ink,
-    backgroundColor: colors.surfaceSecondary,
+    backgroundColor: colors.ink,
   },
   filterTypeText: {
-    ...typography.bodyBold,
+    ...typography.label,
     color: colors.text,
   },
   filterTypeTextActive: {
-    color: colors.ink,
+    color: colors.white,
   },
+  chevronDown: {
+    transform: [{ rotate: '90deg' }],
+  },
+
+  // Category chips - clean, no icon badges
   categoryRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -614,34 +595,13 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    borderWidth: 2,
+    borderWidth: 1.5,
     borderColor: colors.border,
     borderRadius: borderRadius.md,
-    gap: spacing.sm,
   },
   categoryChipActive: {
     borderColor: colors.ink,
-    backgroundColor: colors.surfaceSecondary,
-  },
-  categoryIconBadge: {
-    width: 32,
-    height: 32,
-    backgroundColor: colors.surfaceSecondary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: borderRadius.sm,
-  },
-  categoryIconBadgeActive: {
     backgroundColor: colors.ink,
-  },
-  categoryIconText: {
-    fontSize: 11,
-    fontFamily: fontFamily.uiLabel,
-    color: colors.textSecondary,
-    letterSpacing: 0.5,
-  },
-  categoryIconTextActive: {
-    color: colors.white,
   },
   categoryTextGroup: {
     gap: 1,
@@ -651,7 +611,7 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   categoryLabelActive: {
-    color: colors.ink,
+    color: colors.white,
   },
   categoryCount: {
     ...typography.caption,
@@ -659,35 +619,20 @@ const styles = StyleSheet.create({
     fontSize: 11,
   },
   categoryCountActive: {
-    color: colors.slate,
+    color: colors.whiteAlpha60,
   },
-  optionRow: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-  },
-  optionChip: {
-    flex: 1,
-    backgroundColor: colors.surface,
-    padding: spacing.md,
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: colors.border,
-    borderRadius: borderRadius.md,
-  },
-  optionChipActive: {
-    borderColor: colors.ink,
-    backgroundColor: colors.surfaceSecondary,
-  },
-  optionLabel: {
-    ...typography.bodyBold,
-    color: colors.text,
-  },
-  optionLabelActive: {
-    color: colors.ink,
+
+  // Pinned start button
+  startButtonWrap: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: colors.rule,
+    backgroundColor: colors.background,
   },
   startButton: {
     ...buttons.primary,
-    marginTop: spacing.xl,
   },
   startButtonText: {
     ...buttons.primaryText,
