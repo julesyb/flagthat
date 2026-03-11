@@ -208,7 +208,7 @@ export default function HomeScreen({ navigation }: Props) {
   };
 
   const ONBOARDING_REGIONS = ['africa', 'asia', 'europe', 'americas', 'oceania'] as const;
-  const onboardingComplete = baseline ? (baseline.completedAt !== null || baseline.skipped === true) : true;
+  const onboardingComplete = baseline ? baseline.completedAt !== null : true;
   const onboardingCount = baseline ? ONBOARDING_REGIONS.filter((r) => baseline.regions[r]).length : 0;
   const nextRegion = baseline ? ONBOARDING_REGIONS.find((r) => !baseline.regions[r]) ?? 'africa' : 'africa';
 
