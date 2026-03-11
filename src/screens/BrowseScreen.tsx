@@ -100,6 +100,7 @@ export default function BrowseScreen({ route }: Props) {
           placeholder="Search flags..."
           placeholderTextColor={colors.textTertiary}
           clearButtonMode="while-editing"
+          accessibilityLabel="Search flags"
         />
       </View>
 

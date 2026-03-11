@@ -233,7 +233,7 @@ export function MapImageSmall({ countryCode }: { countryCode: string }) {
 const styles = StyleSheet.create({
   container: {
     overflow: 'hidden',
-    backgroundColor: '#e8e4df',
+    backgroundColor: colors.surfaceSecondary,
     borderWidth: 1,
     borderColor: colors.rule2,
   },
@@ -260,7 +260,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accent,
     borderWidth: 3,
     borderColor: colors.white,
-    shadowColor: '#000',
+    shadowColor: colors.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.5,
     shadowRadius: 4,
@@ -286,7 +286,7 @@ const styles = StyleSheet.create({
   zoomButton: {
     width: 36,
     height: 36,
-    backgroundColor: 'rgba(255,255,255,0.92)',
+    backgroundColor: colors.whiteAlpha90,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,

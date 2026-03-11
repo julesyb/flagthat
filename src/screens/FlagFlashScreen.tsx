@@ -313,7 +313,10 @@ export default function FlagFlashScreen({ route, navigation }: Props) {
   }
 
   const currentQuestion = questions[currentIndex];
-  const correctCount = results.filter((r) => r.correct).length;
+  const correctCount = React.useMemo(
+    () => results.filter((r) => r.correct).length,
+    [results],
+  );
 
   const bgColor =
     tiltState === 'correct'

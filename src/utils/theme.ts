@@ -74,6 +74,7 @@ export const colors = {
   whiteAlpha50: 'rgba(255,255,255,0.50)',
   whiteAlpha60: 'rgba(255,255,255,0.60)',
   whiteAlpha70: 'rgba(255,255,255,0.70)',
+  whiteAlpha90: 'rgba(255,255,255,0.92)',
 };
 
 export const spacing = {
@@ -226,7 +227,7 @@ export const buttons = {
     paddingVertical: 6,
     paddingHorizontal: 14,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: palette.rule,
     backgroundColor: palette.white,
   },
   chipActive: {
@@ -238,7 +239,7 @@ export const buttons = {
     fontSize: 11,
     letterSpacing: 1.2,
     textTransform: 'uppercase' as const,
-    color: '#4B5563',
+    color: palette.slate,
   },
   chipTextActive: {
     color: palette.white,
@@ -255,7 +256,7 @@ export const nav = {
     fontSize: 13,
     fontFamily: 'BarlowCondensed_600SemiBold',
     letterSpacing: 0.5,
-    color: '#9CA3AF',
+    color: palette.muted,
     textTransform: 'uppercase' as const,
   },
 };
