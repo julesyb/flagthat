@@ -231,7 +231,7 @@ export default function GameSetupScreen({ navigation }: Props) {
 
         {/* Filter */}
         <Text style={styles.sectionTitle}>Filter</Text>
-        <Text style={styles.filterHint}>Optional — default is all {totalFlags} flags</Text>
+        <Text style={styles.filterHint}>Optional - default is all {totalFlags} flags</Text>
 
         <View style={styles.filterTypeRow}>
           {(['region', 'theme'] as CategoryType[]).map((type) => {

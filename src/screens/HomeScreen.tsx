@@ -348,7 +348,7 @@ export default function HomeScreen({ navigation }: Props) {
             </View>
             <View style={s.modeText}>
               <Text style={s.modeTitle}>Timed Quiz</Text>
-              <Text style={s.modeSub}>60 seconds — how many can you get?</Text>
+              <Text style={s.modeSub}>60 seconds - how many can you get?</Text>
             </View>
             <ChevronRightIcon size={18} color={colors.rule} />
           </TouchableOpacity>

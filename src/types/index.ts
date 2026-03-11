@@ -66,8 +66,8 @@ export interface UserStats {
 export const GAME_MODES: Record<GameMode, { label: string; description: string; icon: string }> = {
   easy: { label: 'Easy', description: '2 multiple choice options', icon: '2' },
   medium: { label: 'Medium', description: '4 multiple choice options', icon: '4' },
-  hard: { label: 'Hard', description: 'Free-form — type the answer', icon: 'Aa' },
-  flagflash: { label: 'FlagFlash', description: 'Party mode — tilt to play', icon: '!!' },
+  hard: { label: 'Hard', description: 'Free-form, type the answer', icon: 'Aa' },
+  flagflash: { label: 'FlagFlash', description: 'Party mode, tilt to play', icon: '!!' },
   flagpuzzle: { label: 'Flag Puzzle', description: 'Flag reveals over time', icon: '??' },
   timeattack: { label: 'Timed Quiz', description: 'Race the clock', icon: '00' },
 };
