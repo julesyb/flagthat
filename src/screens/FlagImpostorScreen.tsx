@@ -12,7 +12,9 @@ import Svg, { Rect, Path } from 'react-native-svg';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { colors, spacing, typography, fontFamily, buttons, borderRadius } from '../utils/theme';
 import { hapticTap, hapticCorrect, hapticWrong, playWrongSound } from '../utils/feedback';
-import { shuffleArray } from '../utils/gameEngine';
+import { updateStats, updateFlagResults } from '../utils/storage';
+import { shuffleArray, getStreakFromResults } from '../utils/gameEngine';
+import { t } from '../utils/i18n';
 import { RootStackParamList } from '../types/navigation';
 import { FlagItem, GameResult } from '../types';
 import { countries } from '../data/countries';
@@ -280,14 +282,14 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
     <SafeAreaView style={styles.container}>
       <View style={styles.topBar}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.exitButton} accessibilityRole="button">
-          <Text style={styles.exitText}>Exit</Text>
+          <Text style={styles.exitText}>{t('common.exit')}</Text>
         </TouchableOpacity>
         <View style={styles.centerInfo}>
-          <Text style={styles.counter}>{roundIndex + 1} / {rounds.length}</Text>
-          <Text style={styles.scoreText}>{correctCount} correct</Text>
+          <Text style={styles.counter}>{t('game.questionOf', { current: roundIndex + 1, total: rounds.length })}</Text>
+          <Text style={styles.scoreText}>{t('game.correctCount', { count: correctCount })}</Text>
         </View>
         {guessLimit > 0 ? (
-          <Text style={styles.livesText}>{Math.max(0, guessLimit - wrongCount)} {guessLimit - wrongCount === 1 ? 'life' : 'lives'}</Text>
+          <Text style={styles.livesText}>{guessLimit - wrongCount === 1 ? t('game.life', { count: Math.max(0, guessLimit - wrongCount) }) : t('game.lives', { count: Math.max(0, guessLimit - wrongCount) })}</Text>
         ) : (
           <View style={styles.spacer} />
         )}
@@ -295,8 +297,8 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Animated.View style={{ opacity: fadeAnim }}>
-          <Text style={styles.prompt}>Spot the impostor</Text>
-          <Text style={styles.subtitle}>One of these flags is fake. Tap it.</Text>
+          <Text style={styles.prompt}>{t('impostor.spotImpostor')}</Text>
+          <Text style={styles.subtitle}>{t('impostor.spotImpostorDesc')}</Text>
 
           <View style={styles.grid}>
             {grid.map((item) => {
@@ -330,7 +332,7 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
                   {isRevealed && (
                     <View style={styles.revealInfo}>
                       {item.isFake ? (
-                        <Text style={styles.fakeLabel}>FAKE</Text>
+                        <Text style={styles.fakeLabel}>{t('impostor.fake')}</Text>
                       ) : (
                         <>
                           <Text style={styles.realName}>{item.flag!.name}</Text>
@@ -357,8 +359,8 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
 
           {picked !== null && (
             <View style={styles.reasonCard}>
-              <Text style={styles.reasonTitle}>{picked === round.fakeIndex ? 'Correct!' : 'Wrong!'}</Text>
-              <Text style={styles.reasonText}>{round.fakeFlag.reason}</Text>
+              <Text style={styles.reasonTitle}>{picked === round.fakeIndex ? t('common.correct') : t('common.wrong')}</Text>
+              <Text style={styles.reasonText}>{t('impostor.fakeExplanation')}</Text>
             </View>
           )}
         </Animated.View>
@@ -367,7 +369,7 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
       {picked !== null && (
         <View style={styles.bottomBar}>
           <TouchableOpacity style={styles.actionButton} onPress={handleNext} activeOpacity={0.8}>
-            <Text style={styles.actionButtonText}>{isLastRound ? 'See Results' : 'Next'}</Text>
+            <Text style={styles.actionButtonText}>{isLastRound ? t('common.seeResults') : t('common.next')}</Text>
           </TouchableOpacity>
         </View>
       )}

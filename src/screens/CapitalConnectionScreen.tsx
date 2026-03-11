@@ -17,6 +17,7 @@ import { countries } from '../data/countries';
 import { countryCapitals } from '../data/countryCapitals';
 import { countryCities } from '../data/countryCities';
 import FlagImage from '../components/FlagImage';
+import { t } from '../utils/i18n';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CapitalConnection'>;
 
@@ -144,12 +145,12 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.emptyState}>
-          <Text style={styles.emptyTitle}>No countries available</Text>
+          <Text style={styles.emptyTitle}>{t('capital.noCountries')}</Text>
           <Text style={styles.emptyBody}>
-            There are no countries with known capitals in the selected category.
+            {t('capital.noCountriesDesc')}
           </Text>
           <TouchableOpacity style={styles.emptyButton} onPress={() => navigation.goBack()}>
-            <Text style={styles.emptyButtonText}>Go Back</Text>
+            <Text style={styles.emptyButtonText}>{t('common.goBack')}</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -168,20 +169,20 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
           style={styles.exitButton}
           accessibilityRole="button"
         >
-          <Text style={styles.exitText}>Exit</Text>
+          <Text style={styles.exitText}>{t('common.exit')}</Text>
         </TouchableOpacity>
         <View style={styles.centerInfo}>
           <Text style={styles.counter}>
-            {currentIndex + 1} / {questions.length}
+            {t('game.questionOf', { current: currentIndex + 1, total: questions.length })}
           </Text>
           {currentStreak >= 2 ? (
-            <Text style={styles.streakText}>{currentStreak}x streak</Text>
+            <Text style={styles.streakText}>{t('game.streak', { count: currentStreak })}</Text>
           ) : (
-            <Text style={styles.scoreText}>{correctCount} correct</Text>
+            <Text style={styles.scoreText}>{t('game.correctCount', { count: correctCount })}</Text>
           )}
         </View>
         {guessLimit > 0 ? (
-          <Text style={styles.livesText}>{Math.max(0, guessLimit - wrongCount)} {guessLimit - wrongCount === 1 ? 'life' : 'lives'}</Text>
+          <Text style={styles.livesText}>{guessLimit - wrongCount === 1 ? t('game.life', { count: Math.max(0, guessLimit - wrongCount) }) : t('game.lives', { count: Math.max(0, guessLimit - wrongCount) })}</Text>
         ) : (
           <View style={styles.spacer} />
         )}
@@ -196,7 +197,7 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
           />
         </View>
 
-        <Text style={styles.prompt}>What is the capital of {question.flag.name}?</Text>
+        <Text style={styles.prompt}>{t('capital.whatIsCapital', { name: question.flag.name })}</Text>
 
         <View style={styles.optionsContainer}>
           {question.options.map((option, index) => {
@@ -235,7 +236,7 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
         {showFeedback && (
           <View style={styles.feedbackContainer}>
             {selectedAnswer === question.correctCapital ? (
-              <Text style={styles.feedbackCorrect}>Correct!</Text>
+              <Text style={styles.feedbackCorrect}>{t('common.correct')}</Text>
             ) : (
               <Text style={styles.feedbackWrong}>{question.correctCapital}</Text>
             )}

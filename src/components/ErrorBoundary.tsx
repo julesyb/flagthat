@@ -1,6 +1,7 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { colors, spacing, typography } from '../utils/theme';
+import { t } from '../utils/i18n';
 
 interface Props {
   children: ReactNode;
@@ -29,16 +30,16 @@ export default class ErrorBoundary extends Component<Props, State> {
     if (this.state.hasError) {
       return (
         <View style={styles.container}>
-          <Text style={styles.title}>Something went wrong</Text>
+          <Text style={styles.title}>{t('error.title')}</Text>
           <Text style={styles.subtitle}>
-            The app ran into an unexpected error.
+            {t('error.message')}
           </Text>
           <TouchableOpacity
             style={styles.button}
             onPress={this.handleReset}
             activeOpacity={0.7}
           >
-            <Text style={styles.buttonText}>Try Again</Text>
+            <Text style={styles.buttonText}>{t('error.tryAgain')}</Text>
           </TouchableOpacity>
         </View>
       );

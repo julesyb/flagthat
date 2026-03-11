@@ -48,7 +48,13 @@
       "output": "single"
     },
     "plugins": [
-      "expo-screen-orientation"
+      "expo-screen-orientation",
+      [
+        "expo-notifications",
+        {
+          "sounds": []
+        }
+      ]
     ],
     "extra": {
       "eas": {

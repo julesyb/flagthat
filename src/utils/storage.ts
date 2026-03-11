@@ -65,11 +65,19 @@ export async function updateLastGameBadgeFlags(correct: number, total: number): 
 export interface AppSettings {
   soundEnabled: boolean;
   hapticsEnabled: boolean;
+  dailyReminderEnabled: boolean;
+  reminderHour: number; // 0-23
+  reminderMinute: number; // 0-59
+  locale: string | null; // null = auto-detect from device
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
   soundEnabled: true,
   hapticsEnabled: true,
+  dailyReminderEnabled: false,
+  reminderHour: 9,
+  reminderMinute: 0,
+  locale: null,
 };
 
 export async function getSettings(): Promise<AppSettings> {

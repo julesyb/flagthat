@@ -21,6 +21,7 @@ import {
 import { getCategoryCount, getTotalFlagCount } from '../data';
 import { RootStackParamList } from '../types/navigation';
 import BottomNav from '../components/BottomNav';
+import { t } from '../utils/i18n';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'GameSetup'>;
 
@@ -76,7 +77,7 @@ function OptionChipRow({
           accessibilityState={{ selected: !!allSelected }}
         >
           <Text style={[styles.optionLabel, allSelected && styles.optionLabelActive]}>
-            All
+            {t('common.all')}
           </Text>
         </TouchableOpacity>
       )}
@@ -87,19 +88,19 @@ function OptionChipRow({
 type SetupMode = 'quiz' | 'flagflash' | 'flagpuzzle' | 'timeattack' | 'neighbors' | 'capitalconnection';
 type QuizDifficulty = 'easy' | 'medium' | 'hard';
 
-const SETUP_MODES: { key: SetupMode; label: string; description: string; icon: string }[] = [
-  { key: 'quiz', label: 'Quiz', description: 'Classic flag quiz', icon: 'Q' },
-  { key: 'flagflash', label: 'FlagFlash', description: 'Party mode, tilt to play', icon: '!!' },
-  { key: 'flagpuzzle', label: 'Flag Puzzle', description: 'Flag reveals over time', icon: '??' },
-  { key: 'timeattack', label: 'Timed Quiz', description: 'Race the clock', icon: '00' },
-  { key: 'neighbors', label: 'Neighbors', description: 'Find bordering countries', icon: 'NB' },
-  { key: 'capitalconnection', label: 'Capital Quiz', description: 'Match flags to capitals', icon: 'CC' },
+const SETUP_MODES: { key: SetupMode; labelKey: string; descKey: string; icon: string }[] = [
+  { key: 'quiz', labelKey: 'setup.quiz', descKey: 'setup.quizDesc', icon: 'Q' },
+  { key: 'flagflash', labelKey: 'modes.flagflash', descKey: 'setup.flagPuzzleDesc', icon: '!!' },
+  { key: 'flagpuzzle', labelKey: 'setup.flagPuzzle', descKey: 'setup.flagPuzzleDesc', icon: '??' },
+  { key: 'timeattack', labelKey: 'setup.timedQuiz', descKey: 'setup.timedQuizDesc', icon: '00' },
+  { key: 'neighbors', labelKey: 'setup.neighbors', descKey: 'setup.neighborsDesc', icon: 'NB' },
+  { key: 'capitalconnection', labelKey: 'setup.capitalQuiz', descKey: 'setup.capitalQuizDesc', icon: 'CC' },
 ];
 
-const DIFFICULTIES: { key: QuizDifficulty; label: string }[] = [
-  { key: 'easy', label: 'Easy' },
-  { key: 'medium', label: 'Medium' },
-  { key: 'hard', label: 'Hard' },
+const DIFFICULTIES: { key: QuizDifficulty; labelKey: string }[] = [
+  { key: 'easy', labelKey: 'common.easy' },
+  { key: 'medium', labelKey: 'common.medium' },
+  { key: 'hard', labelKey: 'common.hard' },
 ];
 
 export default function GameSetupScreen({ navigation }: Props) {
@@ -201,7 +202,7 @@ export default function GameSetupScreen({ navigation }: Props) {
       >
 
         {/* Game Mode */}
-        <Text style={styles.sectionTitle}>Game Mode</Text>
+        <Text style={styles.sectionTitle}>{t('setup.gameMode')}</Text>
         <View style={styles.modeGrid}>
           {SETUP_MODES.map((m) => {
             const isActive = setupMode === m.key;
@@ -213,16 +214,16 @@ export default function GameSetupScreen({ navigation }: Props) {
                 activeOpacity={0.7}
                 accessibilityRole="button"
                 accessibilityState={{ selected: isActive }}
-                accessibilityLabel={`${m.label}: ${m.description}`}
+                accessibilityLabel={`${t(m.labelKey)}: ${t(m.descKey)}`}
               >
                 <View style={[styles.modeIconBadge, isActive && styles.modeIconBadgeActive]}>
                   <Text style={[styles.modeIconText, isActive && styles.modeIconTextActive]}>{m.icon}</Text>
                 </View>
                 <Text style={[styles.modeLabel, isActive && styles.modeLabelActive]}>
-                  {m.label}
+                  {t(m.labelKey)}
                 </Text>
                 <Text style={[styles.modeDesc, isActive && styles.modeDescActive]}>
-                  {m.description}
+                  {t(m.descKey)}
                 </Text>
               </TouchableOpacity>
             );
@@ -232,7 +233,7 @@ export default function GameSetupScreen({ navigation }: Props) {
         {/* Difficulty (only for Quiz mode) */}
         {isQuiz && (
           <>
-            <Text style={styles.sectionTitle}>Difficulty</Text>
+            <Text style={styles.sectionTitle}>{t('home.difficulty')}</Text>
             <View style={styles.optionRow}>
               {DIFFICULTIES.map((d) => {
                 const isActive = difficulty === d.key;
@@ -245,7 +246,7 @@ export default function GameSetupScreen({ navigation }: Props) {
                     accessibilityRole="button"
                     accessibilityState={{ selected: isActive }}
                   >
-                    <Text style={[styles.optionLabel, isActive && styles.optionLabelActive]}>{d.label}</Text>
+                    <Text style={[styles.optionLabel, isActive && styles.optionLabelActive]}>{t(d.labelKey)}</Text>
                   </TouchableOpacity>
                 );
               })}
@@ -256,21 +257,21 @@ export default function GameSetupScreen({ navigation }: Props) {
         {/* Autocomplete (only for Hard quiz) */}
         {isQuiz && difficulty === 'hard' && (
           <>
-            <Text style={styles.sectionTitle}>Hints</Text>
+            <Text style={styles.sectionTitle}>{t('home.hints')}</Text>
             <View style={styles.optionRow}>
               <TouchableOpacity
                 style={[styles.optionChip, !autocomplete && styles.optionChipActive]}
                 onPress={() => setAutocomplete(false)}
                 activeOpacity={0.7}
               >
-                <Text style={[styles.optionLabel, !autocomplete && styles.optionLabelActive]}>Off</Text>
+                <Text style={[styles.optionLabel, !autocomplete && styles.optionLabelActive]}>{t('common.off')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.optionChip, autocomplete && styles.optionChipActive]}
                 onPress={() => setAutocomplete(true)}
                 activeOpacity={0.7}
               >
-                <Text style={[styles.optionLabel, autocomplete && styles.optionLabelActive]}>On</Text>
+                <Text style={[styles.optionLabel, autocomplete && styles.optionLabelActive]}>{t('common.on')}</Text>
               </TouchableOpacity>
             </View>
           </>
@@ -306,8 +307,8 @@ export default function GameSetupScreen({ navigation }: Props) {
         {/* Guess Limit (only for standard quiz modes) */}
         {showGuessLimit && (
           <>
-            <Text style={styles.sectionTitle}>Lives</Text>
-            <Text style={styles.filterHint}>Wrong guesses before game over</Text>
+            <Text style={styles.sectionTitle}>{t('setup.lives')}</Text>
+            <Text style={styles.filterHint}>{t('setup.livesDesc')}</Text>
             <View style={styles.optionRow}>
               {GUESS_LIMIT_OPTIONS.map((v) => {
                 const isActive = guessLimit === v;
@@ -321,7 +322,7 @@ export default function GameSetupScreen({ navigation }: Props) {
                     accessibilityState={{ selected: isActive }}
                   >
                     <Text style={[styles.optionLabel, isActive && styles.optionLabelActive]}>
-                      {v === 0 ? 'Unlimited' : v}
+                      {v === 0 ? t('setup.unlimited') : v}
                     </Text>
                   </TouchableOpacity>
                 );
@@ -331,8 +332,8 @@ export default function GameSetupScreen({ navigation }: Props) {
         )}
 
         {/* Filter */}
-        <Text style={styles.sectionTitle}>Filter</Text>
-        <Text style={styles.filterHint}>Optional - default is all {totalFlags} flags</Text>
+        <Text style={styles.sectionTitle}>{t('setup.filter')}</Text>
+        <Text style={styles.filterHint}>{t('setup.filterDesc', { count: totalFlags })}</Text>
 
         <View style={styles.filterTypeRow}>
           {(['region', 'theme'] as CategoryType[]).map((type) => {
@@ -347,7 +348,7 @@ export default function GameSetupScreen({ navigation }: Props) {
                 accessibilityState={{ selected: isActive }}
               >
                 <Text style={[styles.filterTypeText, isActive && styles.filterTypeTextActive]}>
-                  {CATEGORY_TYPE_LABELS[type]}
+                  {type === 'region' ? t('setup.byRegion') : t('setup.byTheme')}
                 </Text>
               </TouchableOpacity>
             );
@@ -367,17 +368,17 @@ export default function GameSetupScreen({ navigation }: Props) {
                   activeOpacity={0.7}
                   accessibilityRole="button"
                   accessibilityState={{ selected: isActive }}
-                  accessibilityLabel={`${cat.label}, ${count} flags`}
+                  accessibilityLabel={`${t(`categories.${cat.id}`)}, ${count} flags`}
                 >
                   <View style={[styles.categoryIconBadge, isActive && styles.categoryIconBadgeActive]}>
                     <Text style={[styles.categoryIconText, isActive && styles.categoryIconTextActive]}>{cat.icon}</Text>
                   </View>
                   <View style={styles.categoryTextGroup}>
                     <Text style={[styles.categoryLabel, isActive && styles.categoryLabelActive]}>
-                      {cat.label}
+                      {t(`categories.${cat.id}`)}
                     </Text>
                     <Text style={[styles.categoryCount, isActive && styles.categoryCountActive]}>
-                      {count} flags
+                      {t('browse.flagCountPlural', { count })}
                     </Text>
                   </View>
                 </TouchableOpacity>
@@ -389,32 +390,32 @@ export default function GameSetupScreen({ navigation }: Props) {
         {/* Time Limit (only for FlagFlash/FlagPuzzle) */}
         {hasTimeLimit && (
           <>
-            <Text style={styles.sectionTitle}>Time Limit</Text>
+            <Text style={styles.sectionTitle}>{t('setup.timeLimit')}</Text>
             <View style={styles.optionRow}>
-              {getTimeLimitOptions().map((t) => (
+              {getTimeLimitOptions().map((seconds) => (
                 <TouchableOpacity
-                  key={t}
+                  key={seconds}
                   style={[
                     styles.optionChip,
-                    timeLimit === t && styles.optionChipActive,
+                    timeLimit === seconds && styles.optionChipActive,
                   ]}
-                  onPress={() => setTimeLimit(t)}
+                  onPress={() => setTimeLimit(seconds)}
                   activeOpacity={0.7}
                 >
                   <Text
                     style={[
                       styles.optionLabel,
-                      timeLimit === t && styles.optionLabelActive,
+                      timeLimit === seconds && styles.optionLabelActive,
                     ]}
                   >
-                    {t}s
+                    {t('setup.timeSuffix', { t: seconds })}
                   </Text>
                 </TouchableOpacity>
               ))}
             </View>
             {isFlagPuzzle && (
               <>
-                <Text style={styles.sectionTitle}>Questions</Text>
+                <Text style={styles.sectionTitle}>{t('setup.questions')}</Text>
                 <View style={styles.optionRow}>
                   {QUESTION_COUNTS.map((count) => (
                     <TouchableOpacity
@@ -450,7 +451,7 @@ export default function GameSetupScreen({ navigation }: Props) {
                         questionCountAll && styles.optionLabelActive,
                       ]}
                     >
-                      All
+                      {t('common.all')}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -462,7 +463,7 @@ export default function GameSetupScreen({ navigation }: Props) {
         {/* Question Count (everything except FlagFlash) */}
         {showQuestionCount && (
           <>
-            <Text style={styles.sectionTitle}>Questions</Text>
+            <Text style={styles.sectionTitle}>{t('setup.questions')}</Text>
             <OptionChipRow
               options={QUESTION_COUNTS}
               selected={questionCount}
@@ -479,10 +480,10 @@ export default function GameSetupScreen({ navigation }: Props) {
           onPress={startGame}
           activeOpacity={0.8}
           accessibilityRole="button"
-          accessibilityLabel={`Start ${isQuiz ? DIFFICULTIES.find((d) => d.key === difficulty)?.label + ' Quiz' : SETUP_MODES.find((m) => m.key === setupMode)?.label}`}
+          accessibilityLabel={isQuiz ? t('setup.startQuiz', { difficulty: t(DIFFICULTIES.find((d) => d.key === difficulty)?.labelKey ?? 'common.medium') }) : t('setup.startMode', { mode: t(SETUP_MODES.find((m) => m.key === setupMode)?.labelKey ?? 'setup.quiz') })}
         >
           <Text style={styles.startButtonText}>
-            Start {isQuiz ? `${DIFFICULTIES.find((d) => d.key === difficulty)?.label} Quiz` : SETUP_MODES.find((m) => m.key === setupMode)?.label}
+            {isQuiz ? t('setup.startQuiz', { difficulty: t(DIFFICULTIES.find((d) => d.key === difficulty)?.labelKey ?? 'common.medium') }) : t('setup.startMode', { mode: t(SETUP_MODES.find((m) => m.key === setupMode)?.labelKey ?? 'setup.quiz') })}
           </Text>
         </TouchableOpacity>
       </ScrollView>

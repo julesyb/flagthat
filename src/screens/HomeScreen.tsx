@@ -22,12 +22,9 @@ import { GameMode, UserStats, GameQuestion } from '../types';
 import { PlayIcon, ChevronRightIcon, ClockIcon, UsersIcon, EyeIcon, CalendarIcon, CrosshairIcon, LightningIcon, GearIcon } from '../components/Icons';
 import FlagImage from '../components/FlagImage';
 import BottomNav from '../components/BottomNav';
+import { t } from '../utils/i18n';
 
-const MODES: { key: GameMode; label: string }[] = [
-  { key: 'easy', label: 'Easy' },
-  { key: 'medium', label: 'Medium' },
-  { key: 'hard', label: 'Hard' },
-];
+const MODE_KEYS: GameMode[] = ['easy', 'medium', 'hard'];
 
 const QUESTION_COUNTS = [5, 10, 15, 20];
 
@@ -75,7 +72,7 @@ function FlagTeaser() {
 
   return (
     <View style={s.heroCard}>
-      <Text style={s.heroLabel}>Name this flag</Text>
+      <Text style={s.heroLabel}>{t('home.nameThisFlag')}</Text>
       <View style={s.flagWrap}>
         <FlagImage
           countryCode={question.flag.id}
@@ -145,7 +142,7 @@ function FlagTeaser() {
       ) : (
         <View style={s.teaserResult}>
           <Text style={[s.teaserResultText, picked === question.flag.name ? s.teaserResultCorrect : s.teaserResultWrong]}>
-            {picked === question.flag.name ? 'Correct!' : question.flag.name}
+            {picked === question.flag.name ? t('common.correct') : question.flag.name}
           </Text>
           <TouchableOpacity
             style={[s.teaserPlayBtn, picked === question.flag.name ? s.teaserPlayBtnCorrect : s.teaserPlayBtnWrong]}
@@ -157,7 +154,7 @@ function FlagTeaser() {
             }}
             activeOpacity={0.85}
           >
-            <Text style={s.teaserPlayText}>Keep Playing</Text>
+            <Text style={s.teaserPlayText}>{t('home.keepPlaying')}</Text>
             <ChevronRightIcon size={14} color={colors.white} />
           </TouchableOpacity>
         </View>
@@ -224,12 +221,12 @@ export default function HomeScreen({ navigation }: Props) {
             {dayStreak > 0 ? (
               <>
                 <Text style={s.streakVal}>{dayStreak}</Text>
-                <Text style={s.streakLbl}>day streak</Text>
+                <Text style={s.streakLbl}>{t('home.dayStreak')}</Text>
               </>
             ) : (
               <>
                 <Text style={s.streakVal}>{totalFlags}</Text>
-                <Text style={s.streakLblMuted}>countries</Text>
+                <Text style={s.streakLblMuted}>{t('home.countries')}</Text>
               </>
             )}
           </View>
@@ -261,12 +258,12 @@ export default function HomeScreen({ navigation }: Props) {
           </View>
           <View style={s.dailyContent}>
             <Text style={[s.dailyTitle, dailyDone?.completed && s.dailyTitleDone]}>
-              Daily #{getDailyNumber()}
+              {t('home.daily', { number: getDailyNumber() })}
             </Text>
             <Text style={s.dailySub}>
               {dailyDone?.completed
-                ? `${dailyDone.score}/10 - Come back tomorrow`
-                : '10 flags, same for everyone'}
+                ? `${dailyDone.score}/10 - ${t('home.comeBackTomorrow')}`
+                : t('home.tenFlags')}
             </Text>
           </View>
           {dailyDone?.completed ? (
@@ -285,14 +282,14 @@ export default function HomeScreen({ navigation }: Props) {
             <View style={s.playBolt}>
               <PlayIcon size={14} color={colors.white} />
             </View>
-            <Text style={s.playBtnText}>Play Now</Text>
+            <Text style={s.playBtnText}>{t('home.playNow')}</Text>
           </TouchableOpacity>
         </View>
 
         {/* ── CONFIG ── */}
         <View style={s.configCard}>
           <View style={s.configRow}>
-            <Text style={s.configLbl}>Cards</Text>
+            <Text style={s.configLbl}>{t('home.cards')}</Text>
             <View style={s.segRow}>
               {QUESTION_COUNTS.map((c) => (
                 <TouchableOpacity
@@ -309,22 +306,22 @@ export default function HomeScreen({ navigation }: Props) {
                 onPress={() => { hapticTap(); setQuestionCountAll(true); }}
                 activeOpacity={0.7}
               >
-                <Text style={[s.segBtnText, questionCountAll && s.segBtnTextOn]}>All</Text>
+                <Text style={[s.segBtnText, questionCountAll && s.segBtnTextOn]}>{t('common.all')}</Text>
               </TouchableOpacity>
             </View>
           </View>
           <View style={s.configDivider} />
           <View style={s.configRow}>
-            <Text style={s.configLbl}>Difficulty</Text>
+            <Text style={s.configLbl}>{t('home.difficulty')}</Text>
             <View style={s.segRow}>
-              {MODES.map((m) => (
+              {MODE_KEYS.map((m) => (
                 <TouchableOpacity
-                  key={m.key}
-                  style={[s.segBtn, mode === m.key && s.segBtnOn]}
-                  onPress={() => { hapticTap(); setMode(m.key); }}
+                  key={m}
+                  style={[s.segBtn, mode === m && s.segBtnOn]}
+                  onPress={() => { hapticTap(); setMode(m); }}
                   activeOpacity={0.7}
                 >
-                  <Text style={[s.segBtnText, mode === m.key && s.segBtnTextOn]}>{m.label}</Text>
+                  <Text style={[s.segBtnText, mode === m && s.segBtnTextOn]}>{t(`common.${m}`)}</Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -333,21 +330,21 @@ export default function HomeScreen({ navigation }: Props) {
             <>
               <View style={s.configDivider} />
               <View style={s.configRow}>
-                <Text style={s.configLbl}>Hints</Text>
+                <Text style={s.configLbl}>{t('home.hints')}</Text>
                 <View style={s.segRow}>
                   <TouchableOpacity
                     style={[s.segBtn, !autocomplete && s.segBtnOn]}
                     onPress={() => { hapticTap(); setAutocomplete(false); }}
                     activeOpacity={0.7}
                   >
-                    <Text style={[s.segBtnText, !autocomplete && s.segBtnTextOn]}>Off</Text>
+                    <Text style={[s.segBtnText, !autocomplete && s.segBtnTextOn]}>{t('common.off')}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[s.segBtn, autocomplete && s.segBtnOn]}
                     onPress={() => { hapticTap(); setAutocomplete(true); }}
                     activeOpacity={0.7}
                   >
-                    <Text style={[s.segBtnText, autocomplete && s.segBtnTextOn]}>On</Text>
+                    <Text style={[s.segBtnText, autocomplete && s.segBtnTextOn]}>{t('common.on')}</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -357,7 +354,7 @@ export default function HomeScreen({ navigation }: Props) {
 
         {/* ── GAME MODES ── */}
         <View style={s.sectionWrap}>
-          <Text style={s.sectionLbl}>Game modes</Text>
+          <Text style={s.sectionLbl}>{t('home.gameModes')}</Text>
 
           <TouchableOpacity
             style={s.modeCard}
@@ -373,8 +370,8 @@ export default function HomeScreen({ navigation }: Props) {
               <ClockIcon size={18} color={colors.white} />
             </View>
             <View style={s.modeText}>
-              <Text style={s.modeTitle}>Timed Quiz</Text>
-              <Text style={s.modeSub}>60 seconds - how many can you get?</Text>
+              <Text style={s.modeTitle}>{t('home.timedQuiz')}</Text>
+              <Text style={s.modeSub}>{t('home.timedQuizDesc')}</Text>
             </View>
             <ChevronRightIcon size={18} color={colors.rule} />
           </TouchableOpacity>
@@ -413,8 +410,8 @@ export default function HomeScreen({ navigation }: Props) {
               <UsersIcon size={18} color={colors.white} />
             </View>
             <View style={s.modeText}>
-              <Text style={s.modeTitle}>Neighbors</Text>
-              <Text style={s.modeSub}>Find all bordering countries</Text>
+              <Text style={s.modeTitle}>{t('home.neighbors')}</Text>
+              <Text style={s.modeSub}>{t('home.neighborsDesc')}</Text>
             </View>
             <ChevronRightIcon size={18} color={colors.rule} />
           </TouchableOpacity>
@@ -433,8 +430,8 @@ export default function HomeScreen({ navigation }: Props) {
               <EyeIcon size={18} color={colors.white} />
             </View>
             <View style={s.modeText}>
-              <Text style={s.modeTitle}>Flag Impostor</Text>
-              <Text style={s.modeSub}>Spot the fake flag</Text>
+              <Text style={s.modeTitle}>{t('home.flagImpostor')}</Text>
+              <Text style={s.modeSub}>{t('home.flagImpostorDesc')}</Text>
             </View>
             <ChevronRightIcon size={18} color={colors.rule} />
           </TouchableOpacity>
@@ -454,8 +451,8 @@ export default function HomeScreen({ navigation }: Props) {
                 <CrosshairIcon size={18} color={colors.white} />
               </View>
               <View style={s.modeText}>
-                <Text style={s.modeTitle}>Practice Weak Flags</Text>
-                <Text style={s.modeSub}>{weakFlagCount} flag{weakFlagCount !== 1 ? 's' : ''} to review</Text>
+                <Text style={s.modeTitle}>{t('home.practiceWeak')}</Text>
+                <Text style={s.modeSub}>{weakFlagCount === 1 ? t('home.flagsToReview', { count: weakFlagCount }) : t('home.flagsToReviewPlural', { count: weakFlagCount })}</Text>
               </View>
               <ChevronRightIcon size={18} color={colors.accent} />
             </TouchableOpacity>
@@ -465,19 +462,19 @@ export default function HomeScreen({ navigation }: Props) {
         {/* ── YOUR STATS ── */}
         {hasPlayed && (
           <View style={s.statsWrap}>
-            <Text style={s.sectionLbl}>Your stats</Text>
+            <Text style={s.sectionLbl}>{t('home.yourStats')}</Text>
             <View style={s.statsRow}>
               <View style={s.statTile}>
                 <Text style={s.statVal}>{stats!.bestStreak}</Text>
-                <Text style={s.statLbl}>Best Streak</Text>
+                <Text style={s.statLbl}>{t('home.bestStreak')}</Text>
               </View>
               <View style={s.statTile}>
                 <Text style={s.statVal}>{stats!.bestTimeAttackScore}</Text>
-                <Text style={s.statLbl}>Best 60s</Text>
+                <Text style={s.statLbl}>{t('home.best60s')}</Text>
               </View>
               <View style={s.statTile}>
                 <Text style={s.statVal}>{accuracy}%</Text>
-                <Text style={s.statLbl}>Accuracy</Text>
+                <Text style={s.statLbl}>{t('home.accuracy')}</Text>
               </View>
             </View>
           </View>

@@ -22,6 +22,7 @@ import { useGameAnimations } from '../hooks/useGameAnimations';
 import { getAllFlags } from '../data';
 import { RootStackParamList } from '../types/navigation';
 import { ChevronRightIcon } from '../components/Icons';
+import { t } from '../utils/i18n';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'FlagPuzzle'>;
 
@@ -205,7 +206,7 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
 
       const result: GameResult = {
         question: currentQuestion,
-        userAnswer: answer || '(time up)',
+        userAnswer: answer || t('puzzle.timeUp'),
         correct,
         timeTaken,
       };
@@ -240,7 +241,7 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.ink} />
-          <Text style={styles.loadingText}>Loading</Text>
+          <Text style={styles.loadingText}>{t('common.loading')}</Text>
         </View>
       </SafeAreaView>
     );
@@ -273,21 +274,21 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
           onPress={() => navigation.popToTop()}
           style={styles.quitButton}
         >
-          <Text style={styles.quitText}>Exit</Text>
+          <Text style={styles.quitText}>{t('common.exit')}</Text>
         </TouchableOpacity>
         <View style={styles.centerInfo}>
           <Text style={styles.counter}>
-            {currentIndex + 1} / {questions.length}
+            {t('game.questionOf', { current: currentIndex + 1, total: questions.length })}
           </Text>
           {currentStreak >= 2 ? (
             <Animated.Text
               style={[styles.streakText, { transform: [{ scale: streakScale }] }]}
             >
-              {currentStreak}x streak
+              {t('game.streak', { count: currentStreak })}
             </Animated.Text>
           ) : (
             <Text style={styles.score}>
-              {results.filter((r) => r.correct).length} correct
+              {t('game.correctCount', { count: results.filter((r) => r.correct).length })}
             </Text>
           )}
         </View>
@@ -332,7 +333,7 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
           </View>
 
           <Text style={styles.revealLabel}>
-            {Math.round((revealedCount / TOTAL_TILES) * 100)}% revealed
+            {t('puzzle.revealed', { pct: Math.round((revealedCount / TOTAL_TILES) * 100) })}
           </Text>
         </View>
 
@@ -345,14 +346,14 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
                 setTextInput(text);
                 setShowSuggestions(text.trim().length >= 2);
               }}
-              placeholder="Type country name..."
+              placeholder={t('puzzle.typePlaceholder')}
               placeholderTextColor={colors.textTertiary}
               autoCapitalize="words"
               autoCorrect={false}
               returnKeyType="done"
               onSubmitEditing={handleSubmit}
               editable={!showFeedback}
-              accessibilityLabel="Type country name"
+              accessibilityLabel={t('puzzle.typePlaceholder')}
             />
             <TouchableOpacity
               style={[
@@ -363,9 +364,9 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
               disabled={textInput.trim().length === 0 || showFeedback}
               activeOpacity={0.7}
               accessibilityRole="button"
-              accessibilityLabel="Submit answer"
+              accessibilityLabel={t('common.submit')}
             >
-              <Text style={styles.submitButtonText}>Submit</Text>
+              <Text style={styles.submitButtonText}>{t('common.submit')}</Text>
             </TouchableOpacity>
           </View>
 
@@ -393,18 +394,18 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
         {showFeedback && (
           <View style={styles.feedbackContainer}>
             {lastAnswerCorrect ? (
-              <Text style={styles.feedbackCorrect} accessibilityLiveRegion="polite">Correct!</Text>
+              <Text style={styles.feedbackCorrect} accessibilityLiveRegion="polite">{t('common.correct')}</Text>
             ) : (
-              <Text style={styles.feedbackWrong} accessibilityLiveRegion="polite">Wrong</Text>
+              <Text style={styles.feedbackWrong} accessibilityLiveRegion="polite">{t('common.wrong')}</Text>
             )}
             <TouchableOpacity
               style={styles.nextButton}
               onPress={goToNext}
               activeOpacity={0.7}
               accessibilityRole="button"
-              accessibilityLabel="Next question"
+              accessibilityLabel={t('common.next')}
             >
-              <Text style={styles.nextButtonText}>Next</Text>
+              <Text style={styles.nextButtonText}>{t('common.next')}</Text>
               <ChevronRightIcon size={16} color={colors.white} />
             </TouchableOpacity>
           </View>

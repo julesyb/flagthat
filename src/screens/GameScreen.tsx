@@ -18,6 +18,7 @@ import { GameQuestion, GameResult } from '../types';
 import { generateQuestions, generateDailyQuestions, generatePracticeQuestions, checkAnswer } from '../utils/gameEngine';
 import { getMissedFlagIds } from '../utils/storage';
 import { hapticCorrect, hapticWrong, hapticTap, playCorrectSound, playWrongSound } from '../utils/feedback';
+import { t } from '../utils/i18n';
 import FlagImage from '../components/FlagImage';
 import MapImage from '../components/MapImage';
 import { useGameAnimations } from '../hooks/useGameAnimations';
@@ -226,7 +227,7 @@ export default function GameScreen({ route, navigation }: Props) {
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.ink} />
-          <Text style={styles.loadingText}>Loading</Text>
+          <Text style={styles.loadingText}>{t('common.loading')}</Text>
         </View>
       </SafeAreaView>
     );
@@ -239,7 +240,7 @@ export default function GameScreen({ route, navigation }: Props) {
       {isTimeAttack ? (
         <View style={styles.timerBar}>
           <Text style={[styles.timerText, timeLeft <= 10 && styles.timerTextUrgent]}>
-            {timeLeft}s
+            {t('game.timeLeft', { seconds: timeLeft })}
           </Text>
           <View style={[styles.timerFill, { width: `${(timeLeft / (config.timeLimit || 60)) * 100}%` }]} />
         </View>
@@ -263,35 +264,35 @@ export default function GameScreen({ route, navigation }: Props) {
           }}
           style={styles.quitButton}
         >
-          <Text style={styles.quitText}>Exit</Text>
+          <Text style={styles.quitText}>{t('common.exit')}</Text>
         </TouchableOpacity>
         <View style={styles.centerInfo}>
           {isTimeAttack ? (
             <Text style={styles.counter}>
-              {results.filter((r) => r.correct).length} correct
+              {t('game.correctCount', { count: results.filter((r) => r.correct).length })}
             </Text>
           ) : (
             <Text style={styles.counter}>
-              {currentIndex + 1} / {questions.length}
+              {t('game.questionOf', { current: currentIndex + 1, total: questions.length })}
             </Text>
           )}
           {currentStreak >= 2 ? (
             <Animated.Text
               style={[styles.streakText, { transform: [{ scale: streakScale }] }]}
             >
-              {currentStreak}x streak
+              {t('game.streak', { count: currentStreak })}
             </Animated.Text>
           ) : (
             !isTimeAttack && (
               <Text style={styles.score}>
-                {results.filter((r) => r.correct).length} correct
+                {t('game.correctCount', { count: results.filter((r) => r.correct).length })}
               </Text>
             )
           )}
         </View>
         {livesRemaining !== null ? (
           <Text style={[styles.livesText, livesRemaining === 1 && styles.livesTextUrgent]}>
-            {livesRemaining} {livesRemaining === 1 ? 'life' : 'lives'}
+            {livesRemaining === 1 ? t('game.life', { count: livesRemaining }) : t('game.lives', { count: livesRemaining })}
           </Text>
         ) : (
           <View style={styles.quitSpacer} />
@@ -318,7 +319,7 @@ export default function GameScreen({ route, navigation }: Props) {
 
         {isHard && (
           <Text style={styles.questionText}>
-            {isMapMode ? 'Name this country:' : 'Type the name of this flag:'}
+            {isMapMode ? t('game.nameCountry') : t('game.typePrompt')}
           </Text>
         )}
 
@@ -328,14 +329,14 @@ export default function GameScreen({ route, navigation }: Props) {
               style={styles.textInput}
               value={textInput}
               onChangeText={setTextInput}
-              placeholder="Type your answer..."
+              placeholder={t('game.typePlaceholder')}
               placeholderTextColor={colors.textTertiary}
               autoCapitalize="words"
               autoCorrect={false}
               returnKeyType="done"
               onSubmitEditing={handleSubmitHard}
               editable={!showFeedback}
-              accessibilityLabel="Type your answer"
+              accessibilityLabel={t('game.typePlaceholder')}
             />
             {suggestions.length > 0 && (
               <ScrollView
@@ -364,9 +365,9 @@ export default function GameScreen({ route, navigation }: Props) {
               disabled={textInput.trim().length === 0 || showFeedback}
               activeOpacity={0.7}
               accessibilityRole="button"
-              accessibilityLabel="Submit answer"
+              accessibilityLabel={t('common.submit')}
             >
-              <Text style={styles.submitButtonText}>Submit</Text>
+              <Text style={styles.submitButtonText}>{t('common.submit')}</Text>
             </TouchableOpacity>
           </View>
         ) : (
@@ -421,7 +422,7 @@ export default function GameScreen({ route, navigation }: Props) {
         {showFeedback && (
           <View style={styles.feedbackContainer}>
             {lastAnswerCorrect ? (
-              <Text style={styles.feedbackCorrect} accessibilityLiveRegion="polite">Correct!</Text>
+              <Text style={styles.feedbackCorrect} accessibilityLiveRegion="polite">{t('common.correct')}</Text>
             ) : (
               <Text style={styles.feedbackWrong} accessibilityLiveRegion="polite">
                 {currentQuestion.flag.name}
