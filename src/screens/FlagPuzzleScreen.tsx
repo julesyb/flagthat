@@ -9,27 +9,26 @@ import {
   Animated,
   Keyboard,
   ScrollView,
+  useWindowDimensions,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, buttons } from '../utils/theme';
 import { GameQuestion, GameResult } from '../types';
 import { generateQuestions, checkAnswer } from '../utils/gameEngine';
 import { hapticCorrect, hapticWrong, hapticTap, playCorrectSound, playWrongSound } from '../utils/feedback';
 import FlagImage from '../components/FlagImage';
+import GameTopBar from '../components/GameTopBar';
+import { useGameAnimations } from '../hooks/useGameAnimations';
 import { getAllFlags } from '../data';
 import { RootStackParamList } from '../types/navigation';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'FlagPuzzle'>;
 
-const FLAG_WIDTH = 320;
-const FLAG_HEIGHT = 213;
+const FLAG_ASPECT = 3 / 2;
 const GRID_COLS = 8;
 const GRID_ROWS = 6;
-const TILE_W = FLAG_WIDTH / GRID_COLS;
-const TILE_H = FLAG_HEIGHT / GRID_ROWS;
 const TOTAL_TILES = GRID_COLS * GRID_ROWS;
 
-// Generate a shuffled order for revealing tiles
 function generateRevealOrder(): number[] {
   const indices = Array.from({ length: TOTAL_TILES }, (_, i) => i);
   for (let i = indices.length - 1; i > 0; i--) {
@@ -42,6 +41,13 @@ function generateRevealOrder(): number[] {
 export default function FlagPuzzleScreen({ route, navigation }: Props) {
   const { config } = route.params;
   const timeLimit = config.timeLimit || 30;
+  const { width: screenWidth } = useWindowDimensions();
+
+  // Responsive flag dimensions
+  const flagWidth = Math.min(screenWidth - spacing.lg * 2, 320);
+  const flagHeight = Math.round(flagWidth / FLAG_ASPECT);
+  const tileW = flagWidth / GRID_COLS;
+  const tileH = flagHeight / GRID_ROWS;
 
   const [questions, setQuestions] = useState<GameQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -52,23 +58,18 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
   const [currentStreak, setCurrentStreak] = useState(0);
   const [questionStartTime, setQuestionStartTime] = useState(Date.now());
 
-  // Timer
   const [timeRemaining, setTimeRemaining] = useState(timeLimit);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Reveal state
   const [revealOrder, setRevealOrder] = useState<number[]>(() => generateRevealOrder());
   const [revealedCount, setRevealedCount] = useState(0);
   const revealIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Autocomplete
   const [showSuggestions, setShowSuggestions] = useState(false);
   const allFlagNames = useMemo(() => getAllFlags().map((f) => f.name).sort(), []);
 
-  // Animations
-  const fadeAnim = useRef(new Animated.Value(1)).current;
-  const streakScale = useRef(new Animated.Value(1)).current;
-  const shakeAnim = useRef(new Animated.Value(0)).current;
+  const { fadeAnim, streakScale, shakeAnim, animateStreak, animateWrong, animateTransition } = useGameAnimations();
 
   useEffect(() => {
     const q = generateQuestions(config);
@@ -76,15 +77,19 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
     setQuestionStartTime(Date.now());
   }, []);
 
-  // Start timer and reveal when question loads
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+      if (revealIntervalRef.current) clearInterval(revealIntervalRef.current);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
   useEffect(() => {
     if (questions.length === 0 || showFeedback) return;
 
-    // Calculate reveal timing: reveal tiles over the full time limit
-    // Start at ~10% revealed, end at 100%
     const startRevealCount = Math.floor(TOTAL_TILES * 0.1);
     const remainingTiles = TOTAL_TILES - startRevealCount;
-    // Reveal in 10 steps
     const steps = 10;
     const tilesPerStep = Math.ceil(remainingTiles / steps);
     const intervalMs = (timeLimit * 1000) / steps;
@@ -101,7 +106,6 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
       });
     }, intervalMs);
 
-    // Countdown timer
     setTimeRemaining(timeLimit);
     timerRef.current = setInterval(() => {
       setTimeRemaining((prev) => {
@@ -119,7 +123,6 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
     };
   }, [currentIndex, questions.length, showFeedback]);
 
-  // Handle time running out
   useEffect(() => {
     if (timeRemaining === 0 && !showFeedback && questions.length > 0) {
       handleAnswer('');
@@ -129,7 +132,11 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
   const currentQuestion = questions[currentIndex];
   const progress = questions.length > 0 ? (currentIndex + 1) / questions.length : 0;
 
-  // Compute which tiles are revealed
+  const correctCount = useMemo(
+    () => results.filter((r) => r.correct).length,
+    [results],
+  );
+
   const revealedTiles = useMemo(() => {
     const set = new Set<number>();
     for (let i = 0; i < revealedCount; i++) {
@@ -138,38 +145,16 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
     return set;
   }, [revealedCount, revealOrder]);
 
-  // Filter suggestions based on input
   const suggestions = useMemo(() => {
     if (textInput.trim().length < 2) return [];
     const query = textInput.toLowerCase().trim();
     return allFlagNames.filter((name) => name.toLowerCase().startsWith(query)).slice(0, 5);
   }, [textInput, allFlagNames]);
 
-  const animateStreak = () => {
-    streakScale.setValue(1.5);
-    Animated.spring(streakScale, {
-      toValue: 1,
-      friction: 3,
-      tension: 150,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const animateWrong = () => {
-    Animated.sequence([
-      Animated.timing(shakeAnim, { toValue: 10, duration: 50, useNativeDriver: true }),
-      Animated.timing(shakeAnim, { toValue: -10, duration: 50, useNativeDriver: true }),
-      Animated.timing(shakeAnim, { toValue: 8, duration: 50, useNativeDriver: true }),
-      Animated.timing(shakeAnim, { toValue: -8, duration: 50, useNativeDriver: true }),
-      Animated.timing(shakeAnim, { toValue: 0, duration: 50, useNativeDriver: true }),
-    ]).start();
-  };
-
   const handleAnswer = useCallback(
     (answer: string) => {
       if (showFeedback) return;
 
-      // Clear timers
       if (timerRef.current) clearInterval(timerRef.current);
       if (revealIntervalRef.current) clearInterval(revealIntervalRef.current);
 
@@ -179,7 +164,6 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
 
       setShowFeedback(true);
       setLastAnswerCorrect(correct);
-      // Fully reveal the flag on answer
       setRevealedCount(TOTAL_TILES);
 
       if (correct) {
@@ -203,21 +187,9 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
 
       const newResults = [...results, result];
 
-      setTimeout(() => {
+      timeoutRef.current = setTimeout(() => {
         if (currentIndex < questions.length - 1) {
-          Animated.sequence([
-            Animated.timing(fadeAnim, {
-              toValue: 0,
-              duration: 150,
-              useNativeDriver: true,
-            }),
-            Animated.timing(fadeAnim, {
-              toValue: 1,
-              duration: 150,
-              useNativeDriver: true,
-            }),
-          ]).start();
-
+          animateTransition();
           setResults(newResults);
           setCurrentIndex((i) => i + 1);
           setShowFeedback(false);
@@ -233,7 +205,7 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
         }
       }, correct ? 600 : 1200);
     },
-    [showFeedback, currentQuestion, questionStartTime, results, currentIndex, questions, fadeAnim, navigation, config],
+    [showFeedback, currentQuestion, questionStartTime, results, currentIndex, questions, navigation, config, animateStreak, animateWrong, animateTransition],
   );
 
   const handleSubmit = () => {
@@ -264,12 +236,10 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Progress bar */}
       <View style={styles.progressBar}>
         <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
       </View>
 
-      {/* Timer bar */}
       <View style={styles.timerBar}>
         <View
           style={[
@@ -282,36 +252,21 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
         />
       </View>
 
-      {/* Top bar */}
-      <View style={styles.topBar}>
-        <TouchableOpacity
-          onPress={() => navigation.popToTop()}
-          style={styles.quitButton}
-        >
-          <Text style={styles.quitText}>Quit</Text>
-        </TouchableOpacity>
-        <View style={styles.centerInfo}>
-          <Text style={styles.counter}>
-            {currentIndex + 1} / {questions.length}
-          </Text>
-          {currentStreak >= 2 ? (
-            <Animated.Text
-              style={[styles.streakText, { transform: [{ scale: streakScale }] }]}
-            >
-              {currentStreak}x streak
-            </Animated.Text>
-          ) : (
-            <Text style={styles.score}>
-              {results.filter((r) => r.correct).length} correct
+      <GameTopBar
+        currentIndex={currentIndex}
+        totalQuestions={questions.length}
+        correctCount={correctCount}
+        currentStreak={currentStreak}
+        streakScale={streakScale}
+        onExit={() => navigation.popToTop()}
+        rightElement={
+          <View style={styles.timerDisplay}>
+            <Text style={[styles.timerText, isUrgent && styles.timerTextUrgent]}>
+              {timeRemaining}s
             </Text>
-          )}
-        </View>
-        <View style={styles.timerDisplay}>
-          <Text style={[styles.timerText, isUrgent && styles.timerTextUrgent]}>
-            {timeRemaining}s
-          </Text>
-        </View>
-      </View>
+          </View>
+        }
+      />
 
       <Animated.View
         style={[
@@ -319,17 +274,15 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
           { opacity: fadeAnim, transform: [{ translateX: shakeAnim }] },
         ]}
       >
-        {/* Flag with tile overlay */}
         <View style={styles.flagContainer}>
-          <View style={styles.flagWrapper}>
+          <View style={{ width: flagWidth, height: flagHeight, position: 'relative' }}>
             <FlagImage
               countryCode={currentQuestion.flag.id}
               size="hero"
               emoji={currentQuestion.flag.emoji}
             />
-            {/* Tile overlay grid */}
             {!showFeedback && (
-              <View style={styles.tileGrid} pointerEvents="none">
+              <View style={[styles.tileGrid, { width: flagWidth, height: flagHeight }]} pointerEvents="none">
                 {Array.from({ length: TOTAL_TILES }, (_, i) => {
                   if (revealedTiles.has(i)) return null;
                   const row = Math.floor(i / GRID_COLS);
@@ -340,10 +293,10 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
                       style={[
                         styles.tile,
                         {
-                          left: col * TILE_W,
-                          top: row * TILE_H,
-                          width: TILE_W,
-                          height: TILE_H,
+                          left: col * tileW,
+                          top: row * tileH,
+                          width: tileW,
+                          height: tileH,
                         },
                       ]}
                     />
@@ -353,13 +306,11 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
             )}
           </View>
 
-          {/* Reveal percentage */}
           <Text style={styles.revealLabel}>
             {Math.round((revealedCount / TOTAL_TILES) * 100)}% revealed
           </Text>
         </View>
 
-        {/* Input area */}
         <View style={styles.inputArea}>
           <View style={styles.inputContainer}>
             <TextInput
@@ -376,6 +327,7 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
               returnKeyType="done"
               onSubmitEditing={handleSubmit}
               editable={!showFeedback}
+              accessibilityLabel="Type country name"
             />
             <TouchableOpacity
               style={[
@@ -385,12 +337,13 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
               onPress={handleSubmit}
               disabled={textInput.trim().length === 0 || showFeedback}
               activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="Submit answer"
             >
               <Text style={styles.submitButtonText}>Submit</Text>
             </TouchableOpacity>
           </View>
 
-          {/* Autocomplete suggestions */}
           {showSuggestions && suggestions.length > 0 && !showFeedback && (
             <ScrollView
               style={styles.suggestionsContainer}
@@ -402,6 +355,8 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
                   style={styles.suggestionItem}
                   onPress={() => handleSuggestionSelect(name)}
                   activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Select ${name}`}
                 >
                   <Text style={styles.suggestionText}>{name}</Text>
                 </TouchableOpacity>
@@ -410,13 +365,12 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
           )}
         </View>
 
-        {/* Feedback */}
         {showFeedback && (
           <View style={styles.feedbackContainer}>
             {lastAnswerCorrect ? (
-              <Text style={styles.feedbackCorrect}>Correct!</Text>
+              <Text style={styles.feedbackCorrect} accessibilityLiveRegion="polite">Correct!</Text>
             ) : (
-              <Text style={styles.feedbackWrong}>
+              <Text style={styles.feedbackWrong} accessibilityLiveRegion="polite">
                 It was {currentQuestion.flag.name}
               </Text>
             )}
@@ -430,7 +384,7 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.white,
+    backgroundColor: colors.background,
   },
   loadingContainer: {
     flex: 1,
@@ -456,36 +410,6 @@ const styles = StyleSheet.create({
   timerFill: {
     height: '100%',
   },
-  topBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-  },
-  quitButton: {
-    padding: spacing.sm,
-    width: 60,
-  },
-  quitText: {
-    ...typography.caption,
-    color: colors.textTertiary,
-  },
-  centerInfo: {
-    alignItems: 'center',
-  },
-  counter: {
-    ...typography.bodyBold,
-    color: colors.text,
-  },
-  streakText: {
-    ...typography.caption,
-    color: colors.accent,
-  },
-  score: {
-    ...typography.caption,
-    color: colors.success,
-  },
   timerDisplay: {
     width: 60,
     alignItems: 'flex-end',
@@ -507,17 +431,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: spacing.md,
   },
-  flagWrapper: {
-    width: FLAG_WIDTH,
-    height: FLAG_HEIGHT,
-    position: 'relative',
-  },
   tileGrid: {
     position: 'absolute',
     top: 0,
     left: 0,
-    width: FLAG_WIDTH,
-    height: FLAG_HEIGHT,
   },
   tile: {
     position: 'absolute',
@@ -544,16 +461,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   submitButton: {
-    backgroundColor: colors.ink,
-    padding: spacing.lg,
-    alignItems: 'center',
+    ...buttons.primary,
   },
   submitButtonDisabled: {
     backgroundColor: colors.textTertiary,
   },
   submitButtonText: {
-    ...typography.bodyBold,
-    color: colors.white,
+    ...buttons.primaryText,
   },
   suggestionsContainer: {
     maxHeight: 200,

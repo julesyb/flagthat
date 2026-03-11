@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -16,11 +16,12 @@ import { initAudio, hapticTap } from '../utils/feedback';
 import { RootStackParamList } from '../types/navigation';
 import { GameMode } from '../types';
 import { LightningIcon, CrosshairIcon, BarChartIcon, GlobeIcon } from '../components/Icons';
+import ChipSelector from '../components/ChipSelector';
 
-const MODES: { key: GameMode; label: string }[] = [
-  { key: 'easy', label: '2' },
-  { key: 'medium', label: '4' },
-  { key: 'hard', label: 'Type' },
+const MODE_OPTIONS = [
+  { value: 'easy' as GameMode, label: '2' },
+  { value: 'medium' as GameMode, label: '4' },
+  { value: 'hard' as GameMode, label: 'Type' },
 ];
 
 const QUESTION_COUNTS = [5, 10, 15, 20];
@@ -29,7 +30,6 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 const GRID_SPACING = 80;
 
-// ─── Background Grid ─────────────────────────────────────────
 function GridLines() {
   const screenWidth = Dimensions.get('window').width;
   const lineCount = Math.floor(screenWidth / GRID_SPACING);
@@ -46,7 +46,6 @@ function GridLines() {
   );
 }
 
-// ─── Fade-up wrapper ─────────────────────────────────────────
 function FadeUp({ delay = 0, children }: { delay?: number; children: React.ReactNode }) {
   const opacity = useRef(new Animated.Value(0)).current;
   const translateY = useRef(new Animated.Value(10)).current;
@@ -68,7 +67,6 @@ function FadeUp({ delay = 0, children }: { delay?: number; children: React.React
   );
 }
 
-// ─── Main Screen ─────────────────────────────────────────────
 export default function HomeScreen({ navigation }: Props) {
   const totalFlags = getTotalFlagCount();
   const [mode, setMode] = useState<GameMode>('medium');
@@ -78,6 +76,28 @@ export default function HomeScreen({ navigation }: Props) {
   useEffect(() => {
     initAudio();
   }, []);
+
+  const countOptions = useMemo(() => [
+    ...QUESTION_COUNTS.map((c) => ({ value: c, label: String(c) })),
+    { value: -1, label: 'All' },
+  ], []);
+
+  const selectedCount = questionCountAll ? -1 : questionCount;
+
+  const handleCountSelect = (value: number) => {
+    hapticTap();
+    if (value === -1) {
+      setQuestionCountAll(true);
+    } else {
+      setQuestionCountAll(false);
+      setQuestionCount(value);
+    }
+  };
+
+  const handleModeSelect = (value: GameMode) => {
+    hapticTap();
+    setMode(value);
+  };
 
   const quickPlay = () => {
     hapticTap();
@@ -92,12 +112,11 @@ export default function HomeScreen({ navigation }: Props) {
       <GridLines />
 
       <View style={styles.content}>
-        {/* ── HEADER ── */}
         <FadeUp delay={0}>
           <View style={styles.headerTopRule} />
           <View style={styles.headerInner}>
             <View>
-              <Text style={styles.logotypeMain}>
+              <Text style={styles.logotypeMain} accessibilityRole="header">
                 Flag{'\n'}
                 <Text style={styles.logotypeItalic}>That</Text>
               </Text>
@@ -109,13 +128,13 @@ export default function HomeScreen({ navigation }: Props) {
           </View>
         </FadeUp>
 
-
-        {/* ── SINGLE CTA ── */}
         <FadeUp delay={220}>
           <TouchableOpacity
             style={styles.cardHero}
             onPress={quickPlay}
             activeOpacity={0.85}
+            accessibilityRole="button"
+            accessibilityLabel={`Play ${questionCountAll ? `all ${totalFlags}` : questionCount} random flags`}
           >
             <View style={styles.cardHeroBar} />
             <View style={styles.heroLeft}>
@@ -132,57 +151,26 @@ export default function HomeScreen({ navigation }: Props) {
             <Text style={styles.heroArrow}>{'\u2192'}</Text>
           </TouchableOpacity>
 
-          {/* ── QUESTION COUNT PICKER ── */}
-          <View style={styles.modeSwitcher}>
-            <Text style={styles.modeSwitcherLabel}>Cards</Text>
-            <View style={styles.modeSwitcherRow}>
-              {QUESTION_COUNTS.map((count) => (
-                <TouchableOpacity
-                  key={count}
-                  style={[styles.modeChip, !questionCountAll && questionCount === count && styles.modeChipActive]}
-                  onPress={() => { hapticTap(); setQuestionCount(count); setQuestionCountAll(false); }}
-                  activeOpacity={0.7}
-                >
-                  <Text style={[styles.modeChipText, !questionCountAll && questionCount === count && styles.modeChipTextActive]}>
-                    {count}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-              <TouchableOpacity
-                style={[styles.modeChip, questionCountAll && styles.modeChipActive]}
-                onPress={() => { hapticTap(); setQuestionCountAll(true); }}
-                activeOpacity={0.7}
-              >
-                <Text style={[styles.modeChipText, questionCountAll && styles.modeChipTextActive]}>
-                  All
-                </Text>
-              </TouchableOpacity>
-            </View>
+          <View style={styles.chipRow}>
+            <ChipSelector
+              label="Cards"
+              options={countOptions}
+              selected={selectedCount}
+              onSelect={handleCountSelect}
+            />
           </View>
 
-          {/* ── MODE SWITCHER ── */}
-          <View style={styles.modeSwitcher}>
-            <Text style={styles.modeSwitcherLabel}>Game Mode</Text>
-            <View style={styles.modeSwitcherRow}>
-              {MODES.map((m) => (
-                <TouchableOpacity
-                  key={m.key}
-                  style={[styles.modeChip, mode === m.key && styles.modeChipActive]}
-                  onPress={() => { hapticTap(); setMode(m.key); }}
-                  activeOpacity={0.7}
-                >
-                  <Text style={[styles.modeChipText, mode === m.key && styles.modeChipTextActive]}>
-                    {m.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
+          <View style={styles.chipRow}>
+            <ChipSelector
+              label="Game Mode"
+              options={MODE_OPTIONS}
+              selected={mode}
+              onSelect={handleModeSelect}
+            />
           </View>
-
         </FadeUp>
       </View>
 
-      {/* ── BOTTOM NAV BAR ── */}
       <View style={styles.bottomNav}>
         <View style={styles.bottomNavTopRule} />
         <View style={styles.bottomNavInner}>
@@ -190,6 +178,8 @@ export default function HomeScreen({ navigation }: Props) {
             style={styles.bottomNavItem}
             onPress={quickPlay}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Quick Play"
           >
             <LightningIcon size={16} color={colors.ink} />
             <Text style={styles.bottomNavLabel}>Quick Play</Text>
@@ -199,6 +189,8 @@ export default function HomeScreen({ navigation }: Props) {
             style={styles.bottomNavItem}
             onPress={() => { hapticTap(); navigation.navigate('GameSetup'); }}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Game Mode setup"
           >
             <CrosshairIcon size={16} color={colors.ink} />
             <Text style={styles.bottomNavLabel}>Game Mode</Text>
@@ -213,6 +205,8 @@ export default function HomeScreen({ navigation }: Props) {
               });
             }}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="FlagFlash party mode"
           >
             <LightningIcon size={16} color={colors.ink} filled={false} />
             <Text style={styles.bottomNavLabel}>FlagFlash</Text>
@@ -222,6 +216,8 @@ export default function HomeScreen({ navigation }: Props) {
             style={styles.bottomNavItem}
             onPress={() => { hapticTap(); navigation.navigate('Stats'); }}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="View statistics"
           >
             <BarChartIcon size={16} color={colors.ink} />
             <Text style={styles.bottomNavLabel}>Stats</Text>
@@ -231,6 +227,8 @@ export default function HomeScreen({ navigation }: Props) {
             style={styles.bottomNavItem}
             onPress={() => { hapticTap(); navigation.navigate('Browse'); }}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Browse all flags"
           >
             <GlobeIcon size={16} color={colors.ink} />
             <Text style={styles.bottomNavLabel}>Browse</Text>
@@ -241,7 +239,6 @@ export default function HomeScreen({ navigation }: Props) {
   );
 }
 
-// ─── Styles ──────────────────────────────────────────────────
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -255,8 +252,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     justifyContent: 'center',
   },
-
-  // Grid
   gridContainer: {
     position: 'absolute',
     top: 0,
@@ -272,8 +267,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.rule,
     opacity: 0.35,
   },
-
-  // Header
   headerTopRule: {
     width: '100%',
     height: 3,
@@ -318,8 +311,6 @@ const styles = StyleSheet.create({
     color: colors.slate,
     marginTop: spacing.xxs,
   },
-
-  // Hero card
   cardHero: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -369,48 +360,9 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: colors.whiteAlpha45,
   },
-
-  // Mode switcher
-  modeSwitcher: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+  chipRow: {
     marginTop: spacing.sm,
   },
-  modeSwitcherLabel: {
-    fontFamily: fontFamily.uiLabel,
-    fontSize: 9,
-    letterSpacing: 2.2,
-    textTransform: 'uppercase',
-    color: colors.slate,
-  },
-  modeSwitcherRow: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-  },
-  modeChip: {
-    paddingVertical: 6,
-    paddingHorizontal: 14,
-    borderWidth: 1,
-    borderColor: colors.rule,
-    backgroundColor: colors.white,
-  },
-  modeChipActive: {
-    backgroundColor: colors.ink,
-    borderColor: colors.ink,
-  },
-  modeChipText: {
-    fontFamily: fontFamily.uiLabelMedium,
-    fontSize: 11,
-    letterSpacing: 1.2,
-    textTransform: 'uppercase',
-    color: colors.slate,
-  },
-  modeChipTextActive: {
-    color: colors.white,
-  },
-
-  // Bottom nav
   bottomNav: {
     backgroundColor: colors.background,
     paddingBottom: spacing.sm,

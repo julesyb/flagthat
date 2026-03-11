@@ -184,6 +184,8 @@ export default function StatsScreen() {
           style={styles.resetButton}
           onPress={handleReset}
           activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel="Reset all statistics"
         >
           <Text style={styles.resetButtonText}>Reset Statistics</Text>
         </TouchableOpacity>

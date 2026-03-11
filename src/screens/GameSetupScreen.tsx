@@ -28,6 +28,60 @@ const QUESTION_COUNTS = [10, 20, 50, 100];
 const FLAGFLASH_TIMES = [15, 30, 60, 90];
 const FLAGPUZZLE_TIMES = [15, 30, 60];
 
+// Extracted: reusable row of option chips with "All" toggle
+function OptionChipRow({
+  options,
+  selected,
+  onSelect,
+  includeAll,
+  allSelected,
+  onSelectAll,
+  suffix,
+}: {
+  options: number[];
+  selected: number;
+  onSelect: (v: number) => void;
+  includeAll?: boolean;
+  allSelected?: boolean;
+  onSelectAll?: () => void;
+  suffix?: string;
+}) {
+  return (
+    <View style={styles.optionRow}>
+      {options.map((v) => {
+        const isActive = !allSelected && selected === v;
+        return (
+          <TouchableOpacity
+            key={v}
+            style={[styles.optionChip, isActive && styles.optionChipActive]}
+            onPress={() => onSelect(v)}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityState={{ selected: isActive }}
+          >
+            <Text style={[styles.optionLabel, isActive && styles.optionLabelActive]}>
+              {v}{suffix ?? ''}
+            </Text>
+          </TouchableOpacity>
+        );
+      })}
+      {includeAll && onSelectAll && (
+        <TouchableOpacity
+          style={[styles.optionChip, allSelected && styles.optionChipActive]}
+          onPress={onSelectAll}
+          activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityState={{ selected: !!allSelected }}
+        >
+          <Text style={[styles.optionLabel, allSelected && styles.optionLabelActive]}>
+            All
+          </Text>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
+}
+
 export default function GameSetupScreen({ navigation }: Props) {
   const [displayMode, setDisplayMode] = useState<DisplayMode>('flag');
   const [mode, setMode] = useState<GameMode>('easy');
@@ -41,10 +95,10 @@ export default function GameSetupScreen({ navigation }: Props) {
   const isFlagFlash = mode === 'flagflash';
   const isFlagPuzzle = mode === 'flagpuzzle';
   const hasTimeLimit = isFlagFlash || isFlagPuzzle;
+  const showQuestionCount = !isFlagFlash; // FlagFlash is time-only, no question count
 
   const handleFilterTypeSelect = (type: CategoryType) => {
     if (filterType === type) {
-      // Deselect filter type, reset to all
       setFilterType(null);
       setSelectedCategory('all');
     } else {
@@ -54,11 +108,7 @@ export default function GameSetupScreen({ navigation }: Props) {
   };
 
   const handleCategorySelect = (catId: CategoryId) => {
-    if (selectedCategory === catId) {
-      setSelectedCategory('all');
-    } else {
-      setSelectedCategory(catId);
-    }
+    setSelectedCategory(selectedCategory === catId ? 'all' : catId);
   };
 
   const startGame = () => {
@@ -87,12 +137,15 @@ export default function GameSetupScreen({ navigation }: Props) {
     ? CATEGORIES.filter((c) => c.type === filterType)
     : [];
 
+  const timeLimitOptions = isFlagPuzzle ? FLAGPUZZLE_TIMES : FLAGFLASH_TIMES;
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
+        {/* Display Mode */}
         <Text style={styles.sectionTitle}>Display</Text>
         <View style={styles.displayToggleRow}>
           {(['flag', 'map'] as DisplayMode[]).map((dm) => {
@@ -103,6 +156,9 @@ export default function GameSetupScreen({ navigation }: Props) {
                 style={[styles.displayToggle, isActive && styles.displayToggleActive]}
                 onPress={() => setDisplayMode(dm)}
                 activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityState={{ selected: isActive }}
+                accessibilityLabel={dm === 'flag' ? 'Flag Mode' : 'Map Mode'}
               >
                 <Text style={[styles.displayToggleIcon, isActive && styles.displayToggleIconActive]}>
                   {dm === 'flag' ? '\u2691' : '\u2609'}
@@ -118,6 +174,7 @@ export default function GameSetupScreen({ navigation }: Props) {
           })}
         </View>
 
+        {/* Game Mode */}
         <Text style={styles.sectionTitle}>Game Mode</Text>
         <View style={styles.modeGrid}>
           {(Object.keys(GAME_MODES) as GameMode[]).map((m) => {
@@ -129,6 +186,9 @@ export default function GameSetupScreen({ navigation }: Props) {
                 style={[styles.modeCard, isActive && styles.modeCardActive]}
                 onPress={() => setMode(m)}
                 activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityState={{ selected: isActive }}
+                accessibilityLabel={`${info.label}: ${info.description}`}
               >
                 <View style={[styles.modeIconBadge, isActive && styles.modeIconBadgeActive]}>
                   <Text style={[styles.modeIconText, isActive && styles.modeIconTextActive]}>{info.icon}</Text>
@@ -144,10 +204,10 @@ export default function GameSetupScreen({ navigation }: Props) {
           })}
         </View>
 
+        {/* Filter */}
         <Text style={styles.sectionTitle}>Filter</Text>
         <Text style={styles.filterHint}>Optional — default is all {totalFlags} flags</Text>
 
-        {/* Filter type selector: Region or Theme */}
         <View style={styles.filterTypeRow}>
           {(['region', 'theme'] as CategoryType[]).map((type) => {
             const isActive = filterType === type;
@@ -157,6 +217,8 @@ export default function GameSetupScreen({ navigation }: Props) {
                 style={[styles.filterTypeChip, isActive && styles.filterTypeChipActive]}
                 onPress={() => handleFilterTypeSelect(type)}
                 activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityState={{ selected: isActive }}
               >
                 <Text style={[styles.filterTypeText, isActive && styles.filterTypeTextActive]}>
                   {CATEGORY_TYPE_LABELS[type]}
@@ -166,7 +228,6 @@ export default function GameSetupScreen({ navigation }: Props) {
           })}
         </View>
 
-        {/* Show categories for selected filter type */}
         {filterType && (
           <View style={styles.categoryRow}>
             {filteredCategories.map((cat) => {
@@ -178,6 +239,9 @@ export default function GameSetupScreen({ navigation }: Props) {
                   style={[styles.categoryChip, isActive && styles.categoryChipActive]}
                   onPress={() => handleCategorySelect(cat.id)}
                   activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: isActive }}
+                  accessibilityLabel={`${cat.label}, ${count} flags`}
                 >
                   <View style={[styles.categoryIconBadge, isActive && styles.categoryIconBadgeActive]}>
                     <Text style={[styles.categoryIconText, isActive && styles.categoryIconTextActive]}>{cat.icon}</Text>
@@ -196,118 +260,31 @@ export default function GameSetupScreen({ navigation }: Props) {
           </View>
         )}
 
-        {hasTimeLimit ? (
+        {/* Time Limit (only for FlagFlash/FlagPuzzle) */}
+        {hasTimeLimit && (
           <>
             <Text style={styles.sectionTitle}>Time Limit</Text>
-            <View style={styles.optionRow}>
-              {(isFlagPuzzle ? FLAGPUZZLE_TIMES : FLAGFLASH_TIMES).map((t) => (
-                <TouchableOpacity
-                  key={t}
-                  style={[
-                    styles.optionChip,
-                    timeLimit === t && styles.optionChipActive,
-                  ]}
-                  onPress={() => setTimeLimit(t)}
-                  activeOpacity={0.7}
-                >
-                  <Text
-                    style={[
-                      styles.optionLabel,
-                      timeLimit === t && styles.optionLabelActive,
-                    ]}
-                  >
-                    {t}s
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-            {isFlagPuzzle && (
-              <>
-                <Text style={styles.sectionTitle}>Questions</Text>
-                <View style={styles.optionRow}>
-                  {QUESTION_COUNTS.map((count) => (
-                    <TouchableOpacity
-                      key={count}
-                      style={[
-                        styles.optionChip,
-                        !questionCountAll && questionCount === count && styles.optionChipActive,
-                      ]}
-                      onPress={() => { setQuestionCount(count); setQuestionCountAll(false); }}
-                      activeOpacity={0.7}
-                    >
-                      <Text
-                        style={[
-                          styles.optionLabel,
-                          !questionCountAll && questionCount === count && styles.optionLabelActive,
-                        ]}
-                      >
-                        {count}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                  <TouchableOpacity
-                    style={[
-                      styles.optionChip,
-                      questionCountAll && styles.optionChipActive,
-                    ]}
-                    onPress={() => setQuestionCountAll(true)}
-                    activeOpacity={0.7}
-                  >
-                    <Text
-                      style={[
-                        styles.optionLabel,
-                        questionCountAll && styles.optionLabelActive,
-                      ]}
-                    >
-                      All
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </>
-            )}
+            <OptionChipRow
+              options={timeLimitOptions}
+              selected={timeLimit}
+              onSelect={setTimeLimit}
+              suffix="s"
+            />
           </>
-        ) : (
+        )}
+
+        {/* Question Count (everything except FlagFlash) */}
+        {showQuestionCount && (
           <>
             <Text style={styles.sectionTitle}>Questions</Text>
-            <View style={styles.optionRow}>
-              {QUESTION_COUNTS.map((count) => (
-                <TouchableOpacity
-                  key={count}
-                  style={[
-                    styles.optionChip,
-                    !questionCountAll && questionCount === count && styles.optionChipActive,
-                  ]}
-                  onPress={() => { setQuestionCount(count); setQuestionCountAll(false); }}
-                  activeOpacity={0.7}
-                >
-                  <Text
-                    style={[
-                      styles.optionLabel,
-                      !questionCountAll && questionCount === count && styles.optionLabelActive,
-                    ]}
-                  >
-                    {count}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-              <TouchableOpacity
-                style={[
-                  styles.optionChip,
-                  questionCountAll && styles.optionChipActive,
-                ]}
-                onPress={() => setQuestionCountAll(true)}
-                activeOpacity={0.7}
-              >
-                <Text
-                  style={[
-                    styles.optionLabel,
-                    questionCountAll && styles.optionLabelActive,
-                  ]}
-                >
-                  All
-                </Text>
-              </TouchableOpacity>
-            </View>
+            <OptionChipRow
+              options={QUESTION_COUNTS}
+              selected={questionCount}
+              onSelect={(v) => { setQuestionCount(v); setQuestionCountAll(false); }}
+              includeAll
+              allSelected={questionCountAll}
+              onSelectAll={() => setQuestionCountAll(true)}
+            />
           </>
         )}
 
@@ -315,6 +292,8 @@ export default function GameSetupScreen({ navigation }: Props) {
           style={[styles.startButton, (isFlagFlash || isFlagPuzzle) && styles.startButtonParty]}
           onPress={startGame}
           activeOpacity={0.8}
+          accessibilityRole="button"
+          accessibilityLabel={isFlagFlash ? 'Start FlagFlash' : isFlagPuzzle ? 'Start Flag Puzzle' : 'Start Game'}
         >
           <Text style={styles.startButtonText}>
             {isFlagFlash ? 'Start FlagFlash' : isFlagPuzzle ? 'Start Flag Puzzle' : 'Start Game'}

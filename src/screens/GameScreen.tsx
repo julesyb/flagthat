@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -10,12 +10,14 @@ import {
   Keyboard,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily, nav, buttons } from '../utils/theme';
+import { colors, spacing, typography, buttons } from '../utils/theme';
 import { GameQuestion, GameResult } from '../types';
 import { generateQuestions, checkAnswer } from '../utils/gameEngine';
 import { hapticCorrect, hapticWrong, hapticTap, playCorrectSound, playWrongSound } from '../utils/feedback';
 import FlagImage from '../components/FlagImage';
 import MapImage from '../components/MapImage';
+import GameTopBar from '../components/GameTopBar';
+import { useGameAnimations } from '../hooks/useGameAnimations';
 import { getFlagByName } from '../data';
 import { RootStackParamList } from '../types/navigation';
 
@@ -32,9 +34,9 @@ export default function GameScreen({ route, navigation }: Props) {
   const [lastAnswerCorrect, setLastAnswerCorrect] = useState(false);
   const [currentStreak, setCurrentStreak] = useState(0);
   const [questionStartTime, setQuestionStartTime] = useState(Date.now());
-  const fadeAnim = useRef(new Animated.Value(1)).current;
-  const streakScale = useRef(new Animated.Value(1)).current;
-  const shakeAnim = useRef(new Animated.Value(0)).current;
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const { fadeAnim, streakScale, shakeAnim, animateStreak, animateWrong, animateTransition } = useGameAnimations();
 
   useEffect(() => {
     const q = generateQuestions(config);
@@ -42,30 +44,21 @@ export default function GameScreen({ route, navigation }: Props) {
     setQuestionStartTime(Date.now());
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
   const currentQuestion = questions[currentIndex];
   const isHard = config.mode === 'hard';
   const isMapMode = config.displayMode === 'map';
   const progress = questions.length > 0 ? (currentIndex + 1) / questions.length : 0;
 
-  const animateStreak = () => {
-    streakScale.setValue(1.5);
-    Animated.spring(streakScale, {
-      toValue: 1,
-      friction: 3,
-      tension: 150,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const animateWrong = () => {
-    Animated.sequence([
-      Animated.timing(shakeAnim, { toValue: 10, duration: 50, useNativeDriver: true }),
-      Animated.timing(shakeAnim, { toValue: -10, duration: 50, useNativeDriver: true }),
-      Animated.timing(shakeAnim, { toValue: 8, duration: 50, useNativeDriver: true }),
-      Animated.timing(shakeAnim, { toValue: -8, duration: 50, useNativeDriver: true }),
-      Animated.timing(shakeAnim, { toValue: 0, duration: 50, useNativeDriver: true }),
-    ]).start();
-  };
+  const correctCount = useMemo(
+    () => results.filter((r) => r.correct).length,
+    [results],
+  );
 
   const handleAnswer = useCallback(
     (answer: string) => {
@@ -100,21 +93,9 @@ export default function GameScreen({ route, navigation }: Props) {
 
       const newResults = [...results, result];
 
-      setTimeout(() => {
+      timeoutRef.current = setTimeout(() => {
         if (currentIndex < questions.length - 1) {
-          Animated.sequence([
-            Animated.timing(fadeAnim, {
-              toValue: 0,
-              duration: 150,
-              useNativeDriver: true,
-            }),
-            Animated.timing(fadeAnim, {
-              toValue: 1,
-              duration: 150,
-              useNativeDriver: true,
-            }),
-          ]).start();
-
+          animateTransition();
           setResults(newResults);
           setCurrentIndex((i) => i + 1);
           setSelectedAnswer(null);
@@ -128,7 +109,7 @@ export default function GameScreen({ route, navigation }: Props) {
         }
       }, correct ? 600 : 1200);
     },
-    [showFeedback, currentQuestion, questionStartTime, results, currentIndex, questions, fadeAnim, navigation, config],
+    [showFeedback, currentQuestion, questionStartTime, results, currentIndex, questions, navigation, config, animateStreak, animateWrong, animateTransition],
   );
 
   const handleSubmitHard = () => {
@@ -153,31 +134,14 @@ export default function GameScreen({ route, navigation }: Props) {
         <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
       </View>
 
-      <View style={styles.topBar}>
-        <TouchableOpacity
-          onPress={() => navigation.popToTop()}
-          style={styles.quitButton}
-        >
-          <Text style={styles.quitText}>Exit</Text>
-        </TouchableOpacity>
-        <View style={styles.centerInfo}>
-          <Text style={styles.counter}>
-            {currentIndex + 1} / {questions.length}
-          </Text>
-          {currentStreak >= 2 ? (
-            <Animated.Text
-              style={[styles.streakText, { transform: [{ scale: streakScale }] }]}
-            >
-              {currentStreak}x streak
-            </Animated.Text>
-          ) : (
-            <Text style={styles.score}>
-              {results.filter((r) => r.correct).length} correct
-            </Text>
-          )}
-        </View>
-        <View style={styles.quitSpacer} />
-      </View>
+      <GameTopBar
+        currentIndex={currentIndex}
+        totalQuestions={questions.length}
+        correctCount={correctCount}
+        currentStreak={currentStreak}
+        streakScale={streakScale}
+        onExit={() => navigation.popToTop()}
+      />
 
       <Animated.View
         style={[
@@ -187,10 +151,7 @@ export default function GameScreen({ route, navigation }: Props) {
       >
         <View style={styles.flagContainer}>
           {isMapMode ? (
-            <MapImage
-              countryCode={currentQuestion.flag.id}
-              size="hero"
-            />
+            <MapImage countryCode={currentQuestion.flag.id} size="hero" />
           ) : (
             <FlagImage
               countryCode={currentQuestion.flag.id}
@@ -223,6 +184,7 @@ export default function GameScreen({ route, navigation }: Props) {
               returnKeyType="done"
               onSubmitEditing={handleSubmitHard}
               editable={!showFeedback}
+              accessibilityLabel="Type your answer"
             />
             <TouchableOpacity
               style={[
@@ -232,6 +194,8 @@ export default function GameScreen({ route, navigation }: Props) {
               onPress={handleSubmitHard}
               disabled={textInput.trim().length === 0 || showFeedback}
               activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="Submit answer"
             >
               <Text style={styles.submitButtonText}>Submit</Text>
             </TouchableOpacity>
@@ -267,6 +231,8 @@ export default function GameScreen({ route, navigation }: Props) {
                   onPress={() => handleAnswer(option)}
                   disabled={showFeedback}
                   activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel={isMapMode && optionFlag ? optionFlag.name : option}
                 >
                   {isMapMode && optionFlag ? (
                     <FlagImage
@@ -286,9 +252,9 @@ export default function GameScreen({ route, navigation }: Props) {
         {showFeedback && (
           <View style={styles.feedbackContainer}>
             {lastAnswerCorrect ? (
-              <Text style={styles.feedbackCorrect}>Correct!</Text>
+              <Text style={styles.feedbackCorrect} accessibilityLiveRegion="polite">Correct!</Text>
             ) : (
-              <Text style={styles.feedbackWrong}>
+              <Text style={styles.feedbackWrong} accessibilityLiveRegion="polite">
                 It was {currentQuestion.flag.name}
               </Text>
             )}
@@ -320,37 +286,6 @@ const styles = StyleSheet.create({
   progressFill: {
     height: '100%',
     backgroundColor: colors.ink,
-  },
-  topBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-  },
-  quitButton: {
-    ...nav.backButton,
-  },
-  quitText: {
-    ...nav.backText,
-  },
-  centerInfo: {
-    alignItems: 'center',
-  },
-  counter: {
-    ...typography.bodyBold,
-    color: colors.text,
-  },
-  streakText: {
-    ...typography.caption,
-    color: colors.accent,
-  },
-  score: {
-    ...typography.caption,
-    color: colors.success,
-  },
-  quitSpacer: {
-    width: 60,
   },
   questionContainer: {
     flex: 1,
