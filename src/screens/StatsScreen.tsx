@@ -14,15 +14,16 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
 import { colors, spacing, fontFamily, fontSize, borderRadius } from '../utils/theme';
-import { UserStats, GameMode, CategoryId, CATEGORIES } from '../types';
-import { getStats, getFlagStats, FlagStats, getDayStreak, getBadgeData, getMissedFlagIds, BadgeData, getSupportData } from '../utils/storage';
+import { UserStats, GameMode, CategoryId } from '../types';
+import { getStats, getFlagStats, FlagStats, getDayStreak, getBadgeData, getMissedFlagIds, BadgeData, getSupportData, getGameHistory, GameHistoryEntry } from '../utils/storage';
 import { getAllFlags, getTotalFlagCount } from '../data';
 import { getGrade } from '../utils/gameEngine';
 import { t } from '../utils/i18n';
 import { FlagImageSmall } from '../components/FlagImage';
 import BottomNav from '../components/BottomNav';
+import ScreenContainer from '../components/ScreenContainer';
+import { useNavTabs } from '../hooks/useNavTabs';
 import { evaluateBadges, BADGES, TIER_COLORS, BadgeIcon, BadgeCheckContext, getBadgeProgress } from '../utils/badges';
-import { getGameHistory, GameHistoryEntry } from '../utils/storage';
 import { FlagIcon, GlobeIcon, CheckIcon, PlayIcon, LightningIcon, CalendarIcon, ClockIcon, CrosshairIcon, LinkIcon, HeartIcon, ChevronRightIcon, BarChartIcon } from '../components/Icons';
 
 const RANK_COLORS = [colors.gradeS, colors.textTertiary, colors.warning];
@@ -42,6 +43,7 @@ const REGIONS: CategoryId[] = ['africa', 'asia', 'europe', 'americas', 'oceania'
 
 export default function StatsScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const onNavigate = useNavTabs();
   const [stats, setStats] = useState<UserStats | null>(null);
   const [flagStats, setFlagStats] = useState<FlagStats>({});
   const [dayStreak, setDayStreak] = useState(0);
@@ -356,6 +358,7 @@ export default function StatsScreen() {
   return (
     <SafeAreaView style={s.container}>
       <ScrollView style={{ flex: 1 }} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
+        <ScreenContainer>
 
         {/* ══════════════════════════════════════════════════════════
             HERO: Grade + animated accuracy count-up
@@ -627,12 +630,9 @@ export default function StatsScreen() {
             <ChevronRightIcon size={14} color={colors.textTertiary} />
           </TouchableOpacity>
         </Animated.View>
+        </ScreenContainer>
       </ScrollView>
-      <BottomNav activeTab="Stats" onNavigate={(tab) => {
-        if (tab === 'Play') navigation.navigate('Home');
-        else if (tab === 'Modes') navigation.navigate('GameSetup');
-        else if (tab === 'Browse') navigation.navigate('Browse');
-      }} />
+      <BottomNav activeTab="Stats" onNavigate={onNavigate} />
     </SafeAreaView>
   );
 }

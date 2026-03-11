@@ -14,13 +14,14 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius } from '../utils/theme';
 import { calculateAccuracy, getStreakFromResults, getGrade, generateDailyShareGrid, generateShareGrid, getDailyNumber } from '../utils/gameEngine';
 import { updateStats, updateFlagResults, saveDailyChallenge, incrementDailyChallenges, updateLastGameBadgeFlags, markShared, saveBaselineResult, getStats, getFlagStats, getDayStreak, getBadgeData, getMissedFlagIds, addGameHistoryEntry, getSupportData } from '../utils/storage';
-import { BaselineRegionId } from '../types';
+import { BaselineRegionId, UserStats, GameMode } from '../types';
 import { t } from '../utils/i18n';
 import { hapticCorrect, hapticTap, playCelebrationSound } from '../utils/feedback';
 import { FlagImageSmall } from '../components/FlagImage';
 import { CheckIcon, CrossIcon, ChevronRightIcon, BarChartIcon, FlagIcon, GlobeIcon, PlayIcon, LightningIcon, CalendarIcon, ClockIcon, CrosshairIcon, LinkIcon, HeartIcon } from '../components/Icons';
 import BottomNav from '../components/BottomNav';
-import { UserStats, GameMode } from '../types';
+import ScreenContainer from '../components/ScreenContainer';
+import { useNavTabs } from '../hooks/useNavTabs';
 import { RootStackParamList } from '../types/navigation';
 import { evaluateBadges, BADGES, TIER_COLORS, BadgeIcon, EarnedBadge } from '../utils/badges';
 import { getTotalFlagCount } from '../data';
@@ -29,6 +30,7 @@ import { useInterstitialAdUnit, shouldShowAd, recordAdImpression, incrementGameC
 type Props = NativeStackScreenProps<RootStackParamList, 'Results'>;
 
 export default function ResultsScreen({ route, navigation }: Props) {
+  const onNavigate = useNavTabs();
   const { results, config, reviewOnly } = route.params;
   const correct = results.filter((r) => r.correct).length;
   const accuracy = calculateAccuracy(results);
@@ -385,6 +387,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
   return (
     <SafeAreaView style={st.container}>
       <ScrollView contentContainerStyle={st.content} showsVerticalScrollIndicator={false}>
+        <ScreenContainer>
 
         {/* ── PERFECT BANNER ── */}
         {isPerfect && (
@@ -660,16 +663,9 @@ export default function ResultsScreen({ route, navigation }: Props) {
         })}
 
         <View style={{ height: spacing.lg }} />
+        </ScreenContainer>
       </ScrollView>
-      <BottomNav
-        activeTab="Play"
-        onNavigate={(tab) => {
-          if (tab === 'Play') navigation.popToTop();
-          else if (tab === 'Modes') navigation.navigate('GameSetup');
-          else if (tab === 'Stats') navigation.navigate('Stats');
-          else if (tab === 'Browse') navigation.navigate('Browse');
-        }}
-      />
+      <BottomNav activeTab="Play" onNavigate={onNavigate} />
     </SafeAreaView>
   );
 }

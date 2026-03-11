@@ -25,9 +25,12 @@ import { toggleDailyReminder, syncNotificationSchedule } from '../utils/notifica
 import { t, setLocale, getLocale, SUPPORTED_LOCALES, LocaleCode } from '../utils/i18n';
 import { ChevronRightIcon, ChevronDownIcon, CheckIcon } from '../components/Icons';
 import BottomNav from '../components/BottomNav';
+import ScreenContainer from '../components/ScreenContainer';
+import { useNavTabs } from '../hooks/useNavTabs';
 
 export default function SettingsScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const onNavigate = useNavTabs();
   const [settings, setSettings] = useState<AppSettings>({
     soundEnabled: true,
     hapticsEnabled: true,
@@ -155,6 +158,7 @@ export default function SettingsScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
+        <ScreenContainer>
         {/* Sound & Haptics */}
         <Text style={styles.sectionTitle}>{t('settings.soundHaptics')}</Text>
 
@@ -319,13 +323,9 @@ export default function SettingsScreen() {
         >
           <Text style={styles.resetButtonText}>{t('settings.resetAllData')}</Text>
         </TouchableOpacity>
+        </ScreenContainer>
       </ScrollView>
-      <BottomNav activeTab="Stats" onNavigate={(tab) => {
-        if (tab === 'Play') navigation.navigate('Home');
-        else if (tab === 'Modes') navigation.navigate('GameSetup');
-        else if (tab === 'Stats') navigation.navigate('Stats');
-        else if (tab === 'Browse') navigation.navigate('Browse');
-      }} />
+      <BottomNav activeTab="Play" onNavigate={onNavigate} />
     </SafeAreaView>
   );
 }

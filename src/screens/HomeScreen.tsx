@@ -22,6 +22,8 @@ import { GameMode, UserStats, GameQuestion, CategoryId } from '../types';
 import { PlayIcon, ChevronRightIcon, ChevronDownIcon, ClockIcon, UsersIcon, EyeIcon, CalendarIcon, CrosshairIcon, LightningIcon, GearIcon } from '../components/Icons';
 import FlagImage from '../components/FlagImage';
 import BottomNav from '../components/BottomNav';
+import ScreenContainer from '../components/ScreenContainer';
+import { useNavTabs } from '../hooks/useNavTabs';
 import SupportCard from '../components/SupportCard';
 import { preloadRewardedAd } from '../utils/ads';
 import { t } from '../utils/i18n';
@@ -167,6 +169,7 @@ function FlagTeaser() {
 }
 
 export default function HomeScreen({ navigation }: Props) {
+  const onNavigate = useNavTabs();
   const totalFlags = getTotalFlagCount();
   const [mode, setMode] = useState<GameMode>('medium');
   const [questionCount, setQuestionCount] = useState(10);
@@ -222,7 +225,7 @@ export default function HomeScreen({ navigation }: Props) {
       <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
 
       <ScrollView style={s.scroll} contentContainerStyle={s.scrollContent} showsVerticalScrollIndicator={false}>
-        <View style={s.desktopWrapper}>
+        <ScreenContainer>
         {/* ── HEADER ── */}
         <View style={s.header}>
           <View style={s.wordmark}>
@@ -555,19 +558,11 @@ export default function HomeScreen({ navigation }: Props) {
         )}
 
         <View style={{ height: spacing.md }} />
-        </View>
+        </ScreenContainer>
       </ScrollView>
 
       {/* ── BOTTOM NAV ── */}
-      <BottomNav
-        activeTab="Play"
-        onNavigate={(tab) => {
-          hapticTap();
-          if (tab === 'Modes') navigation.navigate('GameSetup');
-          else if (tab === 'Stats') navigation.navigate('Stats');
-          else if (tab === 'Browse') navigation.navigate('Browse');
-        }}
-      />
+      <BottomNav activeTab="Play" onNavigate={onNavigate} />
     </SafeAreaView>
   );
 }
@@ -583,11 +578,6 @@ const s = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: spacing.md,
-    alignItems: 'center',
-  },
-  desktopWrapper: {
-    width: '100%',
-    maxWidth: 600,
   },
 
   // ── Header

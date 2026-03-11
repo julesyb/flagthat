@@ -18,6 +18,7 @@ import { CheckIcon, ChevronRightIcon } from '../components/Icons';
 import { RootStackParamList } from '../types/navigation';
 import { BaselineRegionId, CategoryId } from '../types';
 import { t } from '../utils/i18n';
+import ScreenContainer from '../components/ScreenContainer';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Onboarding'>;
 
@@ -75,7 +76,7 @@ export default function OnboardingScreen({ navigation }: Props) {
         contentContainerStyle={s.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <View style={s.desktopWrapper}>
+        <ScreenContainer>
           {/* Header */}
           <View style={s.header}>
             <View style={s.wordmark}>
@@ -160,7 +161,7 @@ export default function OnboardingScreen({ navigation }: Props) {
               </Text>
             </View>
           ) : null}
-        </View>
+        </ScreenContainer>
       </ScrollView>
     </SafeAreaView>
   );
@@ -176,11 +177,6 @@ const s = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: spacing.xxl,
-    alignItems: 'center',
-  },
-  desktopWrapper: {
-    width: '100%',
-    maxWidth: 600,
   },
 
   // Header

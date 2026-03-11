@@ -10,7 +10,6 @@ import {
   Keyboard,
   ScrollView,
   ActivityIndicator,
-  useWindowDimensions,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { colors, spacing, typography, fontFamily, nav, buttons, borderRadius } from '../utils/theme';
@@ -25,15 +24,14 @@ import MapImage from '../components/MapImage';
 import { useGameAnimations } from '../hooks/useGameAnimations';
 import { getFlagByName, getFlagsForCategory } from '../data';
 import { RootStackParamList } from '../types/navigation';
+import GameTopBar from '../components/GameTopBar';
+import ScreenContainer from '../components/ScreenContainer';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Game'>;
-
-const MAX_GAME_WIDTH = 600;
 
 export default function GameScreen({ route, navigation }: Props) {
   const { config } = route.params;
   const isTimeAttack = config.mode === 'timeattack';
-  const { width: screenWidth } = useWindowDimensions();
   const [questions, setQuestions] = useState<GameQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [results, setResults] = useState<GameResult[]>([]);
@@ -240,8 +238,6 @@ export default function GameScreen({ route, navigation }: Props) {
     );
   }
 
-  const contentMaxWidth = Math.min(screenWidth, MAX_GAME_WIDTH);
-
   return (
     <SafeAreaView style={styles.container}>
       {isTimeAttack ? (
@@ -257,54 +253,51 @@ export default function GameScreen({ route, navigation }: Props) {
         </View>
       )}
 
-      <View style={[styles.desktopWrapper, { maxWidth: contentMaxWidth }]}>
-      <View style={styles.topBar}>
-        <TouchableOpacity
-          onPress={() => {
-            if (autoAdvanceRef.current) clearTimeout(autoAdvanceRef.current);
-            const currentResults = pendingResultsRef.current ?? results;
-            if (currentResults.length > 0) {
-              navigation.replace('Results', { results: currentResults, config });
-            } else {
-              navigation.popToTop();
-            }
-          }}
-          style={styles.quitButton}
-        >
-          <Text style={styles.quitText}>{t('common.exit')}</Text>
-        </TouchableOpacity>
-        <View style={styles.centerInfo}>
-          {isTimeAttack ? (
-            <Text style={styles.counter}>
-              {t('game.correctCount', { count: results.filter((r) => r.correct).length })}
-            </Text>
-          ) : (
-            <Text style={styles.counter}>
-              {t('game.questionOf', { current: currentIndex + 1, total: questions.length })}
-            </Text>
-          )}
-          {currentStreak >= 2 ? (
-            <Animated.Text
-              style={[styles.streakText, { transform: [{ scale: streakScale }] }]}
-            >
-              {t('game.streak', { count: currentStreak })}
-            </Animated.Text>
-          ) : (
-            !isTimeAttack && (
-              <Text style={styles.score}>
+      <ScreenContainer flex game>
+      <GameTopBar
+        onExit={() => {
+          if (autoAdvanceRef.current) clearTimeout(autoAdvanceRef.current);
+          const currentResults = pendingResultsRef.current ?? results;
+          if (currentResults.length > 0) {
+            navigation.replace('Results', { results: currentResults, config });
+          } else {
+            navigation.popToTop();
+          }
+        }}
+        center={
+          <View style={styles.centerInfo}>
+            {isTimeAttack ? (
+              <Text style={styles.counter}>
                 {t('game.correctCount', { count: results.filter((r) => r.correct).length })}
               </Text>
-            )
-          )}
-        </View>
-        {livesRemaining !== null ? (
-          <Text style={[styles.livesText, livesRemaining === 1 && styles.livesTextUrgent]}>
-            {livesRemaining === 1 ? t('game.life', { count: livesRemaining }) : t('game.lives', { count: livesRemaining })}
-          </Text>
-        ) : (
-          <View style={styles.quitSpacer} />
-        )}
-      </View>
+            ) : (
+              <Text style={styles.counter}>
+                {t('game.questionOf', { current: currentIndex + 1, total: questions.length })}
+              </Text>
+            )}
+            {currentStreak >= 2 ? (
+              <Animated.Text
+                style={[styles.streakText, { transform: [{ scale: streakScale }] }]}
+              >
+                {t('game.streak', { count: currentStreak })}
+              </Animated.Text>
+            ) : (
+              !isTimeAttack && (
+                <Text style={styles.score}>
+                  {t('game.correctCount', { count: results.filter((r) => r.correct).length })}
+                </Text>
+              )
+            )}
+          </View>
+        }
+        right={
+          livesRemaining !== null ? (
+            <Text style={[styles.livesText, livesRemaining === 1 && styles.livesTextUrgent]}>
+              {livesRemaining === 1 ? t('game.life', { count: livesRemaining }) : t('game.lives', { count: livesRemaining })}
+            </Text>
+          ) : undefined
+        }
+      />
 
       <Animated.View
         style={[
@@ -438,7 +431,7 @@ export default function GameScreen({ route, navigation }: Props) {
           </View>
         )}
       </Animated.View>
-      </View>
+      </ScreenContainer>
     </SafeAreaView>
   );
 }
@@ -447,12 +440,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
-    alignItems: 'center',
-  },
-  desktopWrapper: {
-    flex: 1,
-    width: '100%',
-    alignSelf: 'center',
   },
   loadingContainer: {
     flex: 1,

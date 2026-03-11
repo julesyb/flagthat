@@ -24,6 +24,7 @@ import FlagImage from '../components/FlagImage';
 import { flagName } from '../data/countryNames';
 import MapImage from '../components/MapImage';
 import { RootStackParamList } from '../types/navigation';
+import ScreenContainer from '../components/ScreenContainer';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'FlagFlash'>;
 
@@ -302,6 +303,8 @@ export default function FlagFlashScreen({ route, navigation }: Props) {
     return (
       <View style={styles.tutorialContainer}>
         <StatusBar hidden />
+        <ScreenContainer>
+        <View style={styles.tutorialInner}>
         <Text style={styles.tutorialTitle}>FlagFlash</Text>
         <Text style={styles.tutorialSubtitle}>How to play</Text>
 
@@ -377,6 +380,8 @@ export default function FlagFlashScreen({ route, navigation }: Props) {
         >
           <Text style={styles.exitButtonText}>Exit</Text>
         </TouchableOpacity>
+        </View>
+        </ScreenContainer>
       </View>
     );
   }
@@ -427,6 +432,7 @@ export default function FlagFlashScreen({ route, navigation }: Props) {
         />
       </View>
 
+      <ScreenContainer flex game>
       <View style={styles.gameContent}>
         {tiltState === 'correct' ? (
           <Text style={styles.feedbackText}>CORRECT!</Text>
@@ -471,6 +477,8 @@ export default function FlagFlashScreen({ route, navigation }: Props) {
         </View>
       )}
 
+      </ScreenContainer>
+
       <View style={styles.bottomBar}>
         <Text style={[styles.timerText, timeLeft <= 10 && { color: colors.warning }]}>
           {timeLeft}s
@@ -500,6 +508,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: spacing.xl,
+  },
+  tutorialInner: {
+    alignItems: 'center',
   },
   tutorialTitle: {
     fontSize: fontSize.gameTitle,

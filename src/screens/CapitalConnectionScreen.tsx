@@ -17,6 +17,8 @@ import { countries } from '../data/countries';
 import { countryCapitals } from '../data/countryCapitals';
 import { countryCities } from '../data/countryCities';
 import FlagImage from '../components/FlagImage';
+import GameTopBar from '../components/GameTopBar';
+import ScreenContainer from '../components/ScreenContainer';
 import { t } from '../utils/i18n';
 import { flagName } from '../data/countryNames';
 
@@ -164,30 +166,27 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
         <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
       </View>
 
-      <View style={styles.topBar}>
-        <TouchableOpacity
-          onPress={() => navigation.popToTop()}
-          style={styles.exitButton}
-          accessibilityRole="button"
-        >
-          <Text style={styles.exitText}>{t('common.exit')}</Text>
-        </TouchableOpacity>
-        <View style={styles.centerInfo}>
-          <Text style={styles.counter}>
-            {t('game.questionOf', { current: currentIndex + 1, total: questions.length })}
-          </Text>
-          {currentStreak >= 2 ? (
-            <Text style={styles.streakText}>{t('game.streak', { count: currentStreak })}</Text>
-          ) : (
-            <Text style={styles.scoreText}>{t('game.correctCount', { count: correctCount })}</Text>
-          )}
-        </View>
-        {guessLimit > 0 ? (
-          <Text style={styles.livesText}>{guessLimit - wrongCount === 1 ? t('game.life', { count: Math.max(0, guessLimit - wrongCount) }) : t('game.lives', { count: Math.max(0, guessLimit - wrongCount) })}</Text>
-        ) : (
-          <View style={styles.spacer} />
-        )}
-      </View>
+      <ScreenContainer flex game>
+      <GameTopBar
+        onExit={() => navigation.popToTop()}
+        center={
+          <View style={styles.centerInfo}>
+            <Text style={styles.counter}>
+              {t('game.questionOf', { current: currentIndex + 1, total: questions.length })}
+            </Text>
+            {currentStreak >= 2 ? (
+              <Text style={styles.streakText}>{t('game.streak', { count: currentStreak })}</Text>
+            ) : (
+              <Text style={styles.scoreText}>{t('game.correctCount', { count: correctCount })}</Text>
+            )}
+          </View>
+        }
+        right={
+          guessLimit > 0 ? (
+            <Text style={styles.livesText}>{guessLimit - wrongCount === 1 ? t('game.life', { count: Math.max(0, guessLimit - wrongCount) }) : t('game.lives', { count: Math.max(0, guessLimit - wrongCount) })}</Text>
+          ) : undefined
+        }
+      />
 
       <Animated.View style={[styles.questionContainer, { opacity: fadeAnim }]}>
         <View style={styles.flagContainer}>
@@ -244,6 +243,7 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
           </View>
         )}
       </Animated.View>
+      </ScreenContainer>
     </SafeAreaView>
   );
 }
@@ -252,7 +252,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
-    alignItems: 'center',
   },
   progressBar: {
     height: 3,
@@ -269,8 +268,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
-    width: '100%',
-    maxWidth: 480,
   },
   exitButton: {
     padding: spacing.sm,
@@ -304,8 +301,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: spacing.lg,
     justifyContent: 'center',
-    width: '100%',
-    maxWidth: 480,
   },
   flagContainer: {
     alignItems: 'center',
