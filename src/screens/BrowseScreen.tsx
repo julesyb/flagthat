@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
-import { colors, spacing, typography } from '../utils/theme';
+import { colors, spacing, typography, borderRadius } from '../utils/theme';
 import { FlagItem } from '../types';
 import { RootStackParamList } from '../types/navigation';
 import { getAllFlags } from '../data';
@@ -174,6 +174,7 @@ const styles = StyleSheet.create({
     color: colors.text,
     borderWidth: 1,
     borderColor: colors.border,
+    borderRadius: borderRadius.md,
   },
   regionScroll: {
     maxHeight: 48,
@@ -190,6 +191,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     borderWidth: 2,
     borderColor: colors.rule2,
+    borderRadius: borderRadius.sm,
   },
   regionChipActive: {
     borderColor: colors.ink,
@@ -229,6 +231,7 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     borderWidth: 1,
     borderColor: colors.border,
+    borderRadius: borderRadius.md,
   },
   flagInfo: {
     flex: 1,

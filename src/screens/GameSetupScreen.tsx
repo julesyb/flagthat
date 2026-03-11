@@ -8,7 +8,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily, buttons } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, buttons, borderRadius } from '../utils/theme';
 import {
   GameMode,
   DisplayMode,
@@ -384,6 +384,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 2,
     borderColor: colors.border,
+    borderRadius: borderRadius.md,
   },
   displayToggleActive: {
     borderColor: colors.ink,
@@ -436,6 +437,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 2,
     borderColor: colors.border,
+    borderRadius: borderRadius.md,
   },
   modeCardActive: {
     borderColor: colors.ink,
@@ -448,6 +450,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: spacing.xs,
+    borderRadius: borderRadius.sm,
   },
   modeIconBadgeActive: {
     backgroundColor: colors.ink,
@@ -488,6 +491,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 2,
     borderColor: colors.border,
+    borderRadius: borderRadius.md,
   },
   filterTypeChipActive: {
     borderColor: colors.ink,
@@ -513,6 +517,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     borderWidth: 2,
     borderColor: colors.border,
+    borderRadius: borderRadius.md,
     gap: spacing.sm,
   },
   categoryChipActive: {
@@ -525,6 +530,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surfaceSecondary,
     justifyContent: 'center',
     alignItems: 'center',
+    borderRadius: borderRadius.sm,
   },
   categoryIconBadgeActive: {
     backgroundColor: colors.ink,
@@ -567,6 +573,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 2,
     borderColor: colors.border,
+    borderRadius: borderRadius.md,
   },
   optionChipActive: {
     borderColor: colors.ink,

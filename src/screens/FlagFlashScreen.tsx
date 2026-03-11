@@ -8,7 +8,7 @@ import {
   Platform,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily, buttons, nav } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, buttons, borderRadius, nav } from '../utils/theme';
 import { GameQuestion, GameResult } from '../types';
 import { generateQuestions } from '../utils/gameEngine';
 import {
@@ -442,6 +442,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.whiteAlpha15,
     justifyContent: 'center',
     alignItems: 'center',
+    borderRadius: borderRadius.sm,
   },
   stepIconText: {
     ...typography.bodyBold,
@@ -457,6 +458,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     width: 140,
     alignItems: 'center',
+    borderRadius: borderRadius.sm,
   },
   tiltDemoText: {
     ...typography.captionBold,
@@ -541,6 +543,7 @@ const styles = StyleSheet.create({
     maxWidth: 200,
     paddingVertical: spacing.md,
     alignItems: 'center',
+    borderRadius: borderRadius.md,
   },
   webButtonCorrect: {
     backgroundColor: colors.success,
@@ -579,6 +582,7 @@ const styles = StyleSheet.create({
   exitButtonPlaying: {
     padding: spacing.sm,
     backgroundColor: colors.whiteAlpha15,
+    borderRadius: borderRadius.sm,
   },
   exitButtonPlayingText: {
     ...nav.backText,

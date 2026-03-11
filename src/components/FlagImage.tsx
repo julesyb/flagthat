@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import { Image } from 'expo-image';
-import { colors, fontFamily } from '../utils/theme';
+import { colors, fontFamily, borderRadius } from '../utils/theme';
 
 interface FlagImageProps {
   countryCode: string;
@@ -78,6 +78,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surfaceSecondary,
     borderWidth: 1,
     borderColor: colors.rule2,
+    borderRadius: borderRadius.sm,
   },
   image: {
     backgroundColor: 'transparent',
@@ -103,6 +104,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surfaceSecondary,
     borderWidth: 1,
     borderColor: colors.rule2,
+    borderRadius: borderRadius.sm,
   },
   smallImage: {
     width: 56,

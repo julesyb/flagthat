@@ -10,7 +10,7 @@ import {
   Platform,
 } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import { colors, spacing, typography, fontFamily } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, borderRadius } from '../utils/theme';
 import { UserStats, GAME_MODES, CATEGORIES, GameMode } from '../types';
 import { getStats, resetStats, getFlagStats, FlagStats } from '../utils/storage';
 import { getAllFlags } from '../data';
@@ -226,6 +226,7 @@ const styles = StyleSheet.create({
     padding: spacing.xl,
     alignItems: 'center',
     marginBottom: spacing.sm,
+    borderRadius: borderRadius.lg,
   },
   bigStatValue: {
     fontSize: 48,
@@ -248,6 +249,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: colors.border,
+    borderRadius: borderRadius.md,
   },
   smallStatValue: {
     ...typography.heading,
@@ -280,10 +282,12 @@ const styles = StyleSheet.create({
     height: 8,
     backgroundColor: colors.border,
     overflow: 'hidden',
+    borderRadius: borderRadius.full,
   },
   statBar: {
     height: '100%',
     backgroundColor: colors.ink,
+    borderRadius: borderRadius.full,
   },
   statRowValue: {
     ...typography.captionBold,
@@ -299,6 +303,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
     borderWidth: 1,
     borderColor: colors.border,
+    borderRadius: borderRadius.md,
     gap: spacing.md,
   },
   flagStatRank: {

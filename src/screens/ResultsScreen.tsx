@@ -10,7 +10,7 @@ import {
   Share,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily, buttons } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, buttons, borderRadius } from '../utils/theme';
 import { calculateAccuracy, getStreakFromResults, getGrade } from '../utils/gameEngine';
 import { updateStats, updateFlagResults } from '../utils/storage';
 import { hapticCorrect, playCelebrationSound } from '../utils/feedback';
@@ -204,6 +204,7 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     alignItems: 'center',
     marginBottom: spacing.md,
+    borderRadius: borderRadius.md,
   },
   celebrationText: {
     ...typography.headingUpper,
@@ -240,6 +241,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: colors.border,
+    borderRadius: borderRadius.md,
   },
   statValue: {
     ...typography.heading,
@@ -269,6 +271,7 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     marginBottom: spacing.sm,
     borderLeftWidth: 4,
+    borderRadius: borderRadius.md,
     gap: spacing.md,
   },
   reviewCorrect: {

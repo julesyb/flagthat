@@ -462,6 +462,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 2,
     borderColor: colors.border,
+    borderRadius: borderRadius.md,
   },
   optionButtonMap: {
     padding: spacing.xs,
@@ -469,6 +470,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: colors.border,
     backgroundColor: colors.white,
+    borderRadius: borderRadius.md,
   },
   optionCorrect: {
     backgroundColor: colors.success,
@@ -503,6 +505,7 @@ const styles = StyleSheet.create({
     color: colors.text,
     borderWidth: 1,
     borderColor: colors.border,
+    borderRadius: borderRadius.md,
     textAlign: 'center',
   },
   submitButton: {

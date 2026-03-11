@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, useWindowDimensions } from 'react-native';
 import { Image } from 'expo-image';
-import { colors, fontFamily } from '../utils/theme';
+import { colors, fontFamily, borderRadius } from '../utils/theme';
 import { countryCoordinates } from '../data/countryCoordinates';
 
 interface MapImageProps {
@@ -241,6 +241,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.mapBackground,
     borderWidth: 1,
     borderColor: colors.rule2,
+    borderRadius: borderRadius.sm,
   },
   fallback: {
     backgroundColor: colors.border,
@@ -248,6 +249,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: colors.rule2,
+    borderRadius: borderRadius.sm,
   },
   fallbackText: {
     fontSize: 24,
@@ -296,6 +298,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: colors.rule2,
+    borderRadius: borderRadius.sm,
   },
   zoomText: {
     fontFamily: fontFamily.uiLabel,

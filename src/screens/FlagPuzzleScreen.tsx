@@ -11,7 +11,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, buttons, borderRadius, nav } from '../utils/theme';
 import { GameQuestion, GameResult } from '../types';
 import { generateQuestions, checkAnswer } from '../utils/gameEngine';
 import { hapticCorrect, hapticWrong, hapticTap, playCorrectSound, playWrongSound } from '../utils/feedback';
@@ -288,7 +288,7 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
           onPress={() => navigation.popToTop()}
           style={styles.quitButton}
         >
-          <Text style={styles.quitText}>Quit</Text>
+          <Text style={styles.quitText}>Exit</Text>
         </TouchableOpacity>
         <View style={styles.centerInfo}>
           <Text style={styles.counter}>
@@ -430,7 +430,7 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.white,
+    backgroundColor: colors.background,
   },
   loadingContainer: {
     flex: 1,
@@ -464,12 +464,10 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
   },
   quitButton: {
-    padding: spacing.sm,
-    width: 60,
+    ...nav.backButton,
   },
   quitText: {
-    ...typography.caption,
-    color: colors.textTertiary,
+    ...nav.backText,
   },
   centerInfo: {
     alignItems: 'center',
@@ -541,26 +539,26 @@ const styles = StyleSheet.create({
     color: colors.text,
     borderWidth: 2,
     borderColor: colors.border,
+    borderRadius: borderRadius.md,
     textAlign: 'center',
   },
   submitButton: {
-    backgroundColor: colors.ink,
-    padding: spacing.lg,
-    alignItems: 'center',
+    ...buttons.primary,
   },
   submitButtonDisabled: {
     backgroundColor: colors.textTertiary,
   },
   submitButtonText: {
-    ...typography.bodyBold,
-    color: colors.white,
+    ...buttons.primaryText,
   },
   suggestionsContainer: {
     maxHeight: 200,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     borderWidth: 2,
     borderColor: colors.border,
     borderTopWidth: 0,
+    borderBottomLeftRadius: borderRadius.md,
+    borderBottomRightRadius: borderRadius.md,
   },
   suggestionItem: {
     paddingHorizontal: spacing.lg,
