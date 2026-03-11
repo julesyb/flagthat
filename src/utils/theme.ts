@@ -25,7 +25,7 @@ const palette = {
   muted: '#9CA3AF',
   rule: '#E5E7EB',
   rule2: '#D1D5DB',
-  paper: '#F9FAFB',
+  paper: '#F5F6F8',
   paperDark: '#F3F4F6',
   white: '#FFFFFF',
   black: '#000000',

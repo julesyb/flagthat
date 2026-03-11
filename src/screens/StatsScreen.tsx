@@ -41,11 +41,57 @@ export default function StatsScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      getStats().then(setStats);
-      getFlagStats().then(setFlagStats);
-      getDayStreak().then(setDayStreak);
-      getBadgeData().then(setBadgeData);
-      getMissedFlagIds().then((ids) => setWeakFlagCount(ids.length));
+      let cancelled = false;
+
+      async function loadData() {
+        try {
+          const [s, fs, ds, bd, missed] = await Promise.all([
+            getStats(),
+            getFlagStats(),
+            getDayStreak(),
+            getBadgeData(),
+            getMissedFlagIds(),
+          ]);
+          if (!cancelled) {
+            setStats(s);
+            setFlagStats(fs);
+            setDayStreak(ds);
+            setBadgeData(bd);
+            setWeakFlagCount(missed.length);
+          }
+        } catch (e) {
+          // Ensure we still show something even if storage fails
+          if (!cancelled) {
+            setStats((prev) => prev ?? {
+              totalGamesPlayed: 0,
+              totalCorrect: 0,
+              totalAnswered: 0,
+              bestStreak: 0,
+              bestTimeAttackScore: 0,
+              modeStats: {
+                easy: { correct: 0, total: 0 },
+                medium: { correct: 0, total: 0 },
+                hard: { correct: 0, total: 0 },
+                flagflash: { correct: 0, total: 0 },
+                flagpuzzle: { correct: 0, total: 0 },
+                timeattack: { correct: 0, total: 0 },
+                neighbors: { correct: 0, total: 0 },
+                impostor: { correct: 0, total: 0 },
+                capitalconnection: { correct: 0, total: 0 },
+                daily: { correct: 0, total: 0 },
+                practice: { correct: 0, total: 0 },
+              },
+              categoryStats: {},
+            });
+          }
+        }
+      }
+
+      loadData();
+
+      return () => {
+        cancelled = true;
+      };
     }, []),
   );
 
@@ -226,7 +272,7 @@ export default function StatsScreen() {
         {(Object.keys(GAME_MODES) as GameMode[])
           .filter((m) => !GAME_MODES[m].hidden && m !== 'daily' && m !== 'practice')
           .map((m) => {
-            const ms = stats.modeStats[m];
+            const ms = stats.modeStats[m] ?? { correct: 0, total: 0 };
             const acc = ms.total > 0 ? Math.round((ms.correct / ms.total) * 100) : 0;
             const played = ms.total > 0;
             return (

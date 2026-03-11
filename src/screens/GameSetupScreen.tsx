@@ -84,11 +84,12 @@ function OptionChipRow({
   );
 }
 
-type SetupMode = 'quiz' | 'flagpuzzle' | 'timeattack' | 'neighbors' | 'capitalconnection';
+type SetupMode = 'quiz' | 'flagflash' | 'flagpuzzle' | 'timeattack' | 'neighbors' | 'capitalconnection';
 type QuizDifficulty = 'easy' | 'medium' | 'hard';
 
 const SETUP_MODES: { key: SetupMode; label: string; description: string; icon: string }[] = [
   { key: 'quiz', label: 'Quiz', description: 'Classic flag quiz', icon: 'Q' },
+  { key: 'flagflash', label: 'FlagFlash', description: 'Party mode, tilt to play', icon: '!!' },
   { key: 'flagpuzzle', label: 'Flag Puzzle', description: 'Flag reveals over time', icon: '??' },
   { key: 'timeattack', label: 'Timed Quiz', description: 'Race the clock', icon: '00' },
   { key: 'neighbors', label: 'Neighbors', description: 'Find bordering countries', icon: 'NB' },
@@ -102,7 +103,7 @@ const DIFFICULTIES: { key: QuizDifficulty; label: string }[] = [
 ];
 
 export default function GameSetupScreen({ navigation }: Props) {
-  const displayMode: DisplayMode = 'flag';
+  const [displayMode, setDisplayMode] = useState<DisplayMode>('flag');
   const [setupMode, setSetupMode] = useState<SetupMode>('quiz');
   const [difficulty, setDifficulty] = useState<QuizDifficulty>('medium');
   const [selectedCategory, setSelectedCategory] = useState<CategoryId>('all');
@@ -114,19 +115,22 @@ export default function GameSetupScreen({ navigation }: Props) {
   const [autocomplete, setAutocomplete] = useState(false);
 
   const totalFlags = getTotalFlagCount();
+  const isFlagFlash = setupMode === 'flagflash';
   const isFlagPuzzle = setupMode === 'flagpuzzle';
   const isTimeAttack = setupMode === 'timeattack';
-  const hasTimeLimit = isFlagPuzzle || isTimeAttack;
+  const hasTimeLimit = isFlagFlash || isFlagPuzzle || isTimeAttack;
   const isQuiz = setupMode === 'quiz';
 
   // Resolve the actual GameMode from setup selections
-  const resolvedMode: GameMode = isQuiz ? difficulty : setupMode;
+  const resolvedMode: GameMode = isQuiz ? difficulty : (setupMode as GameMode);
 
-  const showGuessLimit = setupMode !== 'timeattack' && setupMode !== 'flagpuzzle';
+  const showGuessLimit = setupMode !== 'timeattack' && setupMode !== 'flagpuzzle' && setupMode !== 'flagflash';
+  const showMapToggle = isQuiz || isFlagPuzzle;
 
   // Set sensible default time limit when mode changes
   useEffect(() => {
-    if (isFlagPuzzle) setTimeLimit(15);
+    if (isFlagFlash) setTimeLimit(60);
+    else if (isFlagPuzzle) setTimeLimit(15);
     else if (isTimeAttack) setTimeLimit(60);
   }, [setupMode]);
 
@@ -164,6 +168,8 @@ export default function GameSetupScreen({ navigation }: Props) {
 
     if (isTimeAttack) {
       navigation.navigate('Game', { config });
+    } else if (isFlagFlash) {
+      navigation.navigate('FlagFlash', { config });
     } else if (isFlagPuzzle) {
       navigation.navigate('FlagPuzzle', { config });
     } else if (setupMode === 'neighbors') {
@@ -181,10 +187,10 @@ export default function GameSetupScreen({ navigation }: Props) {
 
   const getTimeLimitOptions = () => {
     if (isFlagPuzzle) return FLAGPUZZLE_TIMES;
-    return TIMEATTACK_TIMES;
+    return TIMEATTACK_TIMES; // Used for both FlagFlash and Timed Quiz
   };
 
-  const showQuestionCount = !isTimeAttack && !isFlagPuzzle && filterType !== 'theme';
+  const showQuestionCount = !isTimeAttack && !isFlagPuzzle && !isFlagFlash && filterType !== 'theme';
 
   return (
     <SafeAreaView style={styles.container}>
@@ -265,6 +271,33 @@ export default function GameSetupScreen({ navigation }: Props) {
                 activeOpacity={0.7}
               >
                 <Text style={[styles.optionLabel, autocomplete && styles.optionLabelActive]}>On</Text>
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
+
+        {/* Display Mode (flag or map) */}
+        {showMapToggle && (
+          <>
+            <Text style={styles.sectionTitle}>Display</Text>
+            <View style={styles.optionRow}>
+              <TouchableOpacity
+                style={[styles.optionChip, displayMode === 'flag' && styles.optionChipActive]}
+                onPress={() => setDisplayMode('flag')}
+                activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityState={{ selected: displayMode === 'flag' }}
+              >
+                <Text style={[styles.optionLabel, displayMode === 'flag' && styles.optionLabelActive]}>Flag</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.optionChip, displayMode === 'map' && styles.optionChipActive]}
+                onPress={() => setDisplayMode('map')}
+                activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityState={{ selected: displayMode === 'map' }}
+              >
+                <Text style={[styles.optionLabel, displayMode === 'map' && styles.optionLabelActive]}>Map</Text>
               </TouchableOpacity>
             </View>
           </>
