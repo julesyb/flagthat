@@ -256,10 +256,6 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
   };
 
   const finishGame = (finalResults: GameResult[]) => {
-    const correct = finalResults.filter((r) => r.correct).length;
-    const streak = getStreakFromResults(finalResults);
-    updateStats(correct, finalResults.length, streak, 'impostor', config.category);
-    updateFlagResults(finalResults);
     navigation.replace('Results', { results: finalResults, config });
   };
 

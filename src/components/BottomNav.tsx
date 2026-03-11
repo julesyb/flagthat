@@ -27,7 +27,7 @@ const TAB_KEYS: { id: TabId; labelKey: string }[] = [
 
 export default function BottomNav({ activeTab, onNavigate }: BottomNavProps) {
   return (
-    <View style={styles.container}>
+    <View style={styles.container} accessibilityRole="tablist">
       {TAB_KEYS.map((tab) => {
         const isActive = activeTab === tab.id;
         return (
@@ -36,6 +36,9 @@ export default function BottomNav({ activeTab, onNavigate }: BottomNavProps) {
             style={styles.tab}
             onPress={() => onNavigate(tab.id)}
             activeOpacity={0.6}
+            accessibilityRole="tab"
+            accessibilityLabel={t(tab.labelKey)}
+            accessibilityState={{ selected: isActive }}
           >
             {TAB_ICONS[tab.id](isActive)}
             <Text style={[styles.label, isActive && styles.labelActive]}>{t(tab.labelKey)}</Text>
@@ -65,7 +68,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 9,
+    fontSize: 10,
     letterSpacing: 1,
     textTransform: 'uppercase',
     color: colors.textTertiary,

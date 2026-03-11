@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
   SafeAreaView,
+  ActivityIndicator,
   Share,
 } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
@@ -19,9 +20,9 @@ import { hapticTap } from '../utils/feedback';
 import { t } from '../utils/i18n';
 import { FlagImageSmall } from '../components/FlagImage';
 import BottomNav from '../components/BottomNav';
-import { evaluateBadges, BADGES, TIER_COLORS, Badge, EarnedBadge, BadgeTier } from '../utils/badges';
+import { evaluateBadges, BADGES, TIER_COLORS } from '../utils/badges';
 
-const RANK_COLORS = ['#C9960C', '#888888', '#A0612A'];
+const RANK_COLORS = [colors.gradeS, colors.textTertiary, colors.warning];
 
 export default function StatsScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -41,11 +42,57 @@ export default function StatsScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      getStats().then(setStats);
-      getFlagStats().then(setFlagStats);
-      getDayStreak().then(setDayStreak);
-      getBadgeData().then(setBadgeData);
-      getMissedFlagIds().then((ids) => setWeakFlagCount(ids.length));
+      let cancelled = false;
+
+      async function loadData() {
+        try {
+          const [s, fs, ds, bd, missed] = await Promise.all([
+            getStats(),
+            getFlagStats(),
+            getDayStreak(),
+            getBadgeData(),
+            getMissedFlagIds(),
+          ]);
+          if (!cancelled) {
+            setStats(s);
+            setFlagStats(fs);
+            setDayStreak(ds);
+            setBadgeData(bd);
+            setWeakFlagCount(missed.length);
+          }
+        } catch (e) {
+          // Ensure we still show something even if storage fails
+          if (!cancelled) {
+            setStats((prev) => prev ?? {
+              totalGamesPlayed: 0,
+              totalCorrect: 0,
+              totalAnswered: 0,
+              bestStreak: 0,
+              bestTimeAttackScore: 0,
+              modeStats: {
+                easy: { correct: 0, total: 0 },
+                medium: { correct: 0, total: 0 },
+                hard: { correct: 0, total: 0 },
+                flagflash: { correct: 0, total: 0 },
+                flagpuzzle: { correct: 0, total: 0 },
+                timeattack: { correct: 0, total: 0 },
+                neighbors: { correct: 0, total: 0 },
+                impostor: { correct: 0, total: 0 },
+                capitalconnection: { correct: 0, total: 0 },
+                daily: { correct: 0, total: 0 },
+                practice: { correct: 0, total: 0 },
+              },
+              categoryStats: {},
+            });
+          }
+        }
+      }
+
+      loadData();
+
+      return () => {
+        cancelled = true;
+      };
     }, []),
   );
 
@@ -67,6 +114,7 @@ export default function StatsScreen() {
     return (
       <SafeAreaView style={s.container}>
         <View style={s.loadingContainer}>
+          <ActivityIndicator size="large" color={colors.ink} />
           <Text style={s.loadingText}>{t('common.loading')}</Text>
         </View>
       </SafeAreaView>
@@ -226,7 +274,7 @@ export default function StatsScreen() {
         {(Object.keys(GAME_MODES) as GameMode[])
           .filter((m) => !GAME_MODES[m].hidden && m !== 'daily' && m !== 'practice')
           .map((m) => {
-            const ms = stats.modeStats[m];
+            const ms = stats.modeStats[m] ?? { correct: 0, total: 0 };
             const acc = ms.total > 0 ? Math.round((ms.correct / ms.total) * 100) : 0;
             const played = ms.total > 0;
             return (
@@ -306,7 +354,7 @@ export default function StatsScreen() {
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  loadingText: { fontFamily: fontFamily.body, fontSize: 17, color: colors.textSecondary },
+  loadingText: { fontFamily: fontFamily.body, fontSize: 18, color: colors.textSecondary },
   content: { padding: spacing.md, paddingBottom: spacing.xxl },
 
   // ── Challenge Card
@@ -318,7 +366,7 @@ const s = StyleSheet.create({
   },
   cardEyebrow: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 10,
+    fontSize: 11,
     letterSpacing: 1.5,
     textTransform: 'uppercase',
     color: colors.accent,
@@ -333,7 +381,7 @@ const s = StyleSheet.create({
   },
   cardSub: {
     fontFamily: fontFamily.body,
-    fontSize: 13,
+    fontSize: 14,
     color: colors.whiteAlpha45,
     marginTop: 8,
   },
@@ -347,13 +395,13 @@ const s = StyleSheet.create({
     backgroundColor: colors.darkSurface,
     borderWidth: 1,
     borderColor: colors.darkBorder,
-    borderRadius: 100,
+    borderRadius: borderRadius.full,
     paddingVertical: 5,
     paddingHorizontal: 12,
   },
   pillText: {
     fontFamily: fontFamily.bodyMedium,
-    fontSize: 12,
+    fontSize: 13,
     color: colors.whiteAlpha60,
   },
   pillBold: {
@@ -362,7 +410,7 @@ const s = StyleSheet.create({
   },
   shareBtn: {
     backgroundColor: colors.accent,
-    borderRadius: 100,
+    borderRadius: borderRadius.full,
     paddingVertical: 10,
     paddingHorizontal: 20,
     alignSelf: 'flex-start',
@@ -370,7 +418,7 @@ const s = StyleSheet.create({
   },
   shareBtnText: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 13,
+    fontSize: 14,
     letterSpacing: 0.5,
     textTransform: 'uppercase',
     color: colors.white,
@@ -394,7 +442,7 @@ const s = StyleSheet.create({
   },
   tileLabel: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 10,
+    fontSize: 11,
     letterSpacing: 1,
     textTransform: 'uppercase',
     color: colors.textTertiary,
@@ -410,12 +458,12 @@ const s = StyleSheet.create({
   },
   tileUnit: {
     fontFamily: fontFamily.bodyMedium,
-    fontSize: 14,
+    fontSize: 15,
     color: colors.textTertiary,
   },
   tileSub: {
     fontFamily: fontFamily.body,
-    fontSize: 12,
+    fontSize: 13,
     color: colors.textTertiary,
     marginTop: 4,
   },
@@ -425,14 +473,14 @@ const s = StyleSheet.create({
   progressWrap: {
     height: 7,
     backgroundColor: colors.border,
-    borderRadius: 100,
+    borderRadius: borderRadius.full,
     overflow: 'hidden',
     marginTop: 12,
   },
   progressFill: {
     height: '100%',
     backgroundColor: colors.accent,
-    borderRadius: 100,
+    borderRadius: borderRadius.full,
   },
   progressLabels: {
     flexDirection: 'row',
@@ -441,19 +489,19 @@ const s = StyleSheet.create({
   },
   progressLabelBold: {
     fontFamily: fontFamily.bodyBold,
-    fontSize: 11,
+    fontSize: 12,
     color: colors.ink,
   },
   progressLabelMuted: {
     fontFamily: fontFamily.body,
-    fontSize: 11,
+    fontSize: 12,
     color: colors.textTertiary,
   },
 
   // ── Section
   sectionTitle: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 18,
+    fontSize: 19,
     letterSpacing: 0.5,
     textTransform: 'uppercase',
     color: colors.ink,
@@ -469,7 +517,7 @@ const s = StyleSheet.create({
   },
   sectionMeta: {
     fontFamily: fontFamily.body,
-    fontSize: 12,
+    fontSize: 13,
     color: colors.textTertiary,
   },
 
@@ -488,25 +536,25 @@ const s = StyleSheet.create({
   },
   modeName: {
     fontFamily: fontFamily.bodyBold,
-    fontSize: 15,
+    fontSize: 16,
     color: colors.ink,
   },
   modeDetail: {
     fontFamily: fontFamily.body,
-    fontSize: 12,
+    fontSize: 13,
     color: colors.textTertiary,
     marginTop: 2,
   },
   badge: {
-    borderRadius: 100,
+    borderRadius: borderRadius.full,
     paddingVertical: 5,
     paddingHorizontal: 11,
   },
-  badgePlayed: { backgroundColor: 'rgba(22, 163, 74, 0.1)' },
+  badgePlayed: { backgroundColor: colors.successBg },
   badgeUnplayed: { backgroundColor: colors.surfaceSecondary },
   badgeText: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 11,
+    fontSize: 12,
     letterSpacing: 0.5,
     textTransform: 'uppercase',
   },
@@ -535,19 +583,19 @@ const s = StyleSheet.create({
   },
   rankName: {
     fontFamily: fontFamily.bodyMedium,
-    fontSize: 14,
+    fontSize: 15,
     color: colors.ink,
     flex: 1,
   },
   scoreBadge: {
-    backgroundColor: 'rgba(22, 163, 74, 0.1)',
-    borderRadius: 100,
+    backgroundColor: colors.successBg,
+    borderRadius: borderRadius.full,
     paddingVertical: 3,
     paddingHorizontal: 10,
   },
   scoreBadgeText: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 11,
+    fontSize: 12,
     color: colors.success,
   },
   scoreBadgeWrong: {
@@ -582,7 +630,7 @@ const s = StyleSheet.create({
   },
   badgeName: {
     fontFamily: fontFamily.bodyBold,
-    fontSize: 13,
+    fontSize: 14,
     color: colors.ink,
     marginBottom: 3,
   },
@@ -591,9 +639,9 @@ const s = StyleSheet.create({
   },
   badgeDesc: {
     fontFamily: fontFamily.body,
-    fontSize: 11,
+    fontSize: 12,
     color: colors.textSecondary,
-    lineHeight: 15,
+    lineHeight: 16,
   },
   badgeDescLocked: {
     color: colors.textTertiary,
@@ -607,7 +655,7 @@ const s = StyleSheet.create({
   },
   settingsLinkText: {
     fontFamily: fontFamily.bodyMedium,
-    fontSize: 15,
+    fontSize: 16,
     color: colors.textTertiary,
   },
 });

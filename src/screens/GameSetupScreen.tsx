@@ -85,15 +85,15 @@ function OptionChipRow({
   );
 }
 
-type SetupMode = 'quiz' | 'flagpuzzle' | 'timeattack' | 'neighbors' | 'impostor' | 'capitalconnection';
+type SetupMode = 'quiz' | 'flagflash' | 'flagpuzzle' | 'timeattack' | 'neighbors' | 'capitalconnection';
 type QuizDifficulty = 'easy' | 'medium' | 'hard';
 
 const SETUP_MODES: { key: SetupMode; labelKey: string; descKey: string; icon: string }[] = [
   { key: 'quiz', labelKey: 'setup.quiz', descKey: 'setup.quizDesc', icon: 'Q' },
+  { key: 'flagflash', labelKey: 'modes.flagflash', descKey: 'setup.flagPuzzleDesc', icon: '!!' },
   { key: 'flagpuzzle', labelKey: 'setup.flagPuzzle', descKey: 'setup.flagPuzzleDesc', icon: '??' },
   { key: 'timeattack', labelKey: 'setup.timedQuiz', descKey: 'setup.timedQuizDesc', icon: '00' },
   { key: 'neighbors', labelKey: 'setup.neighbors', descKey: 'setup.neighborsDesc', icon: 'NB' },
-  { key: 'impostor', labelKey: 'setup.flagImpostor', descKey: 'setup.flagImpostorDesc', icon: 'FI' },
   { key: 'capitalconnection', labelKey: 'setup.capitalQuiz', descKey: 'setup.capitalQuizDesc', icon: 'CC' },
 ];
 
@@ -104,7 +104,7 @@ const DIFFICULTIES: { key: QuizDifficulty; labelKey: string }[] = [
 ];
 
 export default function GameSetupScreen({ navigation }: Props) {
-  const displayMode: DisplayMode = 'flag';
+  const [displayMode, setDisplayMode] = useState<DisplayMode>('flag');
   const [setupMode, setSetupMode] = useState<SetupMode>('quiz');
   const [difficulty, setDifficulty] = useState<QuizDifficulty>('medium');
   const [selectedCategory, setSelectedCategory] = useState<CategoryId>('all');
@@ -116,19 +116,22 @@ export default function GameSetupScreen({ navigation }: Props) {
   const [autocomplete, setAutocomplete] = useState(false);
 
   const totalFlags = getTotalFlagCount();
+  const isFlagFlash = setupMode === 'flagflash';
   const isFlagPuzzle = setupMode === 'flagpuzzle';
   const isTimeAttack = setupMode === 'timeattack';
-  const hasTimeLimit = isFlagPuzzle || isTimeAttack;
+  const hasTimeLimit = isFlagFlash || isFlagPuzzle || isTimeAttack;
   const isQuiz = setupMode === 'quiz';
 
   // Resolve the actual GameMode from setup selections
-  const resolvedMode: GameMode = isQuiz ? difficulty : setupMode;
+  const resolvedMode: GameMode = isQuiz ? difficulty : (setupMode as GameMode);
 
-  const showGuessLimit = setupMode !== 'timeattack' && setupMode !== 'flagpuzzle';
+  const showGuessLimit = setupMode !== 'timeattack' && setupMode !== 'flagpuzzle' && setupMode !== 'flagflash';
+  const showMapToggle = isQuiz || isFlagPuzzle;
 
   // Set sensible default time limit when mode changes
   useEffect(() => {
-    if (isFlagPuzzle) setTimeLimit(15);
+    if (isFlagFlash) setTimeLimit(60);
+    else if (isFlagPuzzle) setTimeLimit(15);
     else if (isTimeAttack) setTimeLimit(60);
   }, [setupMode]);
 
@@ -157,7 +160,7 @@ export default function GameSetupScreen({ navigation }: Props) {
     const config: GameConfig = {
       mode: resolvedMode,
       category: selectedCategory,
-      questionCount: isTimeAttack ? 999 : effectiveQuestionCount,
+      questionCount: (isTimeAttack || isFlagFlash) ? 999 : effectiveQuestionCount,
       displayMode,
       ...(hasTimeLimit && { timeLimit }),
       ...(difficulty === 'hard' && isQuiz && { autocomplete }),
@@ -166,12 +169,12 @@ export default function GameSetupScreen({ navigation }: Props) {
 
     if (isTimeAttack) {
       navigation.navigate('Game', { config });
+    } else if (isFlagFlash) {
+      navigation.navigate('FlagFlash', { config });
     } else if (isFlagPuzzle) {
       navigation.navigate('FlagPuzzle', { config });
     } else if (setupMode === 'neighbors') {
       navigation.navigate('Neighbors', { config });
-    } else if (setupMode === 'impostor') {
-      navigation.navigate('FlagImpostor', { config });
     } else if (setupMode === 'capitalconnection') {
       navigation.navigate('CapitalConnection', { config });
     } else {
@@ -185,10 +188,10 @@ export default function GameSetupScreen({ navigation }: Props) {
 
   const getTimeLimitOptions = () => {
     if (isFlagPuzzle) return FLAGPUZZLE_TIMES;
-    return TIMEATTACK_TIMES;
+    return TIMEATTACK_TIMES; // Used for both FlagFlash and Timed Quiz
   };
 
-  const showQuestionCount = !isTimeAttack && !isFlagPuzzle && filterType !== 'theme';
+  const showQuestionCount = !isTimeAttack && !isFlagPuzzle && !isFlagFlash && filterType !== 'theme';
 
   return (
     <SafeAreaView style={styles.container}>
@@ -269,6 +272,33 @@ export default function GameSetupScreen({ navigation }: Props) {
                 activeOpacity={0.7}
               >
                 <Text style={[styles.optionLabel, autocomplete && styles.optionLabelActive]}>{t('common.on')}</Text>
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
+
+        {/* Display Mode (flag or map) */}
+        {showMapToggle && (
+          <>
+            <Text style={styles.sectionTitle}>Display</Text>
+            <View style={styles.optionRow}>
+              <TouchableOpacity
+                style={[styles.optionChip, displayMode === 'flag' && styles.optionChipActive]}
+                onPress={() => setDisplayMode('flag')}
+                activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityState={{ selected: displayMode === 'flag' }}
+              >
+                <Text style={[styles.optionLabel, displayMode === 'flag' && styles.optionLabelActive]}>Flag</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.optionChip, displayMode === 'map' && styles.optionChipActive]}
+                onPress={() => setDisplayMode('map')}
+                activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityState={{ selected: displayMode === 'map' }}
+              >
+                <Text style={[styles.optionLabel, displayMode === 'map' && styles.optionLabelActive]}>Map</Text>
               </TouchableOpacity>
             </View>
           </>

@@ -10,12 +10,12 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { colors, spacing, typography, fontFamily, buttons, borderRadius } from '../utils/theme';
 import { hapticTap, hapticCorrect, hapticWrong, playWrongSound } from '../utils/feedback';
-import { updateStats, updateFlagResults } from '../utils/storage';
-import { shuffleArray, getStreakFromResults } from '../utils/gameEngine';
+import { shuffleArray } from '../utils/gameEngine';
 import { RootStackParamList } from '../types/navigation';
 import { FlagItem, GameResult } from '../types';
 import { countries } from '../data/countries';
 import { countryCapitals } from '../data/countryCapitals';
+import { countryCities } from '../data/countryCities';
 import FlagImage from '../components/FlagImage';
 import { t } from '../utils/i18n';
 
@@ -28,18 +28,29 @@ interface QuestionData {
 }
 
 function generateQuestions(count: number): QuestionData[] {
+  // Prefer countries that have same-country city distractors
   const eligible = countries.filter((c) => countryCapitals[c.id]);
-  const selected = shuffleArray(eligible).slice(0, count);
+  const withCities = eligible.filter((c) => countryCities[c.id]?.length >= 3);
+  const pool = withCities.length >= count ? withCities : eligible;
+  const selected = shuffleArray(pool).slice(0, count);
 
   return selected.map((flag) => {
     const correctCapital = countryCapitals[flag.id];
-    // Pick 3 wrong capitals from other countries
-    const otherCapitals = eligible
-      .filter((c) => c.id !== flag.id)
-      .map((c) => countryCapitals[c.id]);
-    const wrongOptions = shuffleArray(otherCapitals).slice(0, 3);
-    const options = shuffleArray([correctCapital, ...wrongOptions]);
+    const localCities = countryCities[flag.id] ?? [];
 
+    let wrongOptions: string[];
+    if (localCities.length >= 3) {
+      // Use cities from the same country as distractors
+      wrongOptions = shuffleArray(localCities.filter((c) => c !== correctCapital)).slice(0, 3);
+    } else {
+      // Fallback: use capitals from other countries
+      const otherCapitals = eligible
+        .filter((c) => c.id !== flag.id)
+        .map((c) => countryCapitals[c.id]);
+      wrongOptions = shuffleArray(otherCapitals).slice(0, 3);
+    }
+
+    const options = shuffleArray([correctCapital, ...wrongOptions]);
     return { flag, correctCapital, options };
   });
 }
@@ -93,10 +104,6 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
         Animated.timing(fadeAnim, { toValue: 1, duration: 150, useNativeDriver: true }).start();
       });
     } else {
-      const correct = newResults.filter((r) => r.correct).length;
-      const streak = getStreakFromResults(newResults);
-      updateStats(correct, newResults.length, streak, 'capitalconnection', config.category);
-      updateFlagResults(newResults);
       navigation.replace('Results', { results: newResults, config });
     }
   }, [currentIndex, questions, navigation, config, fadeAnim]);

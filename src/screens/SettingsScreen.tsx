@@ -14,6 +14,7 @@ import {
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
+import Constants from 'expo-constants';
 import { colors, spacing, typography, fontFamily, borderRadius } from '../utils/theme';
 import { getSettings, saveSettings, AppSettings, resetStats } from '../utils/storage';
 import {
@@ -254,7 +255,7 @@ export default function SettingsScreen() {
         <View style={styles.settingCard}>
           <View style={styles.settingRow}>
             <Text style={styles.settingLabel}>{t('settings.version')}</Text>
-            <Text style={styles.settingValue}>1.0.0</Text>
+            <Text style={styles.settingValue}>{Constants.expoConfig?.version ?? '1.0.0'}</Text>
           </View>
           <View style={styles.settingDivider} />
           <TouchableOpacity
@@ -264,6 +265,24 @@ export default function SettingsScreen() {
           >
             <Text style={styles.settingLabel}>{t('settings.privacyPolicy')}</Text>
             <ChevronRightIcon size={18} color={colors.textTertiary} />
+          </TouchableOpacity>
+          <View style={styles.settingDivider} />
+          <TouchableOpacity
+            style={styles.settingRow}
+            onPress={() => Linking.openURL('https://flagthat.app/terms')}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.settingLabel}>Terms of Service</Text>
+            <Text style={styles.settingChevron}>&rsaquo;</Text>
+          </TouchableOpacity>
+          <View style={styles.settingDivider} />
+          <TouchableOpacity
+            style={styles.settingRow}
+            onPress={() => Linking.openURL('mailto:support@flagthat.app')}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.settingLabel}>Support</Text>
+            <Text style={styles.settingChevron}>&rsaquo;</Text>
           </TouchableOpacity>
         </View>
 

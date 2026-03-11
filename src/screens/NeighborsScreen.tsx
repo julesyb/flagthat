@@ -134,10 +134,6 @@ export default function NeighborsScreen({ navigation, route }: Props) {
     const currentResults = [...results];
     const isEliminated = guessLimit > 0 && currentResults.filter((r) => !r.correct).length >= guessLimit;
     if (isLastRound || isEliminated) {
-      const correct = currentResults.filter((r) => r.correct).length;
-      const streak = getStreakFromResults(currentResults);
-      updateStats(correct, currentResults.length, streak, 'neighbors', config.category);
-      updateFlagResults(currentResults);
       navigation.replace('Results', { results: currentResults, config });
       return;
     }
