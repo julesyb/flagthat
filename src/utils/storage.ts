@@ -5,6 +5,7 @@ const STATS_KEY = '@flagsareus_stats';
 const FLAG_STATS_KEY = '@flagsareus_flag_stats';
 const DAY_STREAK_KEY = '@flagsareus_day_streak';
 const DAILY_CHALLENGE_KEY = '@flagsareus_daily_challenge';
+const DAILY_LOG_KEY = '@flagsareus_daily_log';
 const SETTINGS_KEY = '@flagsareus_settings';
 const BADGE_DATA_KEY = '@flagsareus_badge_data';
 const GAME_HISTORY_KEY = '@flagsareus_game_history';
@@ -186,6 +187,7 @@ export async function resetStats(): Promise<void> {
     await AsyncStorage.removeItem(DAY_STREAK_KEY);
     await AsyncStorage.removeItem(BADGE_DATA_KEY);
     await AsyncStorage.removeItem(DAILY_CHALLENGE_KEY);
+    await AsyncStorage.removeItem(DAILY_LOG_KEY);
     await AsyncStorage.removeItem(GAME_HISTORY_KEY);
     await AsyncStorage.removeItem(BASELINE_KEY);
   } catch {
@@ -253,13 +255,60 @@ export async function getDailyChallenge(): Promise<DailyChallengeData | null> {
 export async function saveDailyChallenge(results: GameResult[]): Promise<void> {
   try {
     const score = results.filter((r) => r.correct).length;
+    const today = getTodayDate();
     const data: DailyChallengeData = {
-      date: getTodayDate(),
+      date: today,
       completed: true,
       results,
       score,
     };
     await AsyncStorage.setItem(DAILY_CHALLENGE_KEY, JSON.stringify(data));
+    await appendDailyLog(today, score, results);
+  } catch {
+    // Silently fail
+  }
+}
+
+// ─── Daily Challenge Log ──────────────────────────────────
+// Lightweight per-day record. Questions are regenerable from the date
+// via generateDailyQuestions(date), so we only store outcomes.
+export interface DailyLogAnswer {
+  flagId: string;
+  correct: boolean;
+  userAnswer: string;
+}
+
+export interface DailyLogEntry {
+  score: number;
+  total: number;
+  answers: DailyLogAnswer[];
+}
+
+export type DailyLog = Record<string, DailyLogEntry>;
+
+export async function getDailyLog(): Promise<DailyLog> {
+  try {
+    const json = await AsyncStorage.getItem(DAILY_LOG_KEY);
+    if (json) return JSON.parse(json);
+    return {};
+  } catch {
+    return {};
+  }
+}
+
+async function appendDailyLog(date: string, score: number, results: GameResult[]): Promise<void> {
+  try {
+    const log = await getDailyLog();
+    log[date] = {
+      score,
+      total: results.length,
+      answers: results.map((r) => ({
+        flagId: r.question.flag.id,
+        correct: r.correct,
+        userAnswer: r.userAnswer,
+      })),
+    };
+    await AsyncStorage.setItem(DAILY_LOG_KEY, JSON.stringify(log));
   } catch {
     // Silently fail
   }
