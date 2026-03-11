@@ -108,6 +108,21 @@ function AppContent() {
   useEffect(() => {
     if (Platform.OS === 'web') {
       document.title = 'Flag That';
+      // Inject global CSS for web-specific interactive styles
+      const style = document.createElement('style');
+      style.textContent = [
+        // Pointer cursor on all touchable/pressable elements
+        '[role="button"], [role="tab"], [role="link"] { cursor: pointer; }',
+        // Subtle hover lift for cards and buttons
+        '[role="button"]:hover, [role="tab"]:hover { opacity: 0.85; }',
+        // Smooth transitions
+        '[role="button"], [role="tab"] { transition: opacity 0.15s ease; }',
+        // Hide mobile-style scrollbar on desktop
+        '::-webkit-scrollbar { width: 6px; }',
+        '::-webkit-scrollbar-track { background: transparent; }',
+        '::-webkit-scrollbar-thumb { background: rgba(26,26,46,0.15); border-radius: 3px; }',
+      ].join('\n');
+      document.head.appendChild(style);
     }
     initLocale()
       .then(async () => {

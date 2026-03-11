@@ -16,7 +16,8 @@ export function useLayout() {
   const isDesktopWeb = isDesktop && Platform.OS === 'web';
   const maxContent = isDesktop ? layout.maxContentWidthDesktop : layout.maxContentWidth;
   const contentWidth = Math.min(width, maxContent);
-  const gameWidth = Math.min(width, layout.maxGameWidth);
+  const maxGame = isDesktop ? layout.maxGameWidthDesktop : layout.maxGameWidth;
+  const gameWidth = Math.min(width, maxGame);
 
   return {
     screenWidth: width,

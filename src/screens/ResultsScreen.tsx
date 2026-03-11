@@ -11,7 +11,8 @@ import {
   Share,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius, layout } from '../utils/theme';
+import { useLayout } from '../utils/useLayout';
 import { calculateAccuracy, getStreakFromResults, getGrade, generateDailyShareGrid, generateShareGrid, getDailyNumber } from '../utils/gameEngine';
 import { updateStats, updateFlagResults, saveDailyChallenge, incrementDailyChallenges, updateLastGameBadgeFlags, markShared, saveBaselineResult, getStats, getFlagStats, getDayStreak, getBadgeData, getMissedFlagIds, addGameHistoryEntry, getSupportData } from '../utils/storage';
 import { BaselineRegionId, UserStats, GameMode } from '../types';
@@ -31,6 +32,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Results'>;
 
 export default function ResultsScreen({ route, navigation }: Props) {
   const onNavigate = useNavTabs();
+  const { isDesktop } = useLayout();
   const { results, config, reviewOnly } = route.params;
   const correct = results.filter((r) => r.correct).length;
   const accuracy = calculateAccuracy(results);
@@ -626,6 +628,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
             <Text style={st.sectionMeta}>{correct}/{results.length} {t('results.correct').toLowerCase()}</Text>
           </View>
         </Animated.View>
+        <View style={isDesktop ? st.reviewGrid : undefined}>
         {results.map((result, index) => {
           const itemTime = Math.round(result.timeTaken / 100) / 10;
           const isFastest = fastestCorrect && result.correct && result.timeTaken === fastestCorrect.time;
@@ -634,6 +637,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
               key={index}
               style={[
                 st.reviewItem,
+                isDesktop && st.reviewItemDesktop,
                 result.correct ? st.reviewCorrect : st.reviewWrong,
                 {
                   opacity: reviewAnims[index],
@@ -661,6 +665,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
             </Animated.View>
           );
         })}
+        </View>
 
         <View style={{ height: spacing.lg }} />
         </ScreenContainer>
@@ -856,10 +861,20 @@ const st = StyleSheet.create({
   sectionMeta: { fontFamily: fontFamily.body, fontSize: fontSize.sm, color: colors.textTertiary },
 
   // ── Review
+  reviewGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
   reviewItem: {
     flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface,
     padding: 12, paddingHorizontal: 14, marginBottom: 6,
     borderLeftWidth: 4, borderRadius: borderRadius.md, gap: 12,
+  },
+  reviewItemDesktop: {
+    flexBasis: '48%',
+    flexGrow: 1,
+    marginBottom: 0,
   },
   reviewCorrect: { borderLeftColor: colors.success },
   reviewWrong: { borderLeftColor: colors.error },

@@ -230,11 +230,13 @@ export default function HomeScreen({ navigation }: Props) {
         <ScreenContainer>
         {/* ── HEADER ── */}
         <View style={s.header}>
-          <View style={s.wordmark}>
-            <Text style={s.wmLine1}>Flag</Text>
-            <Text style={s.wmLine2}>That</Text>
-          </View>
-          <View style={s.headerRight}>
+          {!isDesktop && (
+            <View style={s.wordmark}>
+              <Text style={s.wmLine1}>Flag</Text>
+              <Text style={s.wmLine2}>That</Text>
+            </View>
+          )}
+          <View style={isDesktop ? s.headerRightDesktop : s.headerRight}>
             {dayStreak > 0 ? (
               <>
                 <Text style={s.streakVal}>{dayStreak}</Text>
@@ -611,6 +613,10 @@ const s = StyleSheet.create({
   },
   headerRight: {
     alignItems: 'flex-end',
+    flex: 1,
+  },
+  headerRightDesktop: {
+    alignItems: 'flex-start',
     flex: 1,
   },
   settingsBtn: {

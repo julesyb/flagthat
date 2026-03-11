@@ -1,9 +1,11 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
-import { useNavigationState } from '@react-navigation/native';
+import { useNavigationState, useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, fontFamily, fontSize, spacing, layout, borderRadius } from '../utils/theme';
-import { LightningIcon, CrosshairIcon, BarChartIcon, GlobeIcon } from './Icons';
+import { LightningIcon, CrosshairIcon, BarChartIcon, GlobeIcon, GearIcon } from './Icons';
 import { TabId } from './BottomNav';
+import { RootStackParamList } from '../types/navigation';
 import { t } from '../utils/i18n';
 
 interface SideNavProps {
@@ -35,11 +37,13 @@ const ROUTE_TO_TAB: Record<string, TabId> = {
 };
 
 export default function SideNav({ onNavigate }: SideNavProps) {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const currentRoute = useNavigationState((state) => {
     const route = state.routes[state.index];
     return route?.name ?? 'Home';
   });
   const activeTab = ROUTE_TO_TAB[currentRoute] ?? 'Play';
+  const isSettings = currentRoute === 'Settings';
 
   return (
     <View style={styles.container}>
@@ -51,7 +55,7 @@ export default function SideNav({ onNavigate }: SideNavProps) {
 
       <View style={styles.navItems}>
         {TAB_KEYS.map((tab) => {
-          const isActive = activeTab === tab.id;
+          const isActive = activeTab === tab.id && !isSettings;
           return (
             <TouchableOpacity
               key={tab.id}
@@ -70,6 +74,23 @@ export default function SideNav({ onNavigate }: SideNavProps) {
           );
         })}
       </View>
+
+      {/* Settings at bottom */}
+      <View style={styles.spacer} />
+      <View style={styles.bottomSection}>
+        <TouchableOpacity
+          style={[styles.navItem, isSettings && styles.navItemActive]}
+          onPress={() => navigation.navigate('Settings')}
+          activeOpacity={0.6}
+          accessibilityRole="button"
+          accessibilityLabel={t('app.settings')}
+        >
+          <GearIcon size={20} color={isSettings ? colors.ink : colors.textTertiary} />
+          <Text style={[styles.navLabel, isSettings && styles.navLabelActive]}>
+            {t('app.settings')}
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -82,6 +103,7 @@ const styles = StyleSheet.create({
     borderRightColor: colors.rule,
     paddingTop: spacing.xl,
     paddingHorizontal: spacing.md,
+    paddingBottom: spacing.lg,
     ...(Platform.OS === 'web' ? { height: '100%' as unknown as number } : {}),
   },
   wordmark: {
@@ -127,5 +149,13 @@ const styles = StyleSheet.create({
   },
   navLabelActive: {
     color: colors.ink,
+  },
+  spacer: {
+    flex: 1,
+  },
+  bottomSection: {
+    borderTopWidth: 1,
+    borderTopColor: colors.rule,
+    paddingTop: spacing.md,
   },
 });

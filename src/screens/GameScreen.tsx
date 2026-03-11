@@ -10,9 +10,11 @@ import {
   Keyboard,
   ScrollView,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily, nav, buttons, borderRadius } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, fontSize, nav, buttons, borderRadius } from '../utils/theme';
+import { useLayout } from '../utils/useLayout';
 import { GameQuestion, GameResult } from '../types';
 import { generateQuestions, generateDailyQuestions, generatePracticeQuestions, checkAnswer } from '../utils/gameEngine';
 import { getMissedFlagIds } from '../utils/storage';
@@ -31,6 +33,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Game'>;
 
 export default function GameScreen({ route, navigation }: Props) {
   const { config } = route.params;
+  const { isDesktop } = useLayout();
   const isTimeAttack = config.mode === 'timeattack';
   const [questions, setQuestions] = useState<GameQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -227,6 +230,24 @@ export default function GameScreen({ route, navigation }: Props) {
     handleAnswer(name);
   };
 
+  // Keyboard shortcuts for web (1-4 to select options in multiple-choice mode)
+  useEffect(() => {
+    if (Platform.OS !== 'web' || isHard) return;
+    const handler = (e: KeyboardEvent) => {
+      if (showFeedback) return;
+      const key = e.key;
+      if (key >= '1' && key <= '4' && currentQuestion) {
+        const idx = parseInt(key, 10) - 1;
+        if (idx < currentQuestion.options.length) {
+          e.preventDefault();
+          handleAnswer(currentQuestion.options[idx]);
+        }
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [showFeedback, currentQuestion, handleAnswer, isHard]);
+
   if (questions.length === 0) {
     return (
       <SafeAreaView style={styles.container}>
@@ -371,28 +392,30 @@ export default function GameScreen({ route, navigation }: Props) {
             </TouchableOpacity>
           </View>
         ) : (
-          <View style={isMapMode ? styles.optionsContainerMap : styles.optionsContainer}>
+          <View style={isMapMode ? styles.optionsContainerMap : (isDesktop ? styles.optionsContainerDesktop : styles.optionsContainer)}>
             {currentQuestion.options.map((option, index) => {
               const isSelected = selectedAnswer === option;
               const isCorrect = option === currentQuestion.flag.name;
               const optionFlag = isMapMode ? getFlagByName(option) : null;
 
-              let optionStyle = isMapMode ? styles.optionButtonMap : styles.optionButton;
+              let optionStyle = isMapMode ? styles.optionButtonMap : (isDesktop ? styles.optionButtonDesktop : styles.optionButton);
               let textStyle = styles.optionText;
 
               if (showFeedback) {
                 if (isCorrect) {
                   optionStyle = isMapMode
                     ? { ...styles.optionButtonMap, ...styles.optionCorrectMap }
-                    : { ...styles.optionButton, ...styles.optionCorrect };
+                    : { ...(isDesktop ? styles.optionButtonDesktop : styles.optionButton), ...styles.optionCorrect };
                   textStyle = { ...styles.optionText, ...styles.optionTextFeedback };
                 } else if (isSelected && !isCorrect) {
                   optionStyle = isMapMode
                     ? { ...styles.optionButtonMap, ...styles.optionWrongMap }
-                    : { ...styles.optionButton, ...styles.optionWrong };
+                    : { ...(isDesktop ? styles.optionButtonDesktop : styles.optionButton), ...styles.optionWrong };
                   textStyle = { ...styles.optionText, ...styles.optionTextFeedback };
                 }
               }
+
+              const keyHint = !isMapMode && isDesktop && !showFeedback ? `${index + 1}` : null;
 
               return (
                 <TouchableOpacity
@@ -411,7 +434,10 @@ export default function GameScreen({ route, navigation }: Props) {
                       emoji={optionFlag.emoji}
                     />
                   ) : (
-                    <Text style={textStyle}>{translateName(option)}</Text>
+                    <View style={styles.optionInner}>
+                      {keyHint && <Text style={styles.keyHint}>{keyHint}</Text>}
+                      <Text style={textStyle}>{translateName(option)}</Text>
+                    </View>
                   )}
                 </TouchableOpacity>
               );
@@ -540,6 +566,11 @@ const styles = StyleSheet.create({
   optionsContainer: {
     gap: spacing.xs,
   },
+  optionsContainerDesktop: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+  },
   optionsContainerMap: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -554,6 +585,35 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: colors.border,
     borderRadius: borderRadius.md,
+  },
+  optionButtonDesktop: {
+    backgroundColor: colors.surface,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: colors.border,
+    borderRadius: borderRadius.md,
+    flexBasis: '48%',
+    flexGrow: 1,
+  },
+  optionInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  keyHint: {
+    fontFamily: fontFamily.uiLabel,
+    fontSize: fontSize.sm,
+    color: colors.textTertiary,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: borderRadius.sm,
+    width: 22,
+    height: 22,
+    lineHeight: 20,
+    textAlign: 'center',
+    overflow: 'hidden',
   },
   optionButtonMap: {
     padding: spacing.xs,

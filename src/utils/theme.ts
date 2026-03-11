@@ -337,6 +337,7 @@ export const layout = {
   maxContentWidth: 600,
   maxContentWidthDesktop: 900,
   maxGameWidth: 600,
+  maxGameWidthDesktop: 800,
   breakpoints: {
     tablet: 768,
     desktop: 1024,
