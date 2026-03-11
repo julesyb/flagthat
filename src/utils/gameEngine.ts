@@ -1,6 +1,7 @@
 import { GameMode, FlagItem, GameQuestion, GameResult, GameConfig } from '../types';
 import { getFlagsForCategory, getAllFlags } from '../data';
 import { countryAliases, twinPairs } from '../data/countryAliases';
+import { translateName } from '../data/countryNames';
 import { colors } from './theme';
 
 export function shuffleArray<T>(array: T[]): T[] {
@@ -128,7 +129,7 @@ export function generatePracticeQuestions(flagIds: string[]): GameQuestion[] {
 function generateOptions(correctFlag: FlagItem, pool: FlagItem[], mode: GameMode): string[] {
   if (mode === 'hard' || mode === 'flagflash' || mode === 'flagpuzzle') return [];
 
-  const choiceCount = (mode === 'timeattack' || mode === 'medium') ? 4 : 2;
+  const choiceCount = (mode === 'timeattack' || mode === 'medium' || mode === 'baseline') ? 4 : 2;
   const otherFlags = pool.filter((f) => f.id !== correctFlag.id);
 
   // Prioritize twin flags as wrong options so look-alikes appear together
@@ -169,6 +170,14 @@ export function checkAnswer(userAnswer: string, correctName: string): boolean {
   // Check alias/typo map
   const alias = countryAliases[normalizedAnswer];
   if (alias && normalize(alias) === normalizedCorrect) return true;
+
+  // Check against translated name (so non-English typed answers are accepted)
+  const translated = translateName(correctName);
+  if (translated !== correctName) {
+    const normalizedTranslated = normalize(translated);
+    if (normalizedAnswer === normalizedTranslated) return true;
+    if (stripAccents(normalizedAnswer) === stripAccents(normalizedTranslated)) return true;
+  }
 
   return false;
 }

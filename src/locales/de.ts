@@ -70,6 +70,7 @@ const de: typeof en = {
     bestStreak: 'Beste Serie',
     best60s: 'Beste 60s',
     accuracy: 'Genauigkeit',
+    onboardingScores: 'Ergebnisse',
   },
 
   setup: {
@@ -293,6 +294,17 @@ const de: typeof en = {
     supporter: { name: 'Unterst\u00fctzer', description: 'Unterst\u00fctze durch ein Video' },
   },
 
+  onboarding: {
+    subtitle: 'Mal sehen, wo du stehst',
+    regionTest: 'Flaggen-Quiz',
+    flagCount: '{count} Flaggen',
+    completed: 'Fertig',
+    startPlaying: 'Losspielen',
+    skip: '\u00dcberspringen',
+    next: 'N\u00e4chste Region',
+    allDone: 'Alles geschafft, gut gemacht',
+  },
+
   modes: {
     easy: 'Leicht',
     medium: 'Mittel',
@@ -305,6 +317,7 @@ const de: typeof en = {
     capitalconnection: 'Hauptstadt-Quiz',
     daily: 'T\u00e4glich',
     practice: '\u00dcbung',
+    baseline: 'Einstufung',
   },
 
   categories: {

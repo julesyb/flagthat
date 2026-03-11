@@ -1,4 +1,6 @@
-export type GameMode = 'easy' | 'medium' | 'hard' | 'flagflash' | 'flagpuzzle' | 'timeattack' | 'neighbors' | 'impostor' | 'capitalconnection' | 'daily' | 'practice';
+export type GameMode = 'easy' | 'medium' | 'hard' | 'flagflash' | 'flagpuzzle' | 'timeattack' | 'neighbors' | 'impostor' | 'capitalconnection' | 'daily' | 'practice' | 'baseline';
+
+export type BaselineRegionId = 'africa' | 'asia' | 'europe' | 'americas' | 'oceania';
 
 export type DisplayMode = 'flag' | 'map';
 
@@ -77,6 +79,7 @@ export const GAME_MODES: Record<GameMode, { label: string; description: string; 
   capitalconnection: { label: 'Capital Connection', description: 'Match flags to capitals', icon: 'CC' },
   daily: { label: 'Daily', description: 'Same 10 flags for everyone', icon: 'D' },
   practice: { label: 'Practice', description: 'Review your weak flags', icon: 'PR' },
+  baseline: { label: 'Baseline', description: 'Region baseline test', icon: 'BL', hidden: true },
 };
 
 export const CATEGORIES: CategoryInfo[] = [

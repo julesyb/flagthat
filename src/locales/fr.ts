@@ -70,6 +70,7 @@ const fr: typeof en = {
     bestStreak: 'Meilleure s\u00e9rie',
     best60s: 'Meilleur 60s',
     accuracy: 'Pr\u00e9cision',
+    onboardingScores: 'Scores',
   },
 
   setup: {
@@ -293,6 +294,17 @@ const fr: typeof en = {
     supporter: { name: 'Soutien', description: 'Soutenez en regardant une vid\u00e9o' },
   },
 
+  onboarding: {
+    subtitle: 'Voyons o\u00f9 vous en \u00eates',
+    regionTest: 'Quiz de drapeaux',
+    flagCount: '{count} drapeaux',
+    completed: 'Termin\u00e9',
+    startPlaying: 'Commencer \u00e0 jouer',
+    skip: 'Passer',
+    next: 'R\u00e9gion suivante',
+    allDone: 'Termin\u00e9, bien jou\u00e9',
+  },
+
   modes: {
     easy: 'Facile',
     medium: 'Moyen',
@@ -305,6 +317,7 @@ const fr: typeof en = {
     capitalconnection: 'Quiz capitales',
     daily: 'Quotidien',
     practice: 'R\u00e9vision',
+    baseline: 'Test initial',
   },
 
   categories: {

@@ -70,6 +70,7 @@ const es: typeof en = {
     bestStreak: 'Mejor racha',
     best60s: 'Mejor 60s',
     accuracy: 'Precisi\u00f3n',
+    onboardingScores: 'Puntuaciones',
   },
 
   setup: {
@@ -293,6 +294,17 @@ const es: typeof en = {
     supporter: { name: 'Patrocinador', description: 'Apoya viendo un video' },
   },
 
+  onboarding: {
+    subtitle: 'Veamos tu nivel',
+    regionTest: 'Quiz de banderas',
+    flagCount: '{count} banderas',
+    completed: 'Hecho',
+    startPlaying: 'Empezar a jugar',
+    skip: 'Omitir',
+    next: 'Siguiente regi\u00f3n',
+    allDone: 'Todo listo, buen trabajo',
+  },
+
   modes: {
     easy: 'F\u00e1cil',
     medium: 'Medio',
@@ -305,6 +317,7 @@ const es: typeof en = {
     capitalconnection: 'Quiz capitales',
     daily: 'Diario',
     practice: 'Pr\u00e1ctica',
+    baseline: 'L\u00ednea base',
   },
 
   categories: {

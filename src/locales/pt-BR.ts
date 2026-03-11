@@ -70,6 +70,7 @@ const ptBR: typeof en = {
     bestStreak: 'Melhor sequ\u00eancia',
     best60s: 'Melhor 60s',
     accuracy: 'Precis\u00e3o',
+    onboardingScores: 'Pontua\u00e7\u00f5es',
   },
 
   setup: {
@@ -293,6 +294,17 @@ const ptBR: typeof en = {
     supporter: { name: 'Apoiador', description: 'Apoie assistindo um v\u00eddeo' },
   },
 
+  onboarding: {
+    subtitle: 'Vamos ver seu n\u00edvel',
+    regionTest: 'Quiz de bandeiras',
+    flagCount: '{count} bandeiras',
+    completed: 'Feito',
+    startPlaying: 'Come\u00e7ar a jogar',
+    skip: 'Pular',
+    next: 'Pr\u00f3xima regi\u00e3o',
+    allDone: 'Tudo pronto, bom trabalho',
+  },
+
   modes: {
     easy: 'F\u00e1cil',
     medium: 'M\u00e9dio',
@@ -305,6 +317,7 @@ const ptBR: typeof en = {
     capitalconnection: 'Quiz de capitais',
     daily: 'Di\u00e1rio',
     practice: 'Pr\u00e1tica',
+    baseline: 'Linha de base',
   },
 
   categories: {

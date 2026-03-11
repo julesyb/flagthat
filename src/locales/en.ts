@@ -72,6 +72,7 @@ const en = {
     bestStreak: 'Best Streak',
     best60s: 'Best 60s',
     accuracy: 'Accuracy',
+    onboardingScores: 'Scores',
   },
 
   // ─── Game Setup ──────────────────────────────────────────
@@ -309,6 +310,18 @@ const en = {
     supporter: { name: 'Supporter', description: 'Support by watching a video' },
   },
 
+  // ─── Onboarding ───────────────────────────────────────────
+  onboarding: {
+    subtitle: "Let's see where you stand",
+    regionTest: 'Flag quiz',
+    flagCount: '{count} flags',
+    completed: 'Done',
+    startPlaying: 'Start Playing',
+    skip: 'Skip',
+    next: 'Next Region',
+    allDone: 'All done, nice work',
+  },
+
   // ─── Game Modes (for labels) ────────────────────────────
   modes: {
     easy: 'Easy',
@@ -322,6 +335,7 @@ const en = {
     capitalconnection: 'Capital Connection',
     daily: 'Daily',
     practice: 'Practice',
+    baseline: 'Baseline',
   },
 
   // ─── Categories ─────────────────────────────────────────

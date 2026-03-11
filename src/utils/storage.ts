@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { UserStats, GameMode, CategoryId, GameResult } from '../types';
+import { UserStats, GameMode, CategoryId, GameResult, BaselineRegionId } from '../types';
 
 const STATS_KEY = '@flagsareus_stats';
 const FLAG_STATS_KEY = '@flagsareus_flag_stats';
@@ -121,6 +121,7 @@ const DEFAULT_STATS: UserStats = {
     capitalconnection: { correct: 0, total: 0 },
     daily: { correct: 0, total: 0 },
     practice: { correct: 0, total: 0 },
+    baseline: { correct: 0, total: 0 },
   },
   categoryStats: {},
 };
@@ -183,6 +184,7 @@ export async function resetStats(): Promise<void> {
     await AsyncStorage.removeItem(DAY_STREAK_KEY);
     await AsyncStorage.removeItem(BADGE_DATA_KEY);
     await AsyncStorage.removeItem(DAILY_CHALLENGE_KEY);
+    await AsyncStorage.removeItem(BASELINE_KEY);
   } catch {
     // Silently fail
   }
