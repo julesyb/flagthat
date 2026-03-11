@@ -12,8 +12,7 @@ import Svg, { Rect, Path } from 'react-native-svg';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { colors, spacing, typography, fontFamily, buttons, borderRadius } from '../utils/theme';
 import { hapticTap, hapticCorrect, hapticWrong, playWrongSound } from '../utils/feedback';
-import { updateStats, updateFlagResults } from '../utils/storage';
-import { shuffleArray, getStreakFromResults } from '../utils/gameEngine';
+import { shuffleArray } from '../utils/gameEngine';
 import { RootStackParamList } from '../types/navigation';
 import { FlagItem, GameResult } from '../types';
 import { countries } from '../data/countries';
@@ -255,10 +254,6 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
   };
 
   const finishGame = (finalResults: GameResult[]) => {
-    const correct = finalResults.filter((r) => r.correct).length;
-    const streak = getStreakFromResults(finalResults);
-    updateStats(correct, finalResults.length, streak, 'impostor', config.category);
-    updateFlagResults(finalResults);
     navigation.replace('Results', { results: finalResults, config });
   };
 

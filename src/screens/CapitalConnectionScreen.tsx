@@ -10,8 +10,7 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { colors, spacing, typography, fontFamily, buttons, borderRadius } from '../utils/theme';
 import { hapticTap, hapticCorrect, hapticWrong, playWrongSound } from '../utils/feedback';
-import { updateStats, updateFlagResults } from '../utils/storage';
-import { shuffleArray, getStreakFromResults } from '../utils/gameEngine';
+import { shuffleArray } from '../utils/gameEngine';
 import { RootStackParamList } from '../types/navigation';
 import { FlagItem, GameResult } from '../types';
 import { countries } from '../data/countries';
@@ -104,10 +103,6 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
         Animated.timing(fadeAnim, { toValue: 1, duration: 150, useNativeDriver: true }).start();
       });
     } else {
-      const correct = newResults.filter((r) => r.correct).length;
-      const streak = getStreakFromResults(newResults);
-      updateStats(correct, newResults.length, streak, 'capitalconnection', config.category);
-      updateFlagResults(newResults);
       navigation.replace('Results', { results: newResults, config });
     }
   }, [currentIndex, questions, navigation, config, fadeAnim]);

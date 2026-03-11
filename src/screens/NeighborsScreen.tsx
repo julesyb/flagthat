@@ -11,8 +11,7 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { colors, spacing, typography, fontFamily, buttons, borderRadius } from '../utils/theme';
 import { hapticTap, hapticCorrect, hapticWrong, playWrongSound } from '../utils/feedback';
-import { updateStats, updateFlagResults } from '../utils/storage';
-import { shuffleArray, getStreakFromResults } from '../utils/gameEngine';
+import { shuffleArray } from '../utils/gameEngine';
 import { RootStackParamList } from '../types/navigation';
 import { FlagItem, GameResult } from '../types';
 import { countries } from '../data/countries';
@@ -133,10 +132,6 @@ export default function NeighborsScreen({ navigation, route }: Props) {
     const currentResults = [...results];
     const isEliminated = guessLimit > 0 && currentResults.filter((r) => !r.correct).length >= guessLimit;
     if (isLastRound || isEliminated) {
-      const correct = currentResults.filter((r) => r.correct).length;
-      const streak = getStreakFromResults(currentResults);
-      updateStats(correct, currentResults.length, streak, 'neighbors', config.category);
-      updateFlagResults(currentResults);
       navigation.replace('Results', { results: currentResults, config });
       return;
     }
