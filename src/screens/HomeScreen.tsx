@@ -516,7 +516,7 @@ const s = StyleSheet.create({
   },
   desktopWrapper: {
     width: '100%',
-    maxWidth: 480,
+    maxWidth: 600,
   },
 
   // ── Header

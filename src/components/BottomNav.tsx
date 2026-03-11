@@ -35,7 +35,7 @@ const TABS: { id: TabId; icon: (active: boolean) => React.ReactNode; label: stri
 
 export default function BottomNav({ activeTab, onNavigate }: BottomNavProps) {
   return (
-    <View style={styles.container}>
+    <View style={styles.container} accessibilityRole="tablist">
       {TABS.map((tab) => {
         const isActive = activeTab === tab.id;
         return (
@@ -44,6 +44,9 @@ export default function BottomNav({ activeTab, onNavigate }: BottomNavProps) {
             style={styles.tab}
             onPress={() => onNavigate(tab.id)}
             activeOpacity={0.6}
+            accessibilityRole="tab"
+            accessibilityLabel={tab.label}
+            accessibilityState={{ selected: isActive }}
           >
             {tab.icon(isActive)}
             <Text style={[styles.label, isActive && styles.labelActive]}>{tab.label}</Text>
