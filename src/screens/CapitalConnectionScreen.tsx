@@ -16,6 +16,7 @@ import { RootStackParamList } from '../types/navigation';
 import { FlagItem, GameResult } from '../types';
 import { countries } from '../data/countries';
 import { countryCapitals } from '../data/countryCapitals';
+import { countryCities } from '../data/countryCities';
 import FlagImage from '../components/FlagImage';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CapitalConnection'>;
@@ -27,18 +28,29 @@ interface QuestionData {
 }
 
 function generateQuestions(count: number): QuestionData[] {
+  // Prefer countries that have same-country city distractors
   const eligible = countries.filter((c) => countryCapitals[c.id]);
-  const selected = shuffleArray(eligible).slice(0, count);
+  const withCities = eligible.filter((c) => countryCities[c.id]?.length >= 3);
+  const pool = withCities.length >= count ? withCities : eligible;
+  const selected = shuffleArray(pool).slice(0, count);
 
   return selected.map((flag) => {
     const correctCapital = countryCapitals[flag.id];
-    // Pick 3 wrong capitals from other countries
-    const otherCapitals = eligible
-      .filter((c) => c.id !== flag.id)
-      .map((c) => countryCapitals[c.id]);
-    const wrongOptions = shuffleArray(otherCapitals).slice(0, 3);
-    const options = shuffleArray([correctCapital, ...wrongOptions]);
+    const localCities = countryCities[flag.id] ?? [];
 
+    let wrongOptions: string[];
+    if (localCities.length >= 3) {
+      // Use cities from the same country as distractors
+      wrongOptions = shuffleArray(localCities.filter((c) => c !== correctCapital)).slice(0, 3);
+    } else {
+      // Fallback: use capitals from other countries
+      const otherCapitals = eligible
+        .filter((c) => c.id !== flag.id)
+        .map((c) => countryCapitals[c.id]);
+      wrongOptions = shuffleArray(otherCapitals).slice(0, 3);
+    }
+
+    const options = shuffleArray([correctCapital, ...wrongOptions]);
     return { flag, correctCapital, options };
   });
 }

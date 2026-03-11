@@ -84,7 +84,7 @@ function OptionChipRow({
   );
 }
 
-type SetupMode = 'quiz' | 'flagpuzzle' | 'timeattack' | 'neighbors' | 'impostor' | 'capitalconnection';
+type SetupMode = 'quiz' | 'flagpuzzle' | 'timeattack' | 'neighbors' | 'capitalconnection';
 type QuizDifficulty = 'easy' | 'medium' | 'hard';
 
 const SETUP_MODES: { key: SetupMode; label: string; description: string; icon: string }[] = [
@@ -92,7 +92,6 @@ const SETUP_MODES: { key: SetupMode; label: string; description: string; icon: s
   { key: 'flagpuzzle', label: 'Flag Puzzle', description: 'Flag reveals over time', icon: '??' },
   { key: 'timeattack', label: 'Timed Quiz', description: 'Race the clock', icon: '00' },
   { key: 'neighbors', label: 'Neighbors', description: 'Find bordering countries', icon: 'NB' },
-  { key: 'impostor', label: 'Flag Impostor', description: 'Spot the fake flag', icon: 'FI' },
   { key: 'capitalconnection', label: 'Capital Quiz', description: 'Match flags to capitals', icon: 'CC' },
 ];
 
@@ -169,8 +168,6 @@ export default function GameSetupScreen({ navigation }: Props) {
       navigation.navigate('FlagPuzzle', { config });
     } else if (setupMode === 'neighbors') {
       navigation.navigate('Neighbors', { config });
-    } else if (setupMode === 'impostor') {
-      navigation.navigate('FlagImpostor', { config });
     } else if (setupMode === 'capitalconnection') {
       navigation.navigate('CapitalConnection', { config });
     } else {
