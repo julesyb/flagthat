@@ -249,44 +249,39 @@ export default function HomeScreen({ navigation }: Props) {
 
         {/* ── ONBOARDING PROGRESS ── */}
         {!onboardingComplete && (
-          <TouchableOpacity
-            style={s.onboardingCard}
-            activeOpacity={0.85}
-            onPress={() => {
-              hapticTap();
-              const count = getCategoryCount(nextRegion as CategoryId);
-              navigation.navigate('Game', {
-                config: { mode: 'baseline', category: nextRegion as CategoryId, questionCount: count, displayMode: 'flag' },
-              });
-            }}
-          >
-            <View style={s.onboardingTop}>
-              <View style={s.onboardingIcon}>
-                <CrosshairIcon size={18} color={colors.accent} />
-              </View>
-              <View style={s.onboardingContent}>
-                <Text style={s.onboardingTitle}>{t(`categories.${nextRegion}`)}</Text>
-                <Text style={s.onboardingSub}>
-                  {getCategoryCount(nextRegion as CategoryId)} {t('home.onboardingFlags')}
-                </Text>
-              </View>
-              <ChevronRightIcon size={18} color={colors.accent} />
-            </View>
-            <View style={s.onboardingSegments}>
+          <View style={s.onboardingWrap}>
+            <Text style={s.onboardingLabel}>{t('home.onboardingLabel')}</Text>
+            <View style={s.onboardingRegions}>
               {ONBOARDING_REGIONS.map((r) => {
-                const done = !!baseline?.regions[r];
-                const active = r === nextRegion;
+                const result = baseline?.regions[r];
+                const isNext = r === nextRegion;
                 return (
-                  <View key={r} style={s.onboardingSegCol}>
-                    <View style={[s.onboardingSegBar, done && s.onboardingSegDone, active && s.onboardingSegActive]} />
-                    <Text style={[s.onboardingSegLabel, done && s.onboardingSegLabelDone, active && s.onboardingSegLabelActive]}>
-                      {t(`categories.${r}`).slice(0, 3).toUpperCase()}
+                  <TouchableOpacity
+                    key={r}
+                    style={[s.onboardingRegion, result && s.onboardingRegionDone, isNext && s.onboardingRegionNext]}
+                    activeOpacity={result ? 1 : 0.85}
+                    disabled={!!result}
+                    onPress={() => {
+                      hapticTap();
+                      const count = getCategoryCount(r as CategoryId);
+                      navigation.navigate('Game', {
+                        config: { mode: 'baseline', category: r as CategoryId, questionCount: count, displayMode: 'flag' },
+                      });
+                    }}
+                  >
+                    <Text style={[s.onboardingRegionName, result && s.onboardingRegionNameDone]}>
+                      {t(`categories.${r}`)}
                     </Text>
-                  </View>
+                    {result ? (
+                      <Text style={s.onboardingScore}>{result.accuracy}%</Text>
+                    ) : isNext ? (
+                      <ChevronRightIcon size={14} color={colors.ink} />
+                    ) : null}
+                  </TouchableOpacity>
                 );
               })}
             </View>
-          </TouchableOpacity>
+          </View>
         )}
 
         {/* ── DAILY CHALLENGE ── */}
@@ -629,76 +624,52 @@ const s = StyleSheet.create({
   },
 
   // ── Onboarding progress
-  onboardingCard: {
-    backgroundColor: colors.white,
-    borderWidth: 2,
-    borderColor: colors.accent,
-    borderRadius: borderRadius.lg,
-    marginHorizontal: spacing.md,
+  onboardingWrap: {
+    paddingHorizontal: spacing.md,
     marginTop: spacing.md,
-    padding: spacing.md,
   },
-  onboardingTop: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    marginBottom: spacing.md,
-  },
-  onboardingIcon: {
-    width: 40,
-    height: 40,
-    backgroundColor: colors.accentBg,
-    borderRadius: borderRadius.md,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  onboardingContent: {
-    flex: 1,
-  },
-  onboardingTitle: {
-    fontFamily: fontFamily.bodyBold,
-    fontSize: fontSize.lg,
-    color: colors.ink,
-    marginBottom: 2,
-  },
-  onboardingSub: {
-    fontFamily: fontFamily.body,
-    fontSize: fontSize.caption,
-    color: colors.textTertiary,
-    lineHeight: 18,
-  },
-  onboardingSegments: {
-    flexDirection: 'row',
-    gap: spacing.xs,
-  },
-  onboardingSegCol: {
-    flex: 1,
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  onboardingSegBar: {
-    width: '100%',
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.rule,
-  },
-  onboardingSegDone: {
-    backgroundColor: colors.success,
-  },
-  onboardingSegActive: {
-    backgroundColor: colors.accent,
-  },
-  onboardingSegLabel: {
+  onboardingLabel: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 9,
-    letterSpacing: 0.5,
+    fontSize: fontSize.xxs,
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
+    color: colors.textTertiary,
+    marginBottom: spacing.sm,
+  },
+  onboardingRegions: {
+    gap: spacing.xs,
+  },
+  onboardingRegion: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.rule,
+    borderRadius: borderRadius.sm,
+    paddingVertical: spacing.sm + spacing.xxs,
+    paddingHorizontal: spacing.md,
+  },
+  onboardingRegionDone: {
+    backgroundColor: colors.surfaceSecondary,
+    borderColor: colors.surfaceSecondary,
+  },
+  onboardingRegionNext: {
+    borderColor: colors.ink,
+    borderWidth: 2,
+  },
+  onboardingRegionName: {
+    fontFamily: fontFamily.bodyMedium,
+    fontSize: fontSize.body,
+    color: colors.ink,
+    flex: 1,
+  },
+  onboardingRegionNameDone: {
     color: colors.textTertiary,
   },
-  onboardingSegLabelDone: {
+  onboardingScore: {
+    fontFamily: fontFamily.uiLabel,
+    fontSize: fontSize.caption,
     color: colors.success,
-  },
-  onboardingSegLabelActive: {
-    color: colors.accent,
   },
 
   // ── Daily Challenge

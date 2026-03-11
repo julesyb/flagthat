@@ -70,7 +70,7 @@ const es: typeof en = {
     bestStreak: 'Mejor racha',
     best60s: 'Mejor 60s',
     accuracy: 'Precisi\u00f3n',
-    onboardingFlags: 'banderas pendientes',
+    onboardingLabel: 'Quiz inicial',
   },
 
   setup: {
