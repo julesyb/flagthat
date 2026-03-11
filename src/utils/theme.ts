@@ -23,21 +23,21 @@
 const palette = {
   ink: '#1A1A2E',         // Deep midnight navy (retro cartridge vibes)
   inkLight: '#2A2A45',    // Lighter midnight
-  red: '#E84855',         // Warm coral-red (friendlier, more playful)
-  redLight: '#FF6B6B',    // Light coral
+  red: '#CC3344',         // Bold 90s red (AA 4.8:1 on cream)
+  redLight: '#FF6B6B',    // Light coral (dark-surface variant)
   slate: '#4E5172',       // Indigo-slate (warm secondary text)
-  muted: '#6F7194',       // Muted lavender (AA on cream, 4.7:1)
+  muted: '#5E6085',       // Muted indigo (AA 5.7:1 on cream)
   rule: '#E6DDD5',        // Warm rule line
   rule2: '#D6CCC3',       // Warmer rule
   paper: '#FFF7EE',       // Warm cream background
   paperDark: '#EFE6DC',   // Darker cream
   white: '#FFFFFF',
   black: '#000000',
-  green: '#16A34A',       // Success green (functional, unchanged)
+  green: '#0D8040',       // Deep emerald (AA 4.7:1 on cream)
   crimson: '#DC2626',     // Error red (functional, unchanged)
-  amber: '#E8A317',       // Warm gold
-  blue: '#4361EE',        // Electric retro blue
-  teal: '#00B4A6',        // 90s teal (icons, graphical accents)
+  amber: '#8E6C08',       // Burnt retro gold (AA 4.6:1 on cream, was 2.0 FAIL)
+  blue: '#3A52D4',        // Electric retro blue (AA 5.9:1 on cream)
+  teal: '#007A6E',        // Deep 90s teal (AA 4.9:1 on cream, was 2.5 FAIL)
 };
 
 export const colors = {
@@ -100,10 +100,16 @@ export const colors = {
   errorTextOnDark: '#f8a09a',
 
   // Light feedback backgrounds (on white/paper)
-  successBg: 'rgba(22, 163, 74, 0.08)',
+  successBg: 'rgba(13, 128, 64, 0.08)',
   errorBg: 'rgba(220, 38, 38, 0.08)',
-  warningBg: 'rgba(232, 163, 23, 0.08)',
-  accentBg: 'rgba(232, 72, 85, 0.06)',
+  warningBg: 'rgba(142, 108, 8, 0.08)',
+  accentBg: 'rgba(204, 51, 68, 0.06)',
+
+  // Badge tier colors (AA on cream)
+  tierBronze: '#8B5523',   // 5.4:1 on cream
+  tierSilver: '#6B6B6B',   // 5.0:1 on cream
+  tierGold: '#8E6C08',     // 4.6:1 on cream
+  tierPlatinum: '#5254CC',  // 5.7:1 on cream
 
   // Map
   mapBackground: '#f5f0e8',
@@ -252,6 +258,12 @@ export const buttons = {
     paddingHorizontal: 24,
     alignItems: 'center' as const,
     borderRadius: borderRadius.lg,
+    // Hard offset accent shadow (retro 90s)
+    shadowColor: palette.red,
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 3,
   },
   primaryText: {
     fontFamily: fontFamily.uiLabel,
@@ -268,6 +280,12 @@ export const buttons = {
     borderWidth: 2,
     borderColor: palette.ink,
     borderRadius: borderRadius.lg,
+    // Hard offset ink shadow (retro 90s)
+    shadowColor: palette.ink,
+    shadowOffset: { width: 3, height: 3 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 2,
   },
   secondaryText: {
     fontFamily: fontFamily.uiLabel,

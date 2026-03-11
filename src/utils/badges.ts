@@ -1,6 +1,7 @@
 import { UserStats } from '../types';
 import { FlagStats } from './storage';
 import { getTotalFlagCount } from '../data';
+import { colors } from './theme';
 
 export type BadgeTier = 'bronze' | 'silver' | 'gold' | 'platinum';
 
@@ -20,10 +21,10 @@ export interface EarnedBadge extends Badge {
 }
 
 export const TIER_COLORS: Record<BadgeTier, string> = {
-  bronze: '#A0612A',
-  silver: '#888888',
-  gold: '#C9960C',
-  platinum: '#6366F1',
+  bronze: colors.tierBronze,
+  silver: colors.tierSilver,
+  gold: colors.tierGold,
+  platinum: colors.tierPlatinum,
 };
 
 export const BADGES: Badge[] = [
