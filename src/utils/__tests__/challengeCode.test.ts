@@ -6,7 +6,7 @@
 jest.mock('../../data', () => ({
   getAllFlags: () => [],
 }));
-jest.mock('./../../data/countryAliases', () => ({
+jest.mock('../../data/countryAliases', () => ({
   twinPairs: [],
 }));
 jest.mock('../gameEngine', () => ({
@@ -115,26 +115,18 @@ describe('decodeChallenge', () => {
     );
   });
 
-  it('roundtrips all-correct results', () => {
+  it.each([
+    [true, 'all-correct'],
+    [false, 'all-wrong'],
+  ] as const)('roundtrips %s results', (correct, _label) => {
     const flagIds = ['US', 'FR', 'DE', 'JP', 'BR'];
-    const hostResults = flagIds.map(() => ({ correct: true, timeMs: 2000 }));
+    const hostResults = flagIds.map(() => ({ correct, timeMs: correct ? 2000 : 0 }));
     const data = makeChallengeData({ flagIds, hostResults });
     const encoded = encodeChallenge(data)!;
     const result = decodeChallenge(encoded);
     expect(result.status).toBe('ok');
     if (result.status !== 'ok') return;
-    expect(result.data.hostResults.every((r) => r.correct)).toBe(true);
-  });
-
-  it('roundtrips all-wrong results', () => {
-    const flagIds = ['US', 'FR', 'DE', 'JP', 'BR'];
-    const hostResults = flagIds.map(() => ({ correct: false, timeMs: 0 }));
-    const data = makeChallengeData({ flagIds, hostResults });
-    const encoded = encodeChallenge(data)!;
-    const result = decodeChallenge(encoded);
-    expect(result.status).toBe('ok');
-    if (result.status !== 'ok') return;
-    expect(result.data.hostResults.every((r) => !r.correct)).toBe(true);
+    expect(result.data.hostResults.every((r) => r.correct === correct)).toBe(true);
   });
 
   it('returns invalid for corrupted hex', () => {
@@ -158,25 +150,14 @@ describe('decodeChallenge', () => {
     expect(result.status).toBe('invalid');
   });
 
-  it('strips https:// URL prefix', () => {
+  it.each([
+    'https://flagthat.app/c/',
+    'http://flagthat.app/c/',
+    'flagthat://c/',
+  ])('strips URL prefix %s', (prefix) => {
     const data = makeChallengeData({ flagIds: ['US', 'FR'], hostResults: [{ correct: true, timeMs: 1000 }, { correct: false, timeMs: 0 }] });
     const encoded = encodeChallenge(data)!;
-    const result = decodeChallenge(`https://flagthat.app/c/${encoded}`);
-    expect(result.status).toBe('ok');
-  });
-
-  it('strips http:// URL prefix', () => {
-    const data = makeChallengeData({ flagIds: ['US', 'FR'], hostResults: [{ correct: true, timeMs: 1000 }, { correct: false, timeMs: 0 }] });
-    const encoded = encodeChallenge(data)!;
-    const result = decodeChallenge(`http://flagthat.app/c/${encoded}`);
-    expect(result.status).toBe('ok');
-  });
-
-  it('strips flagthat:// deep link prefix', () => {
-    const data = makeChallengeData({ flagIds: ['US', 'FR'], hostResults: [{ correct: true, timeMs: 1000 }, { correct: false, timeMs: 0 }] });
-    const encoded = encodeChallenge(data)!;
-    const result = decodeChallenge(`flagthat://c/${encoded}`);
-    expect(result.status).toBe('ok');
+    expect(decodeChallenge(`${prefix}${encoded}`).status).toBe('ok');
   });
 });
 

@@ -39,9 +39,9 @@ function sanitizeName(name: string): string {
  * No base64 - the output goes directly into the URL path.
  */
 export function encodeChallenge(data: ChallengeData): string | null {
-  if (data.flagIds.some((id) => id.length !== 2)) return null;
   if (data.flagIds.length > 30) return null; // bit-packing limit
   if (data.hostResults.length !== data.flagIds.length) return null;
+  if (data.flagIds.some((id) => id.length !== 2)) return null;
   const modeIdx = MODE_INDEX.get(data.mode);
   if (modeIdx === undefined) return null;
 
