@@ -23,7 +23,8 @@ import MapImage from '../components/MapImage';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Neighbors'>;
 
-const DISTRACTOR_COUNT = 4;
+const MAX_OPTIONS = 12;
+const MIN_DISTRACTORS = 3;
 
 const flagById = new Map(countries.map((c) => [c.id, c]));
 
@@ -44,15 +45,20 @@ function generateRounds(count: number): RoundData[] {
   return shuffled.map((code) => {
     const country = flagById.get(code)!;
     const neighborIds = countryNeighbors[code].filter((id) => flagById.has(id));
-    const neighborFlags = neighborIds.map((id) => flagById.get(id)!);
+    // Cap neighbors so total options stay within MAX_OPTIONS
+    const cappedNeighborIds = neighborIds.length > MAX_OPTIONS - MIN_DISTRACTORS
+      ? shuffleArray(neighborIds).slice(0, MAX_OPTIONS - MIN_DISTRACTORS)
+      : neighborIds;
+    const neighborFlags = cappedNeighborIds.map((id) => flagById.get(id)!);
 
+    const distractorCount = Math.max(MIN_DISTRACTORS, MAX_OPTIONS - cappedNeighborIds.length);
     const excludeSet = new Set([code, ...neighborIds]);
     const allOther = countries.filter((c) => !excludeSet.has(c.id));
-    const distractors = shuffleArray(allOther).slice(0, DISTRACTOR_COUNT);
+    const distractors = shuffleArray(allOther).slice(0, distractorCount);
 
     return {
       country,
-      neighborIds,
+      neighborIds: cappedNeighborIds,
       options: shuffleArray([...neighborFlags, ...distractors]),
     };
   });
@@ -66,6 +72,7 @@ export default function NeighborsScreen({ navigation, route }: Props) {
   const [submitted, setSubmitted] = useState(false);
   const [results, setResults] = useState<GameResult[]>([]);
   const fadeAnim = useRef(new Animated.Value(1)).current;
+  const roundStartTime = useRef(Date.now());
 
   // Empty rounds — not enough eligible countries
   if (rounds.length === 0) {
@@ -115,7 +122,7 @@ export default function NeighborsScreen({ navigation, route }: Props) {
       question: { flag: round.country, options: round.neighborIds },
       userAnswer: [...selected].join(','),
       correct: allCorrect,
-      timeTaken: 0,
+      timeTaken: Date.now() - roundStartTime.current,
     }]);
   };
 
@@ -135,6 +142,7 @@ export default function NeighborsScreen({ navigation, route }: Props) {
       setRoundIndex((i) => i + 1);
       setSelected(new Set());
       setSubmitted(false);
+      roundStartTime.current = Date.now();
       Animated.timing(fadeAnim, { toValue: 1, duration: 180, useNativeDriver: true }).start();
     });
   };
@@ -168,7 +176,6 @@ export default function NeighborsScreen({ navigation, route }: Props) {
               countryCode={round.country.id}
               emoji={round.country.emoji}
               size="large"
-              style={{ borderRadius: borderRadius.md }}
             />
             <Text style={styles.countryName}>{round.country.name}</Text>
           </View>

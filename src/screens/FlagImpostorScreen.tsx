@@ -167,6 +167,7 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
   const [picked, setPicked] = useState<number | null>(null);
   const [results, setResults] = useState<GameResult[]>([]);
   const fadeAnim = useRef(new Animated.Value(1)).current;
+  const roundStartTime = useRef(Date.now());
 
   const round = rounds[roundIndex] ?? null;
   const isLastRound = roundIndex >= rounds.length - 1;
@@ -198,11 +199,14 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
     if (isCorrect) { hapticCorrect(); }
     else { hapticWrong(); playWrongSound(); }
 
+    const tappedFlag = grid[index];
+    const userLabel = tappedFlag.isFake ? 'Fake flag' : tappedFlag.flag!.name;
+
     setResults((prev) => [...prev, {
-      question: { flag: round.realFlags[0], options: [] },
-      userAnswer: isCorrect ? 'IMPOSTOR' : 'WRONG',
+      question: { flag: round.realFlags[0], options: round.realFlags.map((f) => f.name) },
+      userAnswer: userLabel,
       correct: isCorrect,
-      timeTaken: 0,
+      timeTaken: Date.now() - roundStartTime.current,
     }]);
   };
 
@@ -221,6 +225,7 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
     Animated.timing(fadeAnim, { toValue: 0, duration: 120, useNativeDriver: true }).start(() => {
       setRoundIndex((i) => i + 1);
       setPicked(null);
+      roundStartTime.current = Date.now();
       Animated.timing(fadeAnim, { toValue: 1, duration: 180, useNativeDriver: true }).start();
     });
   };
