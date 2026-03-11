@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
 import { useFonts } from 'expo-font';
 import {
   LibreBaskerville_700Bold,
@@ -13,7 +13,6 @@ import {
 } from '@expo-google-fonts/barlow';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { TouchableOpacity, Text as RNText } from 'react-native';
 import HomeScreen from './src/screens/HomeScreen';
 import GameSetupScreen from './src/screens/GameSetupScreen';
 import GameScreen from './src/screens/GameScreen';
@@ -31,6 +30,19 @@ import { RootStackParamList } from './src/types/navigation';
 import { colors, typography, fontFamily } from './src/utils/theme';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
+
+function HomeBackButton({ onPress }: { onPress: () => void }) {
+  return (
+    <TouchableOpacity
+      style={{ flexDirection: 'row', alignItems: 'center', marginLeft: -8, paddingRight: 12 }}
+      onPress={onPress}
+      activeOpacity={0.7}
+    >
+      <ChevronLeftIcon size={20} color={colors.textTertiary} />
+      <Text style={{ fontFamily: fontFamily.uiLabelMedium, fontSize: 13, letterSpacing: 0.3, color: colors.textTertiary, textTransform: 'uppercase', marginLeft: 2 }}>Play</Text>
+    </TouchableOpacity>
+  );
+}
 
 const screenOptions = {
   headerStyle: {
@@ -64,16 +76,7 @@ function AppContent() {
           component={GameSetupScreen}
           options={({ navigation }) => ({
             title: 'Game Modes',
-            headerLeft: () => (
-              <TouchableOpacity
-                style={{ flexDirection: 'row', alignItems: 'center', marginLeft: -8, paddingRight: 12 }}
-                onPress={() => navigation.navigate('Home')}
-                activeOpacity={0.7}
-              >
-                <ChevronLeftIcon size={20} color={colors.textTertiary} />
-                <RNText style={{ fontFamily: 'Barlow_500Medium', fontSize: 13, letterSpacing: 0.3, color: colors.textTertiary, textTransform: 'uppercase', marginLeft: 2 }}>Play</RNText>
-              </TouchableOpacity>
-            ),
+            headerLeft: () => <HomeBackButton onPress={() => navigation.navigate('Home')} />,
           })}
         />
         <Stack.Screen
@@ -116,16 +119,7 @@ function AppContent() {
           component={StatsScreen}
           options={({ navigation }) => ({
             title: 'Statistics',
-            headerLeft: () => (
-              <TouchableOpacity
-                style={{ flexDirection: 'row', alignItems: 'center', marginLeft: -8, paddingRight: 12 }}
-                onPress={() => navigation.navigate('Home')}
-                activeOpacity={0.7}
-              >
-                <ChevronLeftIcon size={20} color={colors.textTertiary} />
-                <RNText style={{ fontFamily: 'Barlow_500Medium', fontSize: 13, letterSpacing: 0.3, color: colors.textTertiary, textTransform: 'uppercase', marginLeft: 2 }}>Play</RNText>
-              </TouchableOpacity>
-            ),
+            headerLeft: () => <HomeBackButton onPress={() => navigation.navigate('Home')} />,
           })}
         />
         <Stack.Screen
@@ -133,16 +127,7 @@ function AppContent() {
           component={BrowseScreen}
           options={({ navigation }) => ({
             title: 'Browse Flags',
-            headerLeft: () => (
-              <TouchableOpacity
-                style={{ flexDirection: 'row', alignItems: 'center', marginLeft: -8, paddingRight: 12 }}
-                onPress={() => navigation.navigate('Home')}
-                activeOpacity={0.7}
-              >
-                <ChevronLeftIcon size={20} color={colors.textTertiary} />
-                <RNText style={{ fontFamily: 'Barlow_500Medium', fontSize: 13, letterSpacing: 0.3, color: colors.textTertiary, textTransform: 'uppercase', marginLeft: 2 }}>Play</RNText>
-              </TouchableOpacity>
-            ),
+            headerLeft: () => <HomeBackButton onPress={() => navigation.navigate('Home')} />,
           })}
         />
       </Stack.Navigator>

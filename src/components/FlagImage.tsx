@@ -14,7 +14,6 @@ const SIZE_MAP = {
   small: { width: 64, height: 43 },
   medium: { width: 120, height: 80 },
   large: { width: 240, height: 160 },
-  hero: { width: 320, height: 213 },
 };
 
 // flagcdn.com serves PNGs at these fixed widths

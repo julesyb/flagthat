@@ -12,7 +12,7 @@ import Svg, { Rect, Circle, Path, G } from 'react-native-svg';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { colors, spacing, typography, fontFamily, buttons, borderRadius } from '../utils/theme';
 import { hapticTap, hapticCorrect, hapticWrong, playWrongSound } from '../utils/feedback';
-import { updateStats } from '../utils/storage';
+import { updateStats, updateFlagResults } from '../utils/storage';
 import { shuffleArray, getStreakFromResults } from '../utils/gameEngine';
 import { RootStackParamList } from '../types/navigation';
 import { FlagItem, GameResult } from '../types';
@@ -57,7 +57,7 @@ function generateFakeFlag(): FakeFlag {
     hasSymbol,
     symbolType: hasSymbol ? symbolTypes[Math.floor(Math.random() * symbolTypes.length)] : undefined,
     symbolColor: hasSymbol ? shuffledColors[3] || '#FFFFFF' : undefined,
-    reason: 'Procedurally generated — no real country uses this combination',
+    reason: 'Procedurally generated, no real country uses this combination',
   };
 }
 
@@ -168,13 +168,12 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
   const [results, setResults] = useState<GameResult[]>([]);
   const fadeAnim = useRef(new Animated.Value(1)).current;
 
-  const round = rounds[roundIndex];
-  if (!round) return null;
-
+  const round = rounds[roundIndex] ?? null;
   const isLastRound = roundIndex >= rounds.length - 1;
   const correctCount = results.filter((r) => r.correct).length;
 
   const grid = useMemo(() => {
+    if (!round) return [];
     const items: { isFake: boolean; flag?: FlagItem; fakeFlag?: FakeFlag; index: number }[] = [];
     let realIdx = 0;
     for (let i = 0; i < 4; i++) {
@@ -187,6 +186,8 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
     }
     return items;
   }, [round]);
+
+  if (!round) return null;
 
   const handlePick = (index: number) => {
     if (picked !== null) return;
@@ -211,6 +212,7 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
       const correct = finalResults.filter((r) => r.correct).length;
       const streak = getStreakFromResults(finalResults);
       updateStats(correct, finalResults.length, streak, 'impostor', config.category);
+      updateFlagResults(finalResults);
       navigation.replace('Results', { results: finalResults, config });
       return;
     }

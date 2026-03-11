@@ -112,8 +112,6 @@ export default function BrowseScreen({ route, navigation }: Props) {
             style={[
               styles.regionChip,
               selectedFilter === filter && styles.regionChipActive,
-              filter === PRACTICE_MORE && selectedFilter !== filter && styles.practiceChip,
-              filter === PRACTICE_MORE && selectedFilter === filter && styles.practiceChipActive,
             ]}
             onPress={() => setSelectedFilter(filter)}
             activeOpacity={0.7}
@@ -192,8 +190,6 @@ const styles = StyleSheet.create({
     borderColor: colors.ink,
     backgroundColor: colors.ink,
   },
-  practiceChip: {},
-  practiceChipActive: {},
   regionLabel: {
     ...typography.captionBold,
     color: colors.textSecondary,

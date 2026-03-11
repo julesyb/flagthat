@@ -10,6 +10,8 @@ import {
   Platform,
 } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../types/navigation';
 import { colors, spacing, typography, fontFamily, borderRadius } from '../utils/theme';
 import { UserStats, GAME_MODES, GameMode } from '../types';
 import { getStats, resetStats, getFlagStats, FlagStats } from '../utils/storage';
@@ -17,7 +19,7 @@ import { getAllFlags, getTotalFlagCount } from '../data';
 import BottomNav from '../components/BottomNav';
 
 export default function StatsScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [stats, setStats] = useState<UserStats | null>(null);
   const [flagStats, setFlagStats] = useState<FlagStats>({});
 
@@ -192,9 +194,9 @@ export default function StatsScreen() {
         </TouchableOpacity>
       </ScrollView>
       <BottomNav activeTab="Stats" onNavigate={(tab) => {
-        if (tab === 'Play') navigation.navigate('Home' as never);
-        else if (tab === 'Modes') navigation.navigate('GameSetup' as never);
-        else if (tab === 'Browse') navigation.navigate('Browse' as never);
+        if (tab === 'Play') navigation.navigate('Home' );
+        else if (tab === 'Modes') navigation.navigate('GameSetup' );
+        else if (tab === 'Browse') navigation.navigate('Browse' );
       }} />
     </SafeAreaView>
   );

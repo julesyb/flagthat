@@ -313,7 +313,7 @@ export default function HomeScreen({ navigation }: Props) {
             activeOpacity={0.85}
             onPress={() => { hapticTap(); navigation.navigate('GameSetup'); }}
           >
-            <View style={[s.modeIcon, s.modeIconRed]}>
+            <View style={s.modeIcon}>
               <CrosshairIcon size={18} color={colors.white} />
             </View>
             <View style={s.modeText}>
@@ -373,7 +373,7 @@ export default function HomeScreen({ navigation }: Props) {
               });
             }}
           >
-            <View style={[s.modeIcon, s.modeIconRed]}>
+            <View style={s.modeIcon}>
               <EyeIcon size={18} color={colors.white} />
             </View>
             <View style={s.modeText}>
@@ -747,9 +747,6 @@ const s = StyleSheet.create({
     borderRadius: borderRadius.md,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  modeIconRed: {
-    backgroundColor: colors.accent,
   },
   modeText: {
     flex: 1,

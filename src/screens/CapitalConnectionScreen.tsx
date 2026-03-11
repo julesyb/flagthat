@@ -68,30 +68,16 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
   const [timer, setTimer] = useState(ROUND_TIME);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const fadeAnim = useRef(new Animated.Value(1)).current;
+  const handleSubmitRef = useRef<(() => void) | null>(null);
 
-  if (rounds.length === 0) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.emptyState}>
-          <Text style={styles.emptyTitle}>No countries available</Text>
-          <Text style={styles.emptyBody}>
-            There are no countries with known capitals in the selected category.
-          </Text>
-          <TouchableOpacity style={styles.emptyButton} onPress={() => navigation.goBack()}>
-            <Text style={styles.emptyButtonText}>Go Back</Text>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
-    );
-  }
-
-  const round = rounds[roundIndex];
+  const round = rounds[roundIndex] ?? null;
   const isLastRound = roundIndex >= rounds.length - 1;
   const correctCount = results.filter((r) => r.correct).length;
+  const allPaired = Object.keys(pairs).length === PAIRS_PER_ROUND;
 
   // Timer
   useEffect(() => {
-    if (submitted) {
+    if (!round || submitted) {
       if (timerRef.current) clearInterval(timerRef.current);
       return;
     }
@@ -111,11 +97,23 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [roundIndex, submitted]);
+  }, [roundIndex, submitted, round]);
 
-  const handleSubmitRef = useRef<(() => void) | null>(null);
-
-  const allPaired = Object.keys(pairs).length === PAIRS_PER_ROUND;
+  if (!round) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyTitle}>No countries available</Text>
+          <Text style={styles.emptyBody}>
+            There are no countries with known capitals in the selected category.
+          </Text>
+          <TouchableOpacity style={styles.emptyButton} onPress={() => navigation.goBack()}>
+            <Text style={styles.emptyButtonText}>Go Back</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   const handleFlagTap = (flagId: string) => {
     if (submitted) return;
