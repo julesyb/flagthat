@@ -15,6 +15,7 @@ import { hapticTap, hapticCorrect, hapticWrong, playWrongSound } from '../utils/
 import { updateStats, updateFlagResults } from '../utils/storage';
 import { shuffleArray, getStreakFromResults } from '../utils/gameEngine';
 import { t } from '../utils/i18n';
+import { flagName } from '../data/countryNames';
 import { RootStackParamList } from '../types/navigation';
 import { FlagItem, GameResult } from '../types';
 import { countries } from '../data/countries';
@@ -335,7 +336,7 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
                         <Text style={styles.fakeLabel}>{t('impostor.fake')}</Text>
                       ) : (
                         <>
-                          <Text style={styles.realName}>{item.flag!.name}</Text>
+                          <Text style={styles.realName}>{flagName(item.flag!)}</Text>
                           <Text style={styles.realRegion}>{item.flag!.region}</Text>
                         </>
                       )}

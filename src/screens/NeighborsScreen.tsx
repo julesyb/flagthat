@@ -14,6 +14,7 @@ import { hapticTap, hapticCorrect, hapticWrong, playWrongSound } from '../utils/
 import { updateStats, updateFlagResults } from '../utils/storage';
 import { shuffleArray, getStreakFromResults } from '../utils/gameEngine';
 import { t } from '../utils/i18n';
+import { flagName } from '../data/countryNames';
 import { RootStackParamList } from '../types/navigation';
 import { FlagItem, GameResult } from '../types';
 import { countries } from '../data/countries';
@@ -182,7 +183,7 @@ export default function NeighborsScreen({ navigation, route }: Props) {
               emoji={round.country.emoji}
               size="large"
             />
-            <Text style={styles.countryName}>{round.country.name}</Text>
+            <Text style={styles.countryName}>{flagName(round.country)}</Text>
           </View>
 
           <View style={styles.optionsGrid}>
@@ -237,7 +238,7 @@ export default function NeighborsScreen({ navigation, route }: Props) {
                     ]}
                     numberOfLines={1}
                   >
-                    {flag.name}
+                    {flagName(flag)}
                   </Text>
                   {submitted && showMissed && (
                     <Text style={styles.missedLabel}>{t('neighbors.missed')}</Text>
@@ -263,7 +264,7 @@ export default function NeighborsScreen({ navigation, route }: Props) {
                   return (
                     <View key={id} style={styles.neighborChip}>
                       <FlagImage countryCode={f.id} emoji={f.emoji} size="small" />
-                      <Text style={styles.neighborChipText}>{f.name}</Text>
+                      <Text style={styles.neighborChipText}>{flagName(f)}</Text>
                     </View>
                   );
                 })}

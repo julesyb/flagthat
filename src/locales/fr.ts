@@ -276,6 +276,16 @@ const fr: typeof en = {
     shared_spirit: { name: 'Esprit de partage', description: 'Partagez vos r\u00e9sultats' },
   },
 
+  onboarding: {
+    subtitle: 'Voyons o\u00f9 vous en \u00eates',
+    regionTest: 'Quiz de 10 drapeaux',
+    completed: 'Termin\u00e9',
+    startPlaying: 'Commencer \u00e0 jouer',
+    skip: 'Passer',
+    next: 'R\u00e9gion suivante',
+    allDone: 'Termin\u00e9, bien jou\u00e9',
+  },
+
   modes: {
     easy: 'Facile',
     medium: 'Moyen',
@@ -288,6 +298,7 @@ const fr: typeof en = {
     capitalconnection: 'Quiz capitales',
     daily: 'Quotidien',
     practice: 'R\u00e9vision',
+    baseline: 'Test initial',
   },
 
   categories: {

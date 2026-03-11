@@ -201,3 +201,11 @@ export function MapPinIcon({ size = 16, color = '#4B5563', strokeWidth = 1.5 }: 
     </Svg>
   );
 }
+
+export function ChevronDownIcon({ size = 16, color = '#9CA3AF', strokeWidth = 2 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+      <Polyline points="6 9 12 15 18 9" />
+    </Svg>
+  );
+}

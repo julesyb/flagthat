@@ -23,6 +23,7 @@ import { PlayIcon, ChevronRightIcon, ClockIcon, UsersIcon, EyeIcon, CalendarIcon
 import FlagImage from '../components/FlagImage';
 import BottomNav from '../components/BottomNav';
 import { t } from '../utils/i18n';
+import { translateName, flagName } from '../data/countryNames';
 
 const MODE_KEYS: GameMode[] = ['easy', 'medium', 'hard'];
 
@@ -105,7 +106,7 @@ function FlagTeaser() {
                     activeOpacity={0.8}
                     disabled={picked !== null}
                   >
-                    <Text style={[s.optText, showCorrect && s.optTextCorrect, showWrong && s.optTextWrong]}>{opt}</Text>
+                    <Text style={[s.optText, showCorrect && s.optTextCorrect, showWrong && s.optTextWrong]}>{translateName(opt)}</Text>
                   </TouchableOpacity>
                 </Animated.View>
               );
@@ -132,7 +133,7 @@ function FlagTeaser() {
                     activeOpacity={0.8}
                     disabled={picked !== null}
                   >
-                    <Text style={[s.optText, showCorrect && s.optTextCorrect, showWrong && s.optTextWrong]}>{opt}</Text>
+                    <Text style={[s.optText, showCorrect && s.optTextCorrect, showWrong && s.optTextWrong]}>{translateName(opt)}</Text>
                   </TouchableOpacity>
                 </Animated.View>
               );
@@ -142,7 +143,7 @@ function FlagTeaser() {
       ) : (
         <View style={s.teaserResult}>
           <Text style={[s.teaserResultText, picked === question.flag.name ? s.teaserResultCorrect : s.teaserResultWrong]}>
-            {picked === question.flag.name ? t('common.correct') : question.flag.name}
+            {picked === question.flag.name ? t('common.correct') : flagName(question.flag)}
           </Text>
           <TouchableOpacity
             style={[s.teaserPlayBtn, picked === question.flag.name ? s.teaserPlayBtnCorrect : s.teaserPlayBtnWrong]}

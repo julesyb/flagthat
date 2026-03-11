@@ -12,8 +12,10 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { colors, spacing, typography, fontFamily, buttons, borderRadius } from '../utils/theme';
 import { calculateAccuracy, getStreakFromResults, getGrade, generateDailyShareGrid, getDailyNumber } from '../utils/gameEngine';
-import { updateStats, updateFlagResults, saveDailyChallenge, incrementDailyChallenges, updateLastGameBadgeFlags, markShared } from '../utils/storage';
+import { updateStats, updateFlagResults, saveDailyChallenge, incrementDailyChallenges, updateLastGameBadgeFlags, markShared, saveBaselineResult } from '../utils/storage';
+import { BaselineRegionId } from '../types';
 import { t } from '../utils/i18n';
+import { flagName } from '../data/countryNames';
 import { hapticCorrect, playCelebrationSound } from '../utils/feedback';
 import { FlagImageSmall } from '../components/FlagImage';
 import { CheckIcon, CrossIcon } from '../components/Icons';
@@ -38,6 +40,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
   const confettiOpacity = useRef(new Animated.Value(0)).current;
 
   const isDaily = config.mode === 'daily';
+  const isBaseline = config.mode === 'baseline';
 
   useEffect(() => {
     updateStats(correct, results.length, streak, config.mode, config.category);
@@ -46,6 +49,9 @@ export default function ResultsScreen({ route, navigation }: Props) {
     if (isDaily) {
       saveDailyChallenge(results);
       incrementDailyChallenges();
+    }
+    if (isBaseline) {
+      saveBaselineResult(config.category as BaselineRegionId, results);
     }
 
     Animated.spring(gradeScale, {
@@ -101,7 +107,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
   const goHome = () => navigation.popToTop();
 
   const playAgain = () => {
-    if (isDaily) {
+    if (isDaily || isBaseline) {
       navigation.popToTop();
       return;
     }
@@ -195,9 +201,9 @@ export default function ResultsScreen({ route, navigation }: Props) {
             activeOpacity={0.7}
             accessibilityLabel={t('common.play')}
           >
-            <Text style={styles.primaryButtonText}>{isDaily ? t('common.home') : t('common.play')}</Text>
+            <Text style={styles.primaryButtonText}>{isDaily || isBaseline ? (isBaseline ? t('onboarding.next') : t('common.home')) : t('common.play')}</Text>
           </TouchableOpacity>
-          {!isDaily && (
+          {!isDaily && !isBaseline && (
             <TouchableOpacity
               style={styles.secondaryButton}
               onPress={goHome}
@@ -223,7 +229,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
               emoji={result.question.flag.emoji}
             />
             <View style={styles.reviewContent}>
-              <Text style={styles.reviewName}>{result.question.flag.name}</Text>
+              <Text style={styles.reviewName}>{flagName(result.question.flag)}</Text>
               {!result.correct && result.userAnswer !== 'SKIPPED' && (
                 <Text style={styles.reviewAnswer}>
                   {t('results.youSaid', { answer: result.userAnswer })}
@@ -239,30 +245,34 @@ export default function ResultsScreen({ route, navigation }: Props) {
 
         {/* Bottom action buttons (mirrored) */}
         <View style={styles.buttonRow}>
-          <TouchableOpacity
-            style={styles.secondaryButton}
-            onPress={handleShare}
-            activeOpacity={0.7}
-            accessibilityLabel={t('common.share')}
-          >
-            <Text style={styles.secondaryButtonText}>{t('common.share')}</Text>
-          </TouchableOpacity>
+          {!isBaseline && (
+            <TouchableOpacity
+              style={styles.secondaryButton}
+              onPress={handleShare}
+              activeOpacity={0.7}
+              accessibilityLabel={t('common.share')}
+            >
+              <Text style={styles.secondaryButtonText}>{t('common.share')}</Text>
+            </TouchableOpacity>
+          )}
           <TouchableOpacity
             style={styles.primaryButton}
             onPress={playAgain}
             activeOpacity={0.7}
-            accessibilityLabel={t('common.play')}
+            accessibilityLabel={isBaseline ? t('onboarding.next') : t('common.play')}
           >
-            <Text style={styles.primaryButtonText}>{isDaily ? t('common.home') : t('common.play')}</Text>
+            <Text style={styles.primaryButtonText}>{isDaily || isBaseline ? (isBaseline ? t('onboarding.next') : t('common.home')) : t('common.play')}</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.secondaryButton}
-            onPress={goHome}
-            activeOpacity={0.7}
-            accessibilityLabel="Go home"
-          >
-            <Text style={styles.secondaryButtonText}>{t('common.home')}</Text>
-          </TouchableOpacity>
+          {!isBaseline && (
+            <TouchableOpacity
+              style={styles.secondaryButton}
+              onPress={goHome}
+              activeOpacity={0.7}
+              accessibilityLabel="Go home"
+            >
+              <Text style={styles.secondaryButtonText}>{t('common.home')}</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </ScrollView>
       <BottomNav

@@ -276,6 +276,16 @@ const es: typeof en = {
     shared_spirit: { name: 'Esp\u00edritu compartido', description: 'Comparte tus resultados' },
   },
 
+  onboarding: {
+    subtitle: 'Veamos tu nivel',
+    regionTest: 'Quiz de 10 banderas',
+    completed: 'Hecho',
+    startPlaying: 'Empezar a jugar',
+    skip: 'Omitir',
+    next: 'Siguiente regi\u00f3n',
+    allDone: 'Todo listo, buen trabajo',
+  },
+
   modes: {
     easy: 'F\u00e1cil',
     medium: 'Medio',
@@ -288,6 +298,7 @@ const es: typeof en = {
     capitalconnection: 'Quiz capitales',
     daily: 'Diario',
     practice: 'Pr\u00e1ctica',
+    baseline: 'L\u00ednea base',
   },
 
   categories: {

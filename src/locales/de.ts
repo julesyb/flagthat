@@ -276,6 +276,16 @@ const de: typeof en = {
     shared_spirit: { name: 'Teilender Geist', description: 'Teile deine Ergebnisse' },
   },
 
+  onboarding: {
+    subtitle: 'Mal sehen, wo du stehst',
+    regionTest: '10-Flaggen-Quiz',
+    completed: 'Fertig',
+    startPlaying: 'Losspielen',
+    skip: '\u00dcberspringen',
+    next: 'N\u00e4chste Region',
+    allDone: 'Alles geschafft, gut gemacht',
+  },
+
   modes: {
     easy: 'Leicht',
     medium: 'Mittel',
@@ -288,6 +298,7 @@ const de: typeof en = {
     capitalconnection: 'Hauptstadt-Quiz',
     daily: 'T\u00e4glich',
     practice: '\u00dcbung',
+    baseline: 'Einstufung',
   },
 
   categories: {

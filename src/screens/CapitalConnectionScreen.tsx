@@ -18,6 +18,7 @@ import { countryCapitals } from '../data/countryCapitals';
 import { countryCities } from '../data/countryCities';
 import FlagImage from '../components/FlagImage';
 import { t } from '../utils/i18n';
+import { flagName } from '../data/countryNames';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CapitalConnection'>;
 
@@ -197,7 +198,7 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
           />
         </View>
 
-        <Text style={styles.prompt}>{t('capital.whatIsCapital', { name: question.flag.name })}</Text>
+        <Text style={styles.prompt}>{t('capital.whatIsCapital', { name: flagName(question.flag) })}</Text>
 
         <View style={styles.optionsContainer}>
           {question.options.map((option, index) => {

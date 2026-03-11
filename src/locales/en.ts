@@ -291,6 +291,17 @@ const en = {
     shared_spirit: { name: 'Shared Spirit', description: 'Share your results' },
   },
 
+  // ─── Onboarding ───────────────────────────────────────────
+  onboarding: {
+    subtitle: "Let's see where you stand",
+    regionTest: '10-flag quiz',
+    completed: 'Done',
+    startPlaying: 'Start Playing',
+    skip: 'Skip',
+    next: 'Next Region',
+    allDone: 'All done, nice work',
+  },
+
   // ─── Game Modes (for labels) ────────────────────────────
   modes: {
     easy: 'Easy',
@@ -304,6 +315,7 @@ const en = {
     capitalconnection: 'Capital Connection',
     daily: 'Daily',
     practice: 'Practice',
+    baseline: 'Baseline',
   },
 
   // ─── Categories ─────────────────────────────────────────

@@ -21,6 +21,7 @@ import {
   playGameStartSound,
 } from '../utils/feedback';
 import FlagImage from '../components/FlagImage';
+import { flagName } from '../data/countryNames';
 import MapImage from '../components/MapImage';
 import { RootStackParamList } from '../types/navigation';
 
@@ -445,7 +446,7 @@ export default function FlagFlashScreen({ route, navigation }: Props) {
                 emoji={currentQuestion.flag.emoji}
               />
             )}
-            <Text style={styles.flagName}>{currentQuestion.flag.name}</Text>
+            <Text style={styles.flagName}>{flagName(currentQuestion.flag)}</Text>
           </>
         )}
       </View>
