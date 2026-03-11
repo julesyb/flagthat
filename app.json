@@ -15,7 +15,8 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.flagsareus.app",
       "infoPlist": {
-        "CFBundleDisplayName": "Flag That"
+        "CFBundleDisplayName": "Flag That",
+        "ITSAppUsesNonExemptEncryption": false
       },
       "privacyManifests": {
         "NSPrivacyCollectedDataTypes": [],
@@ -29,12 +30,14 @@
     },
     "android": {
       "package": "com.flagsareus.app",
+      "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#F9FAFB",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
-      }
+      },
+      "permissions": []
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -46,6 +49,11 @@
     },
     "plugins": [
       "expo-screen-orientation"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": ""
+      }
+    }
   }
 }
