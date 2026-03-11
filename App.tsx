@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet, Platform, Linking } from 'react-native';
 import { Analytics } from '@vercel/analytics/react';
 import { useFonts } from 'expo-font';
 import {
@@ -38,6 +38,18 @@ import { hasCompletedOnboarding } from './src/utils/storage';
 import { initializeAds, requestConsent } from './src/utils/ads';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
+
+const linking = {
+  prefixes: ['https://flagthat.app', 'flagthat://'],
+  config: {
+    screens: {
+      JoinChallenge: {
+        path: 'c/:code',
+        parse: { code: (code: string) => decodeURIComponent(code) },
+      },
+    },
+  },
+};
 
 function BackButton({ onPress }: { onPress: () => void }) {
   return (
@@ -98,7 +110,7 @@ function AppContent() {
   if (!localeReady) return null;
 
   return (
-    <NavigationContainer>
+    <NavigationContainer linking={linking}>
       <Stack.Navigator screenOptions={screenOptions} initialRouteName={initialRoute}>
         <Stack.Screen
           name="Onboarding"

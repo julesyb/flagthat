@@ -302,7 +302,7 @@ const en = {
     challengeDesc: 'Share your game so a friend can try the same flags',
     enterName: 'Your name',
     enterNameDesc: 'This will be shown to your opponent.',
-    shareMessage: 'I challenge you to beat my score on Flag That! Paste this code in the Challenge section:',
+    shareMessage: 'I challenge you to beat my score on Flag That!',
     headToHead: 'Head to head',
     you: 'You',
     youWin: 'You win!',

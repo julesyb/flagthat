@@ -25,11 +25,12 @@ import { getChallengeName, saveChallengeName } from '../utils/storage';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'JoinChallenge'>;
 
-export default function JoinChallengeScreen({ navigation }: Props) {
+export default function JoinChallengeScreen({ route, navigation }: Props) {
   const onNavigate = useNavTabs();
-  const [code, setCode] = useState('');
+  const initialCode = route.params?.code ?? '';
+  const [code, setCode] = useState(initialCode);
   const [name, setName] = useState('');
-  const [debouncedCode, setDebouncedCode] = useState('');
+  const [debouncedCode, setDebouncedCode] = useState(initialCode);
 
   // Load saved name on mount
   useEffect(() => {

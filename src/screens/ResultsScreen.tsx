@@ -109,16 +109,11 @@ export default function ResultsScreen({ route, navigation }: Props) {
     });
   }, []);
 
-  const handleChallengeShare = async () => {
-    if (challengeName.trim().length === 0) return;
-    Keyboard.dismiss();
-    setShowChallengeModal(false);
-    hapticTap();
-    saveChallengeName(challengeName.trim());
+  const doShareChallenge = async (name: string) => {
     const flagIds = results.map((r) => r.question.flag.id);
     const hostResults = results.map((r) => ({ correct: r.correct, timeMs: r.timeTaken }));
     const code = encodeChallenge({
-      hostName: challengeName.trim(),
+      hostName: name,
       mode: config.mode,
       timeLimit: config.timeLimit || 15,
       flagIds,
@@ -133,9 +128,30 @@ export default function ResultsScreen({ route, navigation }: Props) {
       }
       return;
     }
+    const link = `https://flagthat.app/c/${encodeURIComponent(code)}`;
     try {
-      await Share.share({ message: `${t('challenge.shareMessage')}\n\n${code}` });
+      await Share.share({ message: `${t('challenge.shareMessage')}\n\n${link}\n\n${code}` });
     } catch { /* share cancelled */ }
+  };
+
+  const handleChallengeShare = async () => {
+    if (challengeName.trim().length === 0) return;
+    Keyboard.dismiss();
+    setShowChallengeModal(false);
+    hapticTap();
+    saveChallengeName(challengeName.trim());
+    await doShareChallenge(challengeName.trim());
+  };
+
+  const handleChallengeTap = () => {
+    hapticTap();
+    if (challengeName.trim().length > 0) {
+      // Name already saved, share directly
+      doShareChallenge(challengeName.trim());
+    } else {
+      // Need name first
+      setShowChallengeModal(true);
+    }
   };
 
   // Head-to-head comparison data
@@ -656,7 +672,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
           <Animated.View style={{ opacity: restFade }}>
             <TouchableOpacity
               style={st.challengeButton}
-              onPress={() => { hapticTap(); setShowChallengeModal(true); }}
+              onPress={handleChallengeTap}
               activeOpacity={0.7}
             >
               <UsersIcon size={18} color={colors.ink} />

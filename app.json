@@ -2,6 +2,7 @@
   "expo": {
     "name": "Flag That",
     "slug": "flagsareus",
+    "scheme": "flagthat",
     "version": "1.0.0",
     "orientation": "default",
     "icon": "./assets/icon.png",
@@ -14,6 +15,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.flagsareus.app",
+      "associatedDomains": ["applinks:flagthat.app"],
       "infoPlist": {
         "CFBundleDisplayName": "Flag That",
         "ITSAppUsesNonExemptEncryption": false,
@@ -31,6 +33,14 @@
     },
     "android": {
       "package": "com.flagsareus.app",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [{ "scheme": "https", "host": "flagthat.app", "pathPrefix": "/c/" }],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ],
       "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#F9FAFB",

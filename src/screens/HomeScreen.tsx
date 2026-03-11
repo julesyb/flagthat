@@ -15,11 +15,11 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, fontFamily, fontSize, spacing, borderRadius, shadows } from '../utils/theme';
 import { getTotalFlagCount, getCategoryCount } from '../data';
 import { initAudio, hapticTap, hapticCorrect, hapticWrong, playWrongSound, setSoundsEnabled, setHapticsEnabled } from '../utils/feedback';
-import { getStats, getDayStreak, getDailyChallenge, DailyChallengeData, getSettings, getMissedFlagIds, getBaselineData, BaselineData } from '../utils/storage';
-import { generateQuestions, getDailyNumber } from '../utils/gameEngine';
+import { getStats, getDayStreak, getSettings, getMissedFlagIds, getBaselineData, BaselineData } from '../utils/storage';
+import { generateQuestions } from '../utils/gameEngine';
 import { RootStackParamList } from '../types/navigation';
 import { GameMode, UserStats, GameQuestion, CategoryId } from '../types';
-import { PlayIcon, ChevronRightIcon, ChevronDownIcon, ClockIcon, UsersIcon, EyeIcon, CalendarIcon, CrosshairIcon, LightningIcon, GearIcon, PuzzleIcon, CheckIcon } from '../components/Icons';
+import { PlayIcon, ChevronRightIcon, ChevronDownIcon, ClockIcon, UsersIcon, EyeIcon, CrosshairIcon, LightningIcon, GearIcon, PuzzleIcon, CheckIcon } from '../components/Icons';
 import FlagImage from '../components/FlagImage';
 import BottomNav from '../components/BottomNav';
 import ScreenContainer from '../components/ScreenContainer';
@@ -177,7 +177,6 @@ export default function HomeScreen({ navigation }: Props) {
   const [stats, setStats] = useState<UserStats | null>(null);
   const [dayStreak, setDayStreak] = useState(0);
   const [teaserKey, setTeaserKey] = useState(0);
-  const [dailyDone, setDailyDone] = useState<DailyChallengeData | null>(null);
   const [weakFlagCount, setWeakFlagCount] = useState(0);
   const [autocomplete, setAutocomplete] = useState(false);
   const [baseline, setBaseline] = useState<BaselineData | null>(null);
@@ -195,7 +194,6 @@ export default function HomeScreen({ navigation }: Props) {
     useCallback(() => {
       getStats().then(setStats);
       getDayStreak().then(setDayStreak);
-      getDailyChallenge().then(setDailyDone);
       getMissedFlagIds().then((ids) => setWeakFlagCount(ids.length));
       getBaselineData().then(setBaseline);
       setTeaserKey((k) => k + 1);
@@ -321,45 +319,6 @@ export default function HomeScreen({ navigation }: Props) {
             </View>
           </View>
         )}
-
-        {/* ── DAILY CHALLENGE ── */}
-        <TouchableOpacity
-          style={[s.dailyCard, dailyDone?.completed && s.dailyCardDone]}
-          activeOpacity={0.85}
-          onPress={() => {
-            hapticTap();
-            if (dailyDone?.completed && dailyDone.results) {
-              navigation.navigate('Results', {
-                results: dailyDone.results,
-                config: { mode: 'daily', category: 'all', questionCount: 10, displayMode: 'flag' },
-                reviewOnly: true,
-              });
-            } else {
-              navigation.navigate('Game', {
-                config: { mode: 'daily', category: 'all', questionCount: 10, displayMode: 'flag' },
-              });
-            }
-          }}
-        >
-          <View style={s.dailyLeft}>
-            <CalendarIcon size={18} color={dailyDone?.completed ? colors.success : colors.accent} />
-          </View>
-          <View style={s.dailyContent}>
-            <Text style={[s.dailyTitle, dailyDone?.completed && s.dailyTitleDone]}>
-              {t('home.daily', { number: getDailyNumber() })}
-            </Text>
-            <Text style={s.dailySub}>
-              {dailyDone?.completed
-                ? `${dailyDone.score}/10 - ${t('home.comeBackTomorrow')}`
-                : t('home.tenFlags')}
-            </Text>
-          </View>
-          {dailyDone?.completed ? (
-            <Text style={s.dailyScore}>{dailyDone.score}/10</Text>
-          ) : (
-            <ChevronRightIcon size={18} color={colors.accent} />
-          )}
-        </TouchableOpacity>
 
         {/* ── FLAG TEASER ── */}
         <FlagTeaser key={teaserKey} />
@@ -774,55 +733,6 @@ const s = StyleSheet.create({
     fontFamily: fontFamily.uiLabel,
     fontSize: fontSize.sm,
     color: colors.success,
-  },
-
-  // ── Daily Challenge
-  dailyCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.white,
-    borderWidth: 2,
-    borderColor: colors.accent,
-    borderRadius: borderRadius.lg,
-    padding: spacing.md,
-    paddingHorizontal: spacing.md,
-    marginHorizontal: spacing.md,
-    marginTop: spacing.md,
-    gap: spacing.md,
-  },
-  dailyCardDone: {
-    borderColor: colors.success,
-  },
-  dailyLeft: {
-    width: 40,
-    height: 40,
-    backgroundColor: colors.accentBg,
-    borderRadius: borderRadius.md,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  dailyContent: {
-    flex: 1,
-  },
-  dailyTitle: {
-    fontFamily: fontFamily.bodyBold,
-    fontSize: fontSize.lg,
-    color: colors.ink,
-    marginBottom: 2,
-  },
-  dailyTitleDone: {
-    color: colors.textTertiary,
-  },
-  dailySub: {
-    fontFamily: fontFamily.body,
-    fontSize: fontSize.caption,
-    color: colors.textTertiary,
-    lineHeight: 18,
-  },
-  dailyScore: {
-    fontFamily: fontFamily.display,
-    fontSize: fontSize.xl,
-    color: colors.textTertiary,
   },
 
   // ── Hero flag teaser
