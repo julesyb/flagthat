@@ -15,11 +15,11 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, fontFamily, fontSize, spacing, borderRadius, shadows } from '../utils/theme';
 import { getTotalFlagCount, getCategoryCount } from '../data';
 import { initAudio, hapticTap, hapticCorrect, hapticWrong, playWrongSound, setSoundsEnabled, setHapticsEnabled } from '../utils/feedback';
-import { getStats, getDayStreak, getDailyChallenge, DailyChallengeData, getSettings, getMissedFlagIds, getBaselineData, BaselineData } from '../utils/storage';
+import { getStats, getDayStreak, getDailyChallenge, DailyChallengeData, getSettings, getBaselineData, BaselineData } from '../utils/storage';
 import { generateQuestions, getDailyNumber } from '../utils/gameEngine';
 import { RootStackParamList } from '../types/navigation';
 import { GameMode, UserStats, GameQuestion, CategoryId } from '../types';
-import { PlayIcon, ChevronRightIcon, ChevronDownIcon, ClockIcon, UsersIcon, EyeIcon, CalendarIcon, CrosshairIcon, LightningIcon, GearIcon } from '../components/Icons';
+import { PlayIcon, ChevronRightIcon, ChevronDownIcon, CalendarIcon, GearIcon } from '../components/Icons';
 import FlagImage from '../components/FlagImage';
 import BottomNav from '../components/BottomNav';
 import ScreenContainer from '../components/ScreenContainer';
@@ -178,7 +178,6 @@ export default function HomeScreen({ navigation }: Props) {
   const [dayStreak, setDayStreak] = useState(0);
   const [teaserKey, setTeaserKey] = useState(0);
   const [dailyDone, setDailyDone] = useState<DailyChallengeData | null>(null);
-  const [weakFlagCount, setWeakFlagCount] = useState(0);
   const [autocomplete, setAutocomplete] = useState(false);
   const [baseline, setBaseline] = useState<BaselineData | null>(null);
   const [baselineExpanded, setBaselineExpanded] = useState(false);
@@ -197,7 +196,6 @@ export default function HomeScreen({ navigation }: Props) {
       getStats().then(setStats);
       getDayStreak().then(setDayStreak);
       getDailyChallenge().then(setDailyDone);
-      getMissedFlagIds().then((ids) => setWeakFlagCount(ids.length));
       getBaselineData().then(setBaseline);
       setTeaserKey((k) => k + 1);
     }, []),
@@ -214,11 +212,6 @@ export default function HomeScreen({ navigation }: Props) {
   const onboardingComplete = baseline ? (baseline.completedAt !== null || baseline.skipped === true) : true;
   const onboardingCount = baseline ? ONBOARDING_REGIONS.filter((r) => baseline.regions[r]).length : 0;
   const nextRegion = baseline ? ONBOARDING_REGIONS.find((r) => !baseline.regions[r]) ?? 'africa' : 'africa';
-
-  const hasPlayed = stats !== null && stats.totalGamesPlayed > 0;
-  const accuracy = stats && stats.totalAnswered > 0
-    ? Math.round((stats.totalCorrect / stats.totalAnswered) * 100)
-    : 0;
 
   return (
     <SafeAreaView style={s.container}>
@@ -426,136 +419,8 @@ export default function HomeScreen({ navigation }: Props) {
           )}
         </View>
 
-        {/* ── GAME MODES ── */}
-        <View style={s.sectionWrap}>
-          <Text style={s.sectionLbl}>{t('home.gameModes')}</Text>
-
-          <TouchableOpacity
-            style={s.modeCard}
-            activeOpacity={0.85}
-            onPress={() => {
-              hapticTap();
-              navigation.navigate('Game', {
-                config: { mode: 'timeattack', category: 'all', questionCount: 999, timeLimit: 60, displayMode: 'flag' },
-              });
-            }}
-          >
-            <View style={[s.modeIcon, { backgroundColor: colors.teal }]}>
-              <ClockIcon size={18} color={colors.white} />
-            </View>
-            <View style={s.modeText}>
-              <Text style={s.modeTitle}>{t('home.timedQuiz')}</Text>
-              <Text style={s.modeSub}>{t('home.timedQuizDesc')}</Text>
-            </View>
-            <ChevronRightIcon size={18} color={colors.rule} />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={s.modeCard}
-            activeOpacity={0.85}
-            onPress={() => {
-              hapticTap();
-              navigation.navigate('FlagFlash', {
-                config: { mode: 'flagflash', category: 'all', questionCount: 999, timeLimit: 60, displayMode: 'flag' },
-              });
-            }}
-          >
-            <View style={[s.modeIcon, { backgroundColor: colors.amber }]}>
-              <LightningIcon size={18} color={colors.white} />
-            </View>
-            <View style={s.modeText}>
-              <Text style={s.modeTitle}>FlagFlash</Text>
-              <Text style={s.modeSub}>Party mode - tilt your phone to play</Text>
-            </View>
-            <ChevronRightIcon size={18} color={colors.rule} />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={s.modeCard}
-            activeOpacity={0.85}
-            onPress={() => {
-              hapticTap();
-              navigation.navigate('Neighbors', {
-                config: { mode: 'neighbors', category: 'all', questionCount: 10, displayMode: 'flag' },
-              });
-            }}
-          >
-            <View style={[s.modeIcon, { backgroundColor: colors.blue }]}>
-              <UsersIcon size={18} color={colors.white} />
-            </View>
-            <View style={s.modeText}>
-              <Text style={s.modeTitle}>{t('home.neighbors')}</Text>
-              <Text style={s.modeSub}>{t('home.neighborsDesc')}</Text>
-            </View>
-            <ChevronRightIcon size={18} color={colors.rule} />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={s.modeCard}
-            activeOpacity={0.85}
-            onPress={() => {
-              hapticTap();
-              navigation.navigate('FlagImpostor', {
-                config: { mode: 'impostor', category: 'all', questionCount: 10, displayMode: 'flag' },
-              });
-            }}
-          >
-            <View style={s.modeIcon}>
-              <EyeIcon size={18} color={colors.white} />
-            </View>
-            <View style={s.modeText}>
-              <Text style={s.modeTitle}>{t('home.flagImpostor')}</Text>
-              <Text style={s.modeSub}>{t('home.flagImpostorDesc')}</Text>
-            </View>
-            <ChevronRightIcon size={18} color={colors.rule} />
-          </TouchableOpacity>
-
-          {weakFlagCount > 0 && (
-            <TouchableOpacity
-              style={[s.modeCard, { borderColor: colors.accent, borderWidth: 1.5 }]}
-              activeOpacity={0.85}
-              onPress={() => {
-                hapticTap();
-                navigation.navigate('Game', {
-                  config: { mode: 'practice', category: 'all', questionCount: weakFlagCount, displayMode: 'flag' },
-                });
-              }}
-            >
-              <View style={[s.modeIcon, { backgroundColor: colors.accent }]}>
-                <CrosshairIcon size={18} color={colors.white} />
-              </View>
-              <View style={s.modeText}>
-                <Text style={s.modeTitle}>{t('home.practiceWeak')}</Text>
-                <Text style={s.modeSub}>{weakFlagCount === 1 ? t('home.flagsToReview', { count: weakFlagCount }) : t('home.flagsToReviewPlural', { count: weakFlagCount })}</Text>
-              </View>
-              <ChevronRightIcon size={18} color={colors.accent} />
-            </TouchableOpacity>
-          )}
-        </View>
-
         {/* ── SUPPORT ── */}
         <SupportCard gamesPlayed={stats?.totalGamesPlayed ?? 0} />
-
-        {/* ── YOUR STATS ── */}
-        {hasPlayed && (
-          <View style={s.statsWrap}>
-            <Text style={s.sectionLbl}>{t('home.yourStats')}</Text>
-            <View style={s.statsRow}>
-              <View style={[s.statTile, { borderTopColor: colors.teal }]}>
-                <Text style={s.statVal}>{stats!.bestStreak}</Text>
-                <Text style={s.statLbl}>{t('home.bestStreak')}</Text>
-              </View>
-              <View style={[s.statTile, { borderTopColor: colors.amber }]}>
-                <Text style={s.statVal}>{stats!.bestTimeAttackScore}</Text>
-                <Text style={s.statLbl}>{t('home.best60s')}</Text>
-              </View>
-              <View style={[s.statTile, { borderTopColor: colors.blue }]}>
-                <Text style={s.statVal}>{accuracy}%</Text>
-                <Text style={s.statLbl}>{t('home.accuracy')}</Text>
-              </View>
-            </View>
-          </View>
-        )}
 
         <View style={{ height: spacing.md }} />
         </ScreenContainer>
@@ -958,86 +823,4 @@ const s = StyleSheet.create({
     color: colors.white,
   },
 
-  // ── Game modes
-  sectionWrap: {
-    paddingHorizontal: spacing.md,
-    marginTop: spacing.lg,
-  },
-  sectionLbl: {
-    fontFamily: fontFamily.uiLabel,
-    fontSize: fontSize.xxs,
-    letterSpacing: 1.2,
-    textTransform: 'uppercase',
-    color: colors.textTertiary,
-    marginBottom: spacing.sm,
-  },
-  modeCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.white,
-    borderWidth: 2,
-    borderColor: colors.rule,
-    borderRadius: borderRadius.lg,
-    padding: spacing.md,
-    paddingHorizontal: spacing.md,
-    marginBottom: spacing.sm,
-    gap: spacing.md,
-  },
-  modeIcon: {
-    width: 40,
-    height: 40,
-    backgroundColor: colors.ink,
-    borderRadius: borderRadius.md,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modeText: {
-    flex: 1,
-  },
-  modeTitle: {
-    fontFamily: fontFamily.bodyBold,
-    fontSize: fontSize.lg,
-    color: colors.ink,
-    marginBottom: 2,
-  },
-  modeSub: {
-    fontFamily: fontFamily.body,
-    fontSize: fontSize.caption,
-    color: colors.textTertiary,
-    lineHeight: 18,
-  },
-
-  // ── Stats row
-  statsWrap: {
-    paddingHorizontal: spacing.md,
-    marginTop: spacing.lg,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-  },
-  statTile: {
-    flex: 1,
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
-    borderWidth: 2,
-    borderColor: colors.rule,
-    borderTopWidth: 3,
-    padding: spacing.md,
-    alignItems: 'center',
-  },
-  statVal: {
-    fontFamily: fontFamily.uiLabel,
-    fontSize: fontSize.heading,
-    color: colors.ink,
-    lineHeight: 26,
-  },
-  statLbl: {
-    fontFamily: fontFamily.bodyMedium,
-    fontSize: fontSize.sm,
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
-    color: colors.textTertiary,
-    marginTop: spacing.xs,
-  },
 });

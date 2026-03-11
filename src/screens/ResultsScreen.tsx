@@ -18,13 +18,12 @@ import { BaselineRegionId, UserStats, GameMode } from '../types';
 import { t } from '../utils/i18n';
 import { hapticCorrect, hapticTap, playCelebrationSound } from '../utils/feedback';
 import { FlagImageSmall } from '../components/FlagImage';
-import { CheckIcon, CrossIcon, ChevronRightIcon, BarChartIcon, FlagIcon, GlobeIcon, PlayIcon, LightningIcon, CalendarIcon, ClockIcon, CrosshairIcon, LinkIcon, HeartIcon } from '../components/Icons';
+import { CheckIcon, CrossIcon, FlagIcon, GlobeIcon, PlayIcon, LightningIcon, CalendarIcon, ClockIcon, CrosshairIcon, LinkIcon, HeartIcon } from '../components/Icons';
 import BottomNav from '../components/BottomNav';
 import ScreenContainer from '../components/ScreenContainer';
 import { useNavTabs } from '../hooks/useNavTabs';
 import { RootStackParamList } from '../types/navigation';
 import { evaluateBadges, BADGES, TIER_COLORS, BadgeIcon, EarnedBadge } from '../utils/badges';
-import { getTotalFlagCount } from '../data';
 import { useInterstitialAdUnit, shouldShowAd, recordAdImpression, incrementGameCount } from '../utils/ads';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Results'>;
@@ -75,20 +74,13 @@ export default function ResultsScreen({ route, navigation }: Props) {
   const heroGlow = useRef(new Animated.Value(0)).current;
   // Review items
   const reviewAnims = useRef(results.map(() => new Animated.Value(0))).current;
-  // Progress bar
-  const progressBarAnim = useRef(new Animated.Value(0)).current;
 
-  // Progress data
-  const [overallStats, setOverallStats] = useState<UserStats | null>(null);
-  const [countriesSeen, setCountriesSeen] = useState(0);
-  const [totalFlags, setTotalFlags] = useState(0);
+  // State
   const [dayStreakCount, setDayStreakCount] = useState(0);
   const [newBadges, setNewBadges] = useState<EarnedBadge[]>([]);
   const [totalBadgesEarned, setTotalBadgesEarned] = useState(0);
   const [isNewBestStreak, setIsNewBestStreak] = useState(false);
-  const [newCountriesCount, setNewCountriesCount] = useState(0);
-  const [prevAccuracy, setPrevAccuracy] = useState<number | null>(null);
-  const [weakFlagCount, setWeakFlagCount] = useState(0);
+  const [overallStats, setOverallStats] = useState<UserStats | null>(null);
 
   // Load ad if frequency cap allows (skip for daily/baseline/review)
   useEffect(() => {
@@ -135,16 +127,6 @@ export default function ResultsScreen({ route, navigation }: Props) {
       }).map((b) => b.id));
 
       const wasNewBestStreak = streak > preStats.bestStreak;
-      const prevAcc = preStats.totalAnswered > 0
-        ? Math.round((preStats.totalCorrect / preStats.totalAnswered) * 100) : null;
-
-      let newCountries = 0;
-      for (const r of results) {
-        if (r.correct) {
-          const prev = preFlagStats[r.question.flag.id];
-          if (!prev || prev.right === 0) newCountries++;
-        }
-      }
 
       if (!reviewOnly) {
         await updateStats(correct, results.length, streak, config.mode, config.category);
@@ -178,26 +160,9 @@ export default function ResultsScreen({ route, navigation }: Props) {
 
       setOverallStats(postStats);
       setDayStreakCount(postDayStreak);
-      setTotalFlags(getTotalFlagCount());
-      const seen = Object.values(postFlagStats).filter((fs) => fs.right > 0).length;
-      setCountriesSeen(seen);
       setNewBadges(postBadges.filter((b) => !preBadgeIds.has(b.id)));
       setTotalBadgesEarned(postBadges.length);
       setIsNewBestStreak(wasNewBestStreak && !reviewOnly);
-      setNewCountriesCount(reviewOnly ? 0 : newCountries);
-      setPrevAccuracy(prevAcc);
-      setWeakFlagCount(postMissed.length);
-
-      // Animate progress bar after data loads
-      const totalF = getTotalFlagCount();
-      const pct = totalF > 0 ? seen / totalF : 0;
-      Animated.timing(progressBarAnim, {
-        toValue: pct,
-        duration: 800,
-        delay: 200,
-        easing: Easing.out(Easing.cubic),
-        useNativeDriver: false,
-      }).start();
     }
     processResults();
 
@@ -302,8 +267,6 @@ export default function ResultsScreen({ route, navigation }: Props) {
     try { await Share.share({ message }); markShared(); } catch { /* cancelled */ }
   };
 
-  const goHome = () => navigation.popToTop();
-
   const navigatePlayAgain = useCallback(() => {
     if (isDaily || isBaseline) {
       navigation.popToTop();
@@ -347,14 +310,6 @@ export default function ResultsScreen({ route, navigation }: Props) {
           ? t('results.tryHardMode')
           : t('results.playAgain');
 
-  const progressPct = totalFlags > 0 ? Math.round((countriesSeen / totalFlags) * 100) : 0;
-  const accDiff = prevAccuracy !== null ? accuracy - prevAccuracy : null;
-  const accInsight = prevAccuracy === null
-    ? t('results.firstGame')
-    : accDiff !== null && accDiff > 0 ? t('results.aboveAverage', { pct: accDiff })
-    : accDiff !== null && accDiff < 0 ? t('results.belowAverage', { pct: Math.abs(accDiff) })
-    : null;
-
   const renderBadgeIcon = (icon: BadgeIcon, tierColor: string) => {
     const size = 18;
     switch (icon) {
@@ -371,12 +326,6 @@ export default function ResultsScreen({ route, navigation }: Props) {
       default: return <FlagIcon size={size} color={tierColor} />;
     }
   };
-
-  // Interpolate progress bar width
-  const progressBarWidth = progressBarAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0%', '100%'],
-  });
 
   // Hero glow: interpolate to a warm gold border overlay
   const heroGlowColor = heroGlow.interpolate({
@@ -495,49 +444,14 @@ export default function ResultsScreen({ route, navigation }: Props) {
           </Animated.View>
         )}
 
-        {/* ── INSIGHT CHIPS ── */}
-        {!reviewOnly && (
-          <Animated.View style={[st.insightRow, { opacity: restFade }]}>
-            {newCountriesCount > 0 && (
-              <View style={st.insightChip}>
-                <GlobeIcon size={13} color={colors.success} />
-                <Text style={[st.insightText, { color: colors.success }]}>
-                  {t('results.newCountries', { count: newCountriesCount })}
-                </Text>
-              </View>
-            )}
-            {accInsight && (
-              <View style={st.insightChip}>
-                <BarChartIcon size={13} color={accDiff !== null && accDiff >= 0 ? colors.success : colors.textTertiary} />
-                <Text style={[st.insightText, accDiff !== null && accDiff > 0 && { color: colors.success }]}>
-                  {accInsight}
-                </Text>
-              </View>
-            )}
-            {dayStreakCount > 0 && (
-              <View style={st.insightChip}>
-                <CalendarIcon size={13} color={colors.accent} />
-                <Text style={[st.insightText, { color: colors.accent }]}>
-                  {dayStreakCount} {t('stats.dayStreak').toLowerCase()}
-                </Text>
-              </View>
-            )}
-          </Animated.View>
-        )}
-
         {/* ── ACTION BUTTONS ── */}
-        <Animated.View style={[st.buttonRow, { opacity: restFade }]}>
-          {!isBaseline && (
-            <TouchableOpacity style={st.secondaryButton} onPress={handleShare} activeOpacity={0.7}>
-              <Text style={st.secondaryButtonText}>{t('common.share')}</Text>
-            </TouchableOpacity>
-          )}
+        <Animated.View style={[st.buttonColumn, { opacity: restFade }]}>
           <TouchableOpacity style={st.primaryButton} onPress={playAgain} activeOpacity={0.7}>
             <Text style={st.primaryButtonText}>{playCtaText}</Text>
           </TouchableOpacity>
-          {!isDaily && !isBaseline && (
-            <TouchableOpacity style={st.secondaryButton} onPress={goHome} activeOpacity={0.7}>
-              <Text style={st.secondaryButtonText}>{t('common.home')}</Text>
+          {!isBaseline && (
+            <TouchableOpacity style={st.shareLink} onPress={handleShare} activeOpacity={0.7}>
+              <Text style={st.shareLinkText}>{t('common.share')}</Text>
             </TouchableOpacity>
           )}
         </Animated.View>
@@ -568,54 +482,6 @@ export default function ResultsScreen({ route, navigation }: Props) {
                 </View>
               );
             })}
-          </Animated.View>
-        )}
-
-        {/* ── YOUR PROGRESS (animated bar) ── */}
-        {overallStats && !reviewOnly && (
-          <Animated.View style={[st.progressSection, { opacity: restFade }]}>
-            <View style={st.sectionHeader}>
-              <Text style={st.sectionTitle}>{t('results.yourProgress')}</Text>
-            </View>
-            <View style={st.progressCard}>
-              <View style={st.progressTopRow}>
-                <View style={st.progressStat}>
-                  <Text style={st.progressStatValue}>{countriesSeen}</Text>
-                  <Text style={st.progressStatLabel}>
-                    {t('stats.countriesOf', { seen: countriesSeen, total: totalFlags })}
-                  </Text>
-                </View>
-                <View style={st.progressStat}>
-                  <Text style={st.progressStatValue}>{overallStats.totalGamesPlayed}</Text>
-                  <Text style={st.progressStatLabel}>{t('stats.gamesPlayed')}</Text>
-                </View>
-              </View>
-              <View style={st.progressBarWrap}>
-                <Animated.View style={[st.progressBarFill, { width: progressBarWidth }]} />
-              </View>
-              <Text style={st.progressPctLabel}>{t('stats.percentComplete', { pct: progressPct })}</Text>
-            </View>
-
-            {weakFlagCount > 0 && (
-              <TouchableOpacity
-                style={st.practiceButton}
-                onPress={() => navigation.replace('Game', {
-                  config: { mode: 'practice', category: 'all', questionCount: weakFlagCount, displayMode: 'flag' },
-                })}
-                activeOpacity={0.7}
-              >
-                <CrosshairIcon size={16} color={colors.accent} />
-                <Text style={st.practiceButtonText}>{t('results.practiceWeak')}</Text>
-                <Text style={st.practiceButtonMeta}>{t('results.flagsToReview', { count: weakFlagCount })}</Text>
-                <ChevronRightIcon size={14} color={colors.accent} />
-              </TouchableOpacity>
-            )}
-
-            <TouchableOpacity style={st.viewStatsButton} onPress={() => navigation.navigate('Stats')} activeOpacity={0.7}>
-              <BarChartIcon size={16} color={colors.ink} />
-              <Text style={st.viewStatsText}>{t('results.viewAllStats')}</Text>
-              <ChevronRightIcon size={14} color={colors.textTertiary} />
-            </TouchableOpacity>
           </Animated.View>
         )}
 
@@ -772,21 +638,15 @@ const st = StyleSheet.create({
   dailyCellCorrect: { backgroundColor: colors.success },
   dailyCellWrong: { backgroundColor: colors.whiteAlpha20 },
 
-  // ── Insights
-  insightRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: spacing.sm },
-  insightChip: {
-    flexDirection: 'row', alignItems: 'center', gap: 6,
-    backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
-    borderRadius: borderRadius.full, paddingVertical: 6, paddingHorizontal: 12,
-  },
-  insightText: { fontFamily: fontFamily.bodyMedium, fontSize: fontSize.sm, color: colors.textSecondary },
-
   // ── Buttons
-  buttonRow: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.md },
-  secondaryButton: { ...buttons.secondary, flex: 1, justifyContent: 'center', alignItems: 'center' },
-  secondaryButtonText: { ...buttons.secondaryText, textAlign: 'center' },
-  primaryButton: { ...buttons.primary, flex: 1, justifyContent: 'center', alignItems: 'center' },
+  buttonColumn: { marginBottom: spacing.md, gap: spacing.sm },
+  primaryButton: { ...buttons.primary, justifyContent: 'center', alignItems: 'center' },
   primaryButtonText: { ...buttons.primaryText, textAlign: 'center' },
+  shareLink: { alignSelf: 'center', paddingVertical: spacing.xs, paddingHorizontal: spacing.md },
+  shareLinkText: {
+    fontFamily: fontFamily.uiLabel, fontSize: fontSize.sm,
+    letterSpacing: 0.8, textTransform: 'uppercase', color: colors.textTertiary,
+  },
 
   // ── Badges
   badgesSection: { marginBottom: spacing.md },
@@ -802,47 +662,6 @@ const st = StyleSheet.create({
   badgeTierPill: { borderRadius: borderRadius.full, paddingVertical: 3, paddingHorizontal: 10 },
   badgeTierText: { fontFamily: fontFamily.uiLabel, fontSize: fontSize.xxs, letterSpacing: 0.8, textTransform: 'uppercase' },
 
-  // ── Progress
-  progressSection: { marginBottom: spacing.md },
-  progressCard: {
-    backgroundColor: colors.surface, borderRadius: borderRadius.lg,
-    borderWidth: 1, borderColor: colors.border, padding: 18,
-  },
-  progressTopRow: { flexDirection: 'row', gap: spacing.lg, marginBottom: 14 },
-  progressStat: { alignItems: 'center', flex: 1 },
-  progressStatValue: { fontFamily: fontFamily.display, fontSize: fontSize.heading, color: colors.ink, letterSpacing: -0.5 },
-  progressStatLabel: {
-    fontFamily: fontFamily.uiLabel, fontSize: fontSize.xxs, letterSpacing: 0.8,
-    textTransform: 'uppercase', color: colors.textTertiary, marginTop: spacing.xxs, textAlign: 'center',
-  },
-  progressBarWrap: {
-    height: 7, backgroundColor: colors.border, borderRadius: borderRadius.full, overflow: 'hidden',
-  },
-  progressBarFill: { height: '100%', backgroundColor: colors.accent, borderRadius: borderRadius.full },
-  progressPctLabel: { fontFamily: fontFamily.bodyBold, fontSize: fontSize.sm, color: colors.ink, marginTop: 6 },
-  practiceButton: {
-    flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
-    backgroundColor: colors.accentBg, borderRadius: borderRadius.lg,
-    borderWidth: 1.5, borderColor: colors.accent, padding: 14, marginTop: 8,
-  },
-  practiceButtonText: {
-    fontFamily: fontFamily.uiLabel, fontSize: fontSize.caption,
-    letterSpacing: 0.8, textTransform: 'uppercase', color: colors.accent,
-  },
-  practiceButtonMeta: {
-    fontFamily: fontFamily.body, fontSize: fontSize.sm,
-    color: colors.textTertiary, flex: 1, textAlign: 'right',
-  },
-  viewStatsButton: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    gap: spacing.sm, backgroundColor: colors.surface,
-    borderRadius: borderRadius.lg, borderWidth: 1, borderColor: colors.border,
-    padding: 14, marginTop: 8,
-  },
-  viewStatsText: {
-    fontFamily: fontFamily.uiLabel, fontSize: fontSize.caption,
-    letterSpacing: 0.8, textTransform: 'uppercase', color: colors.ink, flex: 1,
-  },
 
   // ── Sections
   sectionHeader: {
