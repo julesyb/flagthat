@@ -8,7 +8,7 @@ import {
   ScrollView,
   Animated,
 } from 'react-native';
-import Svg, { Rect, Path } from 'react-native-svg';
+import Svg, { Rect, Path, Circle } from 'react-native-svg';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { colors, spacing, typography, fontFamily, buttons, borderRadius } from '../utils/theme';
 import { hapticTap, hapticCorrect, hapticWrong, playWrongSound } from '../utils/feedback';
@@ -27,160 +27,353 @@ function pickRandom<T>(arr: T[], count: number): T[] {
   return shuffleArray(arr).slice(0, count);
 }
 
-// ── Procedural fake flag generation ──
+// ── Impostor flags: real flag layouts recolored with non-traditional colors ──
 
-const FLAG_COLORS = [
-  '#CE1126', '#009739', '#003DA5', '#FFCD00', '#000000', '#FFFFFF',
-  '#FF6600', '#00A9E0', '#7B3F00', '#D21034', '#007A5E', '#EF3340',
-  '#003893', '#FCD116', '#C8102E', '#00843D', '#E30A17', '#002664',
+// Common flag colors - the random pairing with a mismatched template makes the impostor
+const IMPOSTOR_COLORS = [
+  '#CE1126', // red
+  '#003DA5', // blue
+  '#009739', // green
+  '#FFCD00', // yellow
+  '#FFFFFF', // white
+  '#000000', // black
+  '#FF6600', // orange
+  '#00A9E0', // sky blue
+  '#7B3F00', // brown
+  '#502379', // purple
+  '#D21034', // crimson
+  '#007A5E', // teal green
 ];
 
-// Known real-flag color combos to avoid generating (type + sorted colors)
+interface FlagTemplate {
+  name: string;
+  colorSlots: number;
+}
+
+// Each template mirrors the layout of a real national flag
+const FLAG_TEMPLATES: FlagTemplate[] = [
+  { name: 'japan', colorSlots: 2 },
+  { name: 'palau', colorSlots: 2 },
+  { name: 'france', colorSlots: 3 },
+  { name: 'germany', colorSlots: 3 },
+  { name: 'indonesia', colorSlots: 2 },
+  { name: 'sweden', colorSlots: 2 },
+  { name: 'norway', colorSlots: 3 },
+  { name: 'czech', colorSlots: 3 },
+  { name: 'madagascar', colorSlots: 3 },
+  { name: 'thailand', colorSlots: 3 },
+  { name: 'tanzania', colorSlots: 3 },
+  { name: 'jamaica', colorSlots: 3 },
+  { name: 'cuba', colorSlots: 3 },
+  { name: 'panama', colorSlots: 3 },
+  { name: 'colombia', colorSlots: 3 },
+  { name: 'chile', colorSlots: 3 },
+  { name: 'botswana', colorSlots: 3 },
+  { name: 'seychelles', colorSlots: 3 },
+];
+
+// Blocklist: template + sorted color combos that match real national flags
 const REAL_FLAG_COMBOS = new Set([
-  'triband_h:#000000,#CE1126,#FFFFFF',   // Egypt-like
-  'triband_h:#003DA5,#CE1126,#FFFFFF',   // France/Netherlands-like
-  'triband_v:#003DA5,#CE1126,#FFFFFF',   // France
-  'triband_v:#009739,#CE1126,#FFFFFF',   // Italy
-  'triband_h:#000000,#CE1126,#FFCD00',   // Germany
-  'triband_h:#003DA5,#FFFFFF,#EF3340',   // Luxembourg/Netherlands
-  'triband_v:#009739,#FF6600,#FFFFFF',   // Ireland
-  'triband_h:#003DA5,#FFFFFF,#CE1126',   // Russia
-  'bicolor:#003DA5,#FFCD00',             // Ukraine
-  'triband_v:#003DA5,#FFCD00,#EF3340',   // Romania/Chad
-  'triband_h:#009739,#FFCD00,#EF3340',   // Lithuania
-  'triband_v:#003DA5,#FFFFFF,#EF3340',   // France
-  'triband_h:#000000,#EF3340,#FFCD00',   // Germany/Belgium
+  // japan/palau (circle layouts)
+  'japan:#CE1126,#FFFFFF',             // Japan
+  'japan:#003DA5,#FFCD00',             // Palau
+  'japan:#009739,#CE1126',             // Bangladesh
+  'palau:#CE1126,#FFFFFF',             // Japan
+  'palau:#003DA5,#FFCD00',             // Palau
+  'palau:#009739,#CE1126',             // Bangladesh
+  // france (vertical triband)
+  'france:#003DA5,#CE1126,#FFFFFF',    // France
+  'france:#009739,#CE1126,#FFFFFF',    // Italy, Mexico
+  'france:#009739,#FF6600,#FFFFFF',    // Ireland, Ivory Coast
+  'france:#000000,#CE1126,#FFCD00',    // Belgium
+  'france:#003DA5,#CE1126,#FFCD00',    // Chad, Romania
+  'france:#009739,#CE1126,#FFCD00',    // Mali, Guinea, Cameroon, Senegal
+  'france:#009739,#009739,#FFFFFF',    // Nigeria
+  'france:#CE1126,#CE1126,#FFFFFF',    // Peru
+  // germany (horizontal triband)
+  'germany:#000000,#CE1126,#FFCD00',   // Germany
+  'germany:#003DA5,#CE1126,#FFFFFF',   // Netherlands, Luxembourg, Croatia
+  'germany:#009739,#CE1126,#FFFFFF',   // Hungary, Bulgaria, Iran
+  'germany:#009739,#CE1126,#FFCD00',   // Lithuania, Bolivia, Ethiopia, Ghana
+  'germany:#000000,#CE1126,#FFFFFF',   // Yemen, Egypt, Iraq, Syria
+  'germany:#000000,#003DA5,#FFFFFF',   // Estonia
+  'germany:#000000,#009739,#CE1126',   // Afghanistan, Libya, Malawi
+  'germany:#003DA5,#009739,#FFFFFF',   // Sierra Leone, Uzbekistan
+  'germany:#003DA5,#009739,#FFCD00',   // Gabon
+  'germany:#003DA5,#CE1126,#FF6600',   // Armenia
+  'germany:#00A9E0,#00A9E0,#FFFFFF',   // Argentina
+  'germany:#CE1126,#CE1126,#FFFFFF',   // Austria, Latvia
+  // indonesia (horizontal bicolor)
+  'indonesia:#CE1126,#FFFFFF',          // Indonesia, Monaco, Poland
+  'indonesia:#003DA5,#FFCD00',          // Ukraine
+  'indonesia:#00A9E0,#FFCD00',          // Ukraine (sky blue)
+  'indonesia:#003DA5,#CE1126',          // Haiti, Liechtenstein
+  // sweden (nordic cross)
+  'sweden:#003DA5,#FFCD00',             // Sweden
+  'sweden:#CE1126,#FFFFFF',             // Denmark
+  'sweden:#003DA5,#FFFFFF',             // Finland
+  // norway (outlined nordic cross)
+  'norway:#003DA5,#CE1126,#FFFFFF',    // Norway, Iceland
+  // czech (hoist triangle + bicolor)
+  'czech:#003DA5,#CE1126,#FFFFFF',     // Czech Republic
+  'czech:#003DA5,#009739,#FFFFFF',     // Djibouti
+  // madagascar (vertical band + 2 horizontal)
+  'madagascar:#009739,#CE1126,#FFFFFF', // Madagascar
+  'madagascar:#009739,#CE1126,#FFCD00', // Benin
+  // thailand (5 symmetric stripes)
+  'thailand:#003DA5,#CE1126,#FFFFFF',  // Thailand, Costa Rica
+  // tanzania (diagonal band)
+  'tanzania:#000000,#009739,#00A9E0',  // Tanzania
+  'tanzania:#009739,#CE1126,#FFCD00',  // Republic of Congo
+  // jamaica (saltire)
+  'jamaica:#000000,#009739,#FFCD00',   // Jamaica
+  // cuba (stripes + triangle)
+  'cuba:#003DA5,#CE1126,#FFFFFF',      // Cuba
+  // panama (quartered)
+  'panama:#003DA5,#CE1126,#FFFFFF',    // Panama
+  // colombia (unequal horizontal)
+  'colombia:#003DA5,#CE1126,#FFCD00',  // Colombia, Ecuador, Venezuela
+  // chile (bicolor + canton)
+  'chile:#003DA5,#CE1126,#FFFFFF',     // Chile
+  // botswana (center stripe)
+  'botswana:#000000,#00A9E0,#FFFFFF',  // Botswana
+  // seychelles (radiating)
+  'seychelles:#003DA5,#009739,#CE1126', // Seychelles
 ]);
 
 interface FakeFlag {
-  type: 'triband_h' | 'triband_v' | 'bicolor' | 'cross' | 'chevron';
+  templateIndex: number;
   colors: string[];
-  hasSymbol: boolean;
-  symbolType?: 'star' | 'diamond';
-  symbolColor?: string;
   reason: string;
 }
 
 function generateFakeFlag(): FakeFlag {
-  const types: FakeFlag['type'][] = ['triband_h', 'triband_v', 'bicolor', 'cross', 'chevron'];
-  // Only geometric shapes — no circles
-  const symbolTypes: NonNullable<FakeFlag['symbolType']>[] = ['star', 'diamond'];
+  for (let attempt = 0; attempt < 20; attempt++) {
+    const templateIndex = Math.floor(Math.random() * FLAG_TEMPLATES.length);
+    const template = FLAG_TEMPLATES[templateIndex];
+    const shuffled = shuffleArray([...IMPOSTOR_COLORS]);
+    const flagColors = shuffled.slice(0, template.colorSlots);
 
-  // Try up to 10 times to generate a flag that doesn't match a known real flag
-  for (let attempt = 0; attempt < 10; attempt++) {
-    const type = types[Math.floor(Math.random() * types.length)];
-    const shuffledColors = shuffleArray([...FLAG_COLORS]);
-    // Max 3 base colors for the layout (+ 1 symbol color = max 4 total)
-    const numBaseColors = type === 'bicolor' ? 2 : 3;
-    const flagColors = shuffledColors.slice(0, numBaseColors);
-
-    // Always add a single symbol/crest to make it clearly fake
-    const symbolType = symbolTypes[Math.floor(Math.random() * symbolTypes.length)];
-    const symbolColor = shuffledColors[numBaseColors] || '#FFFFFF';
-
-    // Check if this combo matches a known real flag (ignoring symbol)
     const sortedColors = [...flagColors].sort().join(',');
-    const comboKey = `${type}:${sortedColors}`;
+    const comboKey = `${template.name}:${sortedColors}`;
     if (REAL_FLAG_COMBOS.has(comboKey)) continue;
 
     return {
-      type,
+      templateIndex,
       colors: flagColors,
-      hasSymbol: true,
-      symbolType,
-      symbolColor,
-      reason: 'Procedurally generated, no real country uses this combination',
+      reason: 'Real flag layout recolored - does not match any real flag',
     };
   }
 
-  // Fallback: use chevron with symbol (very unlikely to be a real flag)
-  const shuffledColors = shuffleArray([...FLAG_COLORS]);
+  // Fallback: seychelles with purple + brown + teal (no real flag match)
   return {
-    type: 'chevron',
-    colors: shuffledColors.slice(0, 3),
-    hasSymbol: true,
-    symbolType: 'star',
-    symbolColor: shuffledColors[3] || '#FFFFFF',
-    reason: 'Procedurally generated, no real country uses this combination',
+    templateIndex: FLAG_TEMPLATES.findIndex((t) => t.name === 'seychelles'),
+    colors: ['#502379', '#7B3F00', '#007A5E'],
+    reason: 'Real flag layout recolored - does not match any real flag',
   };
 }
 
-function FakeFlagSvg({ flag, width, height }: { flag: FakeFlag; width: number; height: number }) {
-  const renderSymbol = () => {
-    if (!flag.hasSymbol || !flag.symbolType || !flag.symbolColor) return null;
-    const cx = width / 2;
-    const cy = height / 2;
-    const r = Math.min(width, height) * 0.12;
-
-    switch (flag.symbolType) {
-      case 'star': {
-        const points: string[] = [];
-        for (let i = 0; i < 5; i++) {
-          const angle = (i * 144 - 90) * (Math.PI / 180);
-          points.push(`${cx + r * Math.cos(angle)},${cy + r * Math.sin(angle)}`);
-        }
-        return <Path d={`M ${points.join(' L ')} Z`} fill={flag.symbolColor} />;
-      }
-      case 'diamond':
-        return (
-          <Path
-            d={`M ${cx} ${cy - r} L ${cx + r} ${cy} L ${cx} ${cy + r} L ${cx - r} ${cy} Z`}
-            fill={flag.symbolColor}
-          />
-        );
-      default:
-        return null;
-    }
-  };
-
-  switch (flag.type) {
-    case 'triband_h':
+function renderTemplateContent(name: string, c: string[], w: number, h: number): React.ReactNode {
+  switch (name) {
+    // Solid background + centered circle (Japan)
+    case 'japan':
       return (
-        <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
-          <Rect x={0} y={0} width={width} height={height / 3} fill={flag.colors[0]} />
-          <Rect x={0} y={height / 3} width={width} height={height / 3} fill={flag.colors[1]} />
-          <Rect x={0} y={(height / 3) * 2} width={width} height={height / 3} fill={flag.colors[2]} />
-          {renderSymbol()}
-        </Svg>
+        <>
+          <Rect x={0} y={0} width={w} height={h} fill={c[0]} />
+          <Circle cx={w / 2} cy={h / 2} r={Math.min(w, h) * 0.22} fill={c[1]} />
+        </>
       );
-    case 'triband_v':
+    // Solid background + off-center circle (Palau)
+    case 'palau':
       return (
-        <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
-          <Rect x={0} y={0} width={width / 3} height={height} fill={flag.colors[0]} />
-          <Rect x={width / 3} y={0} width={width / 3} height={height} fill={flag.colors[1]} />
-          <Rect x={(width / 3) * 2} y={0} width={width / 3} height={height} fill={flag.colors[2]} />
-          {renderSymbol()}
-        </Svg>
+        <>
+          <Rect x={0} y={0} width={w} height={h} fill={c[0]} />
+          <Circle cx={w * 0.38} cy={h / 2} r={Math.min(w, h) * 0.22} fill={c[1]} />
+        </>
       );
-    case 'bicolor':
+    // Vertical triband (France)
+    case 'france':
       return (
-        <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
-          <Rect x={0} y={0} width={width} height={height / 2} fill={flag.colors[0]} />
-          <Rect x={0} y={height / 2} width={width} height={height / 2} fill={flag.colors[1]} />
-          {renderSymbol()}
-        </Svg>
+        <>
+          <Rect x={0} y={0} width={w / 3} height={h} fill={c[0]} />
+          <Rect x={w / 3} y={0} width={w / 3} height={h} fill={c[1]} />
+          <Rect x={(w / 3) * 2} y={0} width={w / 3} height={h} fill={c[2]} />
+        </>
       );
-    case 'cross': {
-      const barW = height * 0.2;
+    // Horizontal triband (Germany)
+    case 'germany':
       return (
-        <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
-          <Rect x={0} y={0} width={width} height={height} fill={flag.colors[0]} />
-          <Rect x={0} y={(height - barW) / 2} width={width} height={barW} fill={flag.colors[1]} />
-          <Rect x={width * 0.3 - barW / 2} y={0} width={barW} height={height} fill={flag.colors[1]} />
-          {renderSymbol()}
-        </Svg>
+        <>
+          <Rect x={0} y={0} width={w} height={h / 3} fill={c[0]} />
+          <Rect x={0} y={h / 3} width={w} height={h / 3} fill={c[1]} />
+          <Rect x={0} y={(h / 3) * 2} width={w} height={h / 3} fill={c[2]} />
+        </>
+      );
+    // Horizontal bicolor (Indonesia)
+    case 'indonesia':
+      return (
+        <>
+          <Rect x={0} y={0} width={w} height={h / 2} fill={c[0]} />
+          <Rect x={0} y={h / 2} width={w} height={h / 2} fill={c[1]} />
+        </>
+      );
+    // Nordic cross (Sweden)
+    case 'sweden': {
+      const barW = h * 0.18;
+      return (
+        <>
+          <Rect x={0} y={0} width={w} height={h} fill={c[0]} />
+          <Rect x={0} y={(h - barW) / 2} width={w} height={barW} fill={c[1]} />
+          <Rect x={w * 0.33 - barW / 2} y={0} width={barW} height={h} fill={c[1]} />
+        </>
       );
     }
-    case 'chevron':
+    // Outlined Nordic cross (Norway)
+    case 'norway': {
+      const outerW = h * 0.22;
+      const innerW = h * 0.12;
       return (
-        <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
-          <Rect x={0} y={0} width={width} height={height / 2} fill={flag.colors[0]} />
-          <Rect x={0} y={height / 2} width={width} height={height / 2} fill={flag.colors[1]} />
-          <Path d={`M 0,0 L ${width * 0.35},${height / 2} L 0,${height} Z`} fill={flag.colors[2]} />
-          {renderSymbol()}
-        </Svg>
+        <>
+          <Rect x={0} y={0} width={w} height={h} fill={c[0]} />
+          <Rect x={0} y={(h - outerW) / 2} width={w} height={outerW} fill={c[1]} />
+          <Rect x={w * 0.33 - outerW / 2} y={0} width={outerW} height={h} fill={c[1]} />
+          <Rect x={0} y={(h - innerW) / 2} width={w} height={innerW} fill={c[2]} />
+          <Rect x={w * 0.33 - innerW / 2} y={0} width={innerW} height={h} fill={c[2]} />
+        </>
       );
+    }
+    // Hoist triangle + horizontal bicolor (Czech Republic)
+    case 'czech':
+      return (
+        <>
+          <Rect x={0} y={0} width={w} height={h / 2} fill={c[0]} />
+          <Rect x={0} y={h / 2} width={w} height={h / 2} fill={c[1]} />
+          <Path d={`M 0,0 L ${w * 0.42},${h / 2} L 0,${h} Z`} fill={c[2]} />
+        </>
+      );
+    // Vertical hoist band + 2 horizontal bands (Madagascar)
+    case 'madagascar':
+      return (
+        <>
+          <Rect x={0} y={0} width={w / 3} height={h} fill={c[0]} />
+          <Rect x={w / 3} y={0} width={(w / 3) * 2} height={h / 2} fill={c[1]} />
+          <Rect x={w / 3} y={h / 2} width={(w / 3) * 2} height={h / 2} fill={c[2]} />
+        </>
+      );
+    // 5 symmetric horizontal stripes (Thailand)
+    case 'thailand': {
+      const sh = h / 6;
+      return (
+        <>
+          <Rect x={0} y={0} width={w} height={sh} fill={c[0]} />
+          <Rect x={0} y={sh} width={w} height={sh} fill={c[1]} />
+          <Rect x={0} y={sh * 2} width={w} height={sh * 2} fill={c[2]} />
+          <Rect x={0} y={sh * 4} width={w} height={sh} fill={c[1]} />
+          <Rect x={0} y={sh * 5} width={w} height={sh} fill={c[0]} />
+        </>
+      );
+    }
+    // Diagonal band corner to corner (Tanzania)
+    case 'tanzania':
+      return (
+        <>
+          <Rect x={0} y={0} width={w} height={h} fill={c[0]} />
+          <Path d={`M ${w},0 L ${w},${h} L 0,${h} Z`} fill={c[1]} />
+          <Path d={`M 0,${h} L 0,${h * 0.7} L ${w},0 L ${w},${h * 0.3} Z`} fill={c[2]} />
+        </>
+      );
+    // Saltire / X cross (Jamaica)
+    case 'jamaica': {
+      const inset = Math.min(w, h) * 0.08;
+      const cx = w / 2;
+      const cy = h / 2;
+      return (
+        <>
+          <Rect x={0} y={0} width={w} height={h} fill={c[0]} />
+          <Path d={`M ${inset},0 L ${w - inset},0 L ${cx},${cy - inset} Z`} fill={c[1]} />
+          <Path d={`M ${inset},${h} L ${w - inset},${h} L ${cx},${cy + inset} Z`} fill={c[1]} />
+          <Path d={`M 0,${inset} L 0,${h - inset} L ${cx - inset},${cy} Z`} fill={c[2]} />
+          <Path d={`M ${w},${inset} L ${w},${h - inset} L ${cx + inset},${cy} Z`} fill={c[2]} />
+        </>
+      );
+    }
+    // 5 horizontal stripes + hoist triangle (Cuba)
+    case 'cuba': {
+      const sh = h / 5;
+      return (
+        <>
+          <Rect x={0} y={0} width={w} height={sh} fill={c[0]} />
+          <Rect x={0} y={sh} width={w} height={sh} fill={c[1]} />
+          <Rect x={0} y={sh * 2} width={w} height={sh} fill={c[0]} />
+          <Rect x={0} y={sh * 3} width={w} height={sh} fill={c[1]} />
+          <Rect x={0} y={sh * 4} width={w} height={sh} fill={c[0]} />
+          <Path d={`M 0,0 L ${w * 0.35},${h / 2} L 0,${h} Z`} fill={c[2]} />
+        </>
+      );
+    }
+    // Quartered (Panama)
+    case 'panama':
+      return (
+        <>
+          <Rect x={0} y={0} width={w / 2} height={h / 2} fill={c[0]} />
+          <Rect x={w / 2} y={0} width={w / 2} height={h / 2} fill={c[1]} />
+          <Rect x={0} y={h / 2} width={w / 2} height={h / 2} fill={c[2]} />
+          <Rect x={w / 2} y={h / 2} width={w / 2} height={h / 2} fill={c[0]} />
+        </>
+      );
+    // Unequal horizontal bands - top half + two quarters (Colombia)
+    case 'colombia':
+      return (
+        <>
+          <Rect x={0} y={0} width={w} height={h / 2} fill={c[0]} />
+          <Rect x={0} y={h / 2} width={w} height={h / 4} fill={c[1]} />
+          <Rect x={0} y={h * 0.75} width={w} height={h / 4} fill={c[2]} />
+        </>
+      );
+    // Bicolor with canton (Chile)
+    case 'chile':
+      return (
+        <>
+          <Rect x={0} y={0} width={w} height={h / 2} fill={c[0]} />
+          <Rect x={0} y={h / 2} width={w} height={h / 2} fill={c[1]} />
+          <Rect x={0} y={0} width={w / 3} height={h / 2} fill={c[2]} />
+        </>
+      );
+    // Horizontal with center stripe (Botswana)
+    case 'botswana': {
+      const stripeH = h * 0.2;
+      const outlineH = h * 0.04;
+      const cy = h / 2;
+      return (
+        <>
+          <Rect x={0} y={0} width={w} height={h} fill={c[0]} />
+          <Rect x={0} y={cy - stripeH / 2 - outlineH} width={w} height={outlineH} fill={c[1]} />
+          <Rect x={0} y={cy - stripeH / 2} width={w} height={stripeH} fill={c[2]} />
+          <Rect x={0} y={cy + stripeH / 2} width={w} height={outlineH} fill={c[1]} />
+        </>
+      );
+    }
+    // Radiating sectors from bottom-left corner (Seychelles)
+    case 'seychelles':
+      return (
+        <>
+          <Rect x={0} y={0} width={w} height={h} fill={c[0]} />
+          <Path d={`M 0,${h} L ${w * 0.5},0 L ${w},0 L ${w},${h} Z`} fill={c[1]} />
+          <Path d={`M 0,${h} L ${w},${h * 0.33} L ${w},${h} Z`} fill={c[2]} />
+        </>
+      );
+    default:
+      return <Rect x={0} y={0} width={w} height={h} fill={c[0]} />;
   }
+}
+
+function FakeFlagSvg({ flag, width, height }: { flag: FakeFlag; width: number; height: number }) {
+  const template = FLAG_TEMPLATES[flag.templateIndex];
+  return (
+    <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+      {renderTemplateContent(template.name, flag.colors, width, height)}
+    </Svg>
+  );
 }
 
 interface RoundData {
@@ -357,12 +550,6 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
             })}
           </View>
 
-          {picked !== null && (
-            <View style={styles.reasonCard}>
-              <Text style={styles.reasonTitle}>{picked === round.fakeIndex ? t('common.correct') : t('common.wrong')}</Text>
-              <Text style={styles.reasonText}>{t('impostor.fakeExplanation')}</Text>
-            </View>
-          )}
         </Animated.View>
       </ScrollView>
 
@@ -439,18 +626,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   badgeCorrect: { backgroundColor: colors.success },
-  reasonCard: {
-    marginTop: spacing.xl,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: borderRadius.md,
-    padding: spacing.md,
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  reasonTitle: { fontFamily: fontFamily.uiLabel, fontSize: 16, letterSpacing: 1, color: colors.ink, textTransform: 'uppercase' },
-  reasonText: { ...typography.caption, color: colors.textSecondary, textAlign: 'center' },
   bottomBar: {
     position: 'absolute',
     bottom: 0, left: 0, right: 0,
