@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
-import { colors, fontFamily, spacing, borderRadius } from '../utils/theme';
+import { colors, fontFamily, spacing, borderRadius, layout } from '../utils/theme';
 import { getBaselineData, BaselineData, skipOnboarding } from '../utils/storage';
 import { getCategoryCount } from '../data';
 import { hapticTap } from '../utils/feedback';
@@ -179,7 +179,7 @@ const s = StyleSheet.create({
   },
   desktopWrapper: {
     width: '100%',
-    maxWidth: 600,
+    maxWidth: layout.maxContentWidth,
   },
 
   // Header

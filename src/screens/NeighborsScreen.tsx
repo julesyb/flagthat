@@ -9,7 +9,7 @@ import {
   Animated,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius, layout } from '../utils/theme';
 import { hapticTap, hapticCorrect, hapticWrong, playWrongSound } from '../utils/feedback';
 import { updateStats, updateFlagResults } from '../utils/storage';
 import { shuffleArray, getStreakFromResults } from '../utils/gameEngine';
@@ -21,6 +21,7 @@ import { countries } from '../data/countries';
 import { countryNeighbors, getCountriesWithNeighbors } from '../data/countryNeighbors';
 import FlagImage from '../components/FlagImage';
 import { CheckIcon, CrossIcon } from '../components/Icons';
+import GameTopBar from '../components/GameTopBar';
 import MapImage from '../components/MapImage';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Neighbors'>;
@@ -151,27 +152,23 @@ export default function NeighborsScreen({ navigation, route }: Props) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.topBar}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.exitButton}
-          accessibilityRole="button"
-          accessibilityLabel={t('common.exit')}
-        >
-          <Text style={styles.exitText}>{t('common.exit')}</Text>
-        </TouchableOpacity>
-        <View style={styles.centerInfo}>
-          <Text style={styles.counter}>
-            {t('game.questionOf', { current: roundIndex + 1, total: rounds.length })}
-          </Text>
-          <Text style={styles.scoreText}>{t('game.correctCount', { count: correctCount })}</Text>
-        </View>
-        {guessLimit > 0 ? (
-          <Text style={styles.livesText}>{guessLimit - wrongCount === 1 ? t('game.life', { count: Math.max(0, guessLimit - wrongCount) }) : t('game.lives', { count: Math.max(0, guessLimit - wrongCount) })}</Text>
-        ) : (
-          <View style={styles.spacer} />
-        )}
-      </View>
+      <View style={styles.contentInner}>
+      <GameTopBar
+        onExit={() => navigation.goBack()}
+        center={
+          <View style={styles.centerInfo}>
+            <Text style={styles.counter}>
+              {t('game.questionOf', { current: roundIndex + 1, total: rounds.length })}
+            </Text>
+            <Text style={styles.scoreText}>{t('game.correctCount', { count: correctCount })}</Text>
+          </View>
+        }
+        right={
+          guessLimit > 0 ? (
+            <Text style={styles.livesText}>{guessLimit - wrongCount === 1 ? t('game.life', { count: Math.max(0, guessLimit - wrongCount) }) : t('game.lives', { count: Math.max(0, guessLimit - wrongCount) })}</Text>
+          ) : undefined
+        }
+      />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Animated.View style={{ opacity: fadeAnim }}>
@@ -290,12 +287,14 @@ export default function NeighborsScreen({ navigation, route }: Props) {
           </TouchableOpacity>
         )}
       </View>
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
+  container: { flex: 1, backgroundColor: colors.background, alignItems: 'center' },
+  contentInner: { flex: 1, width: '100%', maxWidth: layout.maxGameWidth },
   topBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',

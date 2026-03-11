@@ -306,6 +306,18 @@ export const nav = {
   },
 };
 
+// ---- Responsive layout ----
+export const layout = {
+  maxContentWidth: 600,
+  maxGameWidth: 600,
+  breakpoints: {
+    tablet: 768,
+    desktop: 1024,
+  },
+  headerHeight: 56,
+  gameTopBarHeight: 48,
+};
+
 export const shadows = {
   small: {
     shadowColor: colors.ink,

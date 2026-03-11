@@ -10,7 +10,7 @@ import {
   Share,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius, layout } from '../utils/theme';
 import { calculateAccuracy, getStreakFromResults, getGrade, generateDailyShareGrid, getDailyNumber } from '../utils/gameEngine';
 import { updateStats, updateFlagResults, saveDailyChallenge, incrementDailyChallenges, updateLastGameBadgeFlags, markShared, saveBaselineResult } from '../utils/storage';
 import { BaselineRegionId } from '../types';
@@ -134,6 +134,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
+        <View style={styles.contentInner}>
         {isPerfect && (
           <Animated.View style={[styles.celebrationBanner, { opacity: confettiOpacity }]}>
             <Text style={styles.celebrationText}>{t('results.perfectScore')}</Text>
@@ -276,6 +277,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
             </TouchableOpacity>
           )}
         </View>
+        </View>
       </ScrollView>
       <BottomNav
         activeTab="Play"
@@ -298,6 +300,11 @@ const styles = StyleSheet.create({
   content: {
     padding: spacing.lg,
     paddingBottom: spacing.xxl,
+    alignItems: 'center',
+  },
+  contentInner: {
+    width: '100%',
+    maxWidth: layout.maxContentWidth,
   },
   celebrationBanner: {
     backgroundColor: colors.warning,

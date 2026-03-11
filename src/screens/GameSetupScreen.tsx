@@ -8,7 +8,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius, layout } from '../utils/theme';
 import {
   GameMode,
   DisplayMode,
@@ -190,9 +190,7 @@ export default function GameSetupScreen({ navigation }: Props) {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        {/* Screen header */}
-        <Text style={styles.screenTitle}>{t('setup.gameMode')}</Text>
-
+        <View style={styles.contentInner}>
         {/* Game Mode Grid */}
         <View style={styles.modeGrid}>
           {SETUP_MODES.map((m) => {
@@ -381,6 +379,7 @@ export default function GameSetupScreen({ navigation }: Props) {
 
         {/* Bottom spacing for scroll */}
         <View style={{ height: spacing.md }} />
+        </View>
       </ScrollView>
 
       {/* Pinned start button */}
@@ -418,8 +417,13 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: spacing.lg,
-    paddingTop: spacing.xl,
+    paddingTop: spacing.lg,
     paddingBottom: spacing.md,
+    alignItems: 'center',
+  },
+  contentInner: {
+    width: '100%',
+    maxWidth: layout.maxContentWidth,
   },
 
   // Screen title - prominent heading for the page

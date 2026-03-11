@@ -13,7 +13,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily, buttons, borderRadius, nav } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, buttons, borderRadius, nav, layout } from '../utils/theme';
 import { GameQuestion, GameResult } from '../types';
 import { generateQuestions, checkAnswer } from '../utils/gameEngine';
 import { hapticCorrect, hapticWrong, hapticTap, playWrongSound } from '../utils/feedback';
@@ -22,6 +22,7 @@ import { useGameAnimations } from '../hooks/useGameAnimations';
 import { getAllFlags } from '../data';
 import { RootStackParamList } from '../types/navigation';
 import { ChevronRightIcon } from '../components/Icons';
+import GameTopBar from '../components/GameTopBar';
 import { t } from '../utils/i18n';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'FlagPuzzle'>;
@@ -269,30 +270,27 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
       </View>
 
       {/* Top bar */}
-      <View style={styles.topBar}>
-        <TouchableOpacity
-          onPress={() => navigation.popToTop()}
-          style={styles.quitButton}
-        >
-          <Text style={styles.quitText}>{t('common.exit')}</Text>
-        </TouchableOpacity>
-        <View style={styles.centerInfo}>
-          <Text style={styles.counter}>
-            {t('game.questionOf', { current: currentIndex + 1, total: questions.length })}
-          </Text>
-          {currentStreak >= 2 ? (
-            <Animated.Text
-              style={[styles.streakText, { transform: [{ scale: streakScale }] }]}
-            >
-              {t('game.streak', { count: currentStreak })}
-            </Animated.Text>
-          ) : (
-            <Text style={styles.score}>
-              {t('game.correctCount', { count: results.filter((r) => r.correct).length })}
+      <GameTopBar
+        onExit={() => navigation.popToTop()}
+        center={
+          <View style={styles.centerInfo}>
+            <Text style={styles.counter}>
+              {t('game.questionOf', { current: currentIndex + 1, total: questions.length })}
             </Text>
-          )}
-        </View>
-      </View>
+            {currentStreak >= 2 ? (
+              <Animated.Text
+                style={[styles.streakText, { transform: [{ scale: streakScale }] }]}
+              >
+                {t('game.streak', { count: currentStreak })}
+              </Animated.Text>
+            ) : (
+              <Text style={styles.score}>
+                {t('game.correctCount', { count: results.filter((r) => r.correct).length })}
+              </Text>
+            )}
+          </View>
+        }
+      />
 
       <Animated.View
         style={[
@@ -419,6 +417,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+    alignItems: 'center',
   },
   loadingContainer: {
     flex: 1,
@@ -432,6 +431,7 @@ const styles = StyleSheet.create({
   progressBar: {
     height: 3,
     backgroundColor: colors.border,
+    alignSelf: 'stretch',
   },
   progressFill: {
     height: '100%',
@@ -440,6 +440,7 @@ const styles = StyleSheet.create({
   timerBar: {
     height: 4,
     backgroundColor: colors.border,
+    alignSelf: 'stretch',
   },
   timerFill: {
     height: '100%',

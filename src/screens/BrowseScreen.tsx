@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
-import { colors, spacing, typography, borderRadius } from '../utils/theme';
+import { colors, spacing, typography, borderRadius, layout } from '../utils/theme';
 import { FlagItem } from '../types';
 import { RootStackParamList } from '../types/navigation';
 import { getAllFlags } from '../data';
@@ -103,6 +103,7 @@ export default function BrowseScreen({ route, navigation }: Props) {
 
   return (
     <SafeAreaView style={styles.container}>
+      <View style={styles.contentInner}>
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchInput}
@@ -152,6 +153,7 @@ export default function BrowseScreen({ route, navigation }: Props) {
         showsVerticalScrollIndicator={false}
         style={{ flex: 1 }}
       />
+      </View>
       <BottomNav activeTab="Browse" onNavigate={(tab) => {
         if (tab === 'Play') navigation.navigate('Home');
         else if (tab === 'Modes') navigation.navigate('GameSetup');
@@ -165,6 +167,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+    alignItems: 'center',
+  },
+  contentInner: {
+    flex: 1,
+    width: '100%',
+    maxWidth: layout.maxContentWidth,
   },
   searchContainer: {
     paddingHorizontal: spacing.lg,

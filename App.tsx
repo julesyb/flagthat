@@ -37,7 +37,7 @@ import { hasCompletedOnboarding } from './src/utils/storage';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-function HomeBackButton({ onPress }: { onPress: () => void }) {
+function BackButton({ onPress }: { onPress: () => void }) {
   return (
     <TouchableOpacity
       style={{ marginLeft: -8, padding: 8 }}
@@ -112,7 +112,7 @@ function AppContent() {
           component={GameSetupScreen}
           options={({ navigation }) => ({
             title: t('app.gameModes'),
-            headerLeft: () => <HomeBackButton onPress={() => navigation.navigate('Home')} />,
+            headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
           })}
         />
         <Stack.Screen
@@ -150,7 +150,7 @@ function AppContent() {
           component={ResultsScreen}
           options={({ navigation }) => ({
             title: t('app.results'),
-            headerLeft: () => <HomeBackButton onPress={() => navigation.navigate('Home')} />,
+            headerLeft: () => <BackButton onPress={() => navigation.navigate('Home')} />,
             gestureEnabled: false,
           })}
         />
@@ -159,7 +159,7 @@ function AppContent() {
           component={StatsScreen}
           options={({ navigation }) => ({
             title: t('app.statistics'),
-            headerLeft: () => <HomeBackButton onPress={() => navigation.navigate('Home')} />,
+            headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
           })}
         />
         <Stack.Screen
@@ -167,7 +167,7 @@ function AppContent() {
           component={SettingsScreen}
           options={({ navigation }) => ({
             title: t('app.settings'),
-            headerLeft: () => <HomeBackButton onPress={() => navigation.navigate('Home')} />,
+            headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
           })}
         />
         <Stack.Screen
@@ -175,7 +175,7 @@ function AppContent() {
           component={BrowseScreen}
           options={({ navigation }) => ({
             title: t('app.browseFlags'),
-            headerLeft: () => <HomeBackButton onPress={() => navigation.navigate('Home')} />,
+            headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
           })}
         />
       </Stack.Navigator>

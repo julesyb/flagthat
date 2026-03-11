@@ -12,7 +12,7 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { colors, fontFamily, fontSize, spacing, borderRadius } from '../utils/theme';
+import { colors, fontFamily, fontSize, spacing, borderRadius, layout } from '../utils/theme';
 import { getTotalFlagCount } from '../data';
 import { initAudio, hapticTap, hapticCorrect, hapticWrong, playWrongSound, setSoundsEnabled, setHapticsEnabled } from '../utils/feedback';
 import { getStats, getDayStreak, getDailyChallenge, DailyChallengeData, getSettings, getMissedFlagIds } from '../utils/storage';
@@ -519,7 +519,7 @@ const s = StyleSheet.create({
   },
   desktopWrapper: {
     width: '100%',
-    maxWidth: 600,
+    maxWidth: layout.maxContentWidth,
   },
 
   // ── Header

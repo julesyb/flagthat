@@ -15,7 +15,7 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
 import Constants from 'expo-constants';
-import { colors, spacing, typography, fontFamily, fontSize, borderRadius } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, fontSize, borderRadius, layout } from '../utils/theme';
 import { getSettings, saveSettings, AppSettings, resetStats } from '../utils/storage';
 import {
   setSoundsEnabled,
@@ -155,6 +155,7 @@ export default function SettingsScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
+        <View style={styles.contentInner}>
         {/* Sound & Haptics */}
         <Text style={styles.sectionTitle}>{t('settings.soundHaptics')}</Text>
 
@@ -319,8 +320,9 @@ export default function SettingsScreen() {
         >
           <Text style={styles.resetButtonText}>{t('settings.resetAllData')}</Text>
         </TouchableOpacity>
+        </View>
       </ScrollView>
-      <BottomNav activeTab="Stats" onNavigate={(tab) => {
+      <BottomNav activeTab="Play" onNavigate={(tab) => {
         if (tab === 'Play') navigation.navigate('Home');
         else if (tab === 'Modes') navigation.navigate('GameSetup');
         else if (tab === 'Stats') navigation.navigate('Stats');
@@ -338,6 +340,11 @@ const styles = StyleSheet.create({
   content: {
     padding: spacing.lg,
     paddingBottom: spacing.xxl,
+    alignItems: 'center',
+  },
+  contentInner: {
+    width: '100%',
+    maxWidth: layout.maxContentWidth,
   },
   sectionTitle: {
     fontFamily: fontFamily.uiLabel,

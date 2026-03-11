@@ -13,7 +13,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily, nav, buttons, borderRadius } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, nav, buttons, borderRadius, layout } from '../utils/theme';
 import { GameQuestion, GameResult } from '../types';
 import { generateQuestions, generateDailyQuestions, generatePracticeQuestions, checkAnswer } from '../utils/gameEngine';
 import { getMissedFlagIds } from '../utils/storage';
@@ -25,10 +25,11 @@ import MapImage from '../components/MapImage';
 import { useGameAnimations } from '../hooks/useGameAnimations';
 import { getFlagByName, getFlagsForCategory } from '../data';
 import { RootStackParamList } from '../types/navigation';
+import GameTopBar from '../components/GameTopBar';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Game'>;
 
-const MAX_GAME_WIDTH = 600;
+const MAX_GAME_WIDTH = layout.maxGameWidth;
 
 export default function GameScreen({ route, navigation }: Props) {
   const { config } = route.params;
@@ -258,53 +259,50 @@ export default function GameScreen({ route, navigation }: Props) {
       )}
 
       <View style={[styles.desktopWrapper, { maxWidth: contentMaxWidth }]}>
-      <View style={styles.topBar}>
-        <TouchableOpacity
-          onPress={() => {
-            if (autoAdvanceRef.current) clearTimeout(autoAdvanceRef.current);
-            const currentResults = pendingResultsRef.current ?? results;
-            if (currentResults.length > 0) {
-              navigation.replace('Results', { results: currentResults, config });
-            } else {
-              navigation.popToTop();
-            }
-          }}
-          style={styles.quitButton}
-        >
-          <Text style={styles.quitText}>{t('common.exit')}</Text>
-        </TouchableOpacity>
-        <View style={styles.centerInfo}>
-          {isTimeAttack ? (
-            <Text style={styles.counter}>
-              {t('game.correctCount', { count: results.filter((r) => r.correct).length })}
-            </Text>
-          ) : (
-            <Text style={styles.counter}>
-              {t('game.questionOf', { current: currentIndex + 1, total: questions.length })}
-            </Text>
-          )}
-          {currentStreak >= 2 ? (
-            <Animated.Text
-              style={[styles.streakText, { transform: [{ scale: streakScale }] }]}
-            >
-              {t('game.streak', { count: currentStreak })}
-            </Animated.Text>
-          ) : (
-            !isTimeAttack && (
-              <Text style={styles.score}>
+      <GameTopBar
+        onExit={() => {
+          if (autoAdvanceRef.current) clearTimeout(autoAdvanceRef.current);
+          const currentResults = pendingResultsRef.current ?? results;
+          if (currentResults.length > 0) {
+            navigation.replace('Results', { results: currentResults, config });
+          } else {
+            navigation.popToTop();
+          }
+        }}
+        center={
+          <View style={styles.centerInfo}>
+            {isTimeAttack ? (
+              <Text style={styles.counter}>
                 {t('game.correctCount', { count: results.filter((r) => r.correct).length })}
               </Text>
-            )
-          )}
-        </View>
-        {livesRemaining !== null ? (
-          <Text style={[styles.livesText, livesRemaining === 1 && styles.livesTextUrgent]}>
-            {livesRemaining === 1 ? t('game.life', { count: livesRemaining }) : t('game.lives', { count: livesRemaining })}
-          </Text>
-        ) : (
-          <View style={styles.quitSpacer} />
-        )}
-      </View>
+            ) : (
+              <Text style={styles.counter}>
+                {t('game.questionOf', { current: currentIndex + 1, total: questions.length })}
+              </Text>
+            )}
+            {currentStreak >= 2 ? (
+              <Animated.Text
+                style={[styles.streakText, { transform: [{ scale: streakScale }] }]}
+              >
+                {t('game.streak', { count: currentStreak })}
+              </Animated.Text>
+            ) : (
+              !isTimeAttack && (
+                <Text style={styles.score}>
+                  {t('game.correctCount', { count: results.filter((r) => r.correct).length })}
+                </Text>
+              )
+            )}
+          </View>
+        }
+        right={
+          livesRemaining !== null ? (
+            <Text style={[styles.livesText, livesRemaining === 1 && styles.livesTextUrgent]}>
+              {livesRemaining === 1 ? t('game.life', { count: livesRemaining }) : t('game.lives', { count: livesRemaining })}
+            </Text>
+          ) : undefined
+        }
+      />
 
       <Animated.View
         style={[

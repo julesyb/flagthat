@@ -1,10 +1,10 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { colors, fontFamily, fontSize, spacing } from '../utils/theme';
+import { colors, fontFamily, fontSize, spacing, layout } from '../utils/theme';
 import { LightningIcon, CrosshairIcon, BarChartIcon, GlobeIcon } from './Icons';
 import { t } from '../utils/i18n';
 
-type TabId = 'Play' | 'Modes' | 'Stats' | 'Browse';
+export type TabId = 'Play' | 'Modes' | 'Stats' | 'Browse';
 
 interface BottomNavProps {
   activeTab: TabId;
@@ -28,36 +28,43 @@ const TAB_KEYS: { id: TabId; labelKey: string }[] = [
 export default function BottomNav({ activeTab, onNavigate }: BottomNavProps) {
   return (
     <View style={styles.container} accessibilityRole="tablist">
-      {TAB_KEYS.map((tab) => {
-        const isActive = activeTab === tab.id;
-        return (
-          <TouchableOpacity
-            key={tab.id}
-            style={styles.tab}
-            onPress={() => onNavigate(tab.id)}
-            activeOpacity={0.6}
-            accessibilityRole="tab"
-            accessibilityLabel={t(tab.labelKey)}
-            accessibilityState={{ selected: isActive }}
-          >
-            {TAB_ICONS[tab.id](isActive)}
-            <Text style={[styles.label, isActive && styles.labelActive]}>{t(tab.labelKey)}</Text>
-            {isActive && <View style={styles.dot} />}
-          </TouchableOpacity>
-        );
-      })}
+      <View style={styles.inner}>
+        {TAB_KEYS.map((tab) => {
+          const isActive = activeTab === tab.id;
+          return (
+            <TouchableOpacity
+              key={tab.id}
+              style={styles.tab}
+              onPress={() => onNavigate(tab.id)}
+              activeOpacity={0.6}
+              accessibilityRole="tab"
+              accessibilityLabel={t(tab.labelKey)}
+              accessibilityState={{ selected: isActive }}
+            >
+              {TAB_ICONS[tab.id](isActive)}
+              <Text style={[styles.label, isActive && styles.labelActive]}>{t(tab.labelKey)}</Text>
+              {isActive && <View style={styles.dot} />}
+            </TouchableOpacity>
+          );
+        })}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
     borderTopWidth: 1,
     borderTopColor: colors.rule,
     backgroundColor: colors.background,
     paddingTop: 6,
     paddingBottom: 20,
+    alignItems: 'center',
+  },
+  inner: {
+    flexDirection: 'row',
+    width: '100%',
+    maxWidth: layout.maxContentWidth,
   },
   tab: {
     flex: 1,
