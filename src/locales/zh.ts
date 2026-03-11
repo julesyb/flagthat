@@ -383,7 +383,11 @@ const zh: typeof en = {
     previewMode: '\u6a21\u5f0f',
     previewFlags: '{count} \u9762\u56fd\u65d7',
     previewHost: 'vs {name}',
-    previewTimeLimit: '\u6bcf\u9762\u56fd\u65d7 {seconds} \u79d2',
+    previewTimeLimit: '{seconds}\u79d2/\u9762\u56fd\u65d7',
+    previewValid: '\u6709\u6548\u4ee3\u7801',
+    previewHostScore: '{name} \u7b54\u5bf9\u4e86 {correct}/{total}',
+    challengeBack: '\u53cd\u51fb\u6311\u6218',
+    challengeBackDesc: '\u73a9\u4e00\u5c40\u65b0\u7684\u5e76\u53d1\u56de\u53bb',
   },
 };
 

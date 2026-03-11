@@ -310,6 +310,10 @@ const en = {
     previewFlags: '{count} flags',
     previewHost: 'vs {name}',
     previewTimeLimit: '{seconds}s per flag',
+    previewValid: 'Valid code',
+    previewHostScore: '{name} got {correct}/{total}',
+    challengeBack: 'Challenge Back',
+    challengeBackDesc: 'Play a new round and send it back',
   },
 
   // ─── Notifications ─────────────────────────────────────

@@ -652,6 +652,24 @@ export default function ResultsScreen({ route, navigation }: Props) {
           </Animated.View>
         )}
 
+        {/* ── CHALLENGE BACK (after playing a challenge) ── */}
+        {isChallenge && canChallenge && !reviewOnly && (
+          <Animated.View style={{ opacity: restFade }}>
+            <TouchableOpacity
+              style={st.challengeButton}
+              onPress={() => { hapticTap(); setShowChallengeModal(true); }}
+              activeOpacity={0.7}
+            >
+              <UsersIcon size={18} color={colors.ink} />
+              <View style={st.challengeButtonContent}>
+                <Text style={st.challengeButtonTitle}>{t('challenge.challengeBack')}</Text>
+                <Text style={st.challengeButtonSub}>{t('challenge.challengeBackDesc')}</Text>
+              </View>
+              <ChevronRightIcon size={16} color={colors.textTertiary} />
+            </TouchableOpacity>
+          </Animated.View>
+        )}
+
         {/* ── NEWLY EARNED BADGES ── */}
         {newBadges.length > 0 && (
           <Animated.View style={[st.badgesSection, { opacity: restFade }]}>

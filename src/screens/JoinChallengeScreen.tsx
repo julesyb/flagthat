@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -16,7 +16,7 @@ import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadiu
 import { RootStackParamList } from '../types/navigation';
 import { decodeChallenge, buildChallengeQuestions, getScreenForMode, ChallengeData } from '../utils/challengeCode';
 import { hapticTap, hapticWrong } from '../utils/feedback';
-import { UsersIcon } from '../components/Icons';
+import { UsersIcon, CheckIcon } from '../components/Icons';
 import ScreenContainer from '../components/ScreenContainer';
 import BottomNav from '../components/BottomNav';
 import { useNavTabs } from '../hooks/useNavTabs';
@@ -29,6 +29,8 @@ export default function JoinChallengeScreen({ navigation }: Props) {
   const onNavigate = useNavTabs();
   const [code, setCode] = useState('');
   const [name, setName] = useState('');
+  const [debouncedCode, setDebouncedCode] = useState('');
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Load saved name on mount
   useEffect(() => {
@@ -37,12 +39,23 @@ export default function JoinChallengeScreen({ navigation }: Props) {
     });
   }, []);
 
-  // Decode challenge from code for live preview
+  // Debounce code changes (300ms)
+  useEffect(() => {
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(() => {
+      setDebouncedCode(code);
+    }, 300);
+    return () => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    };
+  }, [code]);
+
+  // Decode challenge from debounced code for live preview
   const preview: ChallengeData | null = useMemo(() => {
-    const trimmed = code.trim();
+    const trimmed = debouncedCode.trim();
     if (trimmed.length === 0) return null;
     return decodeChallenge(trimmed);
-  }, [code]);
+  }, [debouncedCode]);
 
   const canPlay = code.trim().length > 0 && name.trim().length > 0;
 
@@ -93,6 +106,9 @@ export default function JoinChallengeScreen({ navigation }: Props) {
   };
 
   const modeLabel = preview ? t(`modes.${preview.mode}`) : '';
+  const hostScore = preview
+    ? preview.hostResults.filter((r) => r.correct).length
+    : 0;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -142,13 +158,19 @@ export default function JoinChallengeScreen({ navigation }: Props) {
           {/* Live preview when a valid code is pasted */}
           {preview && (
             <View style={styles.previewCard}>
+              <View style={styles.previewHeader}>
+                <CheckIcon size={16} color={colors.success} />
+                <Text style={styles.previewHeaderText}>{t('challenge.previewValid')}</Text>
+              </View>
               <View style={styles.previewRow}>
                 <Text style={styles.previewLabel}>{t('challenge.previewMode')}</Text>
                 <Text style={styles.previewValue}>{modeLabel}</Text>
               </View>
               <View style={styles.previewRow}>
-                <Text style={styles.previewLabel}>{t('challenge.previewHost', { name: preview.hostName })}</Text>
-                <Text style={styles.previewValue}>{t('challenge.previewFlags', { count: preview.flagIds.length })}</Text>
+                <Text style={styles.previewLabel}>{t('challenge.previewFlags', { count: preview.flagIds.length })}</Text>
+                <Text style={styles.previewValue}>
+                  {t('challenge.previewHostScore', { name: preview.hostName, correct: hostScore, total: preview.flagIds.length })}
+                </Text>
               </View>
               {preview.timeLimit > 0 && (
                 <View style={styles.previewRow}>
@@ -241,11 +263,24 @@ const styles = StyleSheet.create({
   previewCard: {
     backgroundColor: colors.surface,
     borderWidth: 2,
-    borderColor: colors.ink,
+    borderColor: colors.success,
     borderRadius: borderRadius.lg,
     padding: spacing.md,
     marginTop: spacing.lg,
     gap: spacing.xs,
+  },
+  previewHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    marginBottom: spacing.xs,
+  },
+  previewHeaderText: {
+    fontFamily: fontFamily.uiLabel,
+    fontSize: fontSize.xxs,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    color: colors.success,
   },
   previewRow: {
     flexDirection: 'row',

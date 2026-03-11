@@ -371,7 +371,7 @@ const ptBR: typeof en = {
     invalidCodeTitle: 'C\u00f3digo inv\u00e1lido',
     invalidCode: 'Este c\u00f3digo de desafio n\u00e3o \u00e9 v\u00e1lido. Verifique se voc\u00ea colou o c\u00f3digo completo.',
     challengeFriend: 'Desafiar um amigo',
-    challengeDesc: 'Compartilhe sua partida para um amigo tentar as mesmas bandeiras',
+    challengeDesc: 'Compartilhe sua partida para que um amigo tente as mesmas bandeiras',
     enterName: 'Seu nome',
     enterNameDesc: 'Este nome ser\u00e1 mostrado ao seu oponente.',
     shareMessage: 'Eu te desafio a superar minha pontua\u00e7\u00e3o no Flag That! Cole este c\u00f3digo na se\u00e7\u00e3o Desafio:',
@@ -384,6 +384,10 @@ const ptBR: typeof en = {
     previewFlags: '{count} bandeiras',
     previewHost: 'vs {name}',
     previewTimeLimit: '{seconds}s por bandeira',
+    previewValid: 'C\u00f3digo v\u00e1lido',
+    previewHostScore: '{name} acertou {correct}/{total}',
+    challengeBack: 'Contra-desafio',
+    challengeBackDesc: 'Jogue uma nova rodada e envie de volta',
   },
 };
 

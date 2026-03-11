@@ -384,6 +384,10 @@ const de: typeof en = {
     previewFlags: '{count} Flaggen',
     previewHost: 'vs {name}',
     previewTimeLimit: '{seconds}s pro Flagge',
+    previewValid: 'G\u00fcltiger Code',
+    previewHostScore: '{name} hat {correct}/{total} richtig',
+    challengeBack: 'Zur\u00fcckfordern',
+    challengeBackDesc: 'Spiel eine neue Runde und sende sie zur\u00fcck',
   },
 };
 

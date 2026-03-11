@@ -16,7 +16,86 @@ export interface ChallengeData {
   hostResults: { correct: boolean; timeMs: number }[];
 }
 
-interface CompactChallenge {
+// ── V2 compact format ──
+// Pipe-delimited: name|modeIndex|timeLimit|flagIds|correctBits|times
+// - modeIndex: single digit index into CHALLENGE_MODES
+// - flagIds: joined 2-char codes (e.g. "usgbfrde")
+// - correctBits: binary string "10110..." (1=correct, 0=wrong)
+// - times: comma-separated deciseconds (e.g. "23,45,18" for 2.3s, 4.5s, 1.8s)
+
+const MODE_INDEX = new Map(CHALLENGE_MODES.map((m, i) => [m, i]));
+const INDEX_MODE = new Map(CHALLENGE_MODES.map((m, i) => [i, m]));
+
+/**
+ * Encode challenge data into a shareable string.
+ * V2 format: "FT2:" + base64(compact pipe-delimited string)
+ */
+export function encodeChallenge(data: ChallengeData): string {
+  const modeIdx = MODE_INDEX.get(data.mode) ?? 0;
+  const flags = data.flagIds.join('');
+  const bits = data.hostResults.map((r) => r.correct ? '1' : '0').join('');
+  // Store times as deciseconds (divide ms by 100, round) to save chars
+  const times = data.hostResults.map((r) => Math.round(r.timeMs / 100)).join(',');
+  const payload = `${data.hostName}|${modeIdx}|${data.timeLimit}|${flags}|${bits}|${times}`;
+  const encoded = toBase64(payload);
+  return `FT2:${encoded}`;
+}
+
+/**
+ * Decode a challenge code string back into ChallengeData.
+ * Supports both V2 (FT2:) and legacy V1 (FT:) formats.
+ */
+export function decodeChallenge(code: string): ChallengeData | null {
+  try {
+    const trimmed = code.trim();
+    if (trimmed.startsWith('FT2:')) {
+      return decodeV2(trimmed.slice(4));
+    }
+    if (trimmed.startsWith('FT:')) {
+      return decodeV1(trimmed.slice(3));
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function decodeV2(encoded: string): ChallengeData | null {
+  const payload = fromBase64(encoded);
+  const parts = payload.split('|');
+  if (parts.length !== 6) return null;
+
+  const [hostName, modeIdxStr, timeLimitStr, flags, bits, timesStr] = parts;
+  if (!hostName || flags.length === 0 || flags.length % 2 !== 0) return null;
+
+  const modeIdx = parseInt(modeIdxStr, 10);
+  const mode = INDEX_MODE.get(modeIdx);
+  if (!mode) return null;
+
+  const timeLimit = parseInt(timeLimitStr, 10);
+  if (isNaN(timeLimit)) return null;
+
+  // Split flag IDs (each is 2 chars)
+  const flagIds: string[] = [];
+  for (let i = 0; i < flags.length; i += 2) {
+    flagIds.push(flags.slice(i, i + 2));
+  }
+
+  if (bits.length !== flagIds.length) return null;
+
+  const times = timesStr.split(',');
+  if (times.length !== flagIds.length) return null;
+
+  const hostResults = flagIds.map((_, i) => ({
+    correct: bits[i] === '1',
+    timeMs: parseInt(times[i], 10) * 100,
+  }));
+
+  return { hostName, mode, timeLimit, flagIds, hostResults };
+}
+
+// Legacy V1 decoder for backwards compatibility
+interface CompactChallengeV1 {
   n: string;
   m: string;
   t: number;
@@ -24,54 +103,26 @@ interface CompactChallenge {
   r: [number, number][];
 }
 
-/**
- * Encode challenge data into a shareable string.
- * Format: "FT:" + base64(JSON)
- */
-export function encodeChallenge(data: ChallengeData): string {
-  const compact: CompactChallenge = {
-    n: data.hostName,
-    m: data.mode,
-    t: data.timeLimit,
-    f: data.flagIds,
-    r: data.hostResults.map((r) => [r.correct ? 1 : 0, r.timeMs]),
-  };
-  const json = JSON.stringify(compact);
-  const encoded = toBase64(json);
-  return `FT:${encoded}`;
-}
+function decodeV1(encoded: string): ChallengeData | null {
+  const json = fromBase64(encoded);
+  const compact: CompactChallengeV1 = JSON.parse(json);
 
-/**
- * Decode a challenge code string back into ChallengeData.
- * Returns null if the code is invalid.
- */
-export function decodeChallenge(code: string): ChallengeData | null {
-  try {
-    const trimmed = code.trim();
-    if (!trimmed.startsWith('FT:')) return null;
-    const encoded = trimmed.slice(3);
-    const json = fromBase64(encoded);
-    const compact: CompactChallenge = JSON.parse(json);
-
-    if (!compact.n || typeof compact.t !== 'number' || !Array.isArray(compact.f) || !Array.isArray(compact.r)) {
-      return null;
-    }
-    if (compact.f.length === 0 || compact.f.length !== compact.r.length) {
-      return null;
-    }
-
-    const mode = (compact.m || 'flagpuzzle') as GameMode;
-
-    return {
-      hostName: compact.n,
-      mode,
-      timeLimit: compact.t,
-      flagIds: compact.f,
-      hostResults: compact.r.map(([c, t]) => ({ correct: c === 1, timeMs: t })),
-    };
-  } catch {
+  if (!compact.n || typeof compact.t !== 'number' || !Array.isArray(compact.f) || !Array.isArray(compact.r)) {
     return null;
   }
+  if (compact.f.length === 0 || compact.f.length !== compact.r.length) {
+    return null;
+  }
+
+  const mode = (compact.m || 'flagpuzzle') as GameMode;
+
+  return {
+    hostName: compact.n,
+    mode,
+    timeLimit: compact.t,
+    flagIds: compact.f,
+    hostResults: compact.r.map(([c, t]) => ({ correct: c === 1, timeMs: t })),
+  };
 }
 
 /**

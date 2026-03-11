@@ -384,6 +384,10 @@ const es: typeof en = {
     previewFlags: '{count} banderas',
     previewHost: 'vs {name}',
     previewTimeLimit: '{seconds}s por bandera',
+    previewValid: 'C\u00f3digo v\u00e1lido',
+    previewHostScore: '{name} obtuvo {correct}/{total}',
+    challengeBack: 'Contradesaf\u00edo',
+    challengeBackDesc: 'Juega una nueva ronda y env\u00edala de vuelta',
   },
 };
 
