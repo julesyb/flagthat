@@ -180,7 +180,7 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
           />
         </View>
 
-        <Text style={styles.prompt}>What is the capital?</Text>
+        <Text style={styles.prompt}>What is the capital of {question.flag.name}?</Text>
 
         <View style={styles.optionsContainer}>
           {question.options.map((option, index) => {
