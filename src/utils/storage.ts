@@ -3,6 +3,11 @@ import { UserStats, GameMode, CategoryId, GameResult } from '../types';
 
 const STATS_KEY = '@flagsareus_stats';
 const FLAG_STATS_KEY = '@flagsareus_flag_stats';
+const DAY_STREAK_KEY = '@flagsareus_day_streak';
+
+function getTodayDate(): string {
+  return new Date().toISOString().slice(0, 10);
+}
 
 const DEFAULT_STATS: UserStats = {
   totalGamesPlayed: 0,
@@ -61,6 +66,7 @@ export async function updateStats(
     stats.categoryStats[category]!.total += total;
 
     await AsyncStorage.setItem(STATS_KEY, JSON.stringify(stats));
+    await recordDayPlayed();
   } catch {
     // Silently fail on storage errors
   }
@@ -70,8 +76,45 @@ export async function resetStats(): Promise<void> {
   try {
     await AsyncStorage.removeItem(STATS_KEY);
     await AsyncStorage.removeItem(FLAG_STATS_KEY);
+    await AsyncStorage.removeItem(DAY_STREAK_KEY);
   } catch {
     // Silently fail
+  }
+}
+
+export async function getDayStreak(): Promise<number> {
+  try {
+    const json = await AsyncStorage.getItem(DAY_STREAK_KEY);
+    if (!json) return 0;
+    const { lastDate, streak } = JSON.parse(json);
+    const today = getTodayDate();
+    if (lastDate === today) return streak;
+    const diffDays = Math.round(
+      (new Date(today + 'T00:00:00').getTime() - new Date(lastDate + 'T00:00:00').getTime()) / 86400000,
+    );
+    return diffDays === 1 ? streak : 0;
+  } catch {
+    return 0;
+  }
+}
+
+async function recordDayPlayed(): Promise<number> {
+  try {
+    const today = getTodayDate();
+    const json = await AsyncStorage.getItem(DAY_STREAK_KEY);
+    let streak = 1;
+    if (json) {
+      const data = JSON.parse(json);
+      if (data.lastDate === today) return data.streak;
+      const diffDays = Math.round(
+        (new Date(today + 'T00:00:00').getTime() - new Date(data.lastDate + 'T00:00:00').getTime()) / 86400000,
+      );
+      if (diffDays === 1) streak = data.streak + 1;
+    }
+    await AsyncStorage.setItem(DAY_STREAK_KEY, JSON.stringify({ lastDate: today, streak }));
+    return streak;
+  } catch {
+    return 0;
   }
 }
 

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -7,71 +7,162 @@ import {
   SafeAreaView,
   StatusBar,
   Animated,
-  Dimensions,
+  ScrollView,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import { colors, fontFamily, spacing } from '../utils/theme';
-import { getTotalFlagCount } from '../data';
-import { initAudio, hapticTap } from '../utils/feedback';
-import { getStats } from '../utils/storage';
+import { getTotalFlagCount, getCategoryCount } from '../data';
+import { initAudio, hapticTap, hapticCorrect, hapticWrong, playCorrectSound, playWrongSound } from '../utils/feedback';
+import { getStats, getDayStreak } from '../utils/storage';
+import { generateQuestions } from '../utils/gameEngine';
 import { RootStackParamList } from '../types/navigation';
-import { GameMode, UserStats } from '../types';
-import { LightningIcon, BarChartIcon, GlobeIcon } from '../components/Icons';
+import { GameMode, UserStats, GameQuestion, CategoryId } from '../types';
+import { LightningIcon, CrosshairIcon, BarChartIcon, GlobeIcon } from '../components/Icons';
 import FlagImage from '../components/FlagImage';
 
-const MODES: { key: GameMode; label: string; desc: string }[] = [
-  { key: 'easy', label: '2', desc: '50/50' },
-  { key: 'medium', label: '4', desc: 'Pick from 4' },
-  { key: 'hard', label: 'Type', desc: 'Type it' },
+// ─── Local border radii (home screen uses rounded cards) ─────
+const R_SM = 8;
+const R_MD = 10;
+const R_LG = 14;
+const R_XL = 18;
+
+const MODES: { key: GameMode; label: string }[] = [
+  { key: 'easy', label: '2 Easy' },
+  { key: 'medium', label: '4 Hard' },
+  { key: 'hard', label: 'Type' },
 ];
 
 const QUESTION_COUNTS = [5, 10, 15, 20];
 
+const REGIONS: { id: CategoryId; label: string }[] = [
+  { id: 'europe', label: 'Europe' },
+  { id: 'asia', label: 'Asia' },
+  { id: 'africa', label: 'Africa' },
+  { id: 'americas', label: 'Americas' },
+  { id: 'oceania', label: 'Oceania' },
+];
+
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
-const GRID_SPACING = 80;
+// ─── Flag Teaser (inline mini-quiz) ─────────────────────────
+function FlagTeaser() {
+  const question = useMemo<GameQuestion | null>(() => {
+    const qs = generateQuestions({ mode: 'medium', category: 'all', questionCount: 1, displayMode: 'flag' });
+    return qs[0] ?? null;
+  }, []);
 
-// Some well-known flags for the preview
-const PREVIEW_FLAG = 'br';
-const PREVIEW_OPTIONS = ['Brazil', 'Colombia', 'Argentina', 'Venezuela'];
-
-// ─── Background Grid ─────────────────────────────────────────
-function GridLines() {
-  const screenWidth = Dimensions.get('window').width;
-  const lineCount = Math.floor(screenWidth / GRID_SPACING);
-
-  return (
-    <View style={styles.gridContainer} pointerEvents="none">
-      {Array.from({ length: lineCount }, (_, i) => (
-        <View
-          key={i}
-          style={[styles.gridLine, { left: (i + 1) * GRID_SPACING }]}
-        />
-      ))}
-    </View>
-  );
-}
-
-// ─── Fade-up wrapper ─────────────────────────────────────────
-function FadeUp({ delay = 0, children }: { delay?: number; children: React.ReactNode }) {
-  const opacity = useRef(new Animated.Value(0)).current;
-  const translateY = useRef(new Animated.Value(10)).current;
+  const [picked, setPicked] = useState<string | null>(null);
+  const coverOpacity = useRef(new Animated.Value(1)).current;
+  const optAnims = useRef([0, 1, 2, 3].map(() => new Animated.Value(0))).current;
 
   useEffect(() => {
+    // Reveal flag
+    Animated.timing(coverOpacity, {
+      toValue: 0,
+      duration: 600,
+      delay: 500,
+      useNativeDriver: true,
+    }).start();
+
+    // Pop in options after reveal
     const timer = setTimeout(() => {
-      Animated.parallel([
-        Animated.timing(opacity, { toValue: 1, duration: 500, useNativeDriver: true }),
-        Animated.timing(translateY, { toValue: 0, duration: 500, useNativeDriver: true }),
-      ]).start();
-    }, delay);
+      Animated.stagger(
+        100,
+        optAnims.map((a) =>
+          Animated.spring(a, { toValue: 1, useNativeDriver: true, tension: 120, friction: 10 }),
+        ),
+      ).start();
+    }, 900);
     return () => clearTimeout(timer);
   }, []);
 
+  if (!question) return null;
+
+  const handlePick = (opt: string) => {
+    if (picked) return;
+    setPicked(opt);
+    if (opt === question.flag.name) {
+      hapticCorrect();
+      playCorrectSound();
+    } else {
+      hapticWrong();
+      playWrongSound();
+    }
+  };
+
   return (
-    <Animated.View style={{ opacity, transform: [{ translateY }] }}>
-      {children}
-    </Animated.View>
+    <View style={s.heroCard}>
+      <Text style={s.heroLabel}>Name this flag</Text>
+      <View style={s.flagWrap}>
+        <FlagImage
+          countryCode={question.flag.id}
+          emoji={question.flag.emoji}
+          size="hero"
+          style={{ borderRadius: R_SM }}
+        />
+        <Animated.View style={[s.flagCover, { opacity: coverOpacity }]}>
+          <Text style={s.coverQ}>?</Text>
+        </Animated.View>
+      </View>
+
+      {/* Options 2x2 */}
+      <View style={s.optsGrid}>
+        <View style={s.optsRow}>
+          {question.options.slice(0, 2).map((opt, i) => {
+            const isCorrect = opt === question.flag.name;
+            const isSelected = picked === opt;
+            const showCorrect = picked !== null && isCorrect;
+            const showWrong = isSelected && !isCorrect;
+            return (
+              <Animated.View
+                key={opt}
+                style={[
+                  s.optWrap,
+                  { opacity: optAnims[i], transform: [{ scale: optAnims[i].interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }) }] },
+                ]}
+              >
+                <TouchableOpacity
+                  style={[s.optBtn, showCorrect && s.optCorrect, showWrong && s.optWrong]}
+                  onPress={() => handlePick(opt)}
+                  activeOpacity={0.8}
+                  disabled={picked !== null}
+                >
+                  <Text style={[s.optText, showCorrect && s.optTextCorrect, showWrong && s.optTextWrong]}>{opt}</Text>
+                </TouchableOpacity>
+              </Animated.View>
+            );
+          })}
+        </View>
+        <View style={s.optsRow}>
+          {question.options.slice(2, 4).map((opt, i) => {
+            const idx = i + 2;
+            const isCorrect = opt === question.flag.name;
+            const isSelected = picked === opt;
+            const showCorrect = picked !== null && isCorrect;
+            const showWrong = isSelected && !isCorrect;
+            return (
+              <Animated.View
+                key={opt}
+                style={[
+                  s.optWrap,
+                  { opacity: optAnims[idx], transform: [{ scale: optAnims[idx].interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }) }] },
+                ]}
+              >
+                <TouchableOpacity
+                  style={[s.optBtn, showCorrect && s.optCorrect, showWrong && s.optWrong]}
+                  onPress={() => handlePick(opt)}
+                  activeOpacity={0.8}
+                  disabled={picked !== null}
+                >
+                  <Text style={[s.optText, showCorrect && s.optTextCorrect, showWrong && s.optTextWrong]}>{opt}</Text>
+                </TouchableOpacity>
+              </Animated.View>
+            );
+          })}
+        </View>
+      </View>
+    </View>
   );
 }
 
@@ -81,18 +172,20 @@ export default function HomeScreen({ navigation }: Props) {
   const [mode, setMode] = useState<GameMode>('medium');
   const [questionCount, setQuestionCount] = useState(10);
   const [questionCountAll, setQuestionCountAll] = useState(false);
-  const [showCustomize, setShowCustomize] = useState(false);
   const [stats, setStats] = useState<UserStats | null>(null);
+  const [dayStreak, setDayStreak] = useState(0);
+  const [teaserKey, setTeaserKey] = useState(0);
 
   useEffect(() => {
     initAudio();
   }, []);
 
-  // Reload stats every time the screen comes into focus
   useFocusEffect(
     useCallback(() => {
       getStats().then(setStats);
-    }, [])
+      getDayStreak().then(setDayStreak);
+      setTeaserKey((k) => k + 1);
+    }, []),
   );
 
   const play = () => {
@@ -103,541 +196,580 @@ export default function HomeScreen({ navigation }: Props) {
   };
 
   const hasPlayed = stats !== null && stats.totalGamesPlayed > 0;
-  const accuracy = stats && stats.totalAnswered > 0
-    ? Math.round((stats.totalCorrect / stats.totalAnswered) * 100)
-    : 0;
+
+  // Region accuracy for progress bars
+  const regionProgress = REGIONS.map((r) => {
+    const cs = stats?.categoryStats[r.id];
+    const pct = cs && cs.total > 0 ? Math.round((cs.correct / cs.total) * 100) : 0;
+    return { ...r, pct };
+  });
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={s.container}>
       <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
-      <GridLines />
 
-      <View style={styles.content}>
+      <ScrollView style={s.scroll} contentContainerStyle={s.scrollContent} showsVerticalScrollIndicator={false}>
         {/* ── HEADER ── */}
-        <FadeUp delay={0}>
-          <View style={styles.headerTopRule} />
-          <View style={styles.headerInner}>
-            <View>
-              <Text style={styles.logotypeMain}>
-                Flag{'\n'}
-                <Text style={styles.logotypeItalic}>That</Text>
-              </Text>
-            </View>
-            <View style={styles.headerRight}>
-              <Text style={styles.countNumber}>{totalFlags}</Text>
-              <Text style={styles.countLabel}>Countries</Text>
-            </View>
+        <View style={s.header}>
+          <View style={s.wordmark}>
+            <Text style={s.wmLine1}>Flag</Text>
+            <Text style={s.wmLine2}>That</Text>
           </View>
-        </FadeUp>
-
-        {/* ── HOOK HEADLINE ── */}
-        <FadeUp delay={120}>
-          <Text style={styles.hookLine}>
-            {hasPlayed ? 'Think you can do better?' : 'How many can you name?'}
-          </Text>
-        </FadeUp>
-
-        {/* ── BIG PLAY BUTTON ── */}
-        <FadeUp delay={220}>
-          <TouchableOpacity
-            style={styles.playButton}
-            onPress={play}
-            activeOpacity={0.85}
-          >
-            <View style={styles.playButtonBar} />
-            <View style={styles.playButtonInner}>
-              <View style={styles.playIcon}>
-                <LightningIcon size={26} color={colors.white} filled />
-              </View>
-              <Text style={styles.playButtonText}>Play</Text>
-            </View>
-            <Text style={styles.playArrow}>{'\u2192'}</Text>
-          </TouchableOpacity>
-        </FadeUp>
-
-        {/* ── RETURNING USER STATS ── */}
-        {hasPlayed && (
-          <FadeUp delay={300}>
-            <View style={styles.statsTeaser}>
-              <View style={styles.statItem}>
-                <Text style={styles.statValue}>{stats!.totalGamesPlayed}</Text>
-                <Text style={styles.statLabel}>Games</Text>
-              </View>
-              <View style={styles.statDivider} />
-              <View style={styles.statItem}>
-                <Text style={styles.statValue}>{accuracy}%</Text>
-                <Text style={styles.statLabel}>Accuracy</Text>
-              </View>
-              <View style={styles.statDivider} />
-              <View style={styles.statItem}>
-                <Text style={styles.statValue}>{stats!.bestStreak}</Text>
-                <Text style={styles.statLabel}>Best Streak</Text>
-              </View>
-            </View>
-          </FadeUp>
-        )}
-
-        {/* ── CUSTOMIZE TOGGLE ── */}
-        <FadeUp delay={hasPlayed ? 380 : 300}>
-          <TouchableOpacity
-            style={styles.customizeToggle}
-            onPress={() => { hapticTap(); setShowCustomize(!showCustomize); }}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.customizeToggleText}>
-              {showCustomize ? 'Hide options' : 'Customize'}
-            </Text>
-            <Text style={styles.customizeArrow}>{showCustomize ? '\u2191' : '\u2193'}</Text>
-          </TouchableOpacity>
-
-          {showCustomize && (
-            <View style={styles.customizePanel}>
-              {/* ── QUESTION COUNT PICKER ── */}
-              <View style={styles.modeSwitcher}>
-                <Text style={styles.modeSwitcherLabel}>Cards</Text>
-                <View style={styles.modeSwitcherRow}>
-                  {QUESTION_COUNTS.map((count) => (
-                    <TouchableOpacity
-                      key={count}
-                      style={[styles.modeChip, !questionCountAll && questionCount === count && styles.modeChipActive]}
-                      onPress={() => { hapticTap(); setQuestionCount(count); setQuestionCountAll(false); }}
-                      activeOpacity={0.7}
-                    >
-                      <Text style={[styles.modeChipText, !questionCountAll && questionCount === count && styles.modeChipTextActive]}>
-                        {count}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                  <TouchableOpacity
-                    style={[styles.modeChip, questionCountAll && styles.modeChipActive]}
-                    onPress={() => { hapticTap(); setQuestionCountAll(true); }}
-                    activeOpacity={0.7}
-                  >
-                    <Text style={[styles.modeChipText, questionCountAll && styles.modeChipTextActive]}>
-                      All
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-
-              {/* ── MODE SWITCHER ── */}
-              <View style={styles.modeSwitcher}>
-                <Text style={styles.modeSwitcherLabel}>Mode</Text>
-                <View style={styles.modeSwitcherRow}>
-                  {MODES.map((m) => (
-                    <TouchableOpacity
-                      key={m.key}
-                      style={[styles.modeChip, mode === m.key && styles.modeChipActive]}
-                      onPress={() => { hapticTap(); setMode(m.key); }}
-                      activeOpacity={0.7}
-                    >
-                      <Text style={[styles.modeChipText, mode === m.key && styles.modeChipTextActive]}>
-                        {m.label}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-            </View>
-          )}
-        </FadeUp>
-
-        {/* ── GAME PREVIEW ── */}
-        <FadeUp delay={hasPlayed ? 440 : 360}>
-          <View style={styles.previewSection}>
-            <View style={styles.previewCard}>
-              <View style={styles.previewFlagWrap}>
-                <FlagImage countryCode={PREVIEW_FLAG} size="medium" />
-              </View>
-              <View style={styles.previewOptions}>
-                {PREVIEW_OPTIONS.map((opt, i) => (
-                  <View
-                    key={opt}
-                    style={[
-                      styles.previewOption,
-                      i === 0 && styles.previewOptionCorrect,
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.previewOptionText,
-                        i === 0 && styles.previewOptionTextCorrect,
-                      ]}
-                    >
-                      {i === 0 ? opt : '\u2022\u2022\u2022\u2022\u2022\u2022'}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-              <View style={styles.previewOverlay} />
-            </View>
-            <Text style={styles.previewCaption}>See a flag. Name the country.</Text>
+          <View style={s.headerRight}>
+            {dayStreak > 0 ? (
+              <>
+                <Text style={s.streakVal}>{dayStreak}</Text>
+                <Text style={s.streakLbl}>day streak</Text>
+              </>
+            ) : (
+              <>
+                <Text style={s.streakVal}>{totalFlags}</Text>
+                <Text style={s.streakLblMuted}>countries</Text>
+              </>
+            )}
           </View>
-        </FadeUp>
-      </View>
+        </View>
 
-      {/* ── BOTTOM NAV BAR ── */}
-      <View style={styles.bottomNav}>
-        <View style={styles.bottomNavTopRule} />
-        <View style={styles.bottomNavInner}>
-          <TouchableOpacity
-            style={styles.bottomNavItem}
-            onPress={play}
-            activeOpacity={0.7}
-          >
-            <LightningIcon size={16} color={colors.ink} filled />
-            <Text style={styles.bottomNavLabel}>Play</Text>
-          </TouchableOpacity>
+        {/* ── FLAG TEASER ── */}
+        <FlagTeaser key={teaserKey} />
 
-          <TouchableOpacity
-            style={styles.bottomNavItem}
-            onPress={() => { hapticTap(); navigation.navigate('Browse'); }}
-            activeOpacity={0.7}
-          >
-            <GlobeIcon size={16} color={colors.ink} />
-            <Text style={styles.bottomNavLabel}>Browse</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.bottomNavItem}
-            onPress={() => { hapticTap(); navigation.navigate('Stats'); }}
-            activeOpacity={0.7}
-          >
-            <BarChartIcon size={16} color={colors.ink} />
-            <Text style={styles.bottomNavLabel}>Stats</Text>
+        {/* ── PLAY NOW ── */}
+        <View style={s.playWrap}>
+          <TouchableOpacity style={s.playBtn} onPress={play} activeOpacity={0.85}>
+            <View style={s.playBolt}>
+              <LightningIcon size={14} color={colors.white} filled />
+            </View>
+            <Text style={s.playBtnText}>Play Now</Text>
           </TouchableOpacity>
         </View>
+
+        {/* ── CONFIG ── */}
+        <View style={s.configCard}>
+          <View style={s.configRow}>
+            <Text style={s.configLbl}>Cards</Text>
+            <View style={s.segRow}>
+              {QUESTION_COUNTS.map((c) => (
+                <TouchableOpacity
+                  key={c}
+                  style={[s.segBtn, !questionCountAll && questionCount === c && s.segBtnOn]}
+                  onPress={() => { hapticTap(); setQuestionCount(c); setQuestionCountAll(false); }}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[s.segBtnText, !questionCountAll && questionCount === c && s.segBtnTextOn]}>{c}</Text>
+                </TouchableOpacity>
+              ))}
+              <TouchableOpacity
+                style={[s.segBtn, questionCountAll && s.segBtnOn]}
+                onPress={() => { hapticTap(); setQuestionCountAll(true); }}
+                activeOpacity={0.7}
+              >
+                <Text style={[s.segBtnText, questionCountAll && s.segBtnTextOn]}>All</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+          <View style={s.configDivider} />
+          <View style={s.configRow}>
+            <Text style={s.configLbl}>Options</Text>
+            <View style={s.segRow}>
+              {MODES.map((m) => (
+                <TouchableOpacity
+                  key={m.key}
+                  style={[s.segBtn, mode === m.key && s.segBtnOn]}
+                  onPress={() => { hapticTap(); setMode(m.key); }}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[s.segBtnText, mode === m.key && s.segBtnTextOn]}>{m.label}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        </View>
+
+        {/* ── GAME MODES ── */}
+        <View style={s.sectionWrap}>
+          <Text style={s.sectionLbl}>Game modes</Text>
+
+          <TouchableOpacity style={s.modeCard} activeOpacity={0.85} onPress={play}>
+            <View style={s.modeIcon}>
+              <LightningIcon size={18} color={colors.white} filled />
+            </View>
+            <View style={s.modeText}>
+              <Text style={s.modeTitle}>Quick Play</Text>
+              <Text style={s.modeSub}>{questionCountAll ? `All ${totalFlags}` : questionCount} random flags, all {totalFlags} countries</Text>
+            </View>
+            <Text style={s.modeChev}>{'\u203A'}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={s.modeCard}
+            activeOpacity={0.85}
+            onPress={() => { hapticTap(); navigation.navigate('GameSetup'); }}
+          >
+            <View style={[s.modeIcon, s.modeIconRed]}>
+              <CrosshairIcon size={18} color={colors.white} />
+            </View>
+            <View style={s.modeText}>
+              <Text style={s.modeTitle}>Game Mode</Text>
+              <Text style={s.modeSub}>Choose difficulty and region</Text>
+            </View>
+            <Text style={s.modeChev}>{'\u203A'}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={s.modeCard}
+            activeOpacity={0.85}
+            onPress={() => {
+              hapticTap();
+              navigation.navigate('FlagFlash', {
+                config: { mode: 'flagflash', category: 'all', questionCount: 999, timeLimit: 60 },
+              });
+            }}
+          >
+            <View style={s.modeIcon}>
+              <LightningIcon size={18} color={colors.white} filled={false} />
+            </View>
+            <View style={s.modeText}>
+              <Text style={s.modeTitle}>FlagFlash</Text>
+              <Text style={s.modeSub}>Speed round — how fast are you?</Text>
+            </View>
+            <Text style={s.modeChev}>{'\u203A'}</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* ── YOUR PROGRESS ── */}
+        {hasPlayed && (
+          <View style={s.progressCard}>
+            <Text style={[s.sectionLbl, { marginBottom: 12 }]}>Your progress</Text>
+            {regionProgress.map((r) => (
+              <View key={r.id} style={s.progRow}>
+                <Text style={s.progName}>{r.label}</Text>
+                <View style={s.progTrack}>
+                  <View style={[s.progFill, { width: `${r.pct}%` }]} />
+                </View>
+                <Text style={s.progPct}>{r.pct}%</Text>
+              </View>
+            ))}
+          </View>
+        )}
+
+        <View style={{ height: spacing.md }} />
+      </ScrollView>
+
+      {/* ── BOTTOM NAV ── */}
+      <View style={s.bottomNav}>
+        <TouchableOpacity style={s.navTab} onPress={play} activeOpacity={0.6}>
+          <LightningIcon size={20} color={colors.ink} filled />
+          <Text style={[s.navLbl, s.navLblActive]}>Play</Text>
+          <View style={s.navDot} />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={s.navTab}
+          onPress={() => { hapticTap(); navigation.navigate('GameSetup'); }}
+          activeOpacity={0.6}
+        >
+          <CrosshairIcon size={20} color={colors.textTertiary} />
+          <Text style={s.navLbl}>Modes</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={s.navTab}
+          onPress={() => {
+            hapticTap();
+            navigation.navigate('FlagFlash', {
+              config: { mode: 'flagflash', category: 'all', questionCount: 999, timeLimit: 60 },
+            });
+          }}
+          activeOpacity={0.6}
+        >
+          <LightningIcon size={20} color={colors.textTertiary} filled={false} />
+          <Text style={s.navLbl}>Flash</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={s.navTab}
+          onPress={() => { hapticTap(); navigation.navigate('Stats'); }}
+          activeOpacity={0.6}
+        >
+          <BarChartIcon size={20} color={colors.textTertiary} />
+          <Text style={s.navLbl}>Stats</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={s.navTab}
+          onPress={() => { hapticTap(); navigation.navigate('Browse'); }}
+          activeOpacity={0.6}
+        >
+          <GlobeIcon size={20} color={colors.textTertiary} />
+          <Text style={s.navLbl}>Browse</Text>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
 }
 
 // ─── Styles ──────────────────────────────────────────────────
-const styles = StyleSheet.create({
+const s = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
   },
-  content: {
+  scroll: {
     flex: 1,
-    maxWidth: 700,
-    alignSelf: 'center',
-    width: '100%',
-    paddingHorizontal: spacing.lg,
-    justifyContent: 'center',
   },
-
-  // Grid
-  gridContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
-  gridLine: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    width: 1,
-    backgroundColor: colors.rule,
-    opacity: 0.35,
-  },
-
-  // Header
-  headerTopRule: {
-    width: '100%',
-    height: 3,
-    backgroundColor: colors.accent,
-    marginBottom: spacing.md,
-  },
-  headerInner: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
+  scrollContent: {
     paddingBottom: spacing.md,
-    borderBottomWidth: 2,
-    borderBottomColor: colors.ink,
   },
-  logotypeMain: {
+
+  // ── Header
+  header: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.rule,
+  },
+  wordmark: {},
+  wmLine1: {
     fontFamily: fontFamily.display,
-    fontSize: 64,
-    lineHeight: 58,
+    fontSize: 26,
+    lineHeight: 26,
     color: colors.ink,
-    letterSpacing: -1.3,
+    letterSpacing: -0.5,
   },
-  logotypeItalic: {
+  wmLine2: {
     fontFamily: fontFamily.displayItalic,
+    fontSize: 26,
+    lineHeight: 26,
     color: colors.accent,
   },
   headerRight: {
     alignItems: 'flex-end',
-    paddingBottom: spacing.xs,
   },
-  countNumber: {
-    fontFamily: fontFamily.display,
-    fontSize: 52,
-    lineHeight: 52,
-    color: colors.ink,
-    letterSpacing: -1.6,
-  },
-  countLabel: {
-    fontFamily: fontFamily.uiLabelMedium,
-    fontSize: 10,
-    letterSpacing: 2,
-    textTransform: 'uppercase',
-    color: colors.slate,
-    marginTop: spacing.xxs,
-  },
-
-  // Hook headline
-  hookLine: {
-    fontFamily: fontFamily.displayItalic,
-    fontSize: 22,
-    color: colors.slate,
-    marginTop: spacing.lg,
-    marginBottom: spacing.lg,
-  },
-
-  // Big play button
-  playButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: colors.ink,
-    paddingVertical: spacing.xl,
-    paddingHorizontal: spacing.lg,
-    position: 'relative',
-  },
-  playButtonBar: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    bottom: 0,
-    width: 4,
-    backgroundColor: colors.accent,
-  },
-  playButtonInner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-  },
-  playIcon: {
-    width: 52,
-    height: 52,
-    borderWidth: 1,
-    borderColor: colors.whiteAlpha20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  playButtonText: {
+  streakVal: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 38,
-    letterSpacing: 4,
-    textTransform: 'uppercase',
-    lineHeight: 38,
-    color: colors.white,
-  },
-  playArrow: {
-    fontFamily: fontFamily.uiLabel,
-    fontSize: 24,
-    color: colors.whiteAlpha45,
-  },
-
-  // Stats teaser
-  statsTeaser: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: spacing.md,
-    paddingVertical: spacing.sm,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: colors.rule,
-  },
-  statItem: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  statValue: {
-    fontFamily: fontFamily.display,
-    fontSize: 24,
+    fontSize: 28,
+    lineHeight: 28,
     color: colors.ink,
     letterSpacing: -0.5,
   },
-  statLabel: {
-    fontFamily: fontFamily.uiLabelMedium,
+  streakLbl: {
+    fontFamily: fontFamily.uiLabel,
     fontSize: 9,
-    letterSpacing: 2,
+    letterSpacing: 1.5,
     textTransform: 'uppercase',
-    color: colors.slate,
-    marginTop: spacing.xxs,
+    color: colors.accent,
+    marginTop: 1,
   },
-  statDivider: {
-    width: 1,
-    height: 32,
-    backgroundColor: colors.rule,
+  streakLblMuted: {
+    fontFamily: fontFamily.uiLabel,
+    fontSize: 9,
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
+    color: colors.textTertiary,
+    marginTop: 1,
   },
 
-  // Customize toggle
-  customizeToggle: {
+  // ── Hero flag teaser
+  heroCard: {
+    backgroundColor: colors.ink,
+    marginHorizontal: spacing.md,
+    marginTop: spacing.md,
+    borderRadius: R_XL,
+    padding: 22,
+    paddingTop: 24,
+  },
+  heroLabel: {
+    fontFamily: fontFamily.uiLabel,
+    fontSize: 10,
+    letterSpacing: 2.5,
+    textTransform: 'uppercase',
+    color: colors.whiteAlpha45,
+    marginBottom: 18,
+  },
+  flagWrap: {
+    width: '100%',
+    aspectRatio: 3 / 2,
+    borderRadius: R_SM,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  flagCover: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: colors.ink,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  coverQ: {
+    fontFamily: fontFamily.display,
+    fontSize: 52,
+    color: colors.whiteAlpha15,
+  },
+
+  // Options 2x2
+  optsGrid: {
+    marginTop: 16,
+    gap: 7,
+  },
+  optsRow: {
+    flexDirection: 'row',
+    gap: 7,
+  },
+  optWrap: {
+    flex: 1,
+  },
+  optBtn: {
+    backgroundColor: 'rgba(255,255,255,0.07)',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255,255,255,0.1)',
+    borderRadius: R_MD,
+    paddingVertical: 13,
+    paddingHorizontal: 10,
+    alignItems: 'center',
+  },
+  optCorrect: {
+    backgroundColor: 'rgba(56,195,100,0.2)',
+    borderColor: 'rgba(56,195,100,0.5)',
+  },
+  optWrong: {
+    backgroundColor: 'rgba(207,35,24,0.2)',
+    borderColor: 'rgba(207,35,24,0.45)',
+  },
+  optText: {
+    fontFamily: fontFamily.bodyMedium,
+    fontSize: 14,
+    color: colors.whiteAlpha70,
+    textAlign: 'center',
+  },
+  optTextCorrect: {
+    color: '#7ee8a2',
+  },
+  optTextWrong: {
+    color: '#f8a09a',
+  },
+
+  // ── Play button
+  playWrap: {
+    paddingHorizontal: spacing.md,
+    paddingTop: 10,
+  },
+  playBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: spacing.xs,
-    marginTop: spacing.md,
-    paddingVertical: spacing.sm,
-  },
-  customizeToggleText: {
-    fontFamily: fontFamily.uiLabelMedium,
-    fontSize: 11,
-    letterSpacing: 2,
-    textTransform: 'uppercase',
-    color: colors.slate,
-  },
-  customizeArrow: {
-    fontFamily: fontFamily.body,
-    fontSize: 12,
-    color: colors.slate,
-  },
-
-  // Customize panel
-  customizePanel: {
-    marginTop: spacing.xs,
-    paddingTop: spacing.sm,
-    borderTopWidth: 1,
-    borderTopColor: colors.rule,
-  },
-
-  // Mode switcher (reused for cards & mode)
-  modeSwitcher: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: spacing.sm,
-  },
-  modeSwitcherLabel: {
-    fontFamily: fontFamily.uiLabel,
-    fontSize: 9,
-    letterSpacing: 2.2,
-    textTransform: 'uppercase',
-    color: colors.slate,
-  },
-  modeSwitcherRow: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-  },
-  modeChip: {
-    paddingVertical: 6,
-    paddingHorizontal: 14,
-    borderWidth: 1,
-    borderColor: colors.rule,
-    backgroundColor: colors.white,
-  },
-  modeChipActive: {
+    gap: 10,
     backgroundColor: colors.ink,
-    borderColor: colors.ink,
+    borderRadius: R_LG,
+    paddingVertical: 18,
   },
-  modeChipText: {
-    fontFamily: fontFamily.uiLabelMedium,
-    fontSize: 11,
+  playBolt: {
+    width: 24,
+    height: 24,
+    backgroundColor: colors.accent,
+    borderRadius: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  playBtnText: {
+    fontFamily: fontFamily.uiLabel,
+    fontSize: 17,
     letterSpacing: 1.2,
     textTransform: 'uppercase',
-    color: colors.slate,
-  },
-  modeChipTextActive: {
     color: colors.white,
   },
 
-  // Game preview
-  previewSection: {
-    alignItems: 'center',
-    marginTop: spacing.lg,
-  },
-  previewCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
+  // ── Config card
+  configCard: {
+    marginHorizontal: spacing.md,
+    marginTop: 10,
     backgroundColor: colors.white,
+    borderRadius: R_LG,
     borderWidth: 1,
     borderColor: colors.rule,
-    padding: spacing.sm,
-    position: 'relative',
     overflow: 'hidden',
   },
-  previewFlagWrap: {
-    opacity: 0.85,
+  configRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 13,
+    paddingHorizontal: 16,
+    gap: 10,
   },
-  previewOptions: {
+  configDivider: {
+    height: 1,
+    backgroundColor: colors.rule,
+  },
+  configLbl: {
+    fontFamily: fontFamily.bodyMedium,
+    fontSize: 13,
+    color: colors.ink,
+    minWidth: 58,
+    flexShrink: 0,
+  },
+  segRow: {
+    flexDirection: 'row',
     flex: 1,
-    gap: spacing.xs,
+    gap: 4,
+    justifyContent: 'flex-end',
   },
-  previewOption: {
-    paddingVertical: 6,
-    paddingHorizontal: spacing.sm,
-    borderWidth: 1,
+  segBtn: {
+    flex: 1,
+    maxWidth: 54,
+    paddingVertical: 7,
+    backgroundColor: colors.surfaceSecondary,
+    borderWidth: 1.5,
     borderColor: colors.rule,
-    backgroundColor: colors.background,
+    borderRadius: R_SM,
+    alignItems: 'center',
   },
-  previewOptionCorrect: {
+  segBtnOn: {
     backgroundColor: colors.ink,
     borderColor: colors.ink,
   },
-  previewOptionText: {
-    fontFamily: fontFamily.uiLabelMedium,
+  segBtnText: {
+    fontFamily: fontFamily.uiLabel,
+    fontSize: 13,
+    textTransform: 'uppercase',
+    color: colors.textTertiary,
+  },
+  segBtnTextOn: {
+    color: colors.white,
+  },
+
+  // ── Game modes
+  sectionWrap: {
+    paddingHorizontal: spacing.md,
+    marginTop: 10,
+  },
+  sectionLbl: {
+    fontFamily: fontFamily.uiLabel,
     fontSize: 10,
+    letterSpacing: 2,
+    textTransform: 'uppercase',
+    color: colors.textTertiary,
+    marginBottom: 8,
+  },
+  modeCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.rule,
+    borderRadius: R_LG,
+    padding: 14,
+    paddingHorizontal: 16,
+    marginBottom: 7,
+    gap: 12,
+  },
+  modeIcon: {
+    width: 40,
+    height: 40,
+    backgroundColor: colors.ink,
+    borderRadius: R_MD,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modeIconRed: {
+    backgroundColor: colors.accent,
+  },
+  modeText: {
+    flex: 1,
+  },
+  modeTitle: {
+    fontFamily: fontFamily.display,
+    fontSize: 15,
+    color: colors.ink,
+    marginBottom: 2,
+  },
+  modeSub: {
+    fontFamily: fontFamily.body,
+    fontSize: 12,
+    color: colors.textTertiary,
+    lineHeight: 16,
+  },
+  modeChev: {
+    fontFamily: fontFamily.body,
+    fontSize: 22,
+    color: colors.rule,
+  },
+
+  // ── Progress card
+  progressCard: {
+    marginHorizontal: spacing.md,
+    marginTop: 10,
+    backgroundColor: colors.white,
+    borderRadius: R_LG,
+    borderWidth: 1,
+    borderColor: colors.rule,
+    padding: 16,
+  },
+  progRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 9,
+  },
+  progName: {
+    fontFamily: fontFamily.bodyMedium,
+    fontSize: 12,
+    color: colors.textTertiary,
+    width: 60,
+    flexShrink: 0,
+  },
+  progTrack: {
+    flex: 1,
+    height: 5,
+    backgroundColor: colors.surfaceSecondary,
+    borderRadius: 99,
+    overflow: 'hidden',
+  },
+  progFill: {
+    height: '100%',
+    backgroundColor: colors.ink,
+    borderRadius: 99,
+  },
+  progPct: {
+    fontFamily: fontFamily.uiLabel,
+    fontSize: 13,
+    color: colors.ink,
+    width: 28,
+    textAlign: 'right',
+  },
+
+  // ── Bottom nav
+  bottomNav: {
+    flexDirection: 'row',
+    borderTopWidth: 1,
+    borderTopColor: colors.rule,
+    backgroundColor: colors.background,
+    paddingTop: 6,
+    paddingBottom: 20,
+  },
+  navTab: {
+    flex: 1,
+    alignItems: 'center',
+    paddingTop: 8,
+    paddingBottom: 4,
+    gap: 3,
+  },
+  navLbl: {
+    fontFamily: fontFamily.uiLabel,
+    fontSize: 9,
     letterSpacing: 1,
     textTransform: 'uppercase',
     color: colors.textTertiary,
   },
-  previewOptionTextCorrect: {
-    color: colors.white,
-  },
-  previewOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(249,250,251,0.25)',
-  },
-  previewCaption: {
-    fontFamily: fontFamily.body,
-    fontSize: 12,
-    color: colors.textTertiary,
-    marginTop: spacing.sm,
-  },
-
-  // Bottom nav
-  bottomNav: {
-    backgroundColor: colors.background,
-    paddingBottom: spacing.sm,
-    maxWidth: 700,
-    alignSelf: 'center',
-    width: '100%',
-    paddingHorizontal: spacing.lg,
-  },
-  bottomNavTopRule: {
-    height: 2,
-    backgroundColor: colors.ink,
-  },
-  bottomNavInner: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    paddingVertical: spacing.sm,
-  },
-  bottomNavItem: {
-    alignItems: 'center',
-    gap: spacing.xs,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-  },
-  bottomNavLabel: {
-    fontFamily: fontFamily.uiLabel,
-    fontSize: 9,
-    letterSpacing: 1.8,
-    textTransform: 'uppercase',
+  navLblActive: {
     color: colors.ink,
+  },
+  navDot: {
+    width: 4,
+    height: 4,
+    backgroundColor: colors.accent,
+    borderRadius: 2,
+    marginTop: 2,
   },
 });
