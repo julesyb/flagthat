@@ -79,14 +79,13 @@ function FakeFlagSvg({ flag, width, height }: { flag: FakeFlag; width: number; h
         }
         return <Path d={`M ${points.join(' L ')} Z`} fill={flag.symbolColor} />;
       }
-      case 'crescent': {
+      case 'crescent':
         return (
           <G>
             <Circle cx={cx} cy={cy} r={r} fill={flag.symbolColor} />
             <Circle cx={cx + r * 0.35} cy={cy} r={r * 0.8} fill={flag.colors[flag.type === 'triband_h' ? 1 : 0]} />
           </G>
         );
-      }
       default:
         return null;
     }
@@ -145,7 +144,7 @@ function FakeFlagSvg({ flag, width, height }: { flag: FakeFlag; width: number; h
 interface RoundData {
   realFlags: FlagItem[];
   fakeFlag: FakeFlag;
-  fakeIndex: number; // position in grid (0-3)
+  fakeIndex: number;
 }
 
 function generateRounds(count: number): RoundData[] {
@@ -156,27 +155,25 @@ function generateRounds(count: number): RoundData[] {
     const available = countries.filter((c) => !usedIds.has(c.id));
     const realFlags = pickRandom(available.length >= 3 ? available : countries, 3);
     realFlags.forEach((f) => usedIds.add(f.id));
-
-    const fakeFlag = generateFakeFlag();
-    const fakeIndex = Math.floor(Math.random() * 4);
-
-    rounds.push({ realFlags, fakeFlag, fakeIndex });
+    rounds.push({ realFlags, fakeFlag: generateFakeFlag(), fakeIndex: Math.floor(Math.random() * 4) });
   }
   return rounds;
 }
 
 export default function FlagImpostorScreen({ navigation, route }: Props) {
   const { config } = route.params;
-  const rounds = useMemo(() => generateRounds(config.questionCount), []);
+  const rounds = useMemo(() => generateRounds(config.questionCount), [config.questionCount]);
   const [roundIndex, setRoundIndex] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
   const [results, setResults] = useState<GameResult[]>([]);
   const fadeAnim = useRef(new Animated.Value(1)).current;
 
   const round = rounds[roundIndex];
-  const isLastRound = roundIndex >= rounds.length - 1;
+  if (!round) return null;
 
-  // Build grid: insert fake at fakeIndex
+  const isLastRound = roundIndex >= rounds.length - 1;
+  const correctCount = results.filter((r) => r.correct).length;
+
   const grid = useMemo(() => {
     const items: { isFake: boolean; flag?: FlagItem; fakeFlag?: FakeFlag; index: number }[] = [];
     let realIdx = 0;
@@ -197,21 +194,15 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
     hapticTap();
 
     const isCorrect = index === round.fakeIndex;
-    if (isCorrect) {
-      hapticCorrect();
-      playCorrectSound();
-    } else {
-      hapticWrong();
-      playWrongSound();
-    }
+    if (isCorrect) { hapticCorrect(); playCorrectSound(); }
+    else { hapticWrong(); playWrongSound(); }
 
-    const result: GameResult = {
+    setResults((prev) => [...prev, {
       question: { flag: round.realFlags[0], options: [] },
       userAnswer: isCorrect ? 'IMPOSTOR' : 'WRONG',
       correct: isCorrect,
       timeTaken: 0,
-    };
-    setResults((prev) => [...prev, result]);
+    }]);
   };
 
   const handleNext = () => {
@@ -224,53 +215,35 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
       return;
     }
 
-    Animated.sequence([
-      Animated.timing(fadeAnim, { toValue: 0, duration: 150, useNativeDriver: true }),
-      Animated.timing(fadeAnim, { toValue: 1, duration: 150, useNativeDriver: true }),
-    ]).start();
-
-    setTimeout(() => {
+    fadeAnim.setValue(1);
+    Animated.timing(fadeAnim, { toValue: 0, duration: 150, useNativeDriver: true }).start(() => {
       setRoundIndex((i) => i + 1);
       setPicked(null);
-    }, 150);
+      Animated.timing(fadeAnim, { toValue: 1, duration: 150, useNativeDriver: true }).start();
+    });
   };
-
-  if (!round) return null;
 
   const FLAG_W = 140;
   const FLAG_H = 93;
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Top Bar */}
       <View style={styles.topBar}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.exitButton}
-          accessibilityRole="button"
-        >
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.exitButton} accessibilityRole="button">
           <Text style={styles.exitText}>Exit</Text>
         </TouchableOpacity>
         <View style={styles.centerInfo}>
-          <Text style={styles.counter}>
-            {roundIndex + 1} / {rounds.length}
-          </Text>
-          <Text style={styles.score}>
-            {results.filter((r) => r.correct).length} correct
-          </Text>
+          <Text style={styles.counter}>{roundIndex + 1} / {rounds.length}</Text>
+          <Text style={styles.scoreText}>{correctCount} correct</Text>
         </View>
-        <View style={{ width: 60 }} />
+        <View style={styles.spacer} />
       </View>
 
-      <ScrollView
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Animated.View style={{ opacity: fadeAnim }}>
           <Text style={styles.prompt}>Spot the impostor</Text>
           <Text style={styles.subtitle}>One of these flags is fake. Tap it.</Text>
 
-          {/* 2x2 Grid */}
           <View style={styles.grid}>
             {grid.map((item) => {
               const isRevealed = picked !== null;
@@ -297,11 +270,7 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
                       <FakeFlagSvg flag={item.fakeFlag!} width={FLAG_W} height={FLAG_H} />
                     </View>
                   ) : (
-                    <FlagImage
-                      countryCode={item.flag!.id}
-                      emoji={item.flag!.emoji}
-                      size="medium"
-                    />
+                    <FlagImage countryCode={item.flag!.id} emoji={item.flag!.emoji} size="medium" />
                   )}
 
                   {isRevealed && (
@@ -318,12 +287,12 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
                   )}
 
                   {isRevealed && item.isFake && (
-                    <View style={styles.fakeBadge}>
+                    <View style={styles.badge}>
                       <CrossIcon size={16} color={colors.white} />
                     </View>
                   )}
                   {correctPick && (
-                    <View style={styles.correctBadge}>
+                    <View style={[styles.badge, styles.badgeCorrect]}>
                       <CheckIcon size={16} color={colors.white} />
                     </View>
                   )}
@@ -332,29 +301,19 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
             })}
           </View>
 
-          {/* Reveal reason after pick */}
           {picked !== null && (
             <View style={styles.reasonCard}>
-              <Text style={styles.reasonTitle}>
-                {picked === round.fakeIndex ? 'Correct!' : 'Wrong!'}
-              </Text>
+              <Text style={styles.reasonTitle}>{picked === round.fakeIndex ? 'Correct!' : 'Wrong!'}</Text>
               <Text style={styles.reasonText}>{round.fakeFlag.reason}</Text>
             </View>
           )}
         </Animated.View>
       </ScrollView>
 
-      {/* Next button */}
       {picked !== null && (
         <View style={styles.bottomBar}>
-          <TouchableOpacity
-            style={styles.nextButton}
-            onPress={handleNext}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.nextButtonText}>
-              {isLastRound ? 'See Results' : 'Next'}
-            </Text>
+          <TouchableOpacity style={styles.actionButton} onPress={handleNext} activeOpacity={0.8}>
+            <Text style={styles.actionButtonText}>{isLastRound ? 'See Results' : 'Next'}</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -363,10 +322,7 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
+  container: { flex: 1, backgroundColor: colors.background },
   topBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -374,10 +330,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
   },
-  exitButton: {
-    padding: 8,
-    width: 60,
-  },
+  exitButton: { padding: spacing.sm, width: 60 },
   exitText: {
     fontSize: 13,
     fontFamily: fontFamily.uiLabelMedium,
@@ -385,39 +338,14 @@ const styles = StyleSheet.create({
     color: colors.textTertiary,
     textTransform: 'uppercase',
   },
-  centerInfo: {
-    alignItems: 'center',
-  },
-  counter: {
-    ...typography.bodyBold,
-    color: colors.text,
-  },
-  score: {
-    ...typography.caption,
-    color: colors.success,
-  },
-  content: {
-    padding: spacing.lg,
-    paddingBottom: 120,
-  },
-  prompt: {
-    ...typography.headingUpper,
-    color: colors.text,
-    textAlign: 'center',
-    marginBottom: spacing.xs,
-  },
-  subtitle: {
-    ...typography.caption,
-    color: colors.textTertiary,
-    textAlign: 'center',
-    marginBottom: spacing.xl,
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.md,
-    justifyContent: 'center',
-  },
+  centerInfo: { alignItems: 'center' },
+  counter: { ...typography.bodyBold, color: colors.text },
+  scoreText: { ...typography.caption, color: colors.success },
+  spacer: { width: 60 },
+  content: { padding: spacing.lg, paddingBottom: 120 },
+  prompt: { ...typography.headingUpper, color: colors.text, textAlign: 'center', marginBottom: spacing.xs },
+  subtitle: { ...typography.caption, color: colors.textTertiary, textAlign: 'center', marginBottom: spacing.xl },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md, justifyContent: 'center' },
   gridCard: {
     width: '46%',
     alignItems: 'center',
@@ -428,18 +356,9 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     gap: spacing.sm,
   },
-  gridCardFake: {
-    borderColor: colors.accent,
-    backgroundColor: 'rgba(229, 39, 28, 0.06)',
-  },
-  gridCardCorrect: {
-    borderColor: colors.success,
-    backgroundColor: 'rgba(22, 163, 74, 0.08)',
-  },
-  gridCardWrong: {
-    borderColor: colors.error,
-    backgroundColor: 'rgba(220, 38, 38, 0.08)',
-  },
+  gridCardFake: { borderColor: colors.accent, backgroundColor: colors.accentBg },
+  gridCardCorrect: { borderColor: colors.success, backgroundColor: colors.successBg },
+  gridCardWrong: { borderColor: colors.error, backgroundColor: colors.errorBg },
   flagWrapper: {
     width: 140,
     height: 93,
@@ -449,32 +368,14 @@ const styles = StyleSheet.create({
     borderColor: colors.rule2,
     backgroundColor: colors.surfaceSecondary,
   },
-  revealInfo: {
-    alignItems: 'center',
-    gap: 2,
-  },
-  fakeLabel: {
-    fontFamily: fontFamily.uiLabel,
-    fontSize: 14,
-    letterSpacing: 2,
-    color: colors.accent,
-    textTransform: 'uppercase',
-  },
-  realName: {
-    fontFamily: fontFamily.bodyBold,
-    fontSize: 13,
-    color: colors.ink,
-    textAlign: 'center',
-  },
-  realRegion: {
-    fontFamily: fontFamily.body,
-    fontSize: 11,
-    color: colors.textTertiary,
-  },
-  fakeBadge: {
+  revealInfo: { alignItems: 'center', gap: spacing.xxs },
+  fakeLabel: { fontFamily: fontFamily.uiLabel, fontSize: 14, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase' },
+  realName: { fontFamily: fontFamily.bodyBold, fontSize: 13, color: colors.ink, textAlign: 'center' },
+  realRegion: { fontFamily: fontFamily.body, fontSize: 11, color: colors.textTertiary },
+  badge: {
     position: 'absolute',
-    top: 8,
-    right: 8,
+    top: spacing.sm,
+    right: spacing.sm,
     width: 24,
     height: 24,
     borderRadius: 12,
@@ -482,17 +383,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  correctBadge: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: colors.success,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+  badgeCorrect: { backgroundColor: colors.success },
   reasonCard: {
     marginTop: spacing.xl,
     backgroundColor: colors.surface,
@@ -503,33 +394,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.xs,
   },
-  reasonTitle: {
-    fontFamily: fontFamily.uiLabel,
-    fontSize: 16,
-    letterSpacing: 1,
-    color: colors.ink,
-    textTransform: 'uppercase',
-  },
-  reasonText: {
-    ...typography.caption,
-    color: colors.textSecondary,
-    textAlign: 'center',
-  },
+  reasonTitle: { fontFamily: fontFamily.uiLabel, fontSize: 16, letterSpacing: 1, color: colors.ink, textTransform: 'uppercase' },
+  reasonText: { ...typography.caption, color: colors.textSecondary, textAlign: 'center' },
   bottomBar: {
     position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
+    bottom: 0, left: 0, right: 0,
     padding: spacing.lg,
     paddingBottom: spacing.xl,
     backgroundColor: colors.background,
     borderTopWidth: 1,
     borderTopColor: colors.rule,
   },
-  nextButton: {
-    ...buttons.primary,
-  },
-  nextButtonText: {
-    ...buttons.primaryText,
-  },
+  actionButton: { ...buttons.primary },
+  actionButtonText: { ...buttons.primaryText },
 });

@@ -59,7 +59,7 @@ function generateRounds(count: number): RoundData[] {
 
 export default function CapitalConnectionScreen({ navigation, route }: Props) {
   const { config } = route.params;
-  const rounds = useMemo(() => generateRounds(config.questionCount), []);
+  const rounds = useMemo(() => generateRounds(config.questionCount), [config.questionCount]);
   const [roundIndex, setRoundIndex] = useState(0);
   const [pairs, setPairs] = useState<Record<string, string>>({}); // flagId -> capitalId
   const [selectedFlag, setSelectedFlag] = useState<string | null>(null);
@@ -69,8 +69,25 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const fadeAnim = useRef(new Animated.Value(1)).current;
 
+  if (rounds.length === 0) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyTitle}>No countries available</Text>
+          <Text style={styles.emptyBody}>
+            There are no countries with known capitals in the selected category.
+          </Text>
+          <TouchableOpacity style={styles.emptyButton} onPress={() => navigation.goBack()}>
+            <Text style={styles.emptyButtonText}>Go Back</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   const round = rounds[roundIndex];
   const isLastRound = roundIndex >= rounds.length - 1;
+  const correctCount = results.filter((r) => r.correct).length;
 
   // Timer
   useEffect(() => {
@@ -183,20 +200,15 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
       return;
     }
 
-    Animated.sequence([
-      Animated.timing(fadeAnim, { toValue: 0, duration: 150, useNativeDriver: true }),
-      Animated.timing(fadeAnim, { toValue: 1, duration: 150, useNativeDriver: true }),
-    ]).start();
-
-    setTimeout(() => {
+    fadeAnim.setValue(1);
+    Animated.timing(fadeAnim, { toValue: 0, duration: 150, useNativeDriver: true }).start(() => {
       setRoundIndex((i) => i + 1);
       setPairs({});
       setSelectedFlag(null);
       setSubmitted(false);
-    }, 150);
+      Animated.timing(fadeAnim, { toValue: 1, duration: 150, useNativeDriver: true }).start();
+    });
   };
-
-  if (!round) return null;
 
   const pairedCapitalIds = new Set(Object.values(pairs));
   const inversePairs = Object.fromEntries(Object.entries(pairs).map(([k, v]) => [v, k]));
@@ -214,8 +226,9 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
         </TouchableOpacity>
         <View style={styles.centerInfo}>
           <Text style={styles.counter}>
-            Round {roundIndex + 1} / {rounds.length}
+            {roundIndex + 1} / {rounds.length}
           </Text>
+          <Text style={styles.scoreText}>{correctCount} correct</Text>
           <View style={styles.timerRow}>
             <ClockIcon size={14} color={timer <= 10 ? colors.accent : colors.textTertiary} />
             <Text style={[styles.timerText, timer <= 10 && styles.timerTextUrgent]}>
@@ -223,7 +236,7 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
             </Text>
           </View>
         </View>
-        <View style={{ width: 60 }} />
+        <View style={styles.spacer} />
       </View>
 
       <ScrollView
@@ -350,23 +363,23 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
       <View style={styles.bottomBar}>
         {!submitted ? (
           <TouchableOpacity
-            style={[styles.submitButton, !allPaired && styles.submitButtonDisabled]}
+            style={[styles.actionButton, !allPaired && styles.actionButtonDisabled]}
             onPress={handleSubmit}
             activeOpacity={0.8}
             disabled={!allPaired}
           >
-            <Text style={styles.submitButtonText}>
+            <Text style={styles.actionButtonText}>
               Submit ({Object.keys(pairs).length}/{PAIRS_PER_ROUND} paired)
             </Text>
           </TouchableOpacity>
         ) : (
           <TouchableOpacity
-            style={styles.nextButton}
+            style={styles.actionButton}
             onPress={handleNext}
             activeOpacity={0.8}
           >
-            <Text style={styles.submitButtonText}>
-              {isLastRound ? 'See Results' : 'Next Round'}
+            <Text style={styles.actionButtonText}>
+              {isLastRound ? 'See Results' : 'Next'}
             </Text>
           </TouchableOpacity>
         )}
@@ -388,7 +401,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
   },
   exitButton: {
-    padding: 8,
+    padding: spacing.sm,
     width: 60,
   },
   exitText: {
@@ -408,7 +421,7 @@ const styles = StyleSheet.create({
   timerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: spacing.xs,
   },
   timerText: {
     ...typography.captionBold,
@@ -456,11 +469,11 @@ const styles = StyleSheet.create({
   },
   flagCardCorrect: {
     borderColor: colors.success,
-    backgroundColor: 'rgba(22, 163, 74, 0.08)',
+    backgroundColor: colors.successBg,
   },
   flagCardWrong: {
     borderColor: colors.error,
-    backgroundColor: 'rgba(220, 38, 38, 0.08)',
+    backgroundColor: colors.errorBg,
   },
   flagResultIcon: {
     position: 'absolute',
@@ -487,7 +500,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: colors.border,
     borderRadius: borderRadius.md,
-    paddingVertical: 12,
+    paddingVertical: spacing.sm + spacing.xs,
     paddingHorizontal: spacing.md,
   },
   capitalCardUsed: {
@@ -496,11 +509,11 @@ const styles = StyleSheet.create({
   },
   capitalCardCorrect: {
     borderColor: colors.success,
-    backgroundColor: 'rgba(22, 163, 74, 0.08)',
+    backgroundColor: colors.successBg,
   },
   capitalCardWrong: {
     borderColor: colors.error,
-    backgroundColor: 'rgba(220, 38, 38, 0.08)',
+    backgroundColor: colors.errorBg,
   },
   capitalText: {
     fontFamily: fontFamily.bodyMedium,
@@ -560,16 +573,14 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: colors.rule,
   },
-  submitButton: {
-    ...buttons.primary,
-  },
-  submitButtonDisabled: {
-    opacity: 0.4,
-  },
-  submitButtonText: {
-    ...buttons.primaryText,
-  },
-  nextButton: {
-    ...buttons.primary,
-  },
+  spacer: { width: 60 },
+  scoreText: { ...typography.caption, color: colors.success },
+  actionButton: { ...buttons.primary },
+  actionButtonDisabled: { opacity: 0.4 },
+  actionButtonText: { ...buttons.primaryText },
+  emptyState: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing.xl },
+  emptyTitle: { ...typography.heading, color: colors.text, marginBottom: spacing.sm },
+  emptyBody: { ...typography.body, color: colors.textSecondary, textAlign: 'center', marginBottom: spacing.xl },
+  emptyButton: { ...buttons.secondary },
+  emptyButtonText: { ...buttons.secondaryText },
 });

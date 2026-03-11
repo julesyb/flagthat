@@ -62,11 +62,12 @@ export interface UserStats {
   categoryStats: Partial<Record<CategoryId, { correct: number; total: number }>>;
 }
 
-export const GAME_MODES: Record<GameMode, { label: string; description: string; icon: string }> = {
+export const GAME_MODES: Record<GameMode, { label: string; description: string; icon: string; hidden?: boolean }> = {
   easy: { label: 'Easy', description: '50/50 - Pick from 2', icon: 'E' },
   medium: { label: 'Medium', description: 'Pick from 4', icon: 'M' },
   hard: { label: 'Hard', description: 'Type the answer', icon: 'H' },
-  flagflash: { label: 'FlagFlash', description: 'Party mode - tilt to play', icon: '!' },
+  // Do not remove — FlagFlash code is complete and will be re-enabled later
+  flagflash: { label: 'FlagFlash', description: 'Party mode - tilt to play', icon: '!', hidden: true },
   flagpuzzle: { label: 'Flag Puzzle', description: 'Flag reveals over time', icon: '?' },
   timeattack: { label: 'Time Attack', description: '60s - how many can you get?', icon: '60' },
   neighbors: { label: 'Neighbors', description: 'Find all bordering countries', icon: 'NB' },

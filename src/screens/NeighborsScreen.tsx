@@ -23,60 +23,79 @@ import MapImage from '../components/MapImage';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Neighbors'>;
 
-const DISTRACTOR_COUNT = 4; // extra wrong flags to show
+const DISTRACTOR_COUNT = 4;
 
 const flagById = new Map(countries.map((c) => [c.id, c]));
 
 interface RoundData {
   country: FlagItem;
   neighborIds: string[];
-  options: FlagItem[]; // neighbors + distractors, shuffled
+  options: FlagItem[];
 }
 
 function generateRounds(count: number): RoundData[] {
   const eligible = getCountriesWithNeighbors().filter(
-    (code) => countryNeighbors[code].length >= 2,
+    (code) => countryNeighbors[code].length >= 2 && flagById.has(code),
   );
+  if (eligible.length === 0) return [];
+
   const shuffled = shuffleArray(eligible).slice(0, count);
 
   return shuffled.map((code) => {
     const country = flagById.get(code)!;
-    const neighborIds = countryNeighbors[code];
-    const neighborFlags = neighborIds.map((id) => flagById.get(id)).filter(Boolean) as FlagItem[];
+    const neighborIds = countryNeighbors[code].filter((id) => flagById.has(id));
+    const neighborFlags = neighborIds.map((id) => flagById.get(id)!);
 
-    // Pick distractors (non-neighbors, not the country itself)
     const excludeSet = new Set([code, ...neighborIds]);
     const allOther = countries.filter((c) => !excludeSet.has(c.id));
     const distractors = shuffleArray(allOther).slice(0, DISTRACTOR_COUNT);
 
-    const options = shuffleArray([...neighborFlags, ...distractors]);
-    return { country, neighborIds, options };
+    return {
+      country,
+      neighborIds,
+      options: shuffleArray([...neighborFlags, ...distractors]),
+    };
   });
 }
 
 export default function NeighborsScreen({ navigation, route }: Props) {
   const { config } = route.params;
-  const rounds = useMemo(() => generateRounds(config.questionCount), []);
+  const rounds = useMemo(() => generateRounds(config.questionCount), [config.questionCount]);
   const [roundIndex, setRoundIndex] = useState(0);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [submitted, setSubmitted] = useState(false);
   const [results, setResults] = useState<GameResult[]>([]);
-  const [showResults, setShowResults] = useState(false);
   const fadeAnim = useRef(new Animated.Value(1)).current;
+
+  // Empty rounds — not enough eligible countries
+  if (rounds.length === 0) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyTitle}>No countries available</Text>
+          <Text style={styles.emptyBody}>
+            There are no countries with land borders in the selected category.
+          </Text>
+          <TouchableOpacity style={styles.emptyButton} onPress={() => navigation.goBack()}>
+            <Text style={styles.emptyButtonText}>Go Back</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   const round = rounds[roundIndex];
   const isLastRound = roundIndex >= rounds.length - 1;
+  const neighborSet = new Set(round.neighborIds);
+  const correctCount = results.filter((r) => r.correct).length;
 
   const toggleSelect = (id: string) => {
     if (submitted) return;
     hapticTap();
     setSelected((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
   };
@@ -85,26 +104,19 @@ export default function NeighborsScreen({ navigation, route }: Props) {
     if (selected.size === 0 || submitted) return;
     setSubmitted(true);
 
-    const neighborSet = new Set(round.neighborIds);
     const allCorrect =
       selected.size === neighborSet.size &&
       [...selected].every((id) => neighborSet.has(id));
 
-    if (allCorrect) {
-      hapticCorrect();
-      playCorrectSound();
-    } else {
-      hapticWrong();
-      playWrongSound();
-    }
+    if (allCorrect) { hapticCorrect(); playCorrectSound(); }
+    else { hapticWrong(); playWrongSound(); }
 
-    const result: GameResult = {
+    setResults((prev) => [...prev, {
       question: { flag: round.country, options: round.neighborIds },
       userAnswer: [...selected].join(','),
       correct: allCorrect,
       timeTaken: 0,
-    };
-    setResults((prev) => [...prev, result]);
+    }]);
   };
 
   const handleNext = () => {
@@ -118,25 +130,17 @@ export default function NeighborsScreen({ navigation, route }: Props) {
       return;
     }
 
-    Animated.sequence([
-      Animated.timing(fadeAnim, { toValue: 0, duration: 150, useNativeDriver: true }),
-      Animated.timing(fadeAnim, { toValue: 1, duration: 150, useNativeDriver: true }),
-    ]).start();
-
-    setTimeout(() => {
+    fadeAnim.setValue(1);
+    Animated.timing(fadeAnim, { toValue: 0, duration: 150, useNativeDriver: true }).start(() => {
       setRoundIndex((i) => i + 1);
       setSelected(new Set());
       setSubmitted(false);
-    }, 150);
+      Animated.timing(fadeAnim, { toValue: 1, duration: 150, useNativeDriver: true }).start();
+    });
   };
-
-  if (!round) return null;
-
-  const neighborSet = new Set(round.neighborIds);
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Top Bar */}
       <View style={styles.topBar}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
@@ -150,19 +154,13 @@ export default function NeighborsScreen({ navigation, route }: Props) {
           <Text style={styles.counter}>
             {roundIndex + 1} / {rounds.length}
           </Text>
-          <Text style={styles.score}>
-            {results.filter((r) => r.correct).length} correct
-          </Text>
+          <Text style={styles.scoreText}>{correctCount} correct</Text>
         </View>
-        <View style={{ width: 60 }} />
+        <View style={styles.spacer} />
       </View>
 
-      <ScrollView
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Animated.View style={{ opacity: fadeAnim }}>
-          {/* Question */}
           <Text style={styles.prompt}>Select all neighboring countries</Text>
 
           <View style={styles.flagCenter}>
@@ -175,7 +173,6 @@ export default function NeighborsScreen({ navigation, route }: Props) {
             <Text style={styles.countryName}>{round.country.name}</Text>
           </View>
 
-          {/* Option Grid */}
           <View style={styles.optionsGrid}>
             {round.options.map((flag) => {
               const isSelected = selected.has(flag.id);
@@ -198,11 +195,7 @@ export default function NeighborsScreen({ navigation, route }: Props) {
                   activeOpacity={0.7}
                   disabled={submitted}
                 >
-                  <FlagImage
-                    countryCode={flag.id}
-                    emoji={flag.emoji}
-                    size="small"
-                  />
+                  <FlagImage countryCode={flag.id} emoji={flag.emoji} size="small" />
                   {submitted && (
                     <View style={styles.resultBadge}>
                       {showCorrect && isSelected && <CheckIcon size={14} color={colors.success} />}
@@ -216,10 +209,7 @@ export default function NeighborsScreen({ navigation, route }: Props) {
                     </View>
                   )}
                   <Text
-                    style={[
-                      styles.optionName,
-                      submitted && isNeighbor && styles.optionNameCorrect,
-                    ]}
+                    style={[styles.optionName, submitted && isNeighbor && styles.optionNameCorrect]}
                     numberOfLines={1}
                   >
                     {flag.name}
@@ -229,7 +219,6 @@ export default function NeighborsScreen({ navigation, route }: Props) {
             })}
           </View>
 
-          {/* Map after submission showing correct neighbors */}
           {submitted && (
             <View style={styles.mapSection}>
               <Text style={styles.mapLabel}>
@@ -253,28 +242,19 @@ export default function NeighborsScreen({ navigation, route }: Props) {
         </Animated.View>
       </ScrollView>
 
-      {/* Bottom Action */}
       <View style={styles.bottomBar}>
         {!submitted ? (
           <TouchableOpacity
-            style={[styles.submitButton, selected.size === 0 && styles.submitButtonDisabled]}
+            style={[styles.actionButton, selected.size === 0 && styles.actionButtonDisabled]}
             onPress={handleSubmit}
             activeOpacity={0.8}
             disabled={selected.size === 0}
           >
-            <Text style={styles.submitButtonText}>
-              Submit ({selected.size} selected)
-            </Text>
+            <Text style={styles.actionButtonText}>Submit ({selected.size} selected)</Text>
           </TouchableOpacity>
         ) : (
-          <TouchableOpacity
-            style={styles.nextButton}
-            onPress={handleNext}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.submitButtonText}>
-              {isLastRound ? 'See Results' : 'Next'}
-            </Text>
+          <TouchableOpacity style={styles.actionButton} onPress={handleNext} activeOpacity={0.8}>
+            <Text style={styles.actionButtonText}>{isLastRound ? 'See Results' : 'Next'}</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -283,10 +263,7 @@ export default function NeighborsScreen({ navigation, route }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
+  container: { flex: 1, backgroundColor: colors.background },
   topBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -294,10 +271,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
   },
-  exitButton: {
-    padding: 8,
-    width: 60,
-  },
+  exitButton: { padding: spacing.sm, width: 60 },
   exitText: {
     fontSize: 13,
     fontFamily: fontFamily.uiLabelMedium,
@@ -305,43 +279,15 @@ const styles = StyleSheet.create({
     color: colors.textTertiary,
     textTransform: 'uppercase',
   },
-  centerInfo: {
-    alignItems: 'center',
-  },
-  counter: {
-    ...typography.bodyBold,
-    color: colors.text,
-  },
-  score: {
-    ...typography.caption,
-    color: colors.success,
-  },
-  content: {
-    padding: spacing.lg,
-    paddingBottom: 120,
-  },
-  prompt: {
-    ...typography.headingUpper,
-    color: colors.text,
-    textAlign: 'center',
-    marginBottom: spacing.lg,
-  },
-  flagCenter: {
-    alignItems: 'center',
-    marginBottom: spacing.lg,
-  },
-  countryName: {
-    fontFamily: fontFamily.display,
-    fontSize: 22,
-    color: colors.ink,
-    marginTop: spacing.sm,
-  },
-  optionsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-    justifyContent: 'center',
-  },
+  centerInfo: { alignItems: 'center' },
+  counter: { ...typography.bodyBold, color: colors.text },
+  scoreText: { ...typography.caption, color: colors.success },
+  spacer: { width: 60 },
+  content: { padding: spacing.lg, paddingBottom: 120 },
+  prompt: { ...typography.headingUpper, color: colors.text, textAlign: 'center', marginBottom: spacing.lg },
+  flagCenter: { alignItems: 'center', marginBottom: spacing.lg },
+  countryName: { fontFamily: fontFamily.display, fontSize: 22, color: colors.ink, marginTop: spacing.sm },
+  optionsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, justifyContent: 'center' },
   optionCard: {
     width: '30%',
     minWidth: 95,
@@ -353,41 +299,17 @@ const styles = StyleSheet.create({
     padding: spacing.sm,
     gap: spacing.xs,
   },
-  optionSelected: {
-    borderColor: colors.ink,
-    backgroundColor: colors.surfaceSecondary,
-  },
-  optionCorrect: {
-    borderColor: colors.success,
-    backgroundColor: 'rgba(22, 163, 74, 0.08)',
-  },
-  optionWrong: {
-    borderColor: colors.error,
-    backgroundColor: 'rgba(220, 38, 38, 0.08)',
-  },
-  optionMissed: {
-    borderColor: colors.warning,
-    backgroundColor: 'rgba(217, 119, 6, 0.08)',
-  },
-  optionName: {
-    fontFamily: fontFamily.bodyMedium,
-    fontSize: 11,
-    color: colors.textSecondary,
-    textAlign: 'center',
-  },
-  optionNameCorrect: {
-    color: colors.success,
-    fontFamily: fontFamily.bodyBold,
-  },
-  resultBadge: {
-    position: 'absolute',
-    top: 4,
-    right: 4,
-  },
+  optionSelected: { borderColor: colors.ink, backgroundColor: colors.surfaceSecondary },
+  optionCorrect: { borderColor: colors.success, backgroundColor: colors.successBg },
+  optionWrong: { borderColor: colors.error, backgroundColor: colors.errorBg },
+  optionMissed: { borderColor: colors.warning, backgroundColor: colors.warningBg },
+  optionName: { fontFamily: fontFamily.bodyMedium, fontSize: 11, color: colors.textSecondary, textAlign: 'center' },
+  optionNameCorrect: { color: colors.success, fontFamily: fontFamily.bodyBold },
+  resultBadge: { position: 'absolute', top: spacing.xs, right: spacing.xs },
   checkBadge: {
     position: 'absolute',
-    top: 4,
-    right: 4,
+    top: spacing.xs,
+    right: spacing.xs,
     width: 18,
     height: 18,
     borderRadius: 9,
@@ -395,23 +317,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  mapSection: {
-    marginTop: spacing.xl,
-    alignItems: 'center',
-  },
-  mapLabel: {
-    ...typography.captionBold,
-    color: colors.textSecondary,
-    marginBottom: spacing.md,
-    textTransform: 'uppercase',
-  },
-  neighborList: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-    marginTop: spacing.md,
-    justifyContent: 'center',
-  },
+  mapSection: { marginTop: spacing.xl, alignItems: 'center' },
+  mapLabel: { ...typography.captionBold, color: colors.textSecondary, marginBottom: spacing.md, textTransform: 'uppercase' },
+  neighborList: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginTop: spacing.md, justifyContent: 'center' },
   neighborChip: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -423,32 +331,22 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
     gap: spacing.xs,
   },
-  neighborChipText: {
-    fontFamily: fontFamily.bodyMedium,
-    fontSize: 12,
-    color: colors.success,
-  },
+  neighborChipText: { fontFamily: fontFamily.bodyMedium, fontSize: 12, color: colors.success },
   bottomBar: {
     position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
+    bottom: 0, left: 0, right: 0,
     padding: spacing.lg,
     paddingBottom: spacing.xl,
     backgroundColor: colors.background,
     borderTopWidth: 1,
     borderTopColor: colors.rule,
   },
-  submitButton: {
-    ...buttons.primary,
-  },
-  submitButtonDisabled: {
-    opacity: 0.4,
-  },
-  submitButtonText: {
-    ...buttons.primaryText,
-  },
-  nextButton: {
-    ...buttons.primary,
-  },
+  actionButton: { ...buttons.primary },
+  actionButtonDisabled: { opacity: 0.4 },
+  actionButtonText: { ...buttons.primaryText },
+  emptyState: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing.xl },
+  emptyTitle: { ...typography.heading, color: colors.text, marginBottom: spacing.sm },
+  emptyBody: { ...typography.body, color: colors.textSecondary, textAlign: 'center', marginBottom: spacing.xl },
+  emptyButton: { ...buttons.secondary },
+  emptyButtonText: { ...buttons.secondaryText },
 });

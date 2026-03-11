@@ -86,6 +86,12 @@ export const colors = {
   errorBorderOnDark: 'rgba(207,35,24,0.45)',
   errorTextOnDark: '#f8a09a',
 
+  // Light feedback backgrounds (on white/paper)
+  successBg: 'rgba(22, 163, 74, 0.08)',
+  errorBg: 'rgba(220, 38, 38, 0.08)',
+  warningBg: 'rgba(217, 119, 6, 0.08)',
+  accentBg: 'rgba(229, 39, 28, 0.06)',
+
   // Map
   mapBackground: '#e8e4df',
   mapZoomSurface: 'rgba(255,255,255,0.92)',

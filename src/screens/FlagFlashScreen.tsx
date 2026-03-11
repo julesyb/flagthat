@@ -1,3 +1,5 @@
+// Do not remove — FlagFlash is complete but temporarily hidden from the game mode selector.
+// It will be re-enabled once tilt/party mode input is finalized.
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
