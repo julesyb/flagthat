@@ -183,6 +183,10 @@ const es: typeof en = {
     overallGrade: 'Nota general',
     moreToUnlock: '{count} m\u00e1s para desbloquear',
     scoreDistribution: 'Distribución de puntos',
+    baselineLabel: 'Base: {pct}%',
+    improvementUp: '+{pct}%, sigue asi!',
+    improvementSame: 'Sin cambios',
+    improvementDown: '{pct}% por recuperar, tu puedes',
   },
 
   settings: {
@@ -325,6 +329,15 @@ const es: typeof en = {
     skip: 'Omitir',
     next: 'Siguiente regi\u00f3n',
     allDone: 'Todo listo, buen trabajo',
+    welcome: 'Bienvenido a',
+    tagline: 'Cuanto sabes del mundo?',
+    startPlayingNow: 'Empezar a jugar',
+    startPlayingDesc: 'Salta directo al juego',
+    testKnowledge: 'Pon a prueba tu conocimiento',
+    testKnowledgeDesc: 'Quiz rapido para cada region',
+    baselineProgress: 'Progreso de la prueba',
+    continueBaseline: 'Continuar',
+    regionsComplete: '{count}/{total} regiones',
   },
 
   modes: {

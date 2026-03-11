@@ -189,10 +189,10 @@ const en = {
     overallGrade: 'Overall Grade',
     moreToUnlock: '{count} more to unlock',
     scoreDistribution: 'Score Distribution',
-    baselineLabel: 'Baseline: {pct}%',
-    improvementUp: 'Up {pct}% from baseline',
-    improvementSame: 'Same as baseline',
-    improvementDown: 'Down {pct}% from baseline',
+    baselineLabel: 'Baseline was {pct}%',
+    improvementUp: 'Up {pct}%, way to go!',
+    improvementSame: 'Holding steady',
+    improvementDown: '{pct}% to recover, you got this',
   },
 
   // ─── Settings Screen ────────────────────────────────────

@@ -183,6 +183,10 @@ const fr: typeof en = {
     overallGrade: 'Note g\u00e9n\u00e9rale',
     moreToUnlock: 'Encore {count} pour d\u00e9bloquer',
     scoreDistribution: 'Distribution des scores',
+    baselineLabel: 'Base : {pct}%',
+    improvementUp: '+{pct}%, bravo !',
+    improvementSame: 'Stable',
+    improvementDown: '{pct}% à rattraper, vous pouvez le faire',
   },
 
   settings: {
@@ -325,6 +329,15 @@ const fr: typeof en = {
     skip: 'Passer',
     next: 'R\u00e9gion suivante',
     allDone: 'Termin\u00e9, bien jou\u00e9',
+    welcome: 'Bienvenue sur',
+    tagline: 'Connaissez-vous bien le monde ?',
+    startPlayingNow: 'Commencer',
+    startPlayingDesc: 'Plongez directement dans le jeu',
+    testKnowledge: 'Testez vos connaissances',
+    testKnowledgeDesc: 'Quiz rapide pour chaque r\u00e9gion',
+    baselineProgress: 'Progression du test',
+    continueBaseline: 'Continuer',
+    regionsComplete: '{count}/{total} r\u00e9gions',
   },
 
   modes: {

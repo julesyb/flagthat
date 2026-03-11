@@ -183,6 +183,10 @@ const ptBR: typeof en = {
     overallGrade: 'Nota geral',
     moreToUnlock: 'Faltam {count} para desbloquear',
     scoreDistribution: 'Distribuição de pontos',
+    baselineLabel: 'Base: {pct}%',
+    improvementUp: '+{pct}%, muito bem!',
+    improvementSame: 'Estavel',
+    improvementDown: '{pct}% para recuperar, voce consegue',
   },
 
   settings: {
@@ -325,6 +329,15 @@ const ptBR: typeof en = {
     skip: 'Pular',
     next: 'Pr\u00f3xima regi\u00e3o',
     allDone: 'Tudo pronto, bom trabalho',
+    welcome: 'Bem-vindo ao',
+    tagline: 'Quanto voce conhece o mundo?',
+    startPlayingNow: 'Comecar a jogar',
+    startPlayingDesc: 'Entre direto no jogo',
+    testKnowledge: 'Teste seu conhecimento',
+    testKnowledgeDesc: 'Quiz rapido para cada regiao',
+    baselineProgress: 'Progresso do teste',
+    continueBaseline: 'Continuar',
+    regionsComplete: '{count}/{total} regioes',
   },
 
   modes: {
