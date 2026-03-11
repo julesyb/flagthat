@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useRef, useEffect } from 'react';
+import React, { useCallback, useState, useRef, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -13,11 +13,12 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import { colors, fontFamily, fontSize, spacing, borderRadius, shadows } from '../utils/theme';
 import { getBaselineData, BaselineData, skipOnboarding } from '../utils/storage';
-import { getCategoryCount } from '../data';
+import { getCategoryCount, getAllFlags } from '../data';
 import { hapticTap } from '../utils/feedback';
-import { CheckIcon, ChevronRightIcon, PlayIcon, BarChartIcon, GlobeIcon } from '../components/Icons';
+import { CheckIcon, ChevronRightIcon, PlayIcon, BarChartIcon } from '../components/Icons';
+import FlagImage from '../components/FlagImage';
 import { RootStackParamList } from '../types/navigation';
-import { BaselineRegionId, CategoryId } from '../types';
+import { BaselineRegionId, CategoryId, FlagItem } from '../types';
 import { t } from '../utils/i18n';
 import ScreenContainer from '../components/ScreenContainer';
 
@@ -31,6 +32,9 @@ const REGIONS: { id: BaselineRegionId; categoryId: CategoryId }[] = [
   { id: 'oceania', categoryId: 'oceania' },
 ];
 
+// Pick 4 recognizable flags for the hero mosaic
+const HERO_FLAGS = ['jp', 'br', 'gb', 'za'];
+
 export default function OnboardingScreen({ navigation }: Props) {
   const [baseline, setBaseline] = useState<BaselineData | null>(null);
   const [showTests, setShowTests] = useState(false);
@@ -42,27 +46,38 @@ export default function OnboardingScreen({ navigation }: Props) {
   const btnSlide = useRef(new Animated.Value(16)).current;
   const testsFade = useRef(new Animated.Value(0)).current;
   const testsSlide = useRef(new Animated.Value(16)).current;
+  const flagAnims = useRef(HERO_FLAGS.map(() => new Animated.Value(0))).current;
 
   useEffect(() => {
-    // Staggered entrance animation
+    // Phase 1: Hero card slides in
     Animated.parallel([
       Animated.timing(heroFade, { toValue: 1, duration: 500, useNativeDriver: true }),
       Animated.spring(heroSlide, { toValue: 0, friction: 8, tension: 60, useNativeDriver: true }),
     ]).start();
 
+    // Phase 2: Flag mosaic stagger in
+    setTimeout(() => {
+      Animated.stagger(
+        120,
+        flagAnims.map((a) =>
+          Animated.spring(a, { toValue: 1, friction: 6, tension: 80, useNativeDriver: true }),
+        ),
+      ).start();
+    }, 300);
+
+    // Phase 3: CTA buttons slide in
     setTimeout(() => {
       Animated.parallel([
         Animated.timing(btnFade, { toValue: 1, duration: 400, useNativeDriver: true }),
         Animated.spring(btnSlide, { toValue: 0, friction: 8, tension: 60, useNativeDriver: true }),
       ]).start();
-    }, 300);
+    }, 600);
   }, []);
 
   useFocusEffect(
     useCallback(() => {
       getBaselineData().then((data) => {
         setBaseline(data);
-        // If user has started baseline tests, go straight to test view
         if (data && Object.keys(data.regions).length > 0 && !data.completedAt && !data.skipped) {
           setShowTests(true);
           testsFade.setValue(1);
@@ -119,7 +134,7 @@ export default function OnboardingScreen({ navigation }: Props) {
         showsVerticalScrollIndicator={false}
       >
         <ScreenContainer>
-          {/* Hero section */}
+          {/* Hero section with flag mosaic */}
           <Animated.View style={[s.hero, { opacity: heroFade, transform: [{ translateY: heroSlide }] }]}>
             <View style={s.heroInner}>
               <Text style={s.welcomeText}>{t('onboarding.welcome')}</Text>
@@ -130,9 +145,26 @@ export default function OnboardingScreen({ navigation }: Props) {
               <Text style={s.tagline}>{t('onboarding.tagline')}</Text>
             </View>
 
-            {/* Globe icon decoration */}
-            <View style={s.heroIconWrap}>
-              <GlobeIcon size={48} color={colors.whiteAlpha20} />
+            {/* Flag mosaic - 4 small flags fanned in the corner */}
+            <View style={s.flagMosaic}>
+              {HERO_FLAGS.map((code, i) => (
+                <Animated.View
+                  key={code}
+                  style={[
+                    s.flagThumb,
+                    {
+                      opacity: flagAnims[i],
+                      transform: [
+                        { scale: flagAnims[i].interpolate({ inputRange: [0, 1], outputRange: [0.6, 1] }) },
+                        { rotate: `${-8 + i * 5}deg` },
+                        { translateX: i * 6 },
+                      ],
+                    },
+                  ]}
+                >
+                  <FlagImage countryCode={code} size="small" emoji="" />
+                </Animated.View>
+              ))}
             </View>
           </Animated.View>
 
@@ -297,11 +329,21 @@ const s = StyleSheet.create({
   heroInner: {
     zIndex: 1,
   },
-  heroIconWrap: {
+  flagMosaic: {
     position: 'absolute',
-    right: spacing.lg,
+    right: spacing.md,
     bottom: spacing.lg,
-    opacity: 0.5,
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+  },
+  flagThumb: {
+    width: 48,
+    height: 32,
+    borderRadius: 4,
+    overflow: 'hidden',
+    marginLeft: -12,
+    borderWidth: 1.5,
+    borderColor: colors.whiteAlpha20,
   },
   welcomeText: {
     fontFamily: fontFamily.body,

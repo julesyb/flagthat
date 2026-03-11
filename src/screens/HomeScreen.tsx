@@ -278,13 +278,16 @@ export default function HomeScreen({ navigation }: Props) {
                 <ChevronRightIcon size={14} color={colors.white} />
               </TouchableOpacity>
             </View>
-            <View style={s.onboardingBar}>
-              <View
-                style={[
-                  s.onboardingBarFill,
-                  { width: `${(onboardingCount / ONBOARDING_REGIONS.length) * 100}%` },
-                ]}
-              />
+            <View style={s.onboardingBarRow}>
+              <View style={s.onboardingBar}>
+                <Animated.View
+                  style={[
+                    s.onboardingBarFill,
+                    { width: `${(onboardingCount / ONBOARDING_REGIONS.length) * 100}%` },
+                  ]}
+                />
+              </View>
+              <Text style={s.onboardingMotivation}>{t('onboarding.baselineMotivation')}</Text>
             </View>
             {/* Region chips */}
             <View style={s.onboardingChips}>
@@ -698,6 +701,9 @@ const s = StyleSheet.create({
     textTransform: 'uppercase',
     color: colors.white,
   },
+  onboardingBarRow: {
+    gap: spacing.xs,
+  },
   onboardingBar: {
     height: 6,
     backgroundColor: colors.rule,
@@ -708,6 +714,12 @@ const s = StyleSheet.create({
     height: 6,
     backgroundColor: colors.success,
     borderRadius: borderRadius.full,
+  },
+  onboardingMotivation: {
+    fontFamily: fontFamily.body,
+    fontSize: fontSize.xxs,
+    color: colors.textTertiary,
+    fontStyle: 'italic',
   },
   onboardingChips: {
     flexDirection: 'row',

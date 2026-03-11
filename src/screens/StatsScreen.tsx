@@ -478,42 +478,59 @@ export default function StatsScreen() {
             <View style={s.sectionHeader}>
               <Text style={s.sectionTitle}>{t('categories.byRegion')}</Text>
             </View>
-            <View style={s.modeBreakdown}>
-              {regionData.map(({ id, pct, correct, total }) => {
-                const barWidth = Math.max(pct, 2);
-                const baselineResult = baseline?.regions[id as keyof typeof baseline.regions];
-                const baselinePct = baselineResult?.accuracy ?? null;
-                const diff = baselinePct !== null ? pct - baselinePct : null;
-                return (
-                  <View key={id}>
-                    <View style={s.modeRow}>
-                      <Text style={s.modeLabel}>{t(`categories.${id}`)}</Text>
-                      <View style={s.modeBarWrap}>
-                        <View style={[s.modeBarFill, { width: `${barWidth}%` }, pct >= 70 && s.modeBarGood]} />
-                        {baselinePct !== null && (
-                          <View style={[s.baselineMarker, { left: `${Math.min(baselinePct, 100)}%` }]} />
-                        )}
+
+            {/* Dedicated region improvement cards (when baseline exists) */}
+            {regionData.some(({ id }) => baseline?.regions[id as keyof typeof baseline.regions]) && (
+              <View style={s.regionCards}>
+                {regionData.map(({ id, pct }) => {
+                  const baselineResult = baseline?.regions[id as keyof typeof baseline.regions];
+                  if (!baselineResult) return null;
+                  const baselinePct = baselineResult.accuracy;
+                  const diff = pct - baselinePct;
+                  const isUp = diff > 0;
+                  const isDown = diff < 0;
+                  return (
+                    <View key={id} style={s.regionImprovCard}>
+                      <Text style={s.regionImprovName}>{t(`categories.${id}`)}</Text>
+                      <View style={s.regionImprovStats}>
+                        <View style={s.regionImprovCol}>
+                          <Text style={s.regionImprovLabel}>{t('stats.baselineLabel', { pct: baselinePct })}</Text>
+                        </View>
+                        <View style={s.regionImprovArrow}>
+                          <Text style={s.regionImprovArrowText}>{isUp ? '\u2192' : isDown ? '\u2192' : '='}</Text>
+                        </View>
+                        <View style={s.regionImprovCol}>
+                          <Text style={[s.regionImprovNow, pct >= 70 && s.regionImprovNowGood]}>{pct}%</Text>
+                        </View>
                       </View>
-                      <Text style={[s.modePct, pct >= 70 && s.modePctGood]}>{pct}%</Text>
+                      <Text style={[
+                        s.regionImprovDiff,
+                        isUp && s.regionImprovDiffUp,
+                        isDown && s.regionImprovDiffDown,
+                      ]}>
+                        {isUp
+                          ? t('stats.improvementUp', { pct: diff })
+                          : isDown
+                          ? t('stats.improvementDown', { pct: Math.abs(diff) })
+                          : t('stats.improvementSame')}
+                      </Text>
                     </View>
-                    {diff !== null && (
-                      <View style={s.baselineRow}>
-                        <Text style={s.baselineLabel}>
-                          {t('stats.baselineLabel', { pct: baselinePct! })}
-                        </Text>
-                        <Text style={[
-                          s.baselineChange,
-                          diff > 0 && s.baselineChangeUp,
-                          diff < 0 && s.baselineChangeDown,
-                        ]}>
-                          {diff > 0
-                            ? t('stats.improvementUp', { pct: diff })
-                            : diff < 0
-                            ? t('stats.improvementDown', { pct: Math.abs(diff) })
-                            : t('stats.improvementSame')}
-                        </Text>
-                      </View>
-                    )}
+                  );
+                })}
+              </View>
+            )}
+
+            {/* Standard bar chart */}
+            <View style={s.modeBreakdown}>
+              {regionData.map(({ id, pct }) => {
+                const barWidth = Math.max(pct, 2);
+                return (
+                  <View key={id} style={s.modeRow}>
+                    <Text style={s.modeLabel}>{t(`categories.${id}`)}</Text>
+                    <View style={s.modeBarWrap}>
+                      <View style={[s.modeBarFill, { width: `${barWidth}%` }, pct >= 70 && s.modeBarGood]} />
+                    </View>
+                    <Text style={[s.modePct, pct >= 70 && s.modePctGood]}>{pct}%</Text>
                   </View>
                 );
               })}
@@ -915,35 +932,67 @@ const s = StyleSheet.create({
   modePctGood: {
     color: colors.success,
   },
-  baselineMarker: {
-    position: 'absolute',
-    top: 0,
-    width: 2,
-    height: 8,
-    backgroundColor: colors.warning,
-    zIndex: 1,
+  // ── Region improvement cards
+  regionCards: {
+    gap: spacing.sm,
+    marginBottom: spacing.sm,
   },
-  baselineRow: {
+  regionImprovCard: {
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: 14,
+  },
+  regionImprovName: {
+    fontFamily: fontFamily.uiLabel,
+    fontSize: fontSize.xxs,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    color: colors.textTertiary,
+    marginBottom: spacing.sm,
+  },
+  regionImprovStats: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginLeft: 90,
-    marginTop: 2,
-    marginBottom: 4,
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginBottom: spacing.xs,
   },
-  baselineLabel: {
+  regionImprovCol: {
+    flex: 1,
+  },
+  regionImprovLabel: {
     fontFamily: fontFamily.body,
-    fontSize: fontSize.xxs,
+    fontSize: fontSize.caption,
     color: colors.textTertiary,
   },
-  baselineChange: {
-    fontFamily: fontFamily.bodyMedium,
-    fontSize: fontSize.xxs,
+  regionImprovArrow: {
+    paddingHorizontal: spacing.xs,
+  },
+  regionImprovArrowText: {
+    fontFamily: fontFamily.body,
+    fontSize: fontSize.body,
     color: colors.textTertiary,
   },
-  baselineChangeUp: {
+  regionImprovNow: {
+    fontFamily: fontFamily.display,
+    fontSize: fontSize.heading,
+    color: colors.ink,
+    letterSpacing: -0.5,
+    textAlign: 'right',
+  },
+  regionImprovNowGood: {
     color: colors.success,
   },
-  baselineChangeDown: {
+  regionImprovDiff: {
+    fontFamily: fontFamily.bodyMedium,
+    fontSize: fontSize.caption,
+    color: colors.textTertiary,
+  },
+  regionImprovDiffUp: {
+    color: colors.success,
+  },
+  regionImprovDiffDown: {
     color: colors.error,
   },
 
