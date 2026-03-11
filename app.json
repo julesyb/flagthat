@@ -57,9 +57,10 @@
         }
       ],
       [
-        "expo-applovin-ads/expo",
+        "react-native-google-mobile-ads",
         {
-          "apiKey": "YOUR_AD_REVIEW_KEY_HERE"
+          "androidAppId": "ca-app-pub-XXXXXXXXXXXXXXXX~YYYYYYYYYY",
+          "iosAppId": "ca-app-pub-XXXXXXXXXXXXXXXX~ZZZZZZZZZZ"
         }
       ]
     ],

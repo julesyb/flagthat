@@ -1,72 +1,40 @@
 import { Platform } from 'react-native';
 
 // ─── Rewarded Ad (Opt-in Support) ─────────────────────────
-// Uses AppLovin MAX for ad mediation on native platforms.
+// Uses Google AdMob with mediation for native platforms.
+// Mediation networks (AppLovin, Unity, Meta, etc.) are configured
+// in the AdMob dashboard - no code changes needed to add partners.
 // On web, ads are not available.
 //
-// Replace these with your real AppLovin ad unit IDs before production:
+// Test ad unit IDs (replace with real ones before production):
 const REWARDED_AD_UNIT_ID = Platform.select({
-  ios: 'YOUR_IOS_REWARDED_AD_UNIT_ID',
-  android: 'YOUR_ANDROID_REWARDED_AD_UNIT_ID',
+  ios: 'ca-app-pub-3940256099942544/1712485313',
+  android: 'ca-app-pub-3940256099942544/5224354917',
   default: '',
 });
 
-// Replace with your AppLovin SDK key (found in AppLovin dashboard > Account > General > Keys):
-const SDK_KEY = 'YOUR_APPLOVIN_SDK_KEY';
+type AdStatus = 'idle' | 'loading' | 'loaded' | 'showing' | 'error';
 
-let sdkInitialized = false;
-let adLoaded = false;
-let AppLovinMAX: {
-  initialize: (sdkKey: string) => Promise<unknown>;
-  isInitialized: () => boolean;
-} | null = null;
-let RewardedAd: {
-  loadAd: (adUnitId: string) => void;
-  isAdReady: (adUnitId: string) => Promise<boolean>;
-  showAd: (adUnitId: string) => void;
-  addAdLoadedEventListener: (callback: (adInfo: unknown) => void) => void;
-  addAdLoadFailedEventListener: (callback: (errorInfo: unknown) => void) => void;
-  addAdHiddenEventListener: (callback: (adInfo: unknown) => void) => void;
-  addAdReceivedRewardEventListener: (callback: (adInfo: unknown) => void) => void;
-  addAdFailedToDisplayEventListener: (callback: (adInfo: unknown) => void) => void;
-} | null = null;
+let adStatus: AdStatus = 'idle';
+let rewardedAd: ReturnType<typeof createRewardedAd> | null = null;
+let createRewardedAd: ((adUnitId: string) => {
+  load: () => void;
+  show: () => Promise<void>;
+  addAdEventListener: (event: string, callback: () => void) => () => void;
+}) | null = null;
+let RewardedAdEventType: Record<string, string> | null = null;
+let AdEventType: Record<string, string> | null = null;
 
 // Lazy-load the native module so it doesn't crash on web
 async function loadAdModule(): Promise<boolean> {
   if (Platform.OS === 'web') return false;
-  if (AppLovinMAX) return true;
+  if (createRewardedAd) return true;
 
   try {
-    const mod = await import('react-native-applovin-max');
-    AppLovinMAX = (mod as { default: typeof AppLovinMAX }).default;
-    RewardedAd = (mod as { RewardedAd: typeof RewardedAd }).RewardedAd;
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-async function ensureInitialized(): Promise<boolean> {
-  const available = await loadAdModule();
-  if (!available || !AppLovinMAX || !RewardedAd || !REWARDED_AD_UNIT_ID) return false;
-
-  if (sdkInitialized) return true;
-
-  try {
-    await AppLovinMAX.initialize(SDK_KEY);
-    sdkInitialized = true;
-
-    // Set up persistent event listeners after init
-    RewardedAd.addAdLoadedEventListener(() => {
-      adLoaded = true;
-    });
-
-    RewardedAd.addAdLoadFailedEventListener(() => {
-      adLoaded = false;
-    });
-
-    // Preload the first ad
-    RewardedAd.loadAd(REWARDED_AD_UNIT_ID);
+    const mod = await import('react-native-google-mobile-ads');
+    createRewardedAd = (mod as { createRewardedAd: typeof createRewardedAd }).createRewardedAd;
+    RewardedAdEventType = (mod as { RewardedAdEventType: Record<string, string> }).RewardedAdEventType;
+    AdEventType = (mod as { AdEventType: Record<string, string> }).AdEventType;
     return true;
   } catch {
     return false;
@@ -74,88 +42,85 @@ async function ensureInitialized(): Promise<boolean> {
 }
 
 export async function preloadRewardedAd(): Promise<void> {
-  await ensureInitialized();
+  const available = await loadAdModule();
+  if (!available || !createRewardedAd || !REWARDED_AD_UNIT_ID) return;
+
+  try {
+    adStatus = 'loading';
+    rewardedAd = createRewardedAd(REWARDED_AD_UNIT_ID);
+    rewardedAd.load();
+  } catch {
+    adStatus = 'error';
+  }
 }
 
 export async function showRewardedAd(): Promise<boolean> {
   if (Platform.OS === 'web') return false;
 
-  const ready = await ensureInitialized();
-  if (!ready || !RewardedAd || !REWARDED_AD_UNIT_ID) return false;
+  const available = await loadAdModule();
+  if (!available || !createRewardedAd || !REWARDED_AD_UNIT_ID) return false;
 
-  // If no ad is preloaded, try loading one now
-  const isReady = await RewardedAd.isAdReady(REWARDED_AD_UNIT_ID);
-  if (!isReady) {
-    // Load and wait for it
-    return new Promise<boolean>((resolve) => {
-      let settled = false;
-      const settle = (value: boolean) => {
-        if (settled) return;
-        settled = true;
-        resolve(value);
+  return new Promise<boolean>((resolve) => {
+    try {
+      const ad = createRewardedAd!(REWARDED_AD_UNIT_ID);
+      const unsubscribers: (() => void)[] = [];
+
+      const cleanup = () => {
+        unsubscribers.forEach((unsub) => unsub());
+        adStatus = 'idle';
       };
 
-      const onLoaded = () => {
-        RewardedAd!.showAd(REWARDED_AD_UNIT_ID!);
-      };
+      // Listen for reward earned
+      if (RewardedAdEventType) {
+        unsubscribers.push(
+          ad.addAdEventListener(RewardedAdEventType.EARNED_REWARD, () => {
+            cleanup();
+            resolve(true);
+          }),
+        );
+      }
 
-      const onLoadFailed = () => {
-        settle(false);
-      };
+      // Listen for ad closed without reward
+      if (AdEventType) {
+        unsubscribers.push(
+          ad.addAdEventListener(AdEventType.CLOSED, () => {
+            cleanup();
+            resolve(false);
+          }),
+        );
 
-      // These one-time listeners handle the show cycle
-      const onRewarded = () => {
-        settle(true);
-        // Preload next ad
-        RewardedAd!.loadAd(REWARDED_AD_UNIT_ID!);
-      };
+        unsubscribers.push(
+          ad.addAdEventListener(AdEventType.ERROR, () => {
+            cleanup();
+            resolve(false);
+          }),
+        );
 
-      const onHidden = () => {
-        settle(false);
-        // Preload next ad
-        RewardedAd!.loadAd(REWARDED_AD_UNIT_ID!);
-      };
+        unsubscribers.push(
+          ad.addAdEventListener(AdEventType.LOADED, () => {
+            adStatus = 'showing';
+            ad.show().catch(() => {
+              cleanup();
+              resolve(false);
+            });
+          }),
+        );
+      }
 
-      const onDisplayFailed = () => {
-        settle(false);
-        RewardedAd!.loadAd(REWARDED_AD_UNIT_ID!);
-      };
-
-      // AppLovin MAX uses persistent listeners, so we register them
-      // and track state via the settled flag
-      RewardedAd!.addAdLoadedEventListener(onLoaded);
-      RewardedAd!.addAdLoadFailedEventListener(onLoadFailed);
-      RewardedAd!.addAdReceivedRewardEventListener(onRewarded);
-      RewardedAd!.addAdHiddenEventListener(onHidden);
-      RewardedAd!.addAdFailedToDisplayEventListener(onDisplayFailed);
-
-      RewardedAd!.loadAd(REWARDED_AD_UNIT_ID!);
+      adStatus = 'loading';
+      ad.load();
 
       // Timeout after 15 seconds if ad never loads
-      setTimeout(() => settle(false), 15000);
-    });
-  }
-
-  // Ad is already loaded, show it
-  return new Promise<boolean>((resolve) => {
-    let rewarded = false;
-
-    RewardedAd!.addAdReceivedRewardEventListener(() => {
-      rewarded = true;
-    });
-
-    RewardedAd!.addAdHiddenEventListener(() => {
-      resolve(rewarded);
-      // Preload next ad
-      RewardedAd!.loadAd(REWARDED_AD_UNIT_ID!);
-    });
-
-    RewardedAd!.addAdFailedToDisplayEventListener(() => {
+      setTimeout(() => {
+        if (adStatus === 'loading') {
+          cleanup();
+          resolve(false);
+        }
+      }, 15000);
+    } catch {
+      adStatus = 'idle';
       resolve(false);
-      RewardedAd!.loadAd(REWARDED_AD_UNIT_ID!);
-    });
-
-    RewardedAd!.showAd(REWARDED_AD_UNIT_ID!);
+    }
   });
 }
 
