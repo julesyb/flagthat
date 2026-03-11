@@ -10,10 +10,9 @@ import {
   Keyboard,
   ScrollView,
   ActivityIndicator,
-  useWindowDimensions,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily, nav, buttons, borderRadius, layout } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, nav, buttons, borderRadius } from '../utils/theme';
 import { GameQuestion, GameResult } from '../types';
 import { generateQuestions, generateDailyQuestions, generatePracticeQuestions, checkAnswer } from '../utils/gameEngine';
 import { getMissedFlagIds } from '../utils/storage';
@@ -26,15 +25,13 @@ import { useGameAnimations } from '../hooks/useGameAnimations';
 import { getFlagByName, getFlagsForCategory } from '../data';
 import { RootStackParamList } from '../types/navigation';
 import GameTopBar from '../components/GameTopBar';
+import ScreenContainer from '../components/ScreenContainer';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Game'>;
-
-const MAX_GAME_WIDTH = layout.maxGameWidth;
 
 export default function GameScreen({ route, navigation }: Props) {
   const { config } = route.params;
   const isTimeAttack = config.mode === 'timeattack';
-  const { width: screenWidth } = useWindowDimensions();
   const [questions, setQuestions] = useState<GameQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [results, setResults] = useState<GameResult[]>([]);
@@ -241,8 +238,6 @@ export default function GameScreen({ route, navigation }: Props) {
     );
   }
 
-  const contentMaxWidth = Math.min(screenWidth, MAX_GAME_WIDTH);
-
   return (
     <SafeAreaView style={styles.container}>
       {isTimeAttack ? (
@@ -258,7 +253,7 @@ export default function GameScreen({ route, navigation }: Props) {
         </View>
       )}
 
-      <View style={[styles.desktopWrapper, { maxWidth: contentMaxWidth }]}>
+      <ScreenContainer flex game>
       <GameTopBar
         onExit={() => {
           if (autoAdvanceRef.current) clearTimeout(autoAdvanceRef.current);
@@ -436,7 +431,7 @@ export default function GameScreen({ route, navigation }: Props) {
           </View>
         )}
       </Animated.View>
-      </View>
+      </ScreenContainer>
     </SafeAreaView>
   );
 }
@@ -445,12 +440,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
-    alignItems: 'center',
-  },
-  desktopWrapper: {
-    flex: 1,
-    width: '100%',
-    alignSelf: 'center',
   },
   loadingContainer: {
     flex: 1,

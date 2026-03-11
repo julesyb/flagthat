@@ -10,7 +10,7 @@ import {
   Share,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius, layout } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius } from '../utils/theme';
 import { calculateAccuracy, getStreakFromResults, getGrade, generateDailyShareGrid, getDailyNumber } from '../utils/gameEngine';
 import { updateStats, updateFlagResults, saveDailyChallenge, incrementDailyChallenges, updateLastGameBadgeFlags, markShared, saveBaselineResult } from '../utils/storage';
 import { BaselineRegionId } from '../types';
@@ -20,12 +20,15 @@ import { hapticCorrect, playCelebrationSound } from '../utils/feedback';
 import { FlagImageSmall } from '../components/FlagImage';
 import { CheckIcon, CrossIcon } from '../components/Icons';
 import BottomNav from '../components/BottomNav';
+import ScreenContainer from '../components/ScreenContainer';
+import { useNavTabs } from '../hooks/useNavTabs';
 import { GAME_MODES, CATEGORIES } from '../types';
 import { RootStackParamList } from '../types/navigation';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Results'>;
 
 export default function ResultsScreen({ route, navigation }: Props) {
+  const onNavigate = useNavTabs();
   const { results, config, reviewOnly } = route.params;
   const correct = results.filter((r) => r.correct).length;
   const accuracy = calculateAccuracy(results);
@@ -134,7 +137,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.contentInner}>
+        <ScreenContainer>
         {isPerfect && (
           <Animated.View style={[styles.celebrationBanner, { opacity: confettiOpacity }]}>
             <Text style={styles.celebrationText}>{t('results.perfectScore')}</Text>
@@ -277,17 +280,9 @@ export default function ResultsScreen({ route, navigation }: Props) {
             </TouchableOpacity>
           )}
         </View>
-        </View>
+        </ScreenContainer>
       </ScrollView>
-      <BottomNav
-        activeTab="Play"
-        onNavigate={(tab) => {
-          if (tab === 'Play') navigation.popToTop();
-          else if (tab === 'Modes') navigation.navigate('GameSetup');
-          else if (tab === 'Stats') navigation.navigate('Stats');
-          else if (tab === 'Browse') navigation.navigate('Browse');
-        }}
-      />
+      <BottomNav activeTab="Play" onNavigate={onNavigate} />
     </SafeAreaView>
   );
 }
@@ -300,11 +295,6 @@ const styles = StyleSheet.create({
   content: {
     padding: spacing.lg,
     paddingBottom: spacing.xxl,
-    alignItems: 'center',
-  },
-  contentInner: {
-    width: '100%',
-    maxWidth: layout.maxContentWidth,
   },
   celebrationBanner: {
     backgroundColor: colors.warning,

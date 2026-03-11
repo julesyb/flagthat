@@ -1,19 +1,37 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { layout } from '../utils/theme';
+import { View, StyleSheet, ViewStyle } from 'react-native';
+import { useLayout } from '../utils/useLayout';
 
 interface ScreenContainerProps {
   children: React.ReactNode;
-  maxWidth?: number;
+  /** Set true when this wrapper needs to fill available space (e.g. wrapping a FlatList or game content). */
+  flex?: boolean;
+  /** Use gameWidth instead of contentWidth (for game screens). */
+  game?: boolean;
 }
 
 /**
- * Wraps screen content with a centered max-width container.
- * Use inside SafeAreaView / ScrollView to constrain content on tablets and desktop.
+ * Centered max-width container for screen content.
+ * Replaces ad-hoc desktopWrapper / contentInner styles across all screens.
+ *
+ * Usage:
+ *   <ScrollView contentContainerStyle={...}>
+ *     <ScreenContainer>{content}</ScreenContainer>
+ *   </ScrollView>
+ *
+ * For non-scrollable layouts (FlatList, game screens):
+ *   <ScreenContainer flex>{content}</ScreenContainer>
+ *
+ * For game screens:
+ *   <ScreenContainer flex game>{content}</ScreenContainer>
  */
-export default function ScreenContainer({ children, maxWidth = layout.maxContentWidth }: ScreenContainerProps) {
+export default function ScreenContainer({ children, flex, game }: ScreenContainerProps) {
+  const { contentWidth, gameWidth } = useLayout();
+  const maxWidth = game ? gameWidth : contentWidth;
+  const flexStyle: ViewStyle | undefined = flex ? { flex: 1 } : undefined;
+
   return (
-    <View style={[styles.wrapper, { maxWidth }]}>
+    <View style={[styles.wrapper, { maxWidth }, flexStyle]}>
       {children}
     </View>
   );

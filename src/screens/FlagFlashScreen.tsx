@@ -9,7 +9,7 @@ import {
   Platform,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius, nav, layout } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius, nav } from '../utils/theme';
 import { GameQuestion, GameResult } from '../types';
 import { generateQuestions } from '../utils/gameEngine';
 import {
@@ -24,6 +24,7 @@ import FlagImage from '../components/FlagImage';
 import { flagName } from '../data/countryNames';
 import MapImage from '../components/MapImage';
 import { RootStackParamList } from '../types/navigation';
+import ScreenContainer from '../components/ScreenContainer';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'FlagFlash'>;
 
@@ -302,6 +303,7 @@ export default function FlagFlashScreen({ route, navigation }: Props) {
     return (
       <View style={styles.tutorialContainer}>
         <StatusBar hidden />
+        <ScreenContainer>
         <Text style={styles.tutorialTitle}>FlagFlash</Text>
         <Text style={styles.tutorialSubtitle}>How to play</Text>
 
@@ -377,6 +379,7 @@ export default function FlagFlashScreen({ route, navigation }: Props) {
         >
           <Text style={styles.exitButtonText}>Exit</Text>
         </TouchableOpacity>
+        </ScreenContainer>
       </View>
     );
   }
@@ -427,6 +430,7 @@ export default function FlagFlashScreen({ route, navigation }: Props) {
         />
       </View>
 
+      <ScreenContainer flex game>
       <View style={styles.gameContent}>
         {tiltState === 'correct' ? (
           <Text style={styles.feedbackText}>CORRECT!</Text>
@@ -484,6 +488,7 @@ export default function FlagFlashScreen({ route, navigation }: Props) {
         </TouchableOpacity>
         <Text style={styles.scoreText}>{correctCount} correct</Text>
       </View>
+      </ScreenContainer>
     </View>
   );
 }

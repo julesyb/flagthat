@@ -8,7 +8,7 @@ import {
   Animated,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius, layout } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius } from '../utils/theme';
 import { hapticTap, hapticCorrect, hapticWrong, playWrongSound } from '../utils/feedback';
 import { shuffleArray } from '../utils/gameEngine';
 import { RootStackParamList } from '../types/navigation';
@@ -18,6 +18,7 @@ import { countryCapitals } from '../data/countryCapitals';
 import { countryCities } from '../data/countryCities';
 import FlagImage from '../components/FlagImage';
 import GameTopBar from '../components/GameTopBar';
+import ScreenContainer from '../components/ScreenContainer';
 import { t } from '../utils/i18n';
 import { flagName } from '../data/countryNames';
 
@@ -165,6 +166,7 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
         <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
       </View>
 
+      <ScreenContainer flex game>
       <GameTopBar
         onExit={() => navigation.popToTop()}
         center={
@@ -241,6 +243,7 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
           </View>
         )}
       </Animated.View>
+      </ScreenContainer>
     </SafeAreaView>
   );
 }
@@ -249,7 +252,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
-    alignItems: 'center',
   },
   progressBar: {
     height: 3,
@@ -266,8 +268,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
-    width: '100%',
-    maxWidth: layout.maxGameWidth,
   },
   exitButton: {
     padding: spacing.sm,
@@ -301,8 +301,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: spacing.lg,
     justifyContent: 'center',
-    width: '100%',
-    maxWidth: layout.maxGameWidth,
   },
   flagContainer: {
     alignItems: 'center',

@@ -12,7 +12,7 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { colors, fontFamily, fontSize, spacing, borderRadius, layout } from '../utils/theme';
+import { colors, fontFamily, fontSize, spacing, borderRadius } from '../utils/theme';
 import { getTotalFlagCount } from '../data';
 import { initAudio, hapticTap, hapticCorrect, hapticWrong, playWrongSound, setSoundsEnabled, setHapticsEnabled } from '../utils/feedback';
 import { getStats, getDayStreak, getDailyChallenge, DailyChallengeData, getSettings, getMissedFlagIds } from '../utils/storage';
@@ -22,6 +22,8 @@ import { GameMode, UserStats, GameQuestion } from '../types';
 import { PlayIcon, ChevronRightIcon, ClockIcon, UsersIcon, EyeIcon, CalendarIcon, CrosshairIcon, LightningIcon, GearIcon } from '../components/Icons';
 import FlagImage from '../components/FlagImage';
 import BottomNav from '../components/BottomNav';
+import ScreenContainer from '../components/ScreenContainer';
+import { useNavTabs } from '../hooks/useNavTabs';
 import { t } from '../utils/i18n';
 import { translateName, flagName } from '../data/countryNames';
 
@@ -165,6 +167,7 @@ function FlagTeaser() {
 }
 
 export default function HomeScreen({ navigation }: Props) {
+  const onNavigate = useNavTabs();
   const totalFlags = getTotalFlagCount();
   const [mode, setMode] = useState<GameMode>('medium');
   const [questionCount, setQuestionCount] = useState(10);
@@ -211,7 +214,7 @@ export default function HomeScreen({ navigation }: Props) {
       <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
 
       <ScrollView style={s.scroll} contentContainerStyle={s.scrollContent} showsVerticalScrollIndicator={false}>
-        <View style={s.desktopWrapper}>
+        <ScreenContainer>
         {/* ── HEADER ── */}
         <View style={s.header}>
           <View style={s.wordmark}>
@@ -487,19 +490,11 @@ export default function HomeScreen({ navigation }: Props) {
         )}
 
         <View style={{ height: spacing.md }} />
-        </View>
+        </ScreenContainer>
       </ScrollView>
 
       {/* ── BOTTOM NAV ── */}
-      <BottomNav
-        activeTab="Play"
-        onNavigate={(tab) => {
-          hapticTap();
-          if (tab === 'Modes') navigation.navigate('GameSetup');
-          else if (tab === 'Stats') navigation.navigate('Stats');
-          else if (tab === 'Browse') navigation.navigate('Browse');
-        }}
-      />
+      <BottomNav activeTab="Play" onNavigate={onNavigate} />
     </SafeAreaView>
   );
 }
@@ -515,11 +510,6 @@ const s = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: spacing.md,
-    alignItems: 'center',
-  },
-  desktopWrapper: {
-    width: '100%',
-    maxWidth: layout.maxContentWidth,
   },
 
   // ── Header

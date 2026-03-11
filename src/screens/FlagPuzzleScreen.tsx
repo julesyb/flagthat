@@ -13,7 +13,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily, buttons, borderRadius, nav, layout } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, buttons, borderRadius, nav } from '../utils/theme';
 import { GameQuestion, GameResult } from '../types';
 import { generateQuestions, checkAnswer } from '../utils/gameEngine';
 import { hapticCorrect, hapticWrong, hapticTap, playWrongSound } from '../utils/feedback';
@@ -23,6 +23,7 @@ import { getAllFlags } from '../data';
 import { RootStackParamList } from '../types/navigation';
 import { ChevronRightIcon } from '../components/Icons';
 import GameTopBar from '../components/GameTopBar';
+import ScreenContainer from '../components/ScreenContainer';
 import { t } from '../utils/i18n';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'FlagPuzzle'>;
@@ -270,6 +271,7 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
       </View>
 
       {/* Top bar */}
+      <ScreenContainer flex game>
       <GameTopBar
         onExit={() => navigation.popToTop()}
         center={
@@ -409,6 +411,7 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
           </View>
         )}
       </Animated.View>
+      </ScreenContainer>
     </SafeAreaView>
   );
 }
@@ -417,7 +420,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
-    alignItems: 'center',
   },
   loadingContainer: {
     flex: 1,
@@ -431,7 +433,6 @@ const styles = StyleSheet.create({
   progressBar: {
     height: 3,
     backgroundColor: colors.border,
-    alignSelf: 'stretch',
   },
   progressFill: {
     height: '100%',
@@ -440,7 +441,6 @@ const styles = StyleSheet.create({
   timerBar: {
     height: 4,
     backgroundColor: colors.border,
-    alignSelf: 'stretch',
   },
   timerFill: {
     height: '100%',

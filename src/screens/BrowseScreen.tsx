@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
-import { colors, spacing, typography, borderRadius, layout } from '../utils/theme';
+import { colors, spacing, typography, borderRadius } from '../utils/theme';
 import { FlagItem } from '../types';
 import { RootStackParamList } from '../types/navigation';
 import { getAllFlags } from '../data';
@@ -19,6 +19,8 @@ import { getMissedFlagIds, getFlagStats, FlagStats } from '../utils/storage';
 import { t } from '../utils/i18n';
 import { translateName, flagName } from '../data/countryNames';
 import BottomNav from '../components/BottomNav';
+import ScreenContainer from '../components/ScreenContainer';
+import { useNavTabs } from '../hooks/useNavTabs';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Browse'>;
 
@@ -34,6 +36,7 @@ const REGION_KEYS: Record<string, string> = {
 const PRACTICE_MORE = 'Practice More';
 
 export default function BrowseScreen({ route, navigation }: Props) {
+  const onNavigate = useNavTabs();
   const initialRegion = route.params?.region ?? 'All';
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState(initialRegion);
@@ -103,7 +106,7 @@ export default function BrowseScreen({ route, navigation }: Props) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.contentInner}>
+      <ScreenContainer flex>
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchInput}
@@ -153,12 +156,8 @@ export default function BrowseScreen({ route, navigation }: Props) {
         showsVerticalScrollIndicator={false}
         style={{ flex: 1 }}
       />
-      </View>
-      <BottomNav activeTab="Browse" onNavigate={(tab) => {
-        if (tab === 'Play') navigation.navigate('Home');
-        else if (tab === 'Modes') navigation.navigate('GameSetup');
-        else if (tab === 'Stats') navigation.navigate('Stats');
-      }} />
+      </ScreenContainer>
+      <BottomNav activeTab="Browse" onNavigate={onNavigate} />
     </SafeAreaView>
   );
 }
@@ -167,12 +166,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
-    alignItems: 'center',
-  },
-  contentInner: {
-    flex: 1,
-    width: '100%',
-    maxWidth: layout.maxContentWidth,
   },
   searchContainer: {
     paddingHorizontal: spacing.lg,

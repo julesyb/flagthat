@@ -8,7 +8,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius, layout } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius } from '../utils/theme';
 import {
   GameMode,
   DisplayMode,
@@ -20,6 +20,8 @@ import {
 import { getCategoryCount, getTotalFlagCount } from '../data';
 import { RootStackParamList } from '../types/navigation';
 import BottomNav from '../components/BottomNav';
+import ScreenContainer from '../components/ScreenContainer';
+import { useNavTabs } from '../hooks/useNavTabs';
 import { t } from '../utils/i18n';
 import { hapticTap } from '../utils/feedback';
 import {
@@ -87,6 +89,7 @@ function SegBtn({ label, active, onPress }: { label: string; active: boolean; on
 }
 
 export default function GameSetupScreen({ navigation }: Props) {
+  const onNavigate = useNavTabs();
   const [displayMode, setDisplayMode] = useState<DisplayMode>('flag');
   const [setupMode, setSetupMode] = useState<SetupMode>('quiz');
   const [difficulty, setDifficulty] = useState<QuizDifficulty>('medium');
@@ -190,7 +193,7 @@ export default function GameSetupScreen({ navigation }: Props) {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.contentInner}>
+        <ScreenContainer>
         {/* Game Mode Grid */}
         <View style={styles.modeGrid}>
           {SETUP_MODES.map((m) => {
@@ -379,7 +382,7 @@ export default function GameSetupScreen({ navigation }: Props) {
 
         {/* Bottom spacing for scroll */}
         <View style={{ height: spacing.md }} />
-        </View>
+        </ScreenContainer>
       </ScrollView>
 
       {/* Pinned start button */}
@@ -395,14 +398,7 @@ export default function GameSetupScreen({ navigation }: Props) {
         </TouchableOpacity>
       </View>
 
-      <BottomNav
-        activeTab="Modes"
-        onNavigate={(tab) => {
-          if (tab === 'Play') navigation.navigate('Home');
-          else if (tab === 'Stats') navigation.navigate('Stats');
-          else if (tab === 'Browse') navigation.navigate('Browse');
-        }}
-      />
+      <BottomNav activeTab="Modes" onNavigate={onNavigate} />
     </SafeAreaView>
   );
 }
@@ -419,11 +415,6 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     paddingTop: spacing.lg,
     paddingBottom: spacing.md,
-    alignItems: 'center',
-  },
-  contentInner: {
-    width: '100%',
-    maxWidth: layout.maxContentWidth,
   },
 
   // Screen title - prominent heading for the page

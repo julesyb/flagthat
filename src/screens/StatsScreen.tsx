@@ -11,13 +11,15 @@ import {
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
-import { colors, spacing, fontFamily, fontSize, borderRadius, layout } from '../utils/theme';
+import { colors, spacing, fontFamily, fontSize, borderRadius } from '../utils/theme';
 import { UserStats } from '../types';
 import { getStats, getFlagStats, FlagStats, getDayStreak, getBadgeData, getMissedFlagIds, BadgeData } from '../utils/storage';
 import { getAllFlags, getTotalFlagCount } from '../data';
 import { t } from '../utils/i18n';
 import { FlagImageSmall } from '../components/FlagImage';
 import BottomNav from '../components/BottomNav';
+import ScreenContainer from '../components/ScreenContainer';
+import { useNavTabs } from '../hooks/useNavTabs';
 import { evaluateBadges, BADGES, TIER_COLORS, BadgeIcon } from '../utils/badges';
 import { FlagIcon, GlobeIcon, CheckIcon, PlayIcon, LightningIcon, CalendarIcon, ClockIcon, CrosshairIcon, LinkIcon } from '../components/Icons';
 
@@ -25,6 +27,7 @@ const RANK_COLORS = [colors.gradeS, colors.textTertiary, colors.warning];
 
 export default function StatsScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const onNavigate = useNavTabs();
   const [stats, setStats] = useState<UserStats | null>(null);
   const [flagStats, setFlagStats] = useState<FlagStats>({});
   const [dayStreak, setDayStreak] = useState(0);
@@ -175,7 +178,7 @@ export default function StatsScreen() {
         contentContainerStyle={s.content}
         showsVerticalScrollIndicator={false}
       >
-        <View style={s.contentInner}>
+        <ScreenContainer>
         {/* ── STAT TILES ── */}
         <View style={s.tileGrid}>
           <View style={s.tileRow}>
@@ -293,13 +296,9 @@ export default function StatsScreen() {
         >
           <Text style={s.settingsLinkText}>{t('app.settings')}</Text>
         </TouchableOpacity>
-        </View>
+        </ScreenContainer>
       </ScrollView>
-      <BottomNav activeTab="Stats" onNavigate={(tab) => {
-        if (tab === 'Play') navigation.navigate('Home');
-        else if (tab === 'Modes') navigation.navigate('GameSetup');
-        else if (tab === 'Browse') navigation.navigate('Browse');
-      }} />
+      <BottomNav activeTab="Stats" onNavigate={onNavigate} />
     </SafeAreaView>
   );
 }
@@ -308,8 +307,7 @@ const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   loadingText: { fontFamily: fontFamily.body, fontSize: fontSize.lg, color: colors.textSecondary },
-  content: { padding: spacing.md, paddingBottom: spacing.xxl, alignItems: 'center' },
-  contentInner: { width: '100%', maxWidth: layout.maxContentWidth },
+  content: { padding: spacing.md, paddingBottom: spacing.xxl },
 
   // ── Tile Grid
   tileGrid: { gap: 8, marginBottom: spacing.md },

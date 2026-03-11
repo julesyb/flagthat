@@ -9,7 +9,7 @@ import {
   Animated,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius, layout } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius } from '../utils/theme';
 import { hapticTap, hapticCorrect, hapticWrong, playWrongSound } from '../utils/feedback';
 import { updateStats, updateFlagResults } from '../utils/storage';
 import { shuffleArray, getStreakFromResults } from '../utils/gameEngine';
@@ -22,6 +22,7 @@ import { countryNeighbors, getCountriesWithNeighbors } from '../data/countryNeig
 import FlagImage from '../components/FlagImage';
 import { CheckIcon, CrossIcon } from '../components/Icons';
 import GameTopBar from '../components/GameTopBar';
+import ScreenContainer from '../components/ScreenContainer';
 import MapImage from '../components/MapImage';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Neighbors'>;
@@ -152,7 +153,7 @@ export default function NeighborsScreen({ navigation, route }: Props) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.contentInner}>
+      <ScreenContainer flex game>
       <GameTopBar
         onExit={() => navigation.goBack()}
         center={
@@ -287,14 +288,13 @@ export default function NeighborsScreen({ navigation, route }: Props) {
           </TouchableOpacity>
         )}
       </View>
-      </View>
+      </ScreenContainer>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background, alignItems: 'center' },
-  contentInner: { flex: 1, width: '100%', maxWidth: layout.maxGameWidth },
+  container: { flex: 1, backgroundColor: colors.background },
   topBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',

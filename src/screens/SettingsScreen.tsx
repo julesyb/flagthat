@@ -15,7 +15,7 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
 import Constants from 'expo-constants';
-import { colors, spacing, typography, fontFamily, fontSize, borderRadius, layout } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, fontSize, borderRadius } from '../utils/theme';
 import { getSettings, saveSettings, AppSettings, resetStats } from '../utils/storage';
 import {
   setSoundsEnabled,
@@ -25,9 +25,12 @@ import { toggleDailyReminder, syncNotificationSchedule } from '../utils/notifica
 import { t, setLocale, getLocale, SUPPORTED_LOCALES, LocaleCode } from '../utils/i18n';
 import { ChevronRightIcon, ChevronDownIcon, CheckIcon } from '../components/Icons';
 import BottomNav from '../components/BottomNav';
+import ScreenContainer from '../components/ScreenContainer';
+import { useNavTabs } from '../hooks/useNavTabs';
 
 export default function SettingsScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const onNavigate = useNavTabs();
   const [settings, setSettings] = useState<AppSettings>({
     soundEnabled: true,
     hapticsEnabled: true,
@@ -155,7 +158,7 @@ export default function SettingsScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.contentInner}>
+        <ScreenContainer>
         {/* Sound & Haptics */}
         <Text style={styles.sectionTitle}>{t('settings.soundHaptics')}</Text>
 
@@ -320,14 +323,9 @@ export default function SettingsScreen() {
         >
           <Text style={styles.resetButtonText}>{t('settings.resetAllData')}</Text>
         </TouchableOpacity>
-        </View>
+        </ScreenContainer>
       </ScrollView>
-      <BottomNav activeTab="Play" onNavigate={(tab) => {
-        if (tab === 'Play') navigation.navigate('Home');
-        else if (tab === 'Modes') navigation.navigate('GameSetup');
-        else if (tab === 'Stats') navigation.navigate('Stats');
-        else if (tab === 'Browse') navigation.navigate('Browse');
-      }} />
+      <BottomNav activeTab="Play" onNavigate={onNavigate} />
     </SafeAreaView>
   );
 }
@@ -340,11 +338,6 @@ const styles = StyleSheet.create({
   content: {
     padding: spacing.lg,
     paddingBottom: spacing.xxl,
-    alignItems: 'center',
-  },
-  contentInner: {
-    width: '100%',
-    maxWidth: layout.maxContentWidth,
   },
   sectionTitle: {
     fontFamily: fontFamily.uiLabel,
