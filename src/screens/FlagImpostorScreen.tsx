@@ -8,7 +8,7 @@ import {
   ScrollView,
   Animated,
 } from 'react-native';
-import Svg, { Rect, Circle, Path, G } from 'react-native-svg';
+import Svg, { Rect, Path } from 'react-native-svg';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { colors, spacing, typography, fontFamily, buttons, borderRadius } from '../utils/theme';
 import { hapticTap, hapticCorrect, hapticWrong, playWrongSound } from '../utils/feedback';
@@ -55,15 +55,15 @@ interface FakeFlag {
   type: 'triband_h' | 'triband_v' | 'bicolor' | 'cross' | 'chevron';
   colors: string[];
   hasSymbol: boolean;
-  symbolType?: 'star' | 'crescent';
+  symbolType?: 'star' | 'diamond';
   symbolColor?: string;
   reason: string;
 }
 
 function generateFakeFlag(): FakeFlag {
   const types: FakeFlag['type'][] = ['triband_h', 'triband_v', 'bicolor', 'cross', 'chevron'];
-  // Only 1 symbol type (no circle — avoids clashing with triangular shapes like chevron)
-  const symbolTypes: NonNullable<FakeFlag['symbolType']>[] = ['star', 'crescent'];
+  // Only geometric shapes — no circles
+  const symbolTypes: NonNullable<FakeFlag['symbolType']>[] = ['star', 'diamond'];
 
   // Try up to 10 times to generate a flag that doesn't match a known real flag
   for (let attempt = 0; attempt < 10; attempt++) {
@@ -120,12 +120,12 @@ function FakeFlagSvg({ flag, width, height }: { flag: FakeFlag; width: number; h
         }
         return <Path d={`M ${points.join(' L ')} Z`} fill={flag.symbolColor} />;
       }
-      case 'crescent':
+      case 'diamond':
         return (
-          <G>
-            <Circle cx={cx} cy={cy} r={r} fill={flag.symbolColor} />
-            <Circle cx={cx + r * 0.35} cy={cy} r={r * 0.8} fill={flag.colors[flag.type === 'triband_h' ? 1 : 0]} />
-          </G>
+          <Path
+            d={`M ${cx} ${cy - r} L ${cx + r} ${cy} L ${cx} ${cy + r} L ${cx - r} ${cy} Z`}
+            fill={flag.symbolColor}
+          />
         );
       default:
         return null;

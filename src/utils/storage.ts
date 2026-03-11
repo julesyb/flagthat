@@ -6,6 +6,60 @@ const FLAG_STATS_KEY = '@flagsareus_flag_stats';
 const DAY_STREAK_KEY = '@flagsareus_day_streak';
 const DAILY_CHALLENGE_KEY = '@flagsareus_daily_challenge';
 const SETTINGS_KEY = '@flagsareus_settings';
+const BADGE_DATA_KEY = '@flagsareus_badge_data';
+
+// ─── Badge Tracking Data ───────────────────────────────────
+export interface BadgeData {
+  dailyChallengesCompleted: number;
+  hasShared: boolean;
+  lastGamePerfect10: boolean;
+  lastGameSRank: boolean;
+}
+
+const DEFAULT_BADGE_DATA: BadgeData = {
+  dailyChallengesCompleted: 0,
+  hasShared: false,
+  lastGamePerfect10: false,
+  lastGameSRank: false,
+};
+
+export async function getBadgeData(): Promise<BadgeData> {
+  try {
+    const json = await AsyncStorage.getItem(BADGE_DATA_KEY);
+    if (json) return { ...DEFAULT_BADGE_DATA, ...JSON.parse(json) };
+    return { ...DEFAULT_BADGE_DATA };
+  } catch {
+    return { ...DEFAULT_BADGE_DATA };
+  }
+}
+
+export async function saveBadgeData(data: Partial<BadgeData>): Promise<void> {
+  try {
+    const current = await getBadgeData();
+    const updated = { ...current, ...data };
+    await AsyncStorage.setItem(BADGE_DATA_KEY, JSON.stringify(updated));
+  } catch {
+    // Silently fail
+  }
+}
+
+export async function markShared(): Promise<void> {
+  await saveBadgeData({ hasShared: true });
+}
+
+export async function incrementDailyChallenges(): Promise<void> {
+  const data = await getBadgeData();
+  await saveBadgeData({ dailyChallengesCompleted: data.dailyChallengesCompleted + 1 });
+}
+
+export async function updateLastGameBadgeFlags(correct: number, total: number): Promise<void> {
+  const data = await getBadgeData();
+  const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
+  await saveBadgeData({
+    lastGamePerfect10: data.lastGamePerfect10 || (correct === total && total >= 10),
+    lastGameSRank: data.lastGameSRank || (accuracy >= 95 && total >= 5),
+  });
+}
 
 // ─── App Settings ──────────────────────────────────────────
 export interface AppSettings {
@@ -118,6 +172,8 @@ export async function resetStats(): Promise<void> {
     await AsyncStorage.removeItem(STATS_KEY);
     await AsyncStorage.removeItem(FLAG_STATS_KEY);
     await AsyncStorage.removeItem(DAY_STREAK_KEY);
+    await AsyncStorage.removeItem(BADGE_DATA_KEY);
+    await AsyncStorage.removeItem(DAILY_CHALLENGE_KEY);
   } catch {
     // Silently fail
   }

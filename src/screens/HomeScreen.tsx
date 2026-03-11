@@ -24,9 +24,9 @@ import FlagImage from '../components/FlagImage';
 import BottomNav from '../components/BottomNav';
 
 const MODES: { key: GameMode; label: string }[] = [
-  { key: 'easy', label: '2 Pick' },
-  { key: 'medium', label: '4 Pick' },
-  { key: 'hard', label: 'Free' },
+  { key: 'easy', label: 'Easy' },
+  { key: 'medium', label: 'Medium' },
+  { key: 'hard', label: 'Hard' },
 ];
 
 const QUESTION_COUNTS = [5, 10, 15, 20];
@@ -198,7 +198,7 @@ export default function HomeScreen({ navigation }: Props) {
   const play = () => {
     hapticTap();
     navigation.navigate('Game', {
-      config: { mode, category: 'all', questionCount: questionCountAll ? totalFlags : questionCount, displayMode: 'flag' },
+      config: { mode, category: 'all', questionCount: questionCountAll ? totalFlags : questionCount, displayMode: 'flag', ...(mode === 'hard' && { autocomplete: true }) },
     });
   };
 
@@ -307,7 +307,7 @@ export default function HomeScreen({ navigation }: Props) {
           </View>
           <View style={s.configDivider} />
           <View style={s.configRow}>
-            <Text style={s.configLbl}>Options</Text>
+            <Text style={s.configLbl}>Difficulty</Text>
             <View style={s.segRow}>
               {MODES.map((m) => (
                 <TouchableOpacity
@@ -521,15 +521,15 @@ const s = StyleSheet.create({
   wordmark: {},
   wmLine1: {
     fontFamily: fontFamily.display,
-    fontSize: 26,
-    lineHeight: 26,
+    fontSize: 36,
+    lineHeight: 38,
     color: colors.ink,
     letterSpacing: -0.5,
   },
   wmLine2: {
     fontFamily: fontFamily.displayItalic,
-    fontSize: 26,
-    lineHeight: 26,
+    fontSize: 36,
+    lineHeight: 38,
     color: colors.accent,
   },
   headerRight: {

@@ -13,11 +13,12 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
 import { colors, spacing, fontFamily, borderRadius } from '../utils/theme';
 import { UserStats, GAME_MODES, GameMode } from '../types';
-import { getStats, getFlagStats, FlagStats, getDayStreak } from '../utils/storage';
+import { getStats, getFlagStats, FlagStats, getDayStreak, markShared, getBadgeData, getMissedFlagIds, BadgeData } from '../utils/storage';
 import { getAllFlags, getTotalFlagCount } from '../data';
 import { hapticTap } from '../utils/feedback';
 import { FlagImageSmall } from '../components/FlagImage';
 import BottomNav from '../components/BottomNav';
+import { evaluateBadges, BADGES, TIER_COLORS, Badge, EarnedBadge, BadgeTier } from '../utils/badges';
 
 const RANK_COLORS = ['#C9960C', '#888888', '#A0612A'];
 
@@ -26,6 +27,8 @@ export default function StatsScreen() {
   const [stats, setStats] = useState<UserStats | null>(null);
   const [flagStats, setFlagStats] = useState<FlagStats>({});
   const [dayStreak, setDayStreak] = useState(0);
+  const [badgeData, setBadgeData] = useState<BadgeData | null>(null);
+  const [weakFlagCount, setWeakFlagCount] = useState(0);
 
   const flagNameMap = React.useMemo(() => {
     const map: Record<string, string> = {};
@@ -40,6 +43,8 @@ export default function StatsScreen() {
       getStats().then(setStats);
       getFlagStats().then(setFlagStats);
       getDayStreak().then(setDayStreak);
+      getBadgeData().then(setBadgeData);
+      getMissedFlagIds().then((ids) => setWeakFlagCount(ids.length));
     }, []),
   );
 
@@ -86,10 +91,27 @@ export default function StatsScreen() {
 
     try {
       await Share.share({ message });
+      markShared();
     } catch {
       // Share cancelled
     }
   };
+
+  const earnedBadges = React.useMemo(() => {
+    if (!badgeData) return [];
+    return evaluateBadges({
+      stats,
+      flagStats,
+      dayStreak,
+      dailyChallengesCompleted: badgeData.dailyChallengesCompleted,
+      hasShared: badgeData.hasShared,
+      lastGamePerfect10: badgeData.lastGamePerfect10,
+      lastGameSRank: badgeData.lastGameSRank,
+      weakFlagCount,
+    });
+  }, [stats, flagStats, dayStreak, badgeData, weakFlagCount]);
+
+  const earnedIds = new Set(earnedBadges.map((b) => b.id));
 
   const accuracyLabel =
     overallAccuracy === 100 ? 'Perfect' :
@@ -178,6 +200,24 @@ export default function StatsScreen() {
               <Text style={s.tileVal}>{stats.bestTimeAttackScore}<Text style={s.tileUnit}> in 60s</Text></Text>
             </View>
           )}
+        </View>
+
+        {/* ── BADGES ── */}
+        <View style={s.sectionHeader}>
+          <Text style={s.sectionTitle}>Badges</Text>
+          <Text style={s.sectionMeta}>{earnedBadges.length}/{BADGES.length} earned</Text>
+        </View>
+        <View style={s.badgeGrid}>
+          {BADGES.map((badge) => {
+            const earned = earnedIds.has(badge.id);
+            return (
+              <View key={badge.id} style={[s.badgeCard, !earned && s.badgeCardLocked]}>
+                <View style={[s.badgeTierDot, { backgroundColor: earned ? TIER_COLORS[badge.tier] : colors.rule }]} />
+                <Text style={[s.badgeName, !earned && s.badgeNameLocked]}>{badge.name}</Text>
+                <Text style={[s.badgeDesc, !earned && s.badgeDescLocked]}>{badge.description}</Text>
+              </View>
+            );
+          })}
         </View>
 
         {/* ── BY MODE ── */}
@@ -514,6 +554,48 @@ const s = StyleSheet.create({
   },
   scoreBadgeTextWrong: {
     color: colors.error,
+  },
+
+  // ── Badges
+  badgeGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  badgeCard: {
+    width: '48%',
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: 14,
+  },
+  badgeCardLocked: {
+    opacity: 0.45,
+  },
+  badgeTierDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginBottom: 8,
+  },
+  badgeName: {
+    fontFamily: fontFamily.bodyBold,
+    fontSize: 13,
+    color: colors.ink,
+    marginBottom: 3,
+  },
+  badgeNameLocked: {
+    color: colors.textTertiary,
+  },
+  badgeDesc: {
+    fontFamily: fontFamily.body,
+    fontSize: 11,
+    color: colors.textSecondary,
+    lineHeight: 15,
+  },
+  badgeDescLocked: {
+    color: colors.textTertiary,
   },
 
   // ── Footer

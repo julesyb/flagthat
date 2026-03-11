@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet, Platform } from 'react-native';
 import { useFonts } from 'expo-font';
 import {
   LibreBaskerville_700Bold,
@@ -65,6 +65,12 @@ const screenOptions = {
 };
 
 function AppContent() {
+  useEffect(() => {
+    if (Platform.OS === 'web') {
+      document.title = 'Flag That';
+    }
+  }, []);
+
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={screenOptions}>
@@ -114,7 +120,11 @@ function AppContent() {
         <Stack.Screen
           name="Results"
           component={ResultsScreen}
-          options={{ title: 'Results', headerLeft: () => null, gestureEnabled: false }}
+          options={({ navigation }) => ({
+            title: 'Results',
+            headerLeft: () => <HomeBackButton onPress={() => navigation.navigate('Home')} />,
+            gestureEnabled: false,
+          })}
         />
         <Stack.Screen
           name="Stats"

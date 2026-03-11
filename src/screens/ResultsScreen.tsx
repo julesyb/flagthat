@@ -12,7 +12,7 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { colors, spacing, typography, fontFamily, buttons, borderRadius } from '../utils/theme';
 import { calculateAccuracy, getStreakFromResults, getGrade, generateDailyShareGrid, getDailyNumber } from '../utils/gameEngine';
-import { updateStats, updateFlagResults, saveDailyChallenge } from '../utils/storage';
+import { updateStats, updateFlagResults, saveDailyChallenge, incrementDailyChallenges, updateLastGameBadgeFlags, markShared } from '../utils/storage';
 import { hapticCorrect, playCelebrationSound } from '../utils/feedback';
 import { FlagImageSmall } from '../components/FlagImage';
 import { CheckIcon, CrossIcon } from '../components/Icons';
@@ -41,8 +41,10 @@ export default function ResultsScreen({ route, navigation }: Props) {
   useEffect(() => {
     updateStats(correct, results.length, streak, config.mode, config.category);
     updateFlagResults(results);
+    updateLastGameBadgeFlags(correct, results.length);
     if (isDaily) {
       saveDailyChallenge(results);
+      incrementDailyChallenges();
     }
 
     Animated.spring(gradeScale, {
@@ -88,6 +90,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
 
     try {
       await Share.share({ message });
+      markShared();
     } catch {
       // Share cancelled
     }
@@ -192,16 +195,18 @@ export default function ResultsScreen({ route, navigation }: Props) {
             activeOpacity={0.7}
             accessibilityLabel="Play again"
           >
-            <Text style={styles.primaryButtonText}>Play</Text>
+            <Text style={styles.primaryButtonText}>{isDaily ? 'Home' : 'Play'}</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.secondaryButton}
-            onPress={goHome}
-            activeOpacity={0.7}
-            accessibilityLabel="Go home"
-          >
-            <Text style={styles.secondaryButtonText}>Home</Text>
-          </TouchableOpacity>
+          {!isDaily && (
+            <TouchableOpacity
+              style={styles.secondaryButton}
+              onPress={goHome}
+              activeOpacity={0.7}
+              accessibilityLabel="Go home"
+            >
+              <Text style={styles.secondaryButtonText}>Home</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         <Text style={styles.reviewTitle}>Review</Text>
