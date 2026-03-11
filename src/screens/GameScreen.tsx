@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   SafeAreaView,
   Animated,
   Keyboard,
+  useWindowDimensions,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { colors, spacing, typography, fontFamily, nav, buttons, borderRadius } from '../utils/theme';
@@ -16,16 +17,19 @@ import { generateQuestions, checkAnswer } from '../utils/gameEngine';
 import { hapticCorrect, hapticWrong, hapticTap, playCorrectSound, playWrongSound } from '../utils/feedback';
 import FlagImage from '../components/FlagImage';
 import MapImage from '../components/MapImage';
-import GameTopBar from '../components/GameTopBar';
 import { useGameAnimations } from '../hooks/useGameAnimations';
 import { getFlagByName } from '../data';
 import { RootStackParamList } from '../types/navigation';
+import { ChevronRightIcon } from '../components/Icons';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Game'>;
+
+const MAX_GAME_WIDTH = 480;
 
 export default function GameScreen({ route, navigation }: Props) {
   const { config } = route.params;
   const isTimeAttack = config.mode === 'timeattack';
+  const { width: screenWidth } = useWindowDimensions();
   const [questions, setQuestions] = useState<GameQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [results, setResults] = useState<GameResult[]>([]);
@@ -36,9 +40,7 @@ export default function GameScreen({ route, navigation }: Props) {
   const [currentStreak, setCurrentStreak] = useState(0);
   const [questionStartTime, setQuestionStartTime] = useState(Date.now());
   const [timeLeft, setTimeLeft] = useState(config.timeLimit || 60);
-  const fadeAnim = useRef(new Animated.Value(1)).current;
-  const streakScale = useRef(new Animated.Value(1)).current;
-  const shakeAnim = useRef(new Animated.Value(0)).current;
+  const { fadeAnim, streakScale, shakeAnim, animateStreak, animateWrong, animateTransition } = useGameAnimations();
 
   useEffect(() => {
     const timeAttackConfig = isTimeAttack
@@ -64,10 +66,27 @@ export default function GameScreen({ route, navigation }: Props) {
     return () => clearInterval(interval);
   }, [isTimeAttack]);
 
+  const pendingResultsRef = useRef<GameResult[] | null>(null);
+  const autoAdvanceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Clean up auto-advance timer on unmount
+  useEffect(() => {
+    return () => {
+      if (autoAdvanceRef.current) clearTimeout(autoAdvanceRef.current);
+    };
+  }, []);
+
   // When timeLeft hits 0, navigate to results
   useEffect(() => {
-    if (isTimeAttack && timeLeft === 0 && results.length > 0) {
-      navigation.replace('Results', { results, config });
+    if (isTimeAttack && timeLeft === 0) {
+      const finalResults = pendingResultsRef.current ?? results;
+      if (finalResults.length > 0) {
+        if (autoAdvanceRef.current) {
+          clearTimeout(autoAdvanceRef.current);
+          autoAdvanceRef.current = null;
+        }
+        navigation.replace('Results', { results: finalResults, config });
+      }
     }
   }, [timeLeft]);
 
@@ -76,10 +95,29 @@ export default function GameScreen({ route, navigation }: Props) {
   const isMapMode = config.displayMode === 'map';
   const progress = questions.length > 0 ? (currentIndex + 1) / questions.length : 0;
 
-  const correctCount = useMemo(
-    () => results.filter((r) => r.correct).length,
-    [results],
-  );
+  const goToNext = useCallback(() => {
+    if (autoAdvanceRef.current) {
+      clearTimeout(autoAdvanceRef.current);
+      autoAdvanceRef.current = null;
+    }
+    const newResults = pendingResultsRef.current;
+    if (!newResults) return;
+    pendingResultsRef.current = null;
+
+    if (currentIndex < questions.length - 1) {
+      animateTransition();
+      setResults(newResults);
+      setCurrentIndex((i) => i + 1);
+      setSelectedAnswer(null);
+      setShowFeedback(false);
+      setLastAnswerCorrect(false);
+      setTextInput('');
+      setQuestionStartTime(Date.now());
+      Keyboard.dismiss();
+    } else {
+      navigation.replace('Results', { results: newResults, config });
+    }
+  }, [currentIndex, questions, navigation, config, animateTransition]);
 
   const handleAnswer = useCallback(
     (answer: string) => {
@@ -113,29 +151,17 @@ export default function GameScreen({ route, navigation }: Props) {
       };
 
       const newResults = [...results, result];
+      pendingResultsRef.current = newResults;
 
       const feedbackDelay = isTimeAttack
         ? (correct ? 300 : 600)
         : (correct ? 600 : 1200);
 
-      setTimeout(() => {
-        if (currentIndex < questions.length - 1) {
-          animateTransition();
-          setResults(newResults);
-          setCurrentIndex((i) => i + 1);
-          setSelectedAnswer(null);
-          setShowFeedback(false);
-          setLastAnswerCorrect(false);
-          setTextInput('');
-          setQuestionStartTime(Date.now());
-          Keyboard.dismiss();
-        } else {
-          // Questions exhausted (unlikely for timeattack with 999)
-          navigation.replace('Results', { results: newResults, config });
-        }
+      autoAdvanceRef.current = setTimeout(() => {
+        goToNext();
       }, feedbackDelay);
     },
-    [showFeedback, currentQuestion, questionStartTime, results, currentIndex, questions, fadeAnim, navigation, config, isTimeAttack],
+    [showFeedback, currentQuestion, questionStartTime, results, isTimeAttack, animateStreak, animateWrong, goToNext],
   );
 
   const handleSubmitHard = () => {
@@ -154,6 +180,8 @@ export default function GameScreen({ route, navigation }: Props) {
     );
   }
 
+  const contentMaxWidth = Math.min(screenWidth, MAX_GAME_WIDTH);
+
   return (
     <SafeAreaView style={styles.container}>
       {isTimeAttack ? (
@@ -169,6 +197,7 @@ export default function GameScreen({ route, navigation }: Props) {
         </View>
       )}
 
+      <View style={[styles.desktopWrapper, { maxWidth: contentMaxWidth }]}>
       <View style={styles.topBar}>
         <TouchableOpacity
           onPress={() => navigation.popToTop()}
@@ -318,9 +347,22 @@ export default function GameScreen({ route, navigation }: Props) {
                 It was {currentQuestion.flag.name}
               </Text>
             )}
+            {!isTimeAttack && (
+              <TouchableOpacity
+                style={styles.nextButton}
+                onPress={goToNext}
+                activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel="Next question"
+              >
+                <Text style={styles.nextButtonText}>Next</Text>
+                <ChevronRightIcon size={16} color={colors.white} />
+              </TouchableOpacity>
+            )}
           </View>
         )}
       </Animated.View>
+      </View>
     </SafeAreaView>
   );
 }
@@ -329,6 +371,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+    alignItems: 'center',
+  },
+  desktopWrapper: {
+    flex: 1,
+    width: '100%',
+    alignSelf: 'center',
   },
   loadingContainer: {
     flex: 1,
@@ -505,5 +553,21 @@ const styles = StyleSheet.create({
   feedbackWrong: {
     ...typography.heading,
     color: colors.error,
+  },
+  nextButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: colors.ink,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: borderRadius.md,
+    marginTop: spacing.md,
+  },
+  nextButtonText: {
+    ...typography.captionBold,
+    color: colors.white,
+    textTransform: 'uppercase',
   },
 });

@@ -14,7 +14,7 @@ import { colors, spacing, typography, borderRadius } from '../utils/theme';
 import { FlagItem } from '../types';
 import { RootStackParamList } from '../types/navigation';
 import { getAllFlags } from '../data';
-import { FlagImageSmall } from '../components/FlagImage';
+import FlagImage from '../components/FlagImage';
 import { getMissedFlagIds, getFlagStats, FlagStats } from '../utils/storage';
 import BottomNav from '../components/BottomNav';
 
@@ -77,7 +77,7 @@ export default function BrowseScreen({ route, navigation }: Props) {
 
     return (
       <View style={styles.flagItem}>
-        <FlagImageSmall countryCode={item.id} emoji={item.emoji} />
+        <FlagImage countryCode={item.id} emoji={item.emoji} size="medium" />
         <View style={styles.flagInfo}>
           <Text style={styles.flagName}>{item.name}</Text>
           <Text style={styles.flagRegion}>
@@ -105,15 +105,10 @@ export default function BrowseScreen({ route, navigation }: Props) {
         />
       </View>
 
-      <FlatList
-        horizontal
-        data={filterOptions}
-        keyExtractor={(item) => item}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.regionList}
-        style={styles.regionScroll}
-        renderItem={({ item: filter }) => (
+      <View style={styles.regionWrap}>
+        {filterOptions.map((filter) => (
           <TouchableOpacity
+            key={filter}
             style={[
               styles.regionChip,
               selectedFilter === filter && styles.regionChipActive,
@@ -132,8 +127,8 @@ export default function BrowseScreen({ route, navigation }: Props) {
               {filter}
             </Text>
           </TouchableOpacity>
-        )}
-      />
+        ))}
+      </View>
 
       <Text style={styles.resultCount}>
         {selectedFilter === PRACTICE_MORE && filteredFlags.length === 0
@@ -177,14 +172,13 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     borderRadius: borderRadius.md,
   },
-  regionScroll: {
-    maxHeight: 48,
-    marginTop: spacing.sm,
-    marginBottom: spacing.md,
-  },
-  regionList: {
+  regionWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     paddingHorizontal: spacing.lg,
     gap: spacing.sm,
+    marginTop: spacing.sm,
+    marginBottom: spacing.md,
   },
   regionChip: {
     backgroundColor: colors.surface,

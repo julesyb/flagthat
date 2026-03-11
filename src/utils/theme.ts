@@ -1,13 +1,18 @@
 // =====================
-// BRAND GUIDELINES — Flag That
+// BRAND GUIDELINES - Flag That
 // Voice: Intelligent. Editorial. Authoritative.
 //
+// Typography: Two font families only.
+//   LibreBaskerville - display / editorial headings (Flag That wordmark, big numbers)
+//   Barlow - everything else (body, labels, buttons, gameplay, UI)
+//
 // Rules:
-// — Rounded corners on cards and interactive elements (sm–xl scale).
-// — No gradients. Flat color planes.
-// — No drop shadows except offset hard shadows on hover.
-// — Accent red appears maximum twice per screen.
-// — No emoji anywhere in the UI. Use SVG icons from Icons.tsx.
+// - Rounded corners on cards and interactive elements (sm-xl scale).
+// - No gradients. Flat color planes.
+// - No drop shadows except offset hard shadows on hover.
+// - Accent red appears maximum twice per screen.
+// - No emoji anywhere in the UI. Use SVG icons from Icons.tsx.
+// - No em dashes in user-facing text. Use hyphens or commas.
 // =====================
 
 // ---- Single source of truth for every color value ----
@@ -111,12 +116,15 @@ export const borderRadius = {
 };
 
 // Font family names — these must match the keys used when loading fonts
+// Two font families only:
+//   LibreBaskerville — display / editorial headings
+//   Barlow — everything else (body, labels, buttons, gameplay)
 export const fontFamily = {
   display: 'LibreBaskerville_700Bold',
   displayItalic: 'LibreBaskerville_400Regular_Italic',
-  uiLabel: 'BarlowCondensed_700Bold',
-  uiLabelMedium: 'BarlowCondensed_600SemiBold',
-  uiLabelLight: 'BarlowCondensed_500Medium',
+  uiLabel: 'Barlow_600SemiBold',
+  uiLabelMedium: 'Barlow_500Medium',
+  uiLabelLight: 'Barlow_400Regular',
   body: 'Barlow_400Regular',
   bodyLight: 'Barlow_300Light',
   bodyMedium: 'Barlow_500Medium',
@@ -137,12 +145,12 @@ export const typography = {
   heading: {
     fontSize: 22,
     fontFamily: fontFamily.uiLabel,
-    letterSpacing: 1,
+    letterSpacing: 0.3,
   },
   headingUpper: {
     fontSize: 22,
     fontFamily: fontFamily.uiLabel,
-    letterSpacing: 1,
+    letterSpacing: 0.3,
     textTransform: 'uppercase' as const,
   },
   body: {
@@ -160,7 +168,7 @@ export const typography = {
   captionBold: {
     fontSize: 13,
     fontFamily: fontFamily.uiLabelMedium,
-    letterSpacing: 0.5,
+    letterSpacing: 0.2,
   },
   label: {
     fontSize: 15,
@@ -169,25 +177,25 @@ export const typography = {
   eyebrow: {
     fontSize: 10,
     fontFamily: fontFamily.uiLabel,
-    letterSpacing: 3,
+    letterSpacing: 2,
     textTransform: 'uppercase' as const,
   },
   sectionLabel: {
     fontSize: 9,
     fontFamily: fontFamily.uiLabel,
-    letterSpacing: 3,
+    letterSpacing: 2,
     textTransform: 'uppercase' as const,
   },
   cardTitle: {
     fontSize: 20,
     fontFamily: fontFamily.uiLabel,
-    letterSpacing: 1.5,
+    letterSpacing: 1,
     textTransform: 'uppercase' as const,
   },
   heroCardTitle: {
     fontSize: 26,
     fontFamily: fontFamily.uiLabel,
-    letterSpacing: 2,
+    letterSpacing: 1.2,
     textTransform: 'uppercase' as const,
   },
   countNumber: {
@@ -212,9 +220,9 @@ export const buttons = {
     borderRadius: borderRadius.lg,
   },
   primaryText: {
-    fontFamily: 'BarlowCondensed_700Bold',
+    fontFamily: 'Barlow_600SemiBold',
     fontSize: 18,
-    letterSpacing: 1.5,
+    letterSpacing: 0.8,
     textTransform: 'uppercase' as const,
     color: palette.white,
   },
@@ -228,9 +236,9 @@ export const buttons = {
     borderRadius: borderRadius.lg,
   },
   secondaryText: {
-    fontFamily: 'BarlowCondensed_700Bold',
+    fontFamily: 'Barlow_600SemiBold',
     fontSize: 18,
-    letterSpacing: 1.5,
+    letterSpacing: 0.8,
     textTransform: 'uppercase' as const,
     color: palette.ink,
   },
@@ -247,9 +255,9 @@ export const buttons = {
     borderColor: palette.ink,
   },
   chipText: {
-    fontFamily: 'BarlowCondensed_600SemiBold',
+    fontFamily: 'Barlow_500Medium',
     fontSize: 11,
-    letterSpacing: 1.2,
+    letterSpacing: 0.8,
     textTransform: 'uppercase' as const,
     color: palette.slate,
   },
@@ -265,8 +273,8 @@ export const nav = {
   },
   backText: {
     fontSize: 13,
-    fontFamily: 'BarlowCondensed_600SemiBold',
-    letterSpacing: 0.5,
+    fontFamily: 'Barlow_500Medium',
+    letterSpacing: 0.3,
     color: palette.muted,
     textTransform: 'uppercase' as const,
   },

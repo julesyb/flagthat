@@ -58,17 +58,18 @@ export interface UserStats {
   totalCorrect: number;
   totalAnswered: number;
   bestStreak: number;
+  bestTimeAttackScore: number;
   modeStats: Record<GameMode, { correct: number; total: number }>;
   categoryStats: Partial<Record<CategoryId, { correct: number; total: number }>>;
 }
 
 export const GAME_MODES: Record<GameMode, { label: string; description: string; icon: string }> = {
-  easy: { label: 'Easy', description: '50/50 - Pick from 2', icon: 'E' },
-  medium: { label: 'Medium', description: 'Pick from 4', icon: 'M' },
-  hard: { label: 'Hard', description: 'Type the answer', icon: 'H' },
-  flagflash: { label: 'FlagFlash', description: 'Party mode - tilt to play', icon: '!' },
-  flagpuzzle: { label: 'Flag Puzzle', description: 'Flag reveals over time', icon: '?' },
-  timeattack: { label: 'Time Attack', description: '60s - how many can you get?', icon: '60' },
+  easy: { label: 'Easy', description: '2 multiple choice options', icon: '2' },
+  medium: { label: 'Medium', description: '4 multiple choice options', icon: '4' },
+  hard: { label: 'Hard', description: 'Free-form, type the answer', icon: 'Aa' },
+  flagflash: { label: 'FlagFlash', description: 'Party mode, tilt to play', icon: '!!' },
+  flagpuzzle: { label: 'Flag Puzzle', description: 'Flag reveals over time', icon: '??' },
+  timeattack: { label: 'Timed Quiz', description: 'Race the clock', icon: '00' },
 };
 
 export const CATEGORIES: CategoryInfo[] = [

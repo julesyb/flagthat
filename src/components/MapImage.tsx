@@ -10,8 +10,8 @@ interface MapImageProps {
   style?: object;
 }
 
-// CartoDB no-labels basemap — free, no API key, no country names
-const TILE_URL = 'https://basemaps.cartocdn.com/light_nolabels';
+// CartoDB Voyager no-labels basemap — cleaner country borders, less road detail
+const TILE_URL = 'https://basemaps.cartocdn.com/rastertiles/voyager_nolabels';
 const TILE_SIZE = 256;
 
 function latLngToTile(lat: number, lng: number, zoom: number) {

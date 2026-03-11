@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -100,6 +100,12 @@ export default function GameSetupScreen({ navigation }: Props) {
   const isTimeAttack = mode === 'timeattack';
   const hasTimeLimit = isFlagFlash || isFlagPuzzle || isTimeAttack;
 
+  // Set sensible default time limit when mode changes
+  useEffect(() => {
+    if (isFlagPuzzle) setTimeLimit(15);
+    else if (isTimeAttack || isFlagFlash) setTimeLimit(60);
+  }, [mode]);
+
   const handleFilterTypeSelect = (type: CategoryType) => {
     if (filterType === type) {
       setFilterType(null);
@@ -151,7 +157,7 @@ export default function GameSetupScreen({ navigation }: Props) {
     return FLAGFLASH_TIMES;
   };
 
-  const showQuestionCount = !isFlagFlash && !isTimeAttack;
+  const showQuestionCount = !isFlagFlash && !isTimeAttack && !isFlagPuzzle;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -225,7 +231,7 @@ export default function GameSetupScreen({ navigation }: Props) {
 
         {/* Filter */}
         <Text style={styles.sectionTitle}>Filter</Text>
-        <Text style={styles.filterHint}>Optional — default is all {totalFlags} flags</Text>
+        <Text style={styles.filterHint}>Optional - default is all {totalFlags} flags</Text>
 
         <View style={styles.filterTypeRow}>
           {(['region', 'theme'] as CategoryType[]).map((type) => {
@@ -372,11 +378,11 @@ export default function GameSetupScreen({ navigation }: Props) {
           onPress={startGame}
           activeOpacity={0.8}
           accessibilityRole="button"
-          accessibilityLabel={isFlagFlash ? 'Start FlagFlash' : isFlagPuzzle ? 'Start Flag Puzzle' : 'Start Game'}
+          accessibilityLabel={isTimeAttack ? 'Start Timed Quiz' : isFlagFlash ? 'Start FlagFlash' : isFlagPuzzle ? 'Start Flag Puzzle' : 'Start Game'}
         >
           <Text style={styles.startButtonText}>
             {isTimeAttack
-              ? 'Start Time Attack'
+              ? 'Start Timed Quiz'
               : isFlagFlash
                 ? 'Start FlagFlash'
                 : isFlagPuzzle
