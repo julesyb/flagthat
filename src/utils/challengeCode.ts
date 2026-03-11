@@ -33,11 +33,11 @@ const INDEX_MODE = new Map(CHALLENGE_MODES.map((m, i) => [i, m]));
 
 /**
  * Encode challenge data into a shareable string.
- * V2 format: "FT2:" + base64(compact pipe-delimited string)
+ * V3 format: "FT3-" + urlSafeBase64(compact pipe-delimited string)
+ * URL-safe: no +/= chars, safe to embed in URLs without encoding.
  * Returns null if encoding fails (e.g. invalid flag IDs).
  */
 export function encodeChallenge(data: ChallengeData): string | null {
-  // V2 format requires all flag IDs to be exactly 2 chars (ISO 3166-1 alpha-2)
   if (data.flagIds.some((id) => id.length !== 2)) {
     return null;
   }
@@ -47,20 +47,23 @@ export function encodeChallenge(data: ChallengeData): string | null {
   }
   const flags = data.flagIds.join('');
   const bits = data.hostResults.map((r) => r.correct ? '1' : '0').join('');
-  // Store times as deciseconds (divide ms by 100, round) to save chars
   const times = data.hostResults.map((r) => Math.round(r.timeMs / 100)).join(',');
   const payload = `${data.hostName}|${modeIdx}|${data.timeLimit}|${flags}|${bits}|${times}`;
-  const encoded = toBase64(payload);
-  return `FT2:${encoded}`;
+  const encoded = toUrlSafeBase64(payload);
+  return `FT3-${encoded}`;
 }
 
 /**
  * Decode a challenge code string back into ChallengeData.
- * Supports both V2 (FT2:) and legacy V1 (FT:) formats.
+ * Supports V3 (FT3-), V2 (FT2:), and legacy V1 (FT:) formats.
  */
 export function decodeChallenge(code: string): DecodeResult {
   try {
     const trimmed = code.trim();
+    if (trimmed.startsWith('FT3-')) {
+      const data = decodeV3(trimmed.slice(4));
+      return data ? { status: 'ok', data } : { status: 'invalid' };
+    }
     if (trimmed.startsWith('FT2:')) {
       const data = decodeV2(trimmed.slice(4));
       return data ? { status: 'ok', data } : { status: 'invalid' };
@@ -69,10 +72,8 @@ export function decodeChallenge(code: string): DecodeResult {
       const data = decodeV1(trimmed.slice(3));
       return data ? { status: 'ok', data } : { status: 'invalid' };
     }
-    // FT: (V1) and FT2: (V2) are handled above via startsWith checks.
-    // Any other FTn: prefix indicates a newer format we can't decode.
-    // This regex matches FT followed by one or more digits and a colon.
-    if (/^FT\d+:/.test(trimmed)) {
+    // Known prefixes handled above. Any other FT prefix is unsupported.
+    if (/^FT\d+[-:]/.test(trimmed)) {
       return { status: 'unsupported' };
     }
     return { status: 'invalid' };
@@ -81,8 +82,17 @@ export function decodeChallenge(code: string): DecodeResult {
   }
 }
 
+function decodeV3(encoded: string): ChallengeData | null {
+  const payload = fromUrlSafeBase64(encoded);
+  return decodePayload(payload);
+}
+
 function decodeV2(encoded: string): ChallengeData | null {
   const payload = fromBase64(encoded);
+  return decodePayload(payload);
+}
+
+function decodePayload(payload: string): ChallengeData | null {
   const parts = payload.split('|');
   if (parts.length !== 6) return null;
 
@@ -96,7 +106,6 @@ function decodeV2(encoded: string): ChallengeData | null {
   const timeLimit = parseInt(timeLimitStr, 10);
   if (isNaN(timeLimit)) return null;
 
-  // Split flag IDs (each is 2 chars)
   const flagIds: string[] = [];
   for (let i = 0; i < flags.length; i += 2) {
     flagIds.push(flags.slice(i, i + 2));
@@ -231,7 +240,6 @@ function toBase64(str: string): string {
   if (typeof btoa === 'function') {
     return btoa(unescape(encodeURIComponent(str)));
   }
-  // Node/RN fallback
   return Buffer.from(str, 'utf-8').toString('base64');
 }
 
@@ -240,4 +248,15 @@ function fromBase64(encoded: string): string {
     return decodeURIComponent(escape(atob(encoded)));
   }
   return Buffer.from(encoded, 'base64').toString('utf-8');
+}
+
+// URL-safe base64: replaces +/ with -_, strips = padding
+function toUrlSafeBase64(str: string): string {
+  return toBase64(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function fromUrlSafeBase64(encoded: string): string {
+  let b64 = encoded.replace(/-/g, '+').replace(/_/g, '/');
+  while (b64.length % 4 !== 0) b64 += '=';
+  return fromBase64(b64);
 }
