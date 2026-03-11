@@ -80,6 +80,7 @@ export default function StatsScreen() {
                 capitalconnection: { correct: 0, total: 0 },
                 daily: { correct: 0, total: 0 },
                 practice: { correct: 0, total: 0 },
+                baseline: { correct: 0, total: 0 },
               },
               categoryStats: {},
             });

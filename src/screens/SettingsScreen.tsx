@@ -23,7 +23,7 @@ import {
 } from '../utils/feedback';
 import { toggleDailyReminder, syncNotificationSchedule } from '../utils/notifications';
 import { t, setLocale, getLocale, SUPPORTED_LOCALES, LocaleCode } from '../utils/i18n';
-import { ChevronRightIcon } from '../components/Icons';
+import { ChevronRightIcon, ChevronDownIcon, CheckIcon } from '../components/Icons';
 import BottomNav from '../components/BottomNav';
 
 export default function SettingsScreen() {
@@ -37,6 +37,7 @@ export default function SettingsScreen() {
     locale: null,
   });
   const [, forceRender] = useState(0);
+  const [langOpen, setLangOpen] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -111,16 +112,13 @@ export default function SettingsScreen() {
     return `${h}:${m} ${period}`;
   };
 
-  const cycleLanguage = async () => {
-    const current = getLocale();
-    const idx = SUPPORTED_LOCALES.findIndex((l) => l.code === current);
-    const next = SUPPORTED_LOCALES[(idx + 1) % SUPPORTED_LOCALES.length];
-    setLocale(next.code);
-    const updated = { ...settings, locale: next.code };
+  const selectLanguage = async (code: LocaleCode) => {
+    setLocale(code);
+    const updated = { ...settings, locale: code };
     setSettings(updated);
     await saveSettings(updated);
+    setLangOpen(false);
     forceRender((n) => n + 1);
-    // Reschedule notification with new language text
     if (settings.dailyReminderEnabled) {
       syncNotificationSchedule();
     }
@@ -238,15 +236,40 @@ export default function SettingsScreen() {
         <View style={styles.settingCard}>
           <TouchableOpacity
             style={styles.settingRow}
-            onPress={cycleLanguage}
+            onPress={() => setLangOpen(!langOpen)}
             activeOpacity={0.7}
           >
             <View style={styles.settingInfo}>
               <Text style={styles.settingLabel}>{currentLocaleName}</Text>
               <Text style={styles.settingDesc}>{t('settings.languageDesc')}</Text>
             </View>
-            <ChevronRightIcon size={18} color={colors.textTertiary} />
+            <ChevronDownIcon
+              size={18}
+              color={colors.textTertiary}
+            />
           </TouchableOpacity>
+          {langOpen && (
+            <>
+              {SUPPORTED_LOCALES.map((locale) => {
+                const isActive = locale.code === getLocale();
+                return (
+                  <React.Fragment key={locale.code}>
+                    <View style={styles.settingDivider} />
+                    <TouchableOpacity
+                      style={[styles.settingRow, isActive && styles.langRowActive]}
+                      onPress={() => selectLanguage(locale.code)}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={[styles.langOptionText, isActive && styles.langOptionActive]}>
+                        {locale.name}
+                      </Text>
+                      {isActive && <CheckIcon size={16} color={colors.ink} />}
+                    </TouchableOpacity>
+                  </React.Fragment>
+                );
+              })}
+            </>
+          )}
         </View>
 
         {/* About */}
@@ -374,6 +397,17 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontSize: fontSize.body,
     letterSpacing: 0.5,
+  },
+  langRowActive: {
+    backgroundColor: colors.surfaceSecondary,
+  },
+  langOptionText: {
+    ...typography.body,
+    color: colors.text,
+    fontSize: 15,
+  },
+  langOptionActive: {
+    fontFamily: fontFamily.bodyBold,
   },
   resetButton: {
     backgroundColor: colors.surface,

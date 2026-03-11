@@ -281,6 +281,17 @@ const zh: typeof en = {
     shared_spirit: { name: '\u5206\u4eab\u7cbe\u795e', description: '\u5206\u4eab\u4f60\u7684\u7ed3\u679c' },
   },
 
+  onboarding: {
+    subtitle: '\u770b\u770b\u4f60\u7684\u6c34\u5e73',
+    regionTest: '10\u9898\u6d4b\u8bd5',
+    flagCount: '{count} \u9762\u56fd\u65d7',
+    completed: '\u5b8c\u6210',
+    startPlaying: '\u5f00\u59cb\u73a9',
+    skip: '\u8df3\u8fc7',
+    next: '\u4e0b\u4e00\u4e2a\u5730\u533a',
+    allDone: '\u5168\u90e8\u5b8c\u6210\uff0c\u505a\u5f97\u597d',
+  },
+
   modes: {
     easy: '\u7b80\u5355',
     medium: '\u4e2d\u7b49',
@@ -293,6 +304,7 @@ const zh: typeof en = {
     capitalconnection: '\u9996\u90fd\u7b54\u9898',
     daily: '\u6bcf\u65e5',
     practice: '\u7ec3\u4e60',
+    baseline: '\u57fa\u7ebf\u6d4b\u8bd5',
   },
 
   categories: {

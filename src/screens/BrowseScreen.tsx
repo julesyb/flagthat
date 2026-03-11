@@ -17,6 +17,7 @@ import { getAllFlags } from '../data';
 import FlagImage from '../components/FlagImage';
 import { getMissedFlagIds, getFlagStats, FlagStats } from '../utils/storage';
 import { t } from '../utils/i18n';
+import { translateName, flagName } from '../data/countryNames';
 import BottomNav from '../components/BottomNav';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Browse'>;
@@ -68,7 +69,7 @@ export default function BrowseScreen({ route, navigation }: Props) {
     }
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
-      flags = flags.filter((f) => f.name.toLowerCase().includes(q));
+      flags = flags.filter((f) => f.name.toLowerCase().includes(q) || flagName(f).toLowerCase().includes(q));
     }
     return flags;
   }, [allFlags, selectedFilter, searchQuery, missedFlagIds, flagStats]);
@@ -88,7 +89,7 @@ export default function BrowseScreen({ route, navigation }: Props) {
       <View style={styles.flagItem}>
         <FlagImage countryCode={item.id} emoji={item.emoji} size="medium" />
         <View style={styles.flagInfo}>
-          <Text style={styles.flagName}>{item.name}</Text>
+          <Text style={styles.flagName}>{flagName(item)}</Text>
           <Text style={styles.flagRegion}>
             {item.region}
             {showWrongCount

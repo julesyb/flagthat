@@ -281,6 +281,17 @@ const ptBR: typeof en = {
     shared_spirit: { name: 'Esp\u00edrito compartilhador', description: 'Compartilhe seus resultados' },
   },
 
+  onboarding: {
+    subtitle: 'Vamos ver seu n\u00edvel',
+    regionTest: 'Quiz de 10 bandeiras',
+    flagCount: '{count} bandeiras',
+    completed: 'Feito',
+    startPlaying: 'Come\u00e7ar a jogar',
+    skip: 'Pular',
+    next: 'Pr\u00f3xima regi\u00e3o',
+    allDone: 'Tudo pronto, bom trabalho',
+  },
+
   modes: {
     easy: 'F\u00e1cil',
     medium: 'M\u00e9dio',
@@ -293,6 +304,7 @@ const ptBR: typeof en = {
     capitalconnection: 'Quiz de capitais',
     daily: 'Di\u00e1rio',
     practice: 'Pr\u00e1tica',
+    baseline: 'Linha de base',
   },
 
   categories: {

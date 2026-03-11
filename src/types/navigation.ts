@@ -1,6 +1,7 @@
 import { GameConfig, GameResult } from './index';
 
 export type RootStackParamList = {
+  Onboarding: undefined;
   Home: undefined;
   GameSetup: undefined;
   Game: { config: GameConfig };
