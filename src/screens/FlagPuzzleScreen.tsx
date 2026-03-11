@@ -12,7 +12,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily, buttons, borderRadius, nav } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, buttons, borderRadius } from '../utils/theme';
 import { GameQuestion, GameResult } from '../types';
 import { generateQuestions, checkAnswer } from '../utils/gameEngine';
 import { hapticCorrect, hapticWrong, hapticTap, playCorrectSound, playWrongSound } from '../utils/feedback';
@@ -252,27 +252,17 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
         />
       </View>
 
-      {/* Top bar */}
-      <View style={styles.topBar}>
-        <TouchableOpacity
-          onPress={() => navigation.popToTop()}
-          style={styles.quitButton}
-        >
-          <Text style={styles.quitText}>Exit</Text>
-        </TouchableOpacity>
-        <View style={styles.centerInfo}>
-          <Text style={styles.counter}>
-            {currentIndex + 1} / {questions.length}
-          </Text>
-          {currentStreak >= 2 ? (
-            <Animated.Text
-              style={[styles.streakText, { transform: [{ scale: streakScale }] }]}
-            >
-              {currentStreak}x streak
-            </Animated.Text>
-          ) : (
-            <Text style={styles.score}>
-              {results.filter((r) => r.correct).length} correct
+      <GameTopBar
+        currentIndex={currentIndex}
+        totalQuestions={questions.length}
+        correctCount={correctCount}
+        currentStreak={currentStreak}
+        streakScale={streakScale}
+        onExit={() => navigation.popToTop()}
+        rightElement={
+          <View style={styles.timerDisplay}>
+            <Text style={[styles.timerText, isUrgent && styles.timerTextUrgent]}>
+              {timeRemaining}s
             </Text>
           </View>
         }
@@ -419,34 +409,6 @@ const styles = StyleSheet.create({
   },
   timerFill: {
     height: '100%',
-  },
-  topBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-  },
-  quitButton: {
-    ...nav.backButton,
-  },
-  quitText: {
-    ...nav.backText,
-  },
-  centerInfo: {
-    alignItems: 'center',
-  },
-  counter: {
-    ...typography.bodyBold,
-    color: colors.text,
-  },
-  streakText: {
-    ...typography.caption,
-    color: colors.accent,
-  },
-  score: {
-    ...typography.caption,
-    color: colors.success,
   },
   timerDisplay: {
     width: 60,

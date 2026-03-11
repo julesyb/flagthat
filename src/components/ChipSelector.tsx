@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { colors, spacing, fontFamily } from '../utils/theme';
+import { colors, spacing, fontFamily, borderRadius } from '../utils/theme';
 
 interface ChipOption<T extends string | number> {
   value: T;
@@ -70,6 +70,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.rule,
     backgroundColor: colors.white,
+    borderRadius: borderRadius.sm,
   },
   chipActive: {
     backgroundColor: colors.ink,

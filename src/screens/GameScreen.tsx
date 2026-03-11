@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -36,9 +36,7 @@ export default function GameScreen({ route, navigation }: Props) {
   const [currentStreak, setCurrentStreak] = useState(0);
   const [questionStartTime, setQuestionStartTime] = useState(Date.now());
   const [timeLeft, setTimeLeft] = useState(config.timeLimit || 60);
-  const fadeAnim = useRef(new Animated.Value(1)).current;
-  const streakScale = useRef(new Animated.Value(1)).current;
-  const shakeAnim = useRef(new Animated.Value(0)).current;
+  const { fadeAnim, streakScale, shakeAnim, animateStreak, animateWrong, animateTransition } = useGameAnimations();
 
   useEffect(() => {
     const timeAttackConfig = isTimeAttack
@@ -135,7 +133,7 @@ export default function GameScreen({ route, navigation }: Props) {
         }
       }, feedbackDelay);
     },
-    [showFeedback, currentQuestion, questionStartTime, results, currentIndex, questions, fadeAnim, navigation, config, isTimeAttack],
+    [showFeedback, currentQuestion, questionStartTime, results, currentIndex, questions, navigation, config, isTimeAttack, animateStreak, animateWrong, animateTransition],
   );
 
   const handleSubmitHard = () => {
