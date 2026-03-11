@@ -8,6 +8,7 @@ import {
   SafeAreaView,
   Alert,
   Platform,
+  Linking,
 } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -192,6 +193,16 @@ export default function StatsScreen() {
         >
           <Text style={styles.resetButtonText}>Reset Statistics</Text>
         </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.privacyLink}
+          onPress={() => Linking.openURL('https://flagthat.app/privacy')}
+          activeOpacity={0.7}
+          accessibilityRole="link"
+          accessibilityLabel="Privacy Policy"
+        >
+          <Text style={styles.privacyLinkText}>Privacy Policy</Text>
+        </TouchableOpacity>
       </ScrollView>
       <BottomNav activeTab="Stats" onNavigate={(tab) => {
         if (tab === 'Play') navigation.navigate('Home' );
@@ -340,5 +351,13 @@ const styles = StyleSheet.create({
   resetButtonText: {
     ...typography.label,
     color: colors.error,
+  },
+  privacyLink: {
+    padding: spacing.md,
+    alignItems: 'center',
+  },
+  privacyLinkText: {
+    ...typography.caption,
+    color: colors.textTertiary,
   },
 });
