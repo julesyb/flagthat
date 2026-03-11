@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useRef, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -7,16 +7,18 @@ import {
   SafeAreaView,
   StatusBar,
   ScrollView,
+  Animated,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
-import { colors, fontFamily, spacing, borderRadius } from '../utils/theme';
+import { colors, fontFamily, fontSize, spacing, borderRadius, shadows } from '../utils/theme';
 import { getBaselineData, BaselineData, skipOnboarding } from '../utils/storage';
-import { getCategoryCount } from '../data';
+import { getCategoryCount, getAllFlags } from '../data';
 import { hapticTap } from '../utils/feedback';
-import { CheckIcon, ChevronRightIcon } from '../components/Icons';
+import { CheckIcon, ChevronRightIcon, PlayIcon, BarChartIcon } from '../components/Icons';
+import FlagImage from '../components/FlagImage';
 import { RootStackParamList } from '../types/navigation';
-import { BaselineRegionId, CategoryId } from '../types';
+import { BaselineRegionId, CategoryId, FlagItem } from '../types';
 import { t } from '../utils/i18n';
 import ScreenContainer from '../components/ScreenContainer';
 
@@ -30,12 +32,58 @@ const REGIONS: { id: BaselineRegionId; categoryId: CategoryId }[] = [
   { id: 'oceania', categoryId: 'oceania' },
 ];
 
+// Pick 4 recognizable flags for the hero mosaic
+const HERO_FLAGS = ['jp', 'br', 'gb', 'za'];
+
 export default function OnboardingScreen({ navigation }: Props) {
   const [baseline, setBaseline] = useState<BaselineData | null>(null);
+  const [showTests, setShowTests] = useState(false);
+
+  // Animations
+  const heroFade = useRef(new Animated.Value(0)).current;
+  const heroSlide = useRef(new Animated.Value(20)).current;
+  const btnFade = useRef(new Animated.Value(0)).current;
+  const btnSlide = useRef(new Animated.Value(16)).current;
+  const testsFade = useRef(new Animated.Value(0)).current;
+  const testsSlide = useRef(new Animated.Value(16)).current;
+  const flagAnims = useRef(HERO_FLAGS.map(() => new Animated.Value(0))).current;
+
+  useEffect(() => {
+    // Phase 1: Hero card slides in
+    Animated.parallel([
+      Animated.timing(heroFade, { toValue: 1, duration: 500, useNativeDriver: true }),
+      Animated.spring(heroSlide, { toValue: 0, friction: 8, tension: 60, useNativeDriver: true }),
+    ]).start();
+
+    // Phase 2: Flag mosaic stagger in
+    setTimeout(() => {
+      Animated.stagger(
+        120,
+        flagAnims.map((a) =>
+          Animated.spring(a, { toValue: 1, friction: 6, tension: 80, useNativeDriver: true }),
+        ),
+      ).start();
+    }, 300);
+
+    // Phase 3: CTA buttons slide in
+    setTimeout(() => {
+      Animated.parallel([
+        Animated.timing(btnFade, { toValue: 1, duration: 400, useNativeDriver: true }),
+        Animated.spring(btnSlide, { toValue: 0, friction: 8, tension: 60, useNativeDriver: true }),
+      ]).start();
+    }, 600);
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
-      getBaselineData().then(setBaseline);
+      getBaselineData().then((data) => {
+        setBaseline(data);
+        if (data && Object.keys(data.regions).length > 0 && !data.completedAt && !data.skipped) {
+          setShowTests(true);
+          testsFade.setValue(1);
+          testsSlide.setValue(0);
+        }
+      });
     }, []),
   );
 
@@ -57,13 +105,22 @@ export default function OnboardingScreen({ navigation }: Props) {
     });
   };
 
-  const handleSkip = async () => {
+  const handleStartPlaying = async () => {
     hapticTap();
     await skipOnboarding();
     navigation.replace('Home');
   };
 
-  const handleStartPlaying = () => {
+  const handleTestKnowledge = () => {
+    hapticTap();
+    setShowTests(true);
+    Animated.parallel([
+      Animated.timing(testsFade, { toValue: 1, duration: 400, useNativeDriver: true }),
+      Animated.spring(testsSlide, { toValue: 0, friction: 8, tension: 60, useNativeDriver: true }),
+    ]).start();
+  };
+
+  const handleAllDone = () => {
     hapticTap();
     navigation.replace('Home');
   };
@@ -77,90 +134,169 @@ export default function OnboardingScreen({ navigation }: Props) {
         showsVerticalScrollIndicator={false}
       >
         <ScreenContainer>
-          {/* Header */}
-          <View style={s.header}>
-            <View style={s.wordmark}>
-              <Text style={s.wmLine1}>Flag</Text>
-              <Text style={s.wmLine2}>That</Text>
+          {/* Hero section with flag mosaic */}
+          <Animated.View style={[s.hero, { opacity: heroFade, transform: [{ translateY: heroSlide }] }]}>
+            <View style={s.heroInner}>
+              <Text style={s.welcomeText}>{t('onboarding.welcome')}</Text>
+              <View style={s.wordmark}>
+                <Text style={s.wmLine1}>Flag</Text>
+                <Text style={s.wmLine2}>That</Text>
+              </View>
+              <Text style={s.tagline}>{t('onboarding.tagline')}</Text>
             </View>
-            <TouchableOpacity onPress={handleSkip} activeOpacity={0.6}>
-              <Text style={s.skipText}>{t('onboarding.skip')}</Text>
-            </TouchableOpacity>
-          </View>
 
-          <Text style={s.subtitle}>{t('onboarding.subtitle')}</Text>
-
-          {/* Region cards */}
-          <View style={s.regionList}>
-            {REGIONS.map((region) => {
-              const result = baseline?.regions[region.id];
-              const isDone = !!result;
-              const flagCount = getCategoryCount(region.categoryId);
-
-              return (
-                <TouchableOpacity
-                  key={region.id}
-                  style={[s.regionCard, isDone && s.regionCardDone]}
-                  activeOpacity={isDone ? 1 : 0.85}
-                  onPress={() => !isDone && handleRegionPress(region.id)}
-                  disabled={isDone}
+            {/* Flag mosaic - 4 small flags fanned in the corner */}
+            <View style={s.flagMosaic}>
+              {HERO_FLAGS.map((code, i) => (
+                <Animated.View
+                  key={code}
+                  style={[
+                    s.flagThumb,
+                    {
+                      opacity: flagAnims[i],
+                      transform: [
+                        { scale: flagAnims[i].interpolate({ inputRange: [0, 1], outputRange: [0.6, 1] }) },
+                        { rotate: `${-8 + i * 5}deg` },
+                        { translateX: i * 6 },
+                      ],
+                    },
+                  ]}
                 >
-                  <View style={s.regionLeft}>
-                    {isDone ? (
-                      <View style={s.checkCircle}>
-                        <CheckIcon size={16} color={colors.white} />
-                      </View>
-                    ) : (
-                      <View style={s.regionDot} />
-                    )}
-                  </View>
-                  <View style={s.regionContent}>
-                    <Text style={[s.regionName, isDone && s.regionNameDone]}>
-                      {t(`categories.${region.id}`)}
-                    </Text>
-                    <Text style={s.regionSub}>
-                      {isDone
-                        ? `${result!.correct}/${result!.total} - ${result!.accuracy}%`
-                        : `${t('onboarding.flagCount', { count: flagCount })} - ${t('onboarding.regionTest')}`}
-                    </Text>
-                  </View>
-                  {isDone ? (
-                    <Text style={s.doneLabel}>{t('onboarding.completed')}</Text>
-                  ) : (
-                    <ChevronRightIcon size={18} color={colors.ink} />
-                  )}
-                </TouchableOpacity>
-              );
-            })}
-          </View>
+                  <FlagImage countryCode={code} size="small" emoji="" />
+                </Animated.View>
+              ))}
+            </View>
+          </Animated.View>
 
-          {/* Progress / CTA */}
-          {allDone ? (
-            <View style={s.ctaWrap}>
-              <Text style={s.allDoneText}>{t('onboarding.allDone')}</Text>
+          {!showTests ? (
+            /* ── Two-path choice ── */
+            <Animated.View style={[s.choiceWrap, { opacity: btnFade, transform: [{ translateY: btnSlide }] }]}>
+              {/* Start Playing - primary CTA */}
               <TouchableOpacity
-                style={s.startBtn}
+                style={s.primaryBtn}
                 onPress={handleStartPlaying}
                 activeOpacity={0.85}
               >
-                <Text style={s.startBtnText}>{t('onboarding.startPlaying')}</Text>
+                <View style={s.primaryBtnIcon}>
+                  <PlayIcon size={16} color={colors.white} />
+                </View>
+                <View style={s.btnTextWrap}>
+                  <Text style={s.primaryBtnText}>{t('onboarding.startPlayingNow')}</Text>
+                  <Text style={s.primaryBtnSub}>{t('onboarding.startPlayingDesc')}</Text>
+                </View>
+                <ChevronRightIcon size={18} color={colors.white} />
               </TouchableOpacity>
-            </View>
-          ) : completedCount > 0 ? (
-            <View style={s.progressWrap}>
-              <View style={s.progressBar}>
-                <View
-                  style={[
-                    s.progressFill,
-                    { width: `${(completedCount / REGIONS.length) * 100}%` },
-                  ]}
-                />
+
+              {/* Test Your Knowledge - secondary CTA */}
+              <TouchableOpacity
+                style={s.secondaryBtn}
+                onPress={handleTestKnowledge}
+                activeOpacity={0.85}
+              >
+                <View style={s.secondaryBtnIcon}>
+                  <BarChartIcon size={16} color={colors.ink} />
+                </View>
+                <View style={s.btnTextWrap}>
+                  <Text style={s.secondaryBtnText}>{t('onboarding.testKnowledge')}</Text>
+                  <Text style={s.secondaryBtnSub}>{t('onboarding.testKnowledgeDesc')}</Text>
+                </View>
+                <ChevronRightIcon size={18} color={colors.ink} />
+              </TouchableOpacity>
+            </Animated.View>
+          ) : (
+            /* ── Baseline test list ── */
+            <Animated.View style={{ opacity: testsFade, transform: [{ translateY: testsSlide }] }}>
+              <View style={s.testHeader}>
+                <Text style={s.testTitle}>{t('onboarding.subtitle')}</Text>
+                {!allDone && (
+                  <TouchableOpacity onPress={handleStartPlaying} activeOpacity={0.6}>
+                    <Text style={s.skipText}>{t('onboarding.skip')}</Text>
+                  </TouchableOpacity>
+                )}
               </View>
-              <Text style={s.progressText}>
-                {completedCount}/{REGIONS.length}
-              </Text>
-            </View>
-          ) : null}
+
+              {/* Progress bar */}
+              <View style={s.progressSection}>
+                <View style={s.progressBar}>
+                  <View
+                    style={[
+                      s.progressFill,
+                      { width: `${(completedCount / REGIONS.length) * 100}%` },
+                    ]}
+                  />
+                </View>
+                <Text style={s.progressText}>
+                  {t('onboarding.regionsComplete', { count: completedCount, total: REGIONS.length })}
+                </Text>
+              </View>
+
+              {/* Region cards */}
+              <View style={s.regionList}>
+                {REGIONS.map((region, index) => {
+                  const result = baseline?.regions[region.id];
+                  const isDone = !!result;
+                  const flagCount = getCategoryCount(region.categoryId);
+
+                  return (
+                    <TouchableOpacity
+                      key={region.id}
+                      style={[
+                        s.regionCard,
+                        isDone && s.regionCardDone,
+                        !isDone && s.regionCardActive,
+                      ]}
+                      activeOpacity={isDone ? 1 : 0.85}
+                      onPress={() => !isDone && handleRegionPress(region.id)}
+                      disabled={isDone}
+                    >
+                      <View style={s.regionLeft}>
+                        {isDone ? (
+                          <View style={s.checkCircle}>
+                            <CheckIcon size={16} color={colors.white} />
+                          </View>
+                        ) : (
+                          <View style={s.regionNumberActive}>
+                            <Text style={s.regionNumberTextActive}>
+                              {index + 1}
+                            </Text>
+                          </View>
+                        )}
+                      </View>
+                      <View style={s.regionContent}>
+                        <Text style={[s.regionName, isDone && s.regionNameDone]}>
+                          {t(`categories.${region.id}`)}
+                        </Text>
+                        <Text style={s.regionSub}>
+                          {isDone
+                            ? `${result!.correct}/${result!.total} correct, ${result!.accuracy}%`
+                            : `${t('onboarding.flagCount', { count: flagCount })}`}
+                        </Text>
+                      </View>
+                      {isDone ? (
+                        <Text style={s.doneLabel}>{t('onboarding.completed')}</Text>
+                      ) : (
+                        <ChevronRightIcon size={18} color={colors.ink} />
+                      )}
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+
+              {/* All done CTA */}
+              {allDone && (
+                <View style={s.ctaWrap}>
+                  <Text style={s.allDoneText}>{t('onboarding.allDone')}</Text>
+                  <TouchableOpacity
+                    style={s.startBtn}
+                    onPress={handleAllDone}
+                    activeOpacity={0.85}
+                  >
+                    <Text style={s.startBtnText}>{t('onboarding.startPlaying')}</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </Animated.View>
+          )}
         </ScreenContainer>
       </ScrollView>
     </SafeAreaView>
@@ -179,45 +315,182 @@ const s = StyleSheet.create({
     paddingBottom: spacing.xxl,
   },
 
-  // Header
-  header: {
+  // ── Hero section
+  hero: {
+    backgroundColor: colors.ink,
+    marginHorizontal: spacing.md,
+    marginTop: spacing.xl,
+    borderRadius: borderRadius.xl,
+    padding: spacing.xl,
+    paddingVertical: spacing.xxl,
+    overflow: 'hidden',
+    ...shadows.large,
+  },
+  heroInner: {
+    zIndex: 1,
+  },
+  flagMosaic: {
+    position: 'absolute',
+    right: spacing.md,
+    bottom: spacing.lg,
     flexDirection: 'row',
     alignItems: 'flex-end',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.xl,
-    paddingBottom: spacing.md,
   },
-  wordmark: {},
+  flagThumb: {
+    width: 48,
+    height: 32,
+    borderRadius: 4,
+    overflow: 'hidden',
+    marginLeft: -12,
+    borderWidth: 1.5,
+    borderColor: colors.whiteAlpha20,
+  },
+  welcomeText: {
+    fontFamily: fontFamily.body,
+    fontSize: fontSize.lg,
+    color: colors.whiteAlpha60,
+    marginBottom: spacing.xs,
+  },
+  wordmark: {
+    marginBottom: spacing.md,
+  },
   wmLine1: {
     fontFamily: fontFamily.display,
-    fontSize: 34,
-    lineHeight: 36,
-    color: colors.ink,
+    fontSize: 42,
+    lineHeight: 44,
+    color: colors.white,
     letterSpacing: -0.5,
   },
   wmLine2: {
     fontFamily: fontFamily.displayItalic,
-    fontSize: 34,
-    lineHeight: 36,
-    color: colors.accent,
+    fontSize: 42,
+    lineHeight: 44,
+    color: colors.accentLight,
+  },
+  tagline: {
+    fontFamily: fontFamily.bodyMedium,
+    fontSize: fontSize.lg,
+    color: colors.whiteAlpha70,
+    lineHeight: 24,
+  },
+
+  // ── Two-path choice
+  choiceWrap: {
+    paddingHorizontal: spacing.md,
+    marginTop: spacing.lg,
+    gap: spacing.sm,
+  },
+  primaryBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.ink,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
+    gap: spacing.md,
+    ...shadows.accentShadow,
+  },
+  primaryBtnIcon: {
+    width: 44,
+    height: 44,
+    backgroundColor: colors.accent,
+    borderRadius: borderRadius.md,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  btnTextWrap: {
+    flex: 1,
+  },
+  primaryBtnText: {
+    fontFamily: fontFamily.uiLabel,
+    fontSize: fontSize.lg,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+    color: colors.white,
+    marginBottom: 2,
+  },
+  primaryBtnSub: {
+    fontFamily: fontFamily.body,
+    fontSize: fontSize.caption,
+    color: colors.whiteAlpha60,
+  },
+  secondaryBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.white,
+    borderWidth: 2,
+    borderColor: colors.ink,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
+    gap: spacing.md,
+    ...shadows.medium,
+  },
+  secondaryBtnIcon: {
+    width: 44,
+    height: 44,
+    backgroundColor: colors.surfaceSecondary,
+    borderRadius: borderRadius.md,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  secondaryBtnText: {
+    fontFamily: fontFamily.uiLabel,
+    fontSize: fontSize.lg,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+    color: colors.ink,
+    marginBottom: 2,
+  },
+  secondaryBtnSub: {
+    fontFamily: fontFamily.body,
+    fontSize: fontSize.caption,
+    color: colors.textTertiary,
+  },
+
+  // ── Baseline test list
+  testHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.lg,
+    marginTop: spacing.lg,
+    marginBottom: spacing.sm,
+  },
+  testTitle: {
+    fontFamily: fontFamily.bodyBold,
+    fontSize: fontSize.xl,
+    color: colors.ink,
   },
   skipText: {
     fontFamily: fontFamily.bodyMedium,
-    fontSize: 15,
+    fontSize: fontSize.caption,
     color: colors.textTertiary,
     paddingVertical: spacing.sm,
   },
 
-  subtitle: {
-    fontFamily: fontFamily.body,
-    fontSize: 18,
-    color: colors.textSecondary,
+  // ── Progress
+  progressSection: {
     paddingHorizontal: spacing.lg,
-    marginBottom: spacing.lg,
+    marginBottom: spacing.md,
+    gap: spacing.xs,
+  },
+  progressBar: {
+    height: 8,
+    backgroundColor: colors.rule,
+    borderRadius: borderRadius.full,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: 8,
+    backgroundColor: colors.success,
+    borderRadius: borderRadius.full,
+  },
+  progressText: {
+    fontFamily: fontFamily.bodyMedium,
+    fontSize: fontSize.sm,
+    color: colors.textTertiary,
   },
 
-  // Region cards
+  // ── Region cards
   regionList: {
     paddingHorizontal: spacing.md,
     gap: spacing.sm,
@@ -227,32 +500,43 @@ const s = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: colors.white,
     borderWidth: 2,
-    borderColor: colors.ink,
+    borderColor: colors.rule,
     borderRadius: borderRadius.lg,
     padding: spacing.md,
     paddingHorizontal: spacing.md,
     gap: spacing.md,
   },
   regionCardDone: {
-    borderColor: colors.rule,
-    opacity: 0.7,
+    borderColor: colors.success,
+    backgroundColor: colors.successBg,
+  },
+  regionCardActive: {
+    borderColor: colors.ink,
+    ...shadows.small,
   },
   regionLeft: {
-    width: 32,
-    height: 32,
+    width: 36,
+    height: 36,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  regionDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+  regionNumberActive: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: colors.ink,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  regionNumberTextActive: {
+    fontFamily: fontFamily.uiLabel,
+    fontSize: fontSize.caption,
+    color: colors.white,
   },
   checkCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: colors.success,
     justifyContent: 'center',
     alignItems: 'center',
@@ -262,16 +546,16 @@ const s = StyleSheet.create({
   },
   regionName: {
     fontFamily: fontFamily.bodyBold,
-    fontSize: 17,
+    fontSize: fontSize.lg,
     color: colors.ink,
     marginBottom: 2,
   },
   regionNameDone: {
-    color: colors.textTertiary,
+    color: colors.success,
   },
   regionSub: {
     fontFamily: fontFamily.body,
-    fontSize: 14,
+    fontSize: fontSize.caption,
     color: colors.textTertiary,
     lineHeight: 18,
   },
@@ -282,34 +566,7 @@ const s = StyleSheet.create({
     textTransform: 'uppercase',
     color: colors.success,
   },
-
-  // Progress
-  progressWrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    marginTop: spacing.lg,
-    gap: spacing.sm,
-  },
-  progressBar: {
-    flex: 1,
-    height: 6,
-    backgroundColor: colors.rule,
-    borderRadius: 3,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: 6,
-    backgroundColor: colors.success,
-    borderRadius: 3,
-  },
-  progressText: {
-    fontFamily: fontFamily.uiLabel,
-    fontSize: 14,
-    color: colors.textTertiary,
-  },
-
-  // CTA
+  // ── CTA
   ctaWrap: {
     paddingHorizontal: spacing.md,
     marginTop: spacing.lg,
@@ -318,7 +575,7 @@ const s = StyleSheet.create({
   },
   allDoneText: {
     fontFamily: fontFamily.body,
-    fontSize: 16,
+    fontSize: fontSize.lg,
     color: colors.textSecondary,
   },
   startBtn: {
@@ -328,10 +585,11 @@ const s = StyleSheet.create({
     paddingHorizontal: spacing.xl,
     width: '100%',
     alignItems: 'center',
+    ...shadows.accentShadow,
   },
   startBtnText: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 19,
+    fontSize: fontSize.xl,
     letterSpacing: 1.5,
     textTransform: 'uppercase',
     color: colors.white,

@@ -178,6 +178,10 @@ const zh: typeof en = {
     overallGrade: '\u603b\u4f53\u7b49\u7ea7',
     moreToUnlock: '\u8fd8\u9700{count}\u4e2a\u624d\u80fd\u89e3\u9501',
     scoreDistribution: '\u5206\u6570\u5206\u5e03',
+    baselineLabel: '\u57fa\u7ebf: {pct}%',
+    improvementUp: '\u63d0\u5347{pct}%, \u7ee7\u7eed\u52a0\u6cb9!',
+    improvementSame: '\u4fdd\u6301\u7a33\u5b9a',
+    improvementDown: '\u8fd8\u5dee{pct}%, \u4f60\u53ef\u4ee5\u7684',
   },
 
   settings: {
@@ -320,6 +324,16 @@ const zh: typeof en = {
     skip: '\u8df3\u8fc7',
     next: '\u4e0b\u4e00\u4e2a\u5730\u533a',
     allDone: '\u5168\u90e8\u5b8c\u6210\uff0c\u505a\u5f97\u597d',
+    welcome: '\u6b22\u8fce\u6765\u5230',
+    tagline: '\u4f60\u5bf9\u4e16\u754c\u4e86\u89e3\u591a\u5c11?',
+    startPlayingNow: '\u5f00\u59cb\u6e38\u620f',
+    startPlayingDesc: '\u76f4\u63a5\u5f00\u59cb\u73a9',
+    testKnowledge: '\u6d4b\u8bd5\u4f60\u7684\u77e5\u8bc6',
+    testKnowledgeDesc: '\u8bbe\u5b9a\u57fa\u51c6\uff0c\u7136\u540e\u89c1\u8bc1\u81ea\u5df1\u7684\u8fdb\u6b65',
+    baselineMotivation: '\u5b8c\u6210\u5168\u90e85\u4e2a\u4ee5\u8ffd\u8e2a\u4f60\u7684\u63d0\u5347',
+    baselineProgress: '\u57fa\u7ebf\u6d4b\u8bd5\u8fdb\u5ea6',
+    continueBaseline: '\u7ee7\u7eed',
+    regionsComplete: '{count}/{total}\u4e2a\u5730\u533a',
   },
 
   modes: {

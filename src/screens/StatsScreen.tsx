@@ -15,7 +15,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
 import { colors, spacing, fontFamily, fontSize, borderRadius } from '../utils/theme';
 import { UserStats, GameMode, CategoryId } from '../types';
-import { getStats, getFlagStats, FlagStats, getDayStreak, getBadgeData, getMissedFlagIds, BadgeData, getSupportData, getGameHistory, GameHistoryEntry } from '../utils/storage';
+import { getStats, getFlagStats, FlagStats, getDayStreak, getBadgeData, getMissedFlagIds, BadgeData, getSupportData, getGameHistory, GameHistoryEntry, getBaselineData, BaselineData } from '../utils/storage';
 import { getAllFlags, getTotalFlagCount } from '../data';
 import { getGrade } from '../utils/gameEngine';
 import { t } from '../utils/i18n';
@@ -51,6 +51,7 @@ export default function StatsScreen() {
   const [weakFlagCount, setWeakFlagCount] = useState(0);
   const [adsWatched, setAdsWatched] = useState(0);
   const [gameHistory, setGameHistory] = useState<GameHistoryEntry[]>([]);
+  const [baseline, setBaseline] = useState<BaselineData | null>(null);
 
   // ── Animation values ──
   const heroFade = useRef(new Animated.Value(0)).current;
@@ -98,8 +99,8 @@ export default function StatsScreen() {
 
       async function loadData() {
         try {
-          const [s, fs, ds, bd, missed, gh, support] = await Promise.all([
-            getStats(), getFlagStats(), getDayStreak(), getBadgeData(), getMissedFlagIds(), getGameHistory(), getSupportData(),
+          const [s, fs, ds, bd, missed, gh, support, bl] = await Promise.all([
+            getStats(), getFlagStats(), getDayStreak(), getBadgeData(), getMissedFlagIds(), getGameHistory(), getSupportData(), getBaselineData(),
           ]);
           if (!cancelled) {
             setStats(s);
@@ -109,6 +110,7 @@ export default function StatsScreen() {
             setWeakFlagCount(missed.length);
             setGameHistory(gh);
             setAdsWatched(support.totalAdsWatched);
+            setBaseline(bl);
 
             // ── Kick off animation sequence after data loads ──
             const acc = s.totalAnswered > 0
@@ -476,8 +478,51 @@ export default function StatsScreen() {
             <View style={s.sectionHeader}>
               <Text style={s.sectionTitle}>{t('categories.byRegion')}</Text>
             </View>
+
+            {/* Dedicated region improvement cards (when baseline exists) */}
+            {regionData.some(({ id }) => baseline?.regions[id as keyof typeof baseline.regions]) && (
+              <View style={s.regionCards}>
+                {regionData.map(({ id, pct }) => {
+                  const baselineResult = baseline?.regions[id as keyof typeof baseline.regions];
+                  if (!baselineResult) return null;
+                  const baselinePct = baselineResult.accuracy;
+                  const diff = pct - baselinePct;
+                  const isUp = diff > 0;
+                  const isDown = diff < 0;
+                  return (
+                    <View key={id} style={s.regionImprovCard}>
+                      <Text style={s.regionImprovName}>{t(`categories.${id}`)}</Text>
+                      <View style={s.regionImprovStats}>
+                        <View style={s.regionImprovCol}>
+                          <Text style={s.regionImprovLabel}>{t('stats.baselineLabel', { pct: baselinePct })}</Text>
+                        </View>
+                        <View style={s.regionImprovArrow}>
+                          <Text style={s.regionImprovArrowText}>{isUp ? '\u2192' : isDown ? '\u2192' : '='}</Text>
+                        </View>
+                        <View style={s.regionImprovCol}>
+                          <Text style={[s.regionImprovNow, pct >= 70 && s.regionImprovNowGood]}>{pct}%</Text>
+                        </View>
+                      </View>
+                      <Text style={[
+                        s.regionImprovDiff,
+                        isUp && s.regionImprovDiffUp,
+                        isDown && s.regionImprovDiffDown,
+                      ]}>
+                        {isUp
+                          ? t('stats.improvementUp', { pct: diff })
+                          : isDown
+                          ? t('stats.improvementDown', { pct: Math.abs(diff) })
+                          : t('stats.improvementSame')}
+                      </Text>
+                    </View>
+                  );
+                })}
+              </View>
+            )}
+
+            {/* Standard bar chart */}
             <View style={s.modeBreakdown}>
-              {regionData.map(({ id, pct, correct, total }) => {
+              {regionData.map(({ id, pct }) => {
                 const barWidth = Math.max(pct, 2);
                 return (
                   <View key={id} style={s.modeRow}>
@@ -886,6 +931,69 @@ const s = StyleSheet.create({
   },
   modePctGood: {
     color: colors.success,
+  },
+  // ── Region improvement cards
+  regionCards: {
+    gap: spacing.sm,
+    marginBottom: spacing.sm,
+  },
+  regionImprovCard: {
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: 14,
+  },
+  regionImprovName: {
+    fontFamily: fontFamily.uiLabel,
+    fontSize: fontSize.xxs,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    color: colors.textTertiary,
+    marginBottom: spacing.sm,
+  },
+  regionImprovStats: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginBottom: spacing.xs,
+  },
+  regionImprovCol: {
+    flex: 1,
+  },
+  regionImprovLabel: {
+    fontFamily: fontFamily.body,
+    fontSize: fontSize.caption,
+    color: colors.textTertiary,
+  },
+  regionImprovArrow: {
+    paddingHorizontal: spacing.xs,
+  },
+  regionImprovArrowText: {
+    fontFamily: fontFamily.body,
+    fontSize: fontSize.body,
+    color: colors.textTertiary,
+  },
+  regionImprovNow: {
+    fontFamily: fontFamily.display,
+    fontSize: fontSize.heading,
+    color: colors.ink,
+    letterSpacing: -0.5,
+    textAlign: 'right',
+  },
+  regionImprovNowGood: {
+    color: colors.success,
+  },
+  regionImprovDiff: {
+    fontFamily: fontFamily.bodyMedium,
+    fontSize: fontSize.caption,
+    color: colors.textTertiary,
+  },
+  regionImprovDiffUp: {
+    color: colors.success,
+  },
+  regionImprovDiffDown: {
+    color: colors.error,
   },
 
   // ── Section
