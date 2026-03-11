@@ -386,7 +386,7 @@ const de: typeof en = {
     challengeDesc: 'Teile dein Spiel, damit ein Freund dieselben Flaggen probieren kann',
     enterName: 'Dein Name',
     enterNameDesc: 'Dieser Name wird deinem Gegner angezeigt.',
-    shareMessage: 'Ich hab {correct}/{total} bei Flag That geschafft. Schaffst du mehr?',
+    shareMessage: '{correct}/{total} bei Flag That - schaffst du mehr?',
     headToHead: 'Kopf an Kopf',
     you: 'Du',
     youWin: 'Du gewinnst!',

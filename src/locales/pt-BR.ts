@@ -385,7 +385,7 @@ const ptBR: typeof en = {
     challengeDesc: 'Compartilhe sua partida para que um amigo tente as mesmas bandeiras',
     enterName: 'Seu nome',
     enterNameDesc: 'Este nome ser\u00e1 mostrado ao seu oponente.',
-    shareMessage: 'Fiz {correct}/{total} no Flag That. Consegue me superar?',
+    shareMessage: '{correct}/{total} no Flag That - supera essa!',
     headToHead: 'Frente a frente',
     you: 'Voc\u00ea',
     youWin: 'Voc\u00ea venceu!',

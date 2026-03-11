@@ -385,7 +385,7 @@ const zh: typeof en = {
     challengeDesc: '\u5206\u4eab\u4f60\u7684\u6e38\u620f\uff0c\u8ba9\u670b\u53cb\u5c1d\u8bd5\u76f8\u540c\u7684\u56fd\u65d7',
     enterName: '\u4f60\u7684\u540d\u5b57',
     enterNameDesc: '\u6b64\u540d\u5b57\u5c06\u663e\u793a\u7ed9\u4f60\u7684\u5bf9\u624b\u3002',
-    shareMessage: '\u6211\u5728 Flag That \u4e2d\u7b54\u5bf9\u4e86 {correct}/{total}\u3002\u4f60\u80fd\u8d85\u8d87\u6211\u5417\uff1f',
+    shareMessage: 'Flag That {correct}/{total} - \u8d85\u8d87\u6211\uff1f',
     headToHead: '\u5bf9\u51b3',
     you: '\u4f60',
     youWin: '\u4f60\u8d62\u4e86\uff01',

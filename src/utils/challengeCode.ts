@@ -21,21 +21,17 @@ export type DecodeResult =
   | { status: 'unsupported' }
   | { status: 'invalid' };
 
-// ── V2 compact format ──
-// Pipe-delimited: name|modeIndex|timeLimit|flagIds|correctBits|times
-// - modeIndex: single digit index into CHALLENGE_MODES
-// - flagIds: joined 2-char codes (e.g. "usgbfrde")
-// - correctBits: binary string "10110..." (1=correct, 0=wrong)
-// - times: comma-separated deciseconds (e.g. "23,45,18" for 2.3s, 4.5s, 1.8s)
+// ── V3 ultra-compact format ──
+// "FT3-" + urlSafeBase64(name|modeIdx|timeLimit|flagIds|packedResults)
+// packedResults: 2-char base36 per flag. 0 = wrong, >0 = correct (deciseconds + 1).
+// This merges correctness + timing into one field, no separators needed.
 
 const MODE_INDEX = new Map(CHALLENGE_MODES.map((m, i) => [m, i]));
 const INDEX_MODE = new Map(CHALLENGE_MODES.map((m, i) => [i, m]));
 
 /**
  * Encode challenge data into a shareable string.
- * V3 format: "FT3-" + urlSafeBase64(compact pipe-delimited string)
- * URL-safe: no +/= chars, safe to embed in URLs without encoding.
- * Returns null if encoding fails (e.g. invalid flag IDs).
+ * V3: "FT3-" + urlSafeBase64(compact payload). URL-safe, no encoding needed.
  */
 export function encodeChallenge(data: ChallengeData): string | null {
   if (data.flagIds.some((id) => id.length !== 2)) {
@@ -46,9 +42,12 @@ export function encodeChallenge(data: ChallengeData): string | null {
     return null;
   }
   const flags = data.flagIds.join('');
-  const bits = data.hostResults.map((r) => r.correct ? '1' : '0').join('');
-  const times = data.hostResults.map((r) => Math.round(r.timeMs / 100)).join(',');
-  const payload = `${data.hostName}|${modeIdx}|${data.timeLimit}|${flags}|${bits}|${times}`;
+  // Pack results: 0 = wrong, deciseconds+1 = correct (2 chars base36 each)
+  const packed = data.hostResults.map((r) => {
+    const val = r.correct ? Math.round(r.timeMs / 100) + 1 : 0;
+    return val.toString(36).padStart(2, '0');
+  }).join('');
+  const payload = `${data.hostName}|${modeIdx}|${data.timeLimit}|${flags}|${packed}`;
   const encoded = toUrlSafeBase64(payload);
   return `FT3-${encoded}`;
 }
@@ -84,15 +83,38 @@ export function decodeChallenge(code: string): DecodeResult {
 
 function decodeV3(encoded: string): ChallengeData | null {
   const payload = fromUrlSafeBase64(encoded);
-  return decodePayload(payload);
+  const parts = payload.split('|');
+  if (parts.length !== 5) return null;
+
+  const [hostName, modeIdxStr, timeLimitStr, flags, packed] = parts;
+  if (!hostName || hostName.length > 50 || flags.length === 0 || flags.length % 2 !== 0) return null;
+
+  const modeIdx = parseInt(modeIdxStr, 10);
+  const mode = INDEX_MODE.get(modeIdx);
+  if (!mode) return null;
+
+  const timeLimit = parseInt(timeLimitStr, 10);
+  if (isNaN(timeLimit)) return null;
+
+  const flagIds: string[] = [];
+  for (let i = 0; i < flags.length; i += 2) {
+    flagIds.push(flags.slice(i, i + 2));
+  }
+
+  // Each result is 2 chars base36. 0 = wrong, >0 = correct (val-1 = deciseconds)
+  if (packed.length !== flagIds.length * 2) return null;
+  const hostResults = flagIds.map((_, i) => {
+    const val = parseInt(packed.slice(i * 2, i * 2 + 2), 36);
+    return val === 0
+      ? { correct: false, timeMs: 0 }
+      : { correct: true, timeMs: (val - 1) * 100 };
+  });
+
+  return { hostName, mode, timeLimit, flagIds, hostResults };
 }
 
 function decodeV2(encoded: string): ChallengeData | null {
   const payload = fromBase64(encoded);
-  return decodePayload(payload);
-}
-
-function decodePayload(payload: string): ChallengeData | null {
   const parts = payload.split('|');
   if (parts.length !== 6) return null;
 
@@ -112,7 +134,6 @@ function decodePayload(payload: string): ChallengeData | null {
   }
 
   if (bits.length !== flagIds.length) return null;
-
   const times = timesStr.split(',');
   if (times.length !== flagIds.length) return null;
 

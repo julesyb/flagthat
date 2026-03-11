@@ -385,7 +385,7 @@ const es: typeof en = {
     challengeDesc: 'Comparte tu partida para que un amigo pruebe las mismas banderas',
     enterName: 'Tu nombre',
     enterNameDesc: 'Este nombre se mostrar\u00e1 a tu oponente.',
-    shareMessage: 'Hice {correct}/{total} en Flag That. \u00bfPuedes superarme?',
+    shareMessage: '{correct}/{total} en Flag That - supera eso!',
     headToHead: 'Cara a cara',
     you: 'T\u00fa',
     youWin: '\u00a1Ganaste!',
