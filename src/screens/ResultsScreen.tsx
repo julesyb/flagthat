@@ -43,19 +43,21 @@ export default function ResultsScreen({ route, navigation }: Props) {
   const isDaily = config.mode === 'daily';
   const isBaseline = config.mode === 'baseline';
 
+  const skipAds = isDaily || isBaseline || reviewOnly;
   const interstitial = useInterstitialAdUnit();
   const [adEligible, setAdEligible] = useState(false);
   const pendingNavRef = useRef<(() => void) | null>(null);
 
-  // Load ad if frequency cap allows
+  // Load ad if frequency cap allows (skip for daily/baseline/review)
   useEffect(() => {
+    if (skipAds) return;
     shouldShowAd().then((eligible) => {
       setAdEligible(eligible);
       if (eligible) {
         interstitial.load();
       }
     });
-  }, [interstitial.load]);
+  }, [interstitial.load, skipAds]);
 
   // When ad closes, execute pending navigation
   useEffect(() => {
@@ -72,7 +74,9 @@ export default function ResultsScreen({ route, navigation }: Props) {
       updateStats(correct, results.length, streak, config.mode, config.category);
       updateFlagResults(results);
       updateLastGameBadgeFlags(correct, results.length);
-      incrementGameCount();
+      if (!skipAds) {
+        incrementGameCount();
+      }
       if (isDaily) {
         saveDailyChallenge(results);
         incrementDailyChallenges();
