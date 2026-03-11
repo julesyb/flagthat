@@ -141,6 +141,11 @@ const ptBR: typeof en = {
     firstGame: 'Primeiro jogo, legal',
     practiceWeak: 'Praticar bandeiras fracas',
     flagsToReview: '{count} para revisar',
+    beatYourScore: 'Supere sua marca',
+    keepTheStreak: 'Manter a sequ\u00eancia',
+    tryHardMode: 'Tentar dif\u00edcil',
+    playAgain: 'Jogar de novo',
+    almostThere: 'Mais {remaining} para {badge}',
   },
 
   stats: {
@@ -175,6 +180,7 @@ const ptBR: typeof en = {
     practiceNow: 'Praticar agora',
     byModeLabel: 'Por modo',
     overallGrade: 'Nota geral',
+    moreToUnlock: 'Faltam {count} para desbloquear',
   },
 
   settings: {

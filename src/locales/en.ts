@@ -146,6 +146,11 @@ const en = {
     firstGame: 'First game, nice',
     practiceWeak: 'Practice Weak Flags',
     flagsToReview: '{count} to review',
+    beatYourScore: 'Beat Your Score',
+    keepTheStreak: 'Keep the Streak',
+    tryHardMode: 'Try Hard Mode',
+    playAgain: 'Play Again',
+    almostThere: '{remaining} more for {badge}',
   },
 
   // ─── Stats Screen ────────────────────────────────────────
@@ -181,6 +186,7 @@ const en = {
     practiceNow: 'Practice Now',
     byModeLabel: 'By Mode',
     overallGrade: 'Overall Grade',
+    moreToUnlock: '{count} more to unlock',
   },
 
   // ─── Settings Screen ────────────────────────────────────

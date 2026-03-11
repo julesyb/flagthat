@@ -141,6 +141,11 @@ const es: typeof en = {
     firstGame: 'Primera partida, genial',
     practiceWeak: 'Practicar banderas d\u00e9biles',
     flagsToReview: '{count} para repasar',
+    beatYourScore: 'Supera tu marca',
+    keepTheStreak: 'Mantener la racha',
+    tryHardMode: 'Probar dif\u00edcil',
+    playAgain: 'Jugar de nuevo',
+    almostThere: '{remaining} m\u00e1s para {badge}',
   },
 
   stats: {
@@ -175,6 +180,7 @@ const es: typeof en = {
     practiceNow: 'Practicar ahora',
     byModeLabel: 'Por modo',
     overallGrade: 'Nota general',
+    moreToUnlock: '{count} m\u00e1s para desbloquear',
   },
 
   settings: {

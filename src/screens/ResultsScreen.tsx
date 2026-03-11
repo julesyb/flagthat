@@ -256,6 +256,18 @@ export default function ResultsScreen({ route, navigation }: Props) {
     navigation.replace((map[config.mode] || 'Game') as 'Game', { config });
   };
 
+  // Contextual Play CTA text
+  const playCtaText = isDaily
+    ? t('common.home')
+    : overallStats && accuracy < (overallStats.totalAnswered > 0
+        ? Math.round((overallStats.totalCorrect / overallStats.totalAnswered) * 100) : 100)
+      ? t('results.beatYourScore')
+      : dayStreakCount > 0
+        ? t('results.keepTheStreak')
+        : config.mode === 'easy' && accuracy >= 90
+          ? t('results.tryHardMode')
+          : t('results.playAgain');
+
   const progressPct = totalFlags > 0 ? Math.round((countriesSeen / totalFlags) * 100) : 0;
   const accDiff = prevAccuracy !== null ? accuracy - prevAccuracy : null;
   const accInsight = prevAccuracy === null
@@ -432,7 +444,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
             <Text style={st.secondaryButtonText}>{t('common.share')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={st.primaryButton} onPress={playAgain} activeOpacity={0.7}>
-            <Text style={st.primaryButtonText}>{isDaily ? t('common.home') : t('common.play')}</Text>
+            <Text style={st.primaryButtonText}>{playCtaText}</Text>
           </TouchableOpacity>
           {!isDaily && (
             <TouchableOpacity style={st.secondaryButton} onPress={goHome} activeOpacity={0.7}>

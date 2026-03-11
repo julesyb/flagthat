@@ -141,6 +141,11 @@ const fr: typeof en = {
     firstGame: 'Premi\u00e8re partie, bravo',
     practiceWeak: 'R\u00e9viser les drapeaux faibles',
     flagsToReview: '{count} \u00e0 r\u00e9viser',
+    beatYourScore: 'Battez votre score',
+    keepTheStreak: 'Gardez la s\u00e9rie',
+    tryHardMode: 'Essayer difficile',
+    playAgain: 'Rejouer',
+    almostThere: 'Encore {remaining} pour {badge}',
   },
 
   stats: {
@@ -175,6 +180,7 @@ const fr: typeof en = {
     practiceNow: 'R\u00e9viser maintenant',
     byModeLabel: 'Par mode',
     overallGrade: 'Note g\u00e9n\u00e9rale',
+    moreToUnlock: 'Encore {count} pour d\u00e9bloquer',
   },
 
   settings: {

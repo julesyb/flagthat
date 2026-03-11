@@ -141,6 +141,11 @@ const de: typeof en = {
     firstGame: 'Erstes Spiel, toll',
     practiceWeak: 'Schwache Flaggen \u00fcben',
     flagsToReview: '{count} zu wiederholen',
+    beatYourScore: 'Schlag deinen Rekord',
+    keepTheStreak: 'Serie halten',
+    tryHardMode: 'Schwer versuchen',
+    playAgain: 'Nochmal spielen',
+    almostThere: 'Noch {remaining} f\u00fcr {badge}',
   },
 
   stats: {
@@ -175,6 +180,7 @@ const de: typeof en = {
     practiceNow: 'Jetzt \u00fcben',
     byModeLabel: 'Nach Modus',
     overallGrade: 'Gesamtnote',
+    moreToUnlock: 'Noch {count} zum Freischalten',
   },
 
   settings: {

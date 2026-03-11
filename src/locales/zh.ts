@@ -141,6 +141,11 @@ const zh: typeof en = {
     firstGame: '\u7b2c\u4e00\u573a, \u4e0d\u9519',
     practiceWeak: '\u7ec3\u4e60\u5f31\u9879\u65d7\u5e1c',
     flagsToReview: '{count}\u4e2a\u5f85\u590d\u4e60',
+    beatYourScore: '\u8d85\u8d8a\u4f60\u7684\u8bb0\u5f55',
+    keepTheStreak: '\u4fdd\u6301\u8fde\u80dc',
+    tryHardMode: '\u8bd5\u8bd5\u56f0\u96be\u6a21\u5f0f',
+    playAgain: '\u518d\u6765\u4e00\u5c40',
+    almostThere: '\u8fd8\u5dee{remaining}\u5c31\u80fd\u83b7\u5f97{badge}',
   },
 
   stats: {
@@ -175,6 +180,7 @@ const zh: typeof en = {
     practiceNow: '\u7acb\u5373\u7ec3\u4e60',
     byModeLabel: '\u6309\u6a21\u5f0f',
     overallGrade: '\u603b\u4f53\u7b49\u7ea7',
+    moreToUnlock: '\u8fd8\u9700{count}\u4e2a\u624d\u80fd\u89e3\u9501',
   },
 
   settings: {
