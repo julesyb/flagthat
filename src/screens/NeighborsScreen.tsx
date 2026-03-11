@@ -9,7 +9,7 @@ import {
   Animated,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily, buttons, borderRadius } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius } from '../utils/theme';
 import { hapticTap, hapticCorrect, hapticWrong, playWrongSound } from '../utils/feedback';
 import { updateStats, updateFlagResults } from '../utils/storage';
 import { shuffleArray, getStreakFromResults } from '../utils/gameEngine';
@@ -304,7 +304,7 @@ const styles = StyleSheet.create({
   },
   exitButton: { padding: spacing.sm, width: 60 },
   exitText: {
-    fontSize: 13,
+    fontSize: fontSize.caption,
     fontFamily: fontFamily.uiLabelMedium,
     letterSpacing: 0.5,
     color: colors.textTertiary,
@@ -318,7 +318,7 @@ const styles = StyleSheet.create({
   content: { padding: spacing.lg, paddingBottom: 120 },
   prompt: { ...typography.headingUpper, color: colors.text, textAlign: 'center', marginBottom: spacing.lg },
   flagCenter: { alignItems: 'center', marginBottom: spacing.lg },
-  countryName: { fontFamily: fontFamily.display, fontSize: 22, color: colors.ink, marginTop: spacing.sm },
+  countryName: { fontFamily: fontFamily.display, fontSize: fontSize.heading, color: colors.ink, marginTop: spacing.sm },
   optionsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, justifyContent: 'center' },
   optionCard: {
     width: '30%',
@@ -335,12 +335,12 @@ const styles = StyleSheet.create({
   optionCorrect: { borderColor: colors.success, backgroundColor: colors.successBg },
   optionWrong: { borderColor: colors.error, backgroundColor: colors.errorBg },
   optionMissed: { borderColor: colors.warning, backgroundColor: colors.warningBg },
-  optionName: { fontFamily: fontFamily.bodyMedium, fontSize: 11, color: colors.textSecondary, textAlign: 'center' },
+  optionName: { fontFamily: fontFamily.bodyMedium, fontSize: fontSize.xxs, color: colors.textSecondary, textAlign: 'center' },
   optionNameCorrect: { color: colors.success, fontFamily: fontFamily.bodyBold },
   optionNameMissed: { color: colors.warning, fontFamily: fontFamily.bodyBold },
   optionNameWrong: { color: colors.error },
-  missedLabel: { fontFamily: fontFamily.uiLabel, fontSize: 8, letterSpacing: 1, color: colors.warning, textTransform: 'uppercase' },
-  wrongLabel: { fontFamily: fontFamily.uiLabel, fontSize: 8, letterSpacing: 0.5, color: colors.error, textTransform: 'uppercase' },
+  missedLabel: { fontFamily: fontFamily.uiLabel, fontSize: fontSize.xxs, letterSpacing: 1, color: colors.warning, textTransform: 'uppercase' },
+  wrongLabel: { fontFamily: fontFamily.uiLabel, fontSize: fontSize.xxs, letterSpacing: 0.5, color: colors.error, textTransform: 'uppercase' },
   resultBadgeCircle: {
     position: 'absolute',
     top: spacing.xs,
@@ -354,7 +354,7 @@ const styles = StyleSheet.create({
   resultBadgeCorrect: { backgroundColor: colors.success },
   resultBadgeMissed: { backgroundColor: colors.warning },
   resultBadgeWrong: { backgroundColor: colors.error },
-  resultBadgeText: { fontFamily: fontFamily.uiLabel, fontSize: 12, color: colors.white },
+  resultBadgeText: { fontFamily: fontFamily.uiLabel, fontSize: fontSize.sm, color: colors.white },
   checkBadge: {
     position: 'absolute',
     top: spacing.xs,
@@ -380,7 +380,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
     gap: spacing.xs,
   },
-  neighborChipText: { fontFamily: fontFamily.bodyMedium, fontSize: 12, color: colors.success },
+  neighborChipText: { fontFamily: fontFamily.bodyMedium, fontSize: fontSize.sm, color: colors.success },
   bottomBar: {
     position: 'absolute',
     bottom: 0, left: 0, right: 0,

@@ -29,7 +29,7 @@ import CapitalConnectionScreen from './src/screens/CapitalConnectionScreen';
 import ErrorBoundary from './src/components/ErrorBoundary';
 import { ChevronLeftIcon } from './src/components/Icons';
 import { RootStackParamList } from './src/types/navigation';
-import { colors, fontFamily } from './src/utils/theme';
+import { colors, fontFamily, fontSize } from './src/utils/theme';
 import { configureNotificationHandler, syncNotificationSchedule } from './src/utils/notifications';
 import { initLocale, t } from './src/utils/i18n';
 
@@ -56,7 +56,7 @@ const screenOptions = {
   headerTintColor: colors.text,
   headerTitleStyle: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 18,
+    fontSize: fontSize.lg,
     letterSpacing: 0.8,
     textTransform: 'uppercase' as const,
   },
@@ -210,7 +210,7 @@ const loadingStyles = StyleSheet.create({
     gap: 16,
   },
   text: {
-    fontSize: 13,
+    fontSize: fontSize.caption,
     color: colors.slate,
     letterSpacing: 3,
     textTransform: 'uppercase',

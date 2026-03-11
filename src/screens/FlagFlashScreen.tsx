@@ -9,7 +9,7 @@ import {
   Platform,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily, buttons, borderRadius, nav } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius, nav } from '../utils/theme';
 import { GameQuestion, GameResult } from '../types';
 import { generateQuestions } from '../utils/gameEngine';
 import {
@@ -501,7 +501,7 @@ const styles = StyleSheet.create({
     padding: spacing.xl,
   },
   tutorialTitle: {
-    fontSize: 42,
+    fontSize: fontSize.gameTitle,
     fontFamily: fontFamily.display,
     color: colors.white,
     marginBottom: spacing.xs,
@@ -577,7 +577,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xl,
   },
   countdownNumber: {
-    fontSize: 120,
+    fontSize: fontSize.countdown,
     fontFamily: fontFamily.display,
     color: colors.white,
   },
@@ -605,7 +605,7 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   flagName: {
-    fontSize: 42,
+    fontSize: fontSize.gameTitle,
     fontFamily: fontFamily.display,
     color: colors.white,
     textAlign: 'center',
@@ -613,7 +613,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
   },
   feedbackText: {
-    fontSize: 56,
+    fontSize: fontSize.gameFeedback,
     fontFamily: fontFamily.display,
     color: colors.white,
     textAlign: 'center',
@@ -651,7 +651,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xl,
   },
   timerText: {
-    fontSize: 28,
+    fontSize: fontSize.title,
     fontFamily: fontFamily.display,
     color: colors.white,
   },

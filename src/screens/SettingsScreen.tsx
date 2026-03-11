@@ -15,7 +15,7 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
 import Constants from 'expo-constants';
-import { colors, spacing, typography, fontFamily, borderRadius } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, fontSize, borderRadius } from '../utils/theme';
 import { getSettings, saveSettings, AppSettings, resetStats } from '../utils/storage';
 import {
   setSoundsEnabled,
@@ -318,7 +318,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 10,
+    fontSize: fontSize.xxs,
     letterSpacing: 1.2,
     textTransform: 'uppercase',
     color: colors.textTertiary,
@@ -350,7 +350,7 @@ const styles = StyleSheet.create({
   settingLabel: {
     ...typography.bodyBold,
     color: colors.text,
-    fontSize: 15,
+    fontSize: fontSize.body,
   },
   settingDesc: {
     ...typography.caption,
@@ -362,7 +362,7 @@ const styles = StyleSheet.create({
     color: colors.textTertiary,
   },
   settingChevron: {
-    fontSize: 22,
+    fontSize: fontSize.heading,
     color: colors.textTertiary,
     lineHeight: 22,
   },
@@ -372,7 +372,7 @@ const styles = StyleSheet.create({
   settingTimeValue: {
     ...typography.bodyBold,
     color: colors.text,
-    fontSize: 15,
+    fontSize: fontSize.body,
     letterSpacing: 0.5,
   },
   resetButton: {

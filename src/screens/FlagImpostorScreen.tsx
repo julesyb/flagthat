@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import Svg, { Rect, Path } from 'react-native-svg';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily, buttons, borderRadius } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius } from '../utils/theme';
 import { hapticTap, hapticCorrect, hapticWrong, playWrongSound } from '../utils/feedback';
 import { updateStats, updateFlagResults } from '../utils/storage';
 import { shuffleArray, getStreakFromResults } from '../utils/gameEngine';
@@ -388,7 +388,7 @@ const styles = StyleSheet.create({
   },
   exitButton: { padding: spacing.sm, width: 60 },
   exitText: {
-    fontSize: 13,
+    fontSize: fontSize.caption,
     fontFamily: fontFamily.uiLabelMedium,
     letterSpacing: 0.5,
     color: colors.textTertiary,
@@ -424,9 +424,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   revealInfo: { alignItems: 'center', gap: spacing.xxs },
-  fakeLabel: { fontFamily: fontFamily.uiLabel, fontSize: 14, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase' },
-  realName: { fontFamily: fontFamily.bodyBold, fontSize: 13, color: colors.ink, textAlign: 'center' },
-  realRegion: { fontFamily: fontFamily.body, fontSize: 11, color: colors.textTertiary },
+  fakeLabel: { fontFamily: fontFamily.uiLabel, fontSize: fontSize.caption, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase' },
+  realName: { fontFamily: fontFamily.bodyBold, fontSize: fontSize.caption, color: colors.ink, textAlign: 'center' },
+  realRegion: { fontFamily: fontFamily.body, fontSize: fontSize.xxs, color: colors.textTertiary },
   badge: {
     position: 'absolute',
     top: spacing.sm,
@@ -449,7 +449,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.xs,
   },
-  reasonTitle: { fontFamily: fontFamily.uiLabel, fontSize: 16, letterSpacing: 1, color: colors.ink, textTransform: 'uppercase' },
+  reasonTitle: { fontFamily: fontFamily.uiLabel, fontSize: fontSize.body, letterSpacing: 1, color: colors.ink, textTransform: 'uppercase' },
   reasonText: { ...typography.caption, color: colors.textSecondary, textAlign: 'center' },
   bottomBar: {
     position: 'absolute',

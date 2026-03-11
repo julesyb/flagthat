@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { colors, fontFamily, spacing } from '../utils/theme';
+import { colors, fontFamily, fontSize, spacing } from '../utils/theme';
 import { LightningIcon, CrosshairIcon, BarChartIcon, GlobeIcon } from './Icons';
 import { t } from '../utils/i18n';
 
@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 10,
+    fontSize: fontSize.xxs,
     letterSpacing: 1,
     textTransform: 'uppercase',
     color: colors.textTertiary,

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, ActivityIndicator, useWindowDimensions } from 'react-native';
 import { Image } from 'expo-image';
-import { colors, fontFamily, borderRadius } from '../utils/theme';
+import { colors, fontFamily, fontSize, borderRadius } from '../utils/theme';
 
 interface FlagImageProps {
   countryCode: string;
@@ -118,7 +118,7 @@ export function FlagImageSmall({ countryCode, emoji }: { countryCode: string; em
       {!loaded && (
         <View style={[styles.placeholder, { width: 56, height: 37 }]}>
           {error ? (
-            <Text style={[styles.errorText, { fontSize: 10 }]}>{countryCode.toUpperCase()}</Text>
+            <Text style={[styles.errorText, { fontSize: fontSize.xxs }]}>{countryCode.toUpperCase()}</Text>
           ) : (
             <ActivityIndicator size="small" color={colors.textTertiary} />
           )}
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontFamily: fontFamily.uiLabelMedium,
-    fontSize: 12,
+    fontSize: fontSize.sm,
     letterSpacing: 1,
     color: colors.textTertiary,
     textAlign: 'center',

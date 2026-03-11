@@ -10,7 +10,7 @@ import {
   Share,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily, buttons, borderRadius } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius } from '../utils/theme';
 import { calculateAccuracy, getStreakFromResults, getGrade, generateDailyShareGrid, getDailyNumber } from '../utils/gameEngine';
 import { updateStats, updateFlagResults, saveDailyChallenge, incrementDailyChallenges, updateLastGameBadgeFlags, markShared } from '../utils/storage';
 import { t } from '../utils/i18n';
@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
     marginVertical: spacing.lg,
   },
   grade: {
-    fontSize: 72,
+    fontSize: fontSize.grade,
     fontFamily: fontFamily.display,
     letterSpacing: -1,
   },
@@ -409,7 +409,7 @@ const styles = StyleSheet.create({
   },
   dailyGridTitle: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 12,
+    fontSize: fontSize.sm,
     letterSpacing: 1.5,
     textTransform: 'uppercase',
     color: colors.whiteAlpha45,
@@ -417,7 +417,7 @@ const styles = StyleSheet.create({
   },
   dailyGridScore: {
     fontFamily: fontFamily.display,
-    fontSize: 36,
+    fontSize: fontSize.stat,
     color: colors.white,
     marginBottom: spacing.md,
   },

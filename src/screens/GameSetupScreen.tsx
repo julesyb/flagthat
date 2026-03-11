@@ -8,7 +8,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily, buttons, borderRadius } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius } from '../utils/theme';
 import {
   GameMode,
   DisplayMode,
@@ -555,7 +555,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.ink,
   },
   modeIconText: {
-    fontSize: 16,
+    fontSize: fontSize.body,
     fontFamily: fontFamily.uiLabel,
     color: colors.textSecondary,
   },
@@ -635,7 +635,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.ink,
   },
   categoryIconText: {
-    fontSize: 11,
+    fontSize: fontSize.xxs,
     fontFamily: fontFamily.uiLabel,
     color: colors.textSecondary,
     letterSpacing: 0.5,
@@ -656,7 +656,7 @@ const styles = StyleSheet.create({
   categoryCount: {
     ...typography.caption,
     color: colors.textTertiary,
-    fontSize: 11,
+    fontSize: fontSize.xxs,
   },
   categoryCountActive: {
     color: colors.slate,

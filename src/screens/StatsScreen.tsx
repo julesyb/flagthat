@@ -11,7 +11,7 @@ import {
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
-import { colors, spacing, fontFamily, borderRadius } from '../utils/theme';
+import { colors, spacing, fontFamily, fontSize, borderRadius } from '../utils/theme';
 import { UserStats } from '../types';
 import { getStats, getFlagStats, FlagStats, getDayStreak, getBadgeData, getMissedFlagIds, BadgeData } from '../utils/storage';
 import { getAllFlags, getTotalFlagCount } from '../data';
@@ -304,7 +304,7 @@ export default function StatsScreen() {
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  loadingText: { fontFamily: fontFamily.body, fontSize: 18, color: colors.textSecondary },
+  loadingText: { fontFamily: fontFamily.body, fontSize: fontSize.lg, color: colors.textSecondary },
   content: { padding: spacing.md, paddingBottom: spacing.xxl },
 
   // ── Tile Grid
@@ -325,30 +325,30 @@ const s = StyleSheet.create({
   },
   tileLabel: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 11,
+    fontSize: fontSize.xxs,
     letterSpacing: 1,
     textTransform: 'uppercase',
     color: colors.textTertiary,
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   tileLabelDark: { color: colors.whiteAlpha45 },
   tileVal: {
     fontFamily: fontFamily.display,
-    fontSize: 38,
+    fontSize: fontSize.stat,
     lineHeight: 40,
     color: colors.ink,
     letterSpacing: -0.5,
   },
   tileUnit: {
     fontFamily: fontFamily.bodyMedium,
-    fontSize: 15,
+    fontSize: fontSize.body,
     color: colors.textTertiary,
   },
   tileSub: {
     fontFamily: fontFamily.body,
-    fontSize: 13,
+    fontSize: fontSize.caption,
     color: colors.textTertiary,
-    marginTop: 4,
+    marginTop: spacing.xs,
   },
   tileSubDark: { color: colors.whiteAlpha45 },
 
@@ -372,19 +372,19 @@ const s = StyleSheet.create({
   },
   progressLabelBold: {
     fontFamily: fontFamily.bodyBold,
-    fontSize: 12,
+    fontSize: fontSize.sm,
     color: colors.ink,
   },
   progressLabelMuted: {
     fontFamily: fontFamily.body,
-    fontSize: 12,
+    fontSize: fontSize.sm,
     color: colors.textTertiary,
   },
 
   // ── Section
   sectionTitle: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 19,
+    fontSize: fontSize.xl,
     letterSpacing: 0.5,
     textTransform: 'uppercase',
     color: colors.ink,
@@ -400,7 +400,7 @@ const s = StyleSheet.create({
   },
   sectionMeta: {
     fontFamily: fontFamily.body,
-    fontSize: 13,
+    fontSize: fontSize.caption,
     color: colors.textTertiary,
   },
 
@@ -419,14 +419,14 @@ const s = StyleSheet.create({
   },
   rank: {
     fontFamily: fontFamily.display,
-    fontSize: 19,
+    fontSize: fontSize.xl,
     color: colors.textTertiary,
     minWidth: 20,
     textAlign: 'center',
   },
   rankName: {
     fontFamily: fontFamily.bodyMedium,
-    fontSize: 15,
+    fontSize: fontSize.body,
     color: colors.ink,
     flex: 1,
   },
@@ -438,7 +438,7 @@ const s = StyleSheet.create({
   },
   scoreBadgeText: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 12,
+    fontSize: fontSize.sm,
     color: colors.success,
   },
   scoreBadgeWrong: {
@@ -475,7 +475,7 @@ const s = StyleSheet.create({
   },
   badgeName: {
     fontFamily: fontFamily.bodyBold,
-    fontSize: 14,
+    fontSize: fontSize.caption,
     color: colors.ink,
     marginBottom: 3,
   },
@@ -484,7 +484,7 @@ const s = StyleSheet.create({
   },
   badgeDesc: {
     fontFamily: fontFamily.body,
-    fontSize: 12,
+    fontSize: fontSize.sm,
     color: colors.textSecondary,
     lineHeight: 16,
   },
@@ -500,7 +500,7 @@ const s = StyleSheet.create({
   },
   settingsLinkText: {
     fontFamily: fontFamily.bodyMedium,
-    fontSize: 16,
+    fontSize: fontSize.body,
     color: colors.textTertiary,
   },
 });

@@ -12,7 +12,7 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { colors, fontFamily, spacing, borderRadius } from '../utils/theme';
+import { colors, fontFamily, fontSize, spacing, borderRadius } from '../utils/theme';
 import { getTotalFlagCount } from '../data';
 import { initAudio, hapticTap, hapticCorrect, hapticWrong, playWrongSound, setSoundsEnabled, setHapticsEnabled } from '../utils/feedback';
 import { getStats, getDayStreak, getDailyChallenge, DailyChallengeData, getSettings, getMissedFlagIds } from '../utils/storage';
@@ -535,14 +535,14 @@ const s = StyleSheet.create({
   wordmark: {},
   wmLine1: {
     fontFamily: fontFamily.display,
-    fontSize: 34,
+    fontSize: fontSize.wordmark,
     lineHeight: 36,
     color: colors.ink,
     letterSpacing: -0.5,
   },
   wmLine2: {
     fontFamily: fontFamily.displayItalic,
-    fontSize: 34,
+    fontSize: fontSize.wordmark,
     lineHeight: 36,
     color: colors.accent,
   },
@@ -556,14 +556,14 @@ const s = StyleSheet.create({
   },
   streakVal: {
     fontFamily: fontFamily.display,
-    fontSize: 28,
-    lineHeight: 28,
+    fontSize: fontSize.title,
+    lineHeight: 30,
     color: colors.ink,
     letterSpacing: -0.5,
   },
   streakLbl: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 9,
+    fontSize: fontSize.xxs,
     letterSpacing: 1,
     textTransform: 'uppercase',
     color: colors.accent,
@@ -571,7 +571,7 @@ const s = StyleSheet.create({
   },
   streakLblMuted: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 9,
+    fontSize: fontSize.xxs,
     letterSpacing: 1,
     textTransform: 'uppercase',
     color: colors.textTertiary,
@@ -608,7 +608,7 @@ const s = StyleSheet.create({
   },
   dailyTitle: {
     fontFamily: fontFamily.bodyBold,
-    fontSize: 17,
+    fontSize: fontSize.lg,
     color: colors.ink,
     marginBottom: 2,
   },
@@ -617,13 +617,13 @@ const s = StyleSheet.create({
   },
   dailySub: {
     fontFamily: fontFamily.body,
-    fontSize: 14,
+    fontSize: fontSize.caption,
     color: colors.textTertiary,
     lineHeight: 18,
   },
   dailyScore: {
     fontFamily: fontFamily.display,
-    fontSize: 20,
+    fontSize: fontSize.xl,
     color: colors.textTertiary,
   },
 
@@ -638,7 +638,7 @@ const s = StyleSheet.create({
   },
   heroLabel: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 11,
+    fontSize: fontSize.xxs,
     letterSpacing: 1.5,
     textTransform: 'uppercase',
     color: colors.whiteAlpha45,
@@ -682,7 +682,7 @@ const s = StyleSheet.create({
   },
   optText: {
     fontFamily: fontFamily.bodyMedium,
-    fontSize: 16,
+    fontSize: fontSize.body,
     color: colors.whiteAlpha70,
     textAlign: 'center',
   },
@@ -701,7 +701,7 @@ const s = StyleSheet.create({
   },
   teaserResultText: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 18,
+    fontSize: fontSize.lg,
     letterSpacing: 1,
     textTransform: 'uppercase',
     color: colors.white,
@@ -711,7 +711,7 @@ const s = StyleSheet.create({
   },
   teaserResultWrong: {
     color: colors.white,
-    fontSize: 20,
+    fontSize: fontSize.xl,
   },
   teaserPlayBtn: {
     flexDirection: 'row',
@@ -731,7 +731,7 @@ const s = StyleSheet.create({
   },
   teaserPlayText: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 17,
+    fontSize: fontSize.lg,
     letterSpacing: 1.5,
     textTransform: 'uppercase',
     color: colors.white,
@@ -761,7 +761,7 @@ const s = StyleSheet.create({
   },
   playBtnText: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 19,
+    fontSize: fontSize.xl,
     letterSpacing: 1.5,
     textTransform: 'uppercase',
     color: colors.white,
@@ -790,7 +790,7 @@ const s = StyleSheet.create({
   },
   configLbl: {
     fontFamily: fontFamily.bodyMedium,
-    fontSize: 15,
+    fontSize: fontSize.body,
     color: colors.ink,
     minWidth: 58,
     flexShrink: 0,
@@ -817,7 +817,7 @@ const s = StyleSheet.create({
   },
   segBtnText: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 14,
+    fontSize: fontSize.caption,
     textTransform: 'uppercase',
     color: colors.textTertiary,
   },
@@ -832,7 +832,7 @@ const s = StyleSheet.create({
   },
   sectionLbl: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 11,
+    fontSize: fontSize.xxs,
     letterSpacing: 1.2,
     textTransform: 'uppercase',
     color: colors.textTertiary,
@@ -863,13 +863,13 @@ const s = StyleSheet.create({
   },
   modeTitle: {
     fontFamily: fontFamily.bodyBold,
-    fontSize: 17,
+    fontSize: fontSize.lg,
     color: colors.ink,
     marginBottom: 2,
   },
   modeSub: {
     fontFamily: fontFamily.body,
-    fontSize: 14,
+    fontSize: fontSize.caption,
     color: colors.textTertiary,
     lineHeight: 18,
   },
@@ -894,13 +894,13 @@ const s = StyleSheet.create({
   },
   statVal: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 22,
+    fontSize: fontSize.heading,
     color: colors.ink,
     lineHeight: 26,
   },
   statLbl: {
     fontFamily: fontFamily.bodyMedium,
-    fontSize: 12,
+    fontSize: fontSize.sm,
     letterSpacing: 0.8,
     textTransform: 'uppercase',
     color: colors.textTertiary,
