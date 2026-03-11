@@ -26,6 +26,7 @@ import { ChevronRightIcon } from '../components/Icons';
 import GameTopBar from '../components/GameTopBar';
 import ScreenContainer from '../components/ScreenContainer';
 import { t } from '../utils/i18n';
+import { flagName } from '../data/countryNames';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'FlagPuzzle'>;
 
@@ -410,7 +411,7 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
             {lastAnswerCorrect ? (
               <Text style={styles.feedbackCorrect} accessibilityLiveRegion="polite">{t('common.correct')}</Text>
             ) : (
-              <Text style={styles.feedbackWrong} accessibilityLiveRegion="polite">{t('common.wrong')}</Text>
+              <Text style={styles.feedbackWrong} accessibilityLiveRegion="polite">{flagName(currentQuestion.flag)}</Text>
             )}
             <TouchableOpacity
               style={styles.nextButton}

@@ -88,6 +88,10 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
   const correctCount = results.filter((r) => r.correct).length;
   const progress = questions.length > 0 ? (currentIndex + 1) / questions.length : 0;
 
+  // Refs so keyboard handler always calls the latest version
+  const handleAnswerRef = useRef<(answer: string) => void>(() => {});
+  const goToNextRef = useRef<() => void>(() => {});
+
   const goToNext = useCallback(() => {
     if (autoAdvanceRef.current) {
       clearTimeout(autoAdvanceRef.current);
@@ -113,6 +117,7 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
       navigation.replace('Results', { results: newResults, config });
     }
   }, [currentIndex, questions, navigation, config, fadeAnim]);
+  goToNextRef.current = goToNext;
 
   // Keyboard shortcuts: 1-4 to select options, Enter/Space to advance
   useEffect(() => {
@@ -120,20 +125,20 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
     const handler = (e: KeyboardEvent) => {
       if (showFeedback && (e.key === 'Enter' || e.key === ' ')) {
         e.preventDefault();
-        goToNext();
+        goToNextRef.current();
         return;
       }
       if (!showFeedback && e.key >= '1' && e.key <= '4' && question) {
         const idx = parseInt(e.key, 10) - 1;
         if (idx < question.options.length) {
           e.preventDefault();
-          handleAnswer(question.options[idx]);
+          handleAnswerRef.current(question.options[idx]);
         }
       }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [showFeedback, question, goToNext]);
+  }, [showFeedback, question]);
 
   const handleAnswer = useCallback((answer: string) => {
     if (showFeedback || !question) return;
@@ -167,6 +172,7 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
     const feedbackDelay = correct ? 600 : 1200;
     autoAdvanceRef.current = setTimeout(() => goToNext(), feedbackDelay);
   }, [showFeedback, question, results, goToNext]);
+  handleAnswerRef.current = handleAnswer;
 
   if (!question) {
     return (
