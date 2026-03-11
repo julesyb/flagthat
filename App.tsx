@@ -13,6 +13,7 @@ import {
 } from '@expo-google-fonts/barlow';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { TouchableOpacity, Text as RNText } from 'react-native';
 import HomeScreen from './src/screens/HomeScreen';
 import GameSetupScreen from './src/screens/GameSetupScreen';
 import GameScreen from './src/screens/GameScreen';
@@ -25,8 +26,9 @@ import NeighborsScreen from './src/screens/NeighborsScreen';
 import FlagImpostorScreen from './src/screens/FlagImpostorScreen';
 import CapitalConnectionScreen from './src/screens/CapitalConnectionScreen';
 import ErrorBoundary from './src/components/ErrorBoundary';
+import { ChevronLeftIcon } from './src/components/Icons';
 import { RootStackParamList } from './src/types/navigation';
-import { colors, typography } from './src/utils/theme';
+import { colors, typography, fontFamily } from './src/utils/theme';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -60,7 +62,19 @@ function AppContent() {
         <Stack.Screen
           name="GameSetup"
           component={GameSetupScreen}
-          options={{ title: 'New Game' }}
+          options={({ navigation }) => ({
+            title: 'Game Modes',
+            headerLeft: () => (
+              <TouchableOpacity
+                style={{ flexDirection: 'row', alignItems: 'center', marginLeft: -8, paddingRight: 12 }}
+                onPress={() => navigation.navigate('Home')}
+                activeOpacity={0.7}
+              >
+                <ChevronLeftIcon size={20} color={colors.textTertiary} />
+                <RNText style={{ fontFamily: 'Barlow_500Medium', fontSize: 13, letterSpacing: 0.3, color: colors.textTertiary, textTransform: 'uppercase', marginLeft: 2 }}>Play</RNText>
+              </TouchableOpacity>
+            ),
+          })}
         />
         <Stack.Screen
           name="Game"
@@ -100,12 +114,36 @@ function AppContent() {
         <Stack.Screen
           name="Stats"
           component={StatsScreen}
-          options={{ title: 'Statistics' }}
+          options={({ navigation }) => ({
+            title: 'Statistics',
+            headerLeft: () => (
+              <TouchableOpacity
+                style={{ flexDirection: 'row', alignItems: 'center', marginLeft: -8, paddingRight: 12 }}
+                onPress={() => navigation.navigate('Home')}
+                activeOpacity={0.7}
+              >
+                <ChevronLeftIcon size={20} color={colors.textTertiary} />
+                <RNText style={{ fontFamily: 'Barlow_500Medium', fontSize: 13, letterSpacing: 0.3, color: colors.textTertiary, textTransform: 'uppercase', marginLeft: 2 }}>Play</RNText>
+              </TouchableOpacity>
+            ),
+          })}
         />
         <Stack.Screen
           name="Browse"
           component={BrowseScreen}
-          options={{ title: 'Browse Flags' }}
+          options={({ navigation }) => ({
+            title: 'Browse Flags',
+            headerLeft: () => (
+              <TouchableOpacity
+                style={{ flexDirection: 'row', alignItems: 'center', marginLeft: -8, paddingRight: 12 }}
+                onPress={() => navigation.navigate('Home')}
+                activeOpacity={0.7}
+              >
+                <ChevronLeftIcon size={20} color={colors.textTertiary} />
+                <RNText style={{ fontFamily: 'Barlow_500Medium', fontSize: 13, letterSpacing: 0.3, color: colors.textTertiary, textTransform: 'uppercase', marginLeft: 2 }}>Play</RNText>
+              </TouchableOpacity>
+            ),
+          })}
         />
       </Stack.Navigator>
     </NavigationContainer>

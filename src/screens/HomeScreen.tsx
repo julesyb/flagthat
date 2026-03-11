@@ -90,7 +90,7 @@ function FlagTeaser() {
           countryCode={question.flag.id}
           emoji={question.flag.emoji}
           size="hero"
-          style={{ borderRadius: borderRadius.sm }}
+          style={{ width: '100%' }}
         />
         <Animated.View style={[s.flagCover, { opacity: coverOpacity }]}>
           <Text style={s.coverQ}>?</Text>
@@ -160,7 +160,7 @@ function FlagTeaser() {
             {picked === question.flag.name ? 'Correct!' : `It was ${question.flag.name}`}
           </Text>
           <TouchableOpacity
-            style={s.teaserPlayBtn}
+            style={[s.teaserPlayBtn, picked === question.flag.name ? s.teaserPlayBtnCorrect : s.teaserPlayBtnWrong]}
             onPress={() => {
               hapticTap();
               navigation.navigate('Game', {
@@ -533,7 +533,6 @@ const s = StyleSheet.create({
   flagWrap: {
     width: '100%',
     aspectRatio: 3 / 2,
-    borderRadius: borderRadius.sm,
     overflow: 'hidden',
     position: 'relative',
   },
@@ -609,11 +608,16 @@ const s = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: colors.accent,
     paddingVertical: 14,
     paddingHorizontal: 28,
     borderRadius: borderRadius.md,
     width: '100%',
+  },
+  teaserPlayBtnCorrect: {
+    backgroundColor: colors.success,
+  },
+  teaserPlayBtnWrong: {
+    backgroundColor: colors.error,
   },
   teaserPlayText: {
     fontFamily: fontFamily.uiLabel,

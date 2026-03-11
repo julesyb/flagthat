@@ -13,7 +13,7 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { colors, spacing, typography, fontFamily, borderRadius } from '../utils/theme';
 import { UserStats, GAME_MODES, GameMode } from '../types';
 import { getStats, resetStats, getFlagStats, FlagStats } from '../utils/storage';
-import { getAllFlags } from '../data';
+import { getAllFlags, getTotalFlagCount } from '../data';
 import BottomNav from '../components/BottomNav';
 
 export default function StatsScreen() {
@@ -113,8 +113,10 @@ export default function StatsScreen() {
               <Text style={styles.smallStatLabel}>Best Streak</Text>
             </View>
             <View style={styles.smallStatCard}>
-              <Text style={styles.smallStatValue}>{stats.totalCorrect}</Text>
-              <Text style={styles.smallStatLabel}>Correct</Text>
+              <Text style={styles.smallStatValue}>
+                {Object.values(flagStats).filter((s) => s.right > 0).length}/{getTotalFlagCount()}
+              </Text>
+              <Text style={styles.smallStatLabel}>Countries</Text>
             </View>
           </View>
           {(stats.bestTimeAttackScore || 0) > 0 && (

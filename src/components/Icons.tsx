@@ -143,6 +143,15 @@ export function LinkIcon({ size = 16, color = '#4B5563', strokeWidth = 1.5 }: Ic
 }
 
 // Map pin — map display mode toggle
+// Chevron left — back navigation
+export function ChevronLeftIcon({ size = 16, color = '#9CA3AF', strokeWidth = 2 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+      <Path d="M15 18L9 12L15 6" />
+    </Svg>
+  );
+}
+
 export function MapPinIcon({ size = 16, color = '#4B5563', strokeWidth = 1.5 }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth}>

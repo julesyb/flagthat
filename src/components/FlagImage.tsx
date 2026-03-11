@@ -1,7 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, View, Text, useWindowDimensions } from 'react-native';
 import { Image } from 'expo-image';
-import { colors, fontFamily, borderRadius } from '../utils/theme';
+import { colors, fontFamily } from '../utils/theme';
 
 interface FlagImageProps {
   countryCode: string;
@@ -30,15 +30,33 @@ function getFlagUrl(code: string, width: number): string {
 
 export default function FlagImage({ countryCode, size = 'large', emoji, style }: FlagImageProps) {
   const { width: screenWidth } = useWindowDimensions();
-  const dimensions = useMemo(() => {
-    if (size === 'hero') {
-      const w = Math.min(screenWidth - 48, 420);
-      return { width: Math.max(w, 320), height: Math.round(Math.max(w, 320) * (2 / 3)) };
-    }
-    return SIZE_MAP[size];
-  }, [size, screenWidth]);
-  const requestWidth = dimensions.width * 2;
   const [loaded, setLoaded] = useState(false);
+
+  if (size === 'hero') {
+    // Hero fills parent width — use aspectRatio instead of fixed pixels
+    const requestWidth = Math.min(screenWidth, 500) * 2;
+    return (
+      <View style={[styles.container, { width: '100%', aspectRatio: 3 / 2 }, style]}>
+        {!loaded && (
+          <View style={[styles.emojiOverlay, { width: '100%', height: '100%' }]}>
+            <Text style={styles.placeholderText}>{countryCode.toUpperCase()}</Text>
+          </View>
+        )}
+        <Image
+          source={{ uri: getFlagUrl(countryCode, requestWidth) }}
+          style={[styles.image, { width: '100%', height: '100%' }]}
+          contentFit="contain"
+          transition={200}
+          priority="high"
+          cachePolicy="memory-disk"
+          onLoad={() => setLoaded(true)}
+        />
+      </View>
+    );
+  }
+
+  const dimensions = SIZE_MAP[size];
+  const requestWidth = dimensions.width * 2;
 
   return (
     <View style={[styles.container, dimensions, style]}>
@@ -83,7 +101,6 @@ const styles = StyleSheet.create({
   container: {
     overflow: 'hidden',
     backgroundColor: 'transparent',
-    borderRadius: borderRadius.sm,
   },
   image: {
     backgroundColor: 'transparent',
@@ -109,7 +126,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surfaceSecondary,
     borderWidth: 1,
     borderColor: colors.rule2,
-    borderRadius: borderRadius.sm,
   },
   smallImage: {
     width: 56,

@@ -192,13 +192,8 @@ const styles = StyleSheet.create({
     borderColor: colors.ink,
     backgroundColor: colors.ink,
   },
-  practiceChip: {
-    borderColor: colors.accent,
-  },
-  practiceChipActive: {
-    borderColor: colors.accent,
-    backgroundColor: colors.accent,
-  },
+  practiceChip: {},
+  practiceChipActive: {},
   regionLabel: {
     ...typography.captionBold,
     color: colors.textSecondary,
@@ -220,7 +215,7 @@ const styles = StyleSheet.create({
   flagItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceSecondary,
     padding: spacing.md,
     marginBottom: spacing.sm,
     gap: spacing.md,
