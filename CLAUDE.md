@@ -12,15 +12,16 @@
 - Rounded corners on cards and interactive elements (sm-xl scale).
 - No gradients. Flat color planes.
 - No drop shadows except offset hard shadows on hover states.
-- Accent red (#E5271C) appears maximum twice per screen.
+- Accent red (#E84855) appears maximum twice per screen.
 - No emoji anywhere in the UI. Use SVG icons from `src/components/Icons.tsx`.
 - No em dashes in user-facing text. Use hyphens or commas.
 - No circles in procedurally generated fake flags (impostor mode).
 
 ### Colors
 - All colors defined in `src/utils/theme.ts` — single source of truth.
-- Dark surfaces use `colors.ink` (#111827).
-- Background uses `colors.background` (#F9FAFB).
+- Retro-warm palette: midnight navy, warm cream, coral-red, teal/gold/blue pops.
+- Dark surfaces use `colors.ink` (#1A1A2E).
+- Background uses `colors.background` (#FFF7EE).
 
 ## Architecture
 - React Native / Expo SDK 55 (iOS, Android, Web)

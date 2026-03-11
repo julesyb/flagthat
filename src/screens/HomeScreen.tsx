@@ -437,7 +437,7 @@ export default function HomeScreen({ navigation }: Props) {
               });
             }}
           >
-            <View style={s.modeIcon}>
+            <View style={[s.modeIcon, { backgroundColor: colors.teal }]}>
               <ClockIcon size={18} color={colors.white} />
             </View>
             <View style={s.modeText}>
@@ -457,7 +457,7 @@ export default function HomeScreen({ navigation }: Props) {
               });
             }}
           >
-            <View style={s.modeIcon}>
+            <View style={[s.modeIcon, { backgroundColor: colors.amber }]}>
               <LightningIcon size={18} color={colors.white} />
             </View>
             <View style={s.modeText}>
@@ -477,7 +477,7 @@ export default function HomeScreen({ navigation }: Props) {
               });
             }}
           >
-            <View style={s.modeIcon}>
+            <View style={[s.modeIcon, { backgroundColor: colors.blue }]}>
               <UsersIcon size={18} color={colors.white} />
             </View>
             <View style={s.modeText}>
