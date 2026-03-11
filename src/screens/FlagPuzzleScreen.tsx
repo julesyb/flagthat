@@ -24,8 +24,10 @@ import { getAllFlags } from '../data';
 import { RootStackParamList } from '../types/navigation';
 import { ChevronRightIcon } from '../components/Icons';
 import GameTopBar from '../components/GameTopBar';
+import GameFeedback from '../components/GameFeedback';
 import ScreenContainer from '../components/ScreenContainer';
 import { t } from '../utils/i18n';
+import { flagName } from '../data/countryNames';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'FlagPuzzle'>;
 
@@ -406,12 +408,7 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
         </View>
 
         {showFeedback && (
-          <View style={styles.feedbackContainer}>
-            {lastAnswerCorrect ? (
-              <Text style={styles.feedbackCorrect} accessibilityLiveRegion="polite">{t('common.correct')}</Text>
-            ) : (
-              <Text style={styles.feedbackWrong} accessibilityLiveRegion="polite">{t('common.wrong')}</Text>
-            )}
+          <GameFeedback correct={lastAnswerCorrect} correctAnswer={flagName(currentQuestion.flag)}>
             <TouchableOpacity
               style={styles.nextButton}
               onPress={goToNext}
@@ -422,7 +419,7 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
               <Text style={styles.nextButtonText}>{t('common.next')}</Text>
               <ChevronRightIcon size={16} color={colors.white} />
             </TouchableOpacity>
-          </View>
+          </GameFeedback>
         )}
       </Animated.View>
       </ScreenContainer>
@@ -540,18 +537,6 @@ const styles = StyleSheet.create({
   suggestionText: {
     ...typography.body,
     color: colors.text,
-  },
-  feedbackContainer: {
-    marginTop: spacing.lg,
-    alignItems: 'center',
-  },
-  feedbackCorrect: {
-    ...typography.heading,
-    color: colors.success,
-  },
-  feedbackWrong: {
-    ...typography.heading,
-    color: colors.error,
   },
   nextButton: {
     flexDirection: 'row',
