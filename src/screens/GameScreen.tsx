@@ -19,7 +19,7 @@ import { hapticCorrect, hapticWrong, hapticTap, playCorrectSound, playWrongSound
 import FlagImage from '../components/FlagImage';
 import MapImage from '../components/MapImage';
 import { useGameAnimations } from '../hooks/useGameAnimations';
-import { getFlagByName, getAllFlags } from '../data';
+import { getFlagByName, getFlagsForCategory } from '../data';
 import { RootStackParamList } from '../types/navigation';
 import { ChevronRightIcon } from '../components/Icons';
 
@@ -96,15 +96,18 @@ export default function GameScreen({ route, navigation }: Props) {
   const isMapMode = config.displayMode === 'map';
   const isAutocomplete = isHard && config.autocomplete === true;
 
-  const allCountryNames = useMemo(() => getAllFlags().map((f) => f.name).sort(), []);
+  const categoryCountryNames = useMemo(
+    () => getFlagsForCategory(config.category).map((f) => f.name).sort(),
+    [config.category],
+  );
 
   const suggestions = useMemo(() => {
     if (!isAutocomplete || textInput.trim().length < 1 || showFeedback) return [];
     const query = textInput.trim().toLowerCase();
-    return allCountryNames
+    return categoryCountryNames
       .filter((name) => name.toLowerCase().includes(query))
       .slice(0, 5);
-  }, [isAutocomplete, textInput, showFeedback, allCountryNames]);
+  }, [isAutocomplete, textInput, showFeedback, categoryCountryNames]);
   const progress = questions.length > 0 ? (currentIndex + 1) / questions.length : 0;
 
   const goToNext = useCallback(() => {
