@@ -157,7 +157,7 @@ function FlagTeaser() {
       ) : (
         <View style={s.teaserResult}>
           <Text style={s.teaserResultText}>
-            {picked === question.flag.name ? 'Correct!' : `It was ${question.flag.name}`}
+            {picked === question.flag.name ? 'Correct!' : question.flag.name}
           </Text>
           <TouchableOpacity
             style={[s.teaserPlayBtn, picked === question.flag.name ? s.teaserPlayBtnCorrect : s.teaserPlayBtnWrong]}

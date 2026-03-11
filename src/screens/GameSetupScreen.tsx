@@ -167,7 +167,7 @@ export default function GameSetupScreen({ navigation }: Props) {
     return FLAGFLASH_TIMES;
   };
 
-  const showQuestionCount = !isFlagFlash && !isTimeAttack && !isFlagPuzzle;
+  const showQuestionCount = !isFlagFlash && !isTimeAttack && !isFlagPuzzle && filterType !== 'theme';
 
   return (
     <SafeAreaView style={styles.container}>
