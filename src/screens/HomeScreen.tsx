@@ -291,14 +291,12 @@ export default function HomeScreen({ navigation }: Props) {
               {ONBOARDING_REGIONS.map((r) => {
                 const result = baseline?.regions[r];
                 const isDone = !!result;
-                const isNext = r === nextRegion;
                 return (
                   <TouchableOpacity
                     key={r}
                     style={[
                       s.onboardingChip,
-                      isDone && s.onboardingChipDone,
-                      isNext && s.onboardingChipNext,
+                      isDone ? s.onboardingChipDone : s.onboardingChipPending,
                     ]}
                     activeOpacity={isDone ? 1 : 0.7}
                     disabled={isDone}
@@ -313,8 +311,7 @@ export default function HomeScreen({ navigation }: Props) {
                     {isDone && <CheckIcon size={10} color={colors.success} />}
                     <Text style={[
                       s.onboardingChipText,
-                      isDone && s.onboardingChipTextDone,
-                      isNext && s.onboardingChipTextNext,
+                      isDone ? s.onboardingChipTextDone : s.onboardingChipTextPending,
                     ]}>
                       {t(`categories.${r}`)}
                     </Text>
@@ -732,7 +729,7 @@ const s = StyleSheet.create({
     backgroundColor: colors.successBg,
     borderColor: colors.success,
   },
-  onboardingChipNext: {
+  onboardingChipPending: {
     backgroundColor: colors.ink,
     borderColor: colors.ink,
   },
@@ -744,7 +741,7 @@ const s = StyleSheet.create({
   onboardingChipTextDone: {
     color: colors.success,
   },
-  onboardingChipTextNext: {
+  onboardingChipTextPending: {
     color: colors.white,
   },
   onboardingChipPct: {

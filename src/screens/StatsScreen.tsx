@@ -917,11 +917,11 @@ const s = StyleSheet.create({
   },
   baselineMarker: {
     position: 'absolute',
-    top: -1,
+    top: 0,
     width: 2,
-    height: 10,
+    height: 8,
     backgroundColor: colors.warning,
-    borderRadius: 1,
+    zIndex: 1,
   },
   baselineRow: {
     flexDirection: 'row',

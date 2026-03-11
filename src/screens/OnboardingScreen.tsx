@@ -204,7 +204,6 @@ export default function OnboardingScreen({ navigation }: Props) {
                   const result = baseline?.regions[region.id];
                   const isDone = !!result;
                   const flagCount = getCategoryCount(region.categoryId);
-                  const isNext = !isDone && !REGIONS.slice(0, index).some((r) => !baseline?.regions[r.id]);
 
                   return (
                     <TouchableOpacity
@@ -212,7 +211,7 @@ export default function OnboardingScreen({ navigation }: Props) {
                       style={[
                         s.regionCard,
                         isDone && s.regionCardDone,
-                        isNext && s.regionCardNext,
+                        !isDone && s.regionCardActive,
                       ]}
                       activeOpacity={isDone ? 1 : 0.85}
                       onPress={() => !isDone && handleRegionPress(region.id)}
@@ -224,8 +223,8 @@ export default function OnboardingScreen({ navigation }: Props) {
                             <CheckIcon size={16} color={colors.white} />
                           </View>
                         ) : (
-                          <View style={[s.regionNumber, isNext && s.regionNumberNext]}>
-                            <Text style={[s.regionNumberText, isNext && s.regionNumberTextNext]}>
+                          <View style={s.regionNumberActive}>
+                            <Text style={s.regionNumberTextActive}>
                               {index + 1}
                             </Text>
                           </View>
@@ -243,12 +242,8 @@ export default function OnboardingScreen({ navigation }: Props) {
                       </View>
                       {isDone ? (
                         <Text style={s.doneLabel}>{t('onboarding.completed')}</Text>
-                      ) : isNext ? (
-                        <View style={s.startTag}>
-                          <Text style={s.startTagText}>{t('common.play')}</Text>
-                        </View>
                       ) : (
-                        <ChevronRightIcon size={18} color={colors.rule} />
+                        <ChevronRightIcon size={18} color={colors.ink} />
                       )}
                     </TouchableOpacity>
                   );
@@ -473,7 +468,7 @@ const s = StyleSheet.create({
     borderColor: colors.success,
     backgroundColor: colors.successBg,
   },
-  regionCardNext: {
+  regionCardActive: {
     borderColor: colors.ink,
     ...shadows.small,
   },
@@ -483,23 +478,17 @@ const s = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  regionNumber: {
+  regionNumberActive: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: colors.surfaceSecondary,
+    backgroundColor: colors.ink,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  regionNumberNext: {
-    backgroundColor: colors.ink,
-  },
-  regionNumberText: {
+  regionNumberTextActive: {
     fontFamily: fontFamily.uiLabel,
     fontSize: fontSize.caption,
-    color: colors.textTertiary,
-  },
-  regionNumberTextNext: {
     color: colors.white,
   },
   checkCircle: {
@@ -535,20 +524,6 @@ const s = StyleSheet.create({
     textTransform: 'uppercase',
     color: colors.success,
   },
-  startTag: {
-    backgroundColor: colors.ink,
-    borderRadius: borderRadius.sm,
-    paddingVertical: spacing.xs + 2,
-    paddingHorizontal: spacing.sm + 2,
-  },
-  startTagText: {
-    fontFamily: fontFamily.uiLabel,
-    fontSize: fontSize.sm,
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
-    color: colors.white,
-  },
-
   // ── CTA
   ctaWrap: {
     paddingHorizontal: spacing.md,
