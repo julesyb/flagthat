@@ -29,20 +29,20 @@ function pickRandom<T>(arr: T[], count: number): T[] {
 
 // ── Impostor flags: real flag layouts recolored with non-traditional colors ──
 
-// Colors not traditionally found on national flags
+// Common flag colors - the random pairing with a mismatched template makes the impostor
 const IMPOSTOR_COLORS = [
-  '#E91E8C', // hot pink
-  '#7C3AED', // violet
-  '#14B8A6', // teal
-  '#F472B6', // rose
-  '#A78BFA', // lavender
-  '#94A3B8', // slate gray
-  '#6EE7B7', // mint
-  '#818CF8', // periwinkle
-  '#FB7185', // coral
-  '#C084FC', // orchid
-  '#2DD4BF', // aqua
-  '#D4D4D8', // silver
+  '#CE1126', // red
+  '#003DA5', // blue
+  '#009739', // green
+  '#FFCD00', // yellow
+  '#FFFFFF', // white
+  '#000000', // black
+  '#FF6600', // orange
+  '#00A9E0', // sky blue
+  '#7B3F00', // brown
+  '#502379', // purple
+  '#D21034', // crimson
+  '#007A5E', // teal green
 ];
 
 interface FlagTemplate {
