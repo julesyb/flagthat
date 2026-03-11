@@ -12,7 +12,7 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { colors, fontFamily, fontSize, spacing, borderRadius } from '../utils/theme';
+import { colors, fontFamily, fontSize, spacing, borderRadius, shadows } from '../utils/theme';
 import { getTotalFlagCount, getCategoryCount } from '../data';
 import { initAudio, hapticTap, hapticCorrect, hapticWrong, playWrongSound, setSoundsEnabled, setHapticsEnabled } from '../utils/feedback';
 import { getStats, getDayStreak, getDailyChallenge, DailyChallengeData, getSettings, getMissedFlagIds, getBaselineData, BaselineData } from '../utils/storage';
@@ -538,15 +538,15 @@ export default function HomeScreen({ navigation }: Props) {
           <View style={s.statsWrap}>
             <Text style={s.sectionLbl}>{t('home.yourStats')}</Text>
             <View style={s.statsRow}>
-              <View style={s.statTile}>
+              <View style={[s.statTile, { borderTopColor: colors.teal }]}>
                 <Text style={s.statVal}>{stats!.bestStreak}</Text>
                 <Text style={s.statLbl}>{t('home.bestStreak')}</Text>
               </View>
-              <View style={s.statTile}>
+              <View style={[s.statTile, { borderTopColor: colors.amber }]}>
                 <Text style={s.statVal}>{stats!.bestTimeAttackScore}</Text>
                 <Text style={s.statLbl}>{t('home.best60s')}</Text>
               </View>
-              <View style={s.statTile}>
+              <View style={[s.statTile, { borderTopColor: colors.blue }]}>
                 <Text style={s.statVal}>{accuracy}%</Text>
                 <Text style={s.statLbl}>{t('home.accuracy')}</Text>
               </View>
@@ -775,6 +775,7 @@ const s = StyleSheet.create({
     borderRadius: borderRadius.xl,
     padding: spacing.lg,
     paddingTop: spacing.lg,
+    ...shadows.large,
   },
   heroLabel: {
     fontFamily: fontFamily.uiLabel,
@@ -880,7 +881,8 @@ const s = StyleSheet.create({
   // ── Play button
   playWrap: {
     paddingHorizontal: spacing.md,
-    paddingTop: spacing.sm,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.xs,
   },
   playBtn: {
     flexDirection: 'row',
@@ -889,7 +891,8 @@ const s = StyleSheet.create({
     gap: spacing.sm,
     backgroundColor: colors.ink,
     borderRadius: borderRadius.lg,
-    paddingVertical: spacing.md + spacing.xxs,
+    paddingVertical: spacing.md + spacing.xs,
+    ...shadows.accentShadow,
   },
   playBolt: {
     width: 24,
@@ -913,7 +916,7 @@ const s = StyleSheet.create({
     marginTop: spacing.sm,
     backgroundColor: colors.white,
     borderRadius: borderRadius.lg,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: colors.rule,
     overflow: 'hidden',
   },
@@ -968,7 +971,7 @@ const s = StyleSheet.create({
   // ── Game modes
   sectionWrap: {
     paddingHorizontal: spacing.md,
-    marginTop: spacing.sm,
+    marginTop: spacing.lg,
   },
   sectionLbl: {
     fontFamily: fontFamily.uiLabel,
@@ -982,7 +985,7 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.white,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: colors.rule,
     borderRadius: borderRadius.lg,
     padding: spacing.md,
@@ -1017,7 +1020,7 @@ const s = StyleSheet.create({
   // ── Stats row
   statsWrap: {
     paddingHorizontal: spacing.md,
-    marginTop: spacing.sm,
+    marginTop: spacing.lg,
   },
   statsRow: {
     flexDirection: 'row',
@@ -1027,8 +1030,9 @@ const s = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.white,
     borderRadius: borderRadius.lg,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: colors.rule,
+    borderTopWidth: 3,
     padding: spacing.md,
     alignItems: 'center',
   },
