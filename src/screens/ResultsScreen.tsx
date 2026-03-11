@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -22,6 +22,7 @@ import { CheckIcon, CrossIcon } from '../components/Icons';
 import BottomNav from '../components/BottomNav';
 import { GAME_MODES, CATEGORIES } from '../types';
 import { RootStackParamList } from '../types/navigation';
+import { useInterstitialAdUnit, shouldShowAd, recordAdImpression, incrementGameCount } from '../utils/ads';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Results'>;
 
@@ -42,11 +43,39 @@ export default function ResultsScreen({ route, navigation }: Props) {
   const isDaily = config.mode === 'daily';
   const isBaseline = config.mode === 'baseline';
 
+  const skipAds = isDaily || isBaseline || reviewOnly;
+  const interstitial = useInterstitialAdUnit();
+  const [adEligible, setAdEligible] = useState(false);
+  const pendingNavRef = useRef<(() => void) | null>(null);
+
+  // Load ad if frequency cap allows (skip for daily/baseline/review)
+  useEffect(() => {
+    if (skipAds) return;
+    shouldShowAd().then((eligible) => {
+      setAdEligible(eligible);
+      if (eligible) {
+        interstitial.load();
+      }
+    });
+  }, [interstitial.load, skipAds]);
+
+  // When ad closes, execute pending navigation
+  useEffect(() => {
+    if (interstitial.isClosed && pendingNavRef.current) {
+      const nav = pendingNavRef.current;
+      pendingNavRef.current = null;
+      recordAdImpression().then(nav);
+    }
+  }, [interstitial.isClosed]);
+
   useEffect(() => {
     if (!reviewOnly) {
       updateStats(correct, results.length, streak, config.mode, config.category);
       updateFlagResults(results);
       updateLastGameBadgeFlags(correct, results.length);
+      if (!skipAds) {
+        incrementGameCount();
+      }
       if (isDaily) {
         saveDailyChallenge(results);
         incrementDailyChallenges();
@@ -108,7 +137,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
 
   const goHome = () => navigation.popToTop();
 
-  const playAgain = () => {
+  const navigatePlayAgain = useCallback(() => {
     if (isDaily || isBaseline) {
       navigation.popToTop();
       return;
@@ -125,6 +154,23 @@ export default function ResultsScreen({ route, navigation }: Props) {
       navigation.replace('CapitalConnection', { config });
     } else {
       navigation.replace('Game', { config });
+    }
+  }, [isDaily, isBaseline, config, navigation]);
+
+  const playAgain = () => {
+    if (adEligible && interstitial.isLoaded) {
+      pendingNavRef.current = navigatePlayAgain;
+      interstitial.show();
+      // Safety: if ad never fires isClosed (SDK bug, network), unblock after 10s
+      setTimeout(() => {
+        if (pendingNavRef.current) {
+          const nav = pendingNavRef.current;
+          pendingNavRef.current = null;
+          recordAdImpression().then(nav);
+        }
+      }, 10000);
+    } else {
+      navigatePlayAgain();
     }
   };
 
