@@ -337,8 +337,8 @@ export default function SettingsScreen() {
             onPress={() => Linking.openURL('https://flagthat.app/terms')}
             activeOpacity={0.7}
           >
-            <Text style={styles.settingLabel}>Terms of Service</Text>
-            <Text style={styles.settingChevron}>&rsaquo;</Text>
+            <Text style={styles.settingLabel}>{t('settings.termsOfService')}</Text>
+            <ChevronRightIcon size={18} color={colors.textTertiary} />
           </TouchableOpacity>
           <View style={styles.settingDivider} />
           <TouchableOpacity
@@ -346,8 +346,8 @@ export default function SettingsScreen() {
             onPress={() => Linking.openURL('mailto:support@flagthat.app')}
             activeOpacity={0.7}
           >
-            <Text style={styles.settingLabel}>Support</Text>
-            <Text style={styles.settingChevron}>&rsaquo;</Text>
+            <Text style={styles.settingLabel}>{t('settings.support')}</Text>
+            <ChevronRightIcon size={18} color={colors.textTertiary} />
           </TouchableOpacity>
         </View>
 
@@ -457,11 +457,6 @@ const styles = StyleSheet.create({
     ...typography.caption,
     color: colors.textTertiary,
   },
-  settingChevron: {
-    fontSize: fontSize.heading,
-    color: colors.textTertiary,
-    lineHeight: 22,
-  },
   settingDisabled: {
     opacity: 0.35,
   },
@@ -500,7 +495,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(26, 26, 46, 0.5)',
+    backgroundColor: colors.overlay,
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 100,

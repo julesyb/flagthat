@@ -212,6 +212,8 @@ const en = {
     about: 'About',
     version: 'Version',
     privacyPolicy: 'Privacy Policy',
+    termsOfService: 'Terms of Service',
+    support: 'Support',
     data: 'Data',
     resetAllData: 'Reset All Data',
     resetConfirmTitle: 'Reset All Data',

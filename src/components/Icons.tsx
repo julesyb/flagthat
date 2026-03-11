@@ -152,8 +152,7 @@ export function LinkIcon({ size = 16, color = colors.textSecondary, strokeWidth 
   );
 }
 
-// Map pin — map display mode toggle
-// Chevron left — back navigation
+// Chevron left - back navigation
 export function ChevronLeftIcon({ size = 16, color = colors.textTertiary, strokeWidth = 2 }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">

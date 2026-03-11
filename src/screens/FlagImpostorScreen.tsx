@@ -14,8 +14,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius } from '../utils/theme';
 import { useLayout } from '../utils/useLayout';
 import { hapticTap, hapticCorrect, hapticWrong, playWrongSound } from '../utils/feedback';
-import { updateStats, updateFlagResults } from '../utils/storage';
-import { shuffleArray, getStreakFromResults } from '../utils/gameEngine';
+import { shuffleArray } from '../utils/gameEngine';
 import { t } from '../utils/i18n';
 import { flagName } from '../data/countryNames';
 import { RootStackParamList } from '../types/navigation';
@@ -606,26 +605,6 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  topBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-  },
-  exitButton: { padding: spacing.sm, width: 60 },
-  exitText: {
-    fontSize: fontSize.caption,
-    fontFamily: fontFamily.uiLabelMedium,
-    letterSpacing: 0.5,
-    color: colors.textTertiary,
-    textTransform: 'uppercase',
-  },
-  centerInfo: { alignItems: 'center' },
-  counter: { ...typography.bodyBold, color: colors.text },
-  scoreText: { ...typography.caption, color: colors.success },
-  spacer: { width: 60 },
-  livesText: { ...typography.bodyBold, color: colors.error, width: 60, textAlign: 'right' },
   content: { padding: spacing.lg, paddingBottom: 120 },
   prompt: { ...typography.headingUpper, color: colors.text, textAlign: 'center', marginBottom: spacing.xs },
   subtitle: { ...typography.caption, color: colors.textTertiary, textAlign: 'center', marginBottom: spacing.xl },

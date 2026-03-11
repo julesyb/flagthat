@@ -205,6 +205,8 @@ const de: typeof en = {
     about: '\u00dcber',
     version: 'Version',
     privacyPolicy: 'Datenschutzrichtlinie',
+    termsOfService: 'Nutzungsbedingungen',
+    support: 'Support',
     data: 'Daten',
     resetAllData: 'Alle Daten zur\u00fccksetzen',
     resetConfirmTitle: 'Alle Daten zur\u00fccksetzen',

@@ -17,7 +17,7 @@ import { getAllFlags } from '../data';
 import FlagImage from '../components/FlagImage';
 import { getMissedFlagIds, getFlagStats, FlagStats } from '../utils/storage';
 import { t } from '../utils/i18n';
-import { translateName, flagName } from '../data/countryNames';
+import { flagName } from '../data/countryNames';
 import BottomNav from '../components/BottomNav';
 import ScreenContainer from '../components/ScreenContainer';
 import { useNavTabs } from '../hooks/useNavTabs';

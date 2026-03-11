@@ -205,6 +205,8 @@ const ptBR: typeof en = {
     about: 'Sobre',
     version: 'Vers\u00e3o',
     privacyPolicy: 'Pol\u00edtica de privacidade',
+    termsOfService: 'Termos de servi\u00e7o',
+    support: 'Suporte',
     data: 'Dados',
     resetAllData: 'Redefinir dados',
     resetConfirmTitle: 'Redefinir dados',

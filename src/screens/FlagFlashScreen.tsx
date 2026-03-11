@@ -618,12 +618,6 @@ const styles = StyleSheet.create({
     color: colors.white,
   },
   // Playing
-  loadingText: {
-    ...typography.body,
-    color: colors.white,
-    textAlign: 'center',
-    marginTop: '45%',
-  },
   timerBar: {
     height: 6,
     backgroundColor: colors.whiteAlpha20,

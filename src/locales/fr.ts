@@ -205,6 +205,8 @@ const fr: typeof en = {
     about: '\u00c0 propos',
     version: 'Version',
     privacyPolicy: 'Politique de confidentialit\u00e9',
+    termsOfService: 'Conditions d\'utilisation',
+    support: 'Assistance',
     data: 'Donn\u00e9es',
     resetAllData: 'R\u00e9initialiser les donn\u00e9es',
     resetConfirmTitle: 'R\u00e9initialiser les donn\u00e9es',

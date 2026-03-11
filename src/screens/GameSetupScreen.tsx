@@ -419,13 +419,6 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.md,
   },
 
-  // Screen title - prominent heading for the page
-  screenTitle: {
-    ...typography.heading,
-    color: colors.text,
-    marginBottom: spacing.md,
-  },
-
   // Section labels - small eyebrow style for form sections
   sectionLabel: {
     ...typography.eyebrow,
@@ -514,7 +507,7 @@ const styles = StyleSheet.create({
   },
   configLbl: {
     fontFamily: fontFamily.bodyMedium,
-    fontSize: 15,
+    fontSize: fontSize.body,
     color: colors.ink,
     minWidth: 72,
     flexShrink: 0,
@@ -541,7 +534,7 @@ const styles = StyleSheet.create({
   },
   segBtnText: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 14,
+    fontSize: fontSize.caption,
     textTransform: 'uppercase',
     color: colors.textTertiary,
   },

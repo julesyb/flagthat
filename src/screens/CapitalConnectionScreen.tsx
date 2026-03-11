@@ -291,41 +291,6 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: colors.ink,
   },
-  topBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-  },
-  exitButton: {
-    padding: spacing.sm,
-    width: 60,
-  },
-  exitText: {
-    fontSize: fontSize.caption,
-    fontFamily: fontFamily.uiLabelMedium,
-    letterSpacing: 0.5,
-    color: colors.textTertiary,
-    textTransform: 'uppercase',
-  },
-  centerInfo: {
-    alignItems: 'center',
-  },
-  counter: {
-    ...typography.bodyBold,
-    color: colors.text,
-  },
-  scoreText: {
-    ...typography.caption,
-    color: colors.success,
-  },
-  streakText: {
-    ...typography.caption,
-    color: colors.accent,
-  },
-  spacer: { width: 60 },
-  livesText: { ...typography.bodyBold, color: colors.error, width: 60, textAlign: 'right' },
   questionContainer: {
     flex: 1,
     padding: spacing.lg,

@@ -121,7 +121,7 @@ function AppContent() {
         '  [role="button"]:active, [role="tab"]:active { transform: translateY(0px); opacity: 0.75; }',
         '}',
         // Focus-visible outline for keyboard navigation
-        '[role="button"]:focus-visible, [role="tab"]:focus-visible, input:focus-visible { outline: 2px solid #CC3344; outline-offset: 2px; }',
+        `[role="button"]:focus-visible, [role="tab"]:focus-visible, input:focus-visible { outline: 2px solid ${colors.accent}; outline-offset: 2px; }`,
         // Remove default focus ring for mouse users
         '[role="button"]:focus:not(:focus-visible), [role="tab"]:focus:not(:focus-visible) { outline: none; }',
         // Styled scrollbar

@@ -28,7 +28,7 @@ function getFlagUrl(code: string, width: number): string {
   return `https://flagcdn.com/w${nearestCdnWidth(width)}/${code.toLowerCase()}.png`;
 }
 
-export default function FlagImage({ countryCode, size = 'large', emoji, style, accessibilityLabel }: FlagImageProps) {
+export default function FlagImage({ countryCode, size = 'large', style, accessibilityLabel }: FlagImageProps) {
   const { width: screenWidth } = useWindowDimensions();
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);

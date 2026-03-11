@@ -13,7 +13,7 @@ import {
   Platform,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius, nav } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius } from '../utils/theme';
 import { useLayout } from '../utils/useLayout';
 import { GameQuestion, GameResult } from '../types';
 import { generateQuestions, checkAnswer } from '../utils/gameEngine';
@@ -459,19 +459,6 @@ const styles = StyleSheet.create({
   timerFill: {
     height: '100%',
   },
-  topBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-  },
-  quitButton: {
-    ...nav.backButton,
-  },
-  quitText: {
-    ...nav.backText,
-  },
   centerInfo: {
     alignItems: 'center',
   },
@@ -490,11 +477,6 @@ const styles = StyleSheet.create({
   questionContainer: {
     flex: 1,
     padding: spacing.lg,
-    justifyContent: 'center',
-  },
-  questionContainerDesktop: {
-    flex: 1,
-    padding: spacing.xl,
     justifyContent: 'center',
   },
   flagContainer: {

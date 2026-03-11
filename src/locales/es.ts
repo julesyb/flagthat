@@ -205,6 +205,8 @@ const es: typeof en = {
     about: 'Acerca de',
     version: 'Versi\u00f3n',
     privacyPolicy: 'Pol\u00edtica de privacidad',
+    termsOfService: 'T\u00e9rminos de servicio',
+    support: 'Soporte',
     data: 'Datos',
     resetAllData: 'Restablecer datos',
     resetConfirmTitle: 'Restablecer datos',

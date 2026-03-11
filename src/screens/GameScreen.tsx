@@ -13,7 +13,7 @@ import {
   Platform,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily, fontSize, nav, buttons, borderRadius } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius } from '../utils/theme';
 import { useLayout } from '../utils/useLayout';
 import { GameQuestion, GameResult } from '../types';
 import { generateQuestions, generateDailyQuestions, generatePracticeQuestions, checkAnswer } from '../utils/gameEngine';
@@ -518,19 +518,6 @@ const styles = StyleSheet.create({
     opacity: 0.15,
     borderRadius: borderRadius.none,
   },
-  topBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-  },
-  quitButton: {
-    ...nav.backButton,
-  },
-  quitText: {
-    ...nav.backText,
-  },
   centerInfo: {
     alignItems: 'center',
   },
@@ -545,9 +532,6 @@ const styles = StyleSheet.create({
   score: {
     ...typography.caption,
     color: colors.success,
-  },
-  quitSpacer: {
-    width: 60,
   },
   livesText: {
     ...typography.bodyBold,

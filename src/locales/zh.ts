@@ -205,6 +205,8 @@ const zh: typeof en = {
     about: '\u5173\u4e8e',
     version: '\u7248\u672c',
     privacyPolicy: '\u9690\u79c1\u653f\u7b56',
+    termsOfService: '\u670d\u52a1\u6761\u6b3e',
+    support: '\u652f\u6301',
     data: '\u6570\u636e',
     resetAllData: '\u91cd\u7f6e\u6240\u6709\u6570\u636e',
     resetConfirmTitle: '\u91cd\u7f6e\u6240\u6709\u6570\u636e',
