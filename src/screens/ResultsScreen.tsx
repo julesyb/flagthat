@@ -624,28 +624,18 @@ export default function ResultsScreen({ route, navigation }: Props) {
                 <ChevronRightIcon size={14} color={colors.goldBright} />
               </View>
             </TouchableOpacity>
-          </Animated.View>
-        )}
-
-        {/* ── CHALLENGE BACK (after send results) ── */}
-        {isChallenge && canChallenge && !reviewOnly && (
-          <Animated.View style={{ opacity: scoreFade }}>
-            <TouchableOpacity
-              style={styles.challengeButton}
-              onPress={() => { hapticTap(); navigation.replace('GameSetup', { initialMode: config.mode, ...(config.difficulty && { initialDifficulty: config.difficulty }) }); }}
-              activeOpacity={0.7}
-              accessibilityRole="button"
-              accessibilityLabel={t('challenge.challengeBack')}
-            >
-              <View style={styles.challengeButtonInner}>
-                <UsersIcon size={18} color={colors.goldBright} />
-                <View style={styles.challengeButtonContent}>
-                  <Text style={styles.challengeButtonTitle}>{t('challenge.challengeBack')}</Text>
-                  <Text style={styles.challengeButtonDesc}>{t('challenge.challengeBackDesc')}</Text>
-                </View>
-                <ChevronRightIcon size={14} color={colors.goldBright} />
-              </View>
-            </TouchableOpacity>
+            {/* Challenge Back as text link underneath */}
+            {canChallenge && (
+              <TouchableOpacity
+                style={styles.challengeBackLink}
+                onPress={() => { hapticTap(); navigation.replace('GameSetup', { initialMode: config.mode, ...(config.difficulty && { initialDifficulty: config.difficulty }) }); }}
+                activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel={t('challenge.challengeBack')}
+              >
+                <Text style={styles.challengeBackLinkText}>{t('challenge.challengeBack')}</Text>
+              </TouchableOpacity>
+            )}
           </Animated.View>
         )}
 
@@ -803,8 +793,9 @@ export default function ResultsScreen({ route, navigation }: Props) {
           </View>
           {isChallenge && challenge && (
             <View style={styles.reviewH2hHeader}>
-              <Text style={styles.reviewH2hLabel}>{playerName || t('challenge.you')}</Text>
-              <Text style={styles.reviewH2hLabel}>{challenge.hostName}</Text>
+              <View style={{ flex: 1 }} />
+              <Text style={[styles.reviewH2hLabel, { width: 40, textAlign: 'center' }]}>{playerName || t('challenge.you')}</Text>
+              <Text style={[styles.reviewH2hLabel, { width: 40, textAlign: 'center' }]}>{challenge.hostName}</Text>
             </View>
           )}
         </Animated.View>
@@ -824,15 +815,6 @@ export default function ResultsScreen({ route, navigation }: Props) {
                 },
               ]}
             >
-              {/* Yours vs Theirs icons for challenge mode */}
-              {isChallenge && opponentResult !== undefined && (
-                <View style={styles.reviewH2hIcons}>
-                  {result.correct ? <CheckIcon size={14} color={colors.success} /> : <CrossIcon size={14} color={colors.error} />}
-                </View>
-              )}
-              <Text style={[styles.reviewIndex, result.correct ? styles.reviewIndexCorrect : styles.reviewIndexWrong]}>
-                {index + 1}
-              </Text>
               <FlagImageSmall countryCode={result.question.flag.id} />
               <View style={styles.reviewContent}>
                 <Text style={styles.reviewName}>{result.question.flag.name}</Text>
@@ -844,9 +826,14 @@ export default function ResultsScreen({ route, navigation }: Props) {
                 )}
               </View>
               {isChallenge && opponentResult !== undefined ? (
-                <View style={styles.reviewH2hIcons}>
-                  {opponentResult.correct ? <CheckIcon size={14} color={colors.success} /> : <CrossIcon size={14} color={colors.error} />}
-                </View>
+                <>
+                  <View style={styles.reviewH2hIcons}>
+                    {result.correct ? <CheckIcon size={16} color={colors.success} /> : <CrossIcon size={16} color={colors.error} />}
+                  </View>
+                  <View style={styles.reviewH2hIcons}>
+                    {opponentResult.correct ? <CheckIcon size={16} color={colors.success} /> : <CrossIcon size={16} color={colors.error} />}
+                  </View>
+                </>
               ) : (
                 <View style={styles.reviewRight}>
                   <Text style={[styles.reviewTime, isFastest && styles.reviewTimeFastest]}>{itemTime}s</Text>
@@ -1083,14 +1070,14 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   reviewTime: { ...typography.microMedium, color: colors.textTertiary },
   reviewTimeFastest: { color: colors.success },
   reviewH2hHeader: {
-    flexDirection: 'row', justifyContent: 'space-between',
+    flexDirection: 'row', alignItems: 'center',
     paddingHorizontal: 14, marginBottom: spacing.xs,
   },
   reviewH2hLabel: {
     ...typography.eyebrow, color: colors.textTertiary,
   },
   reviewH2hIcons: {
-    width: 24, alignItems: 'center', justifyContent: 'center',
+    width: 40, alignItems: 'center', justifyContent: 'center',
   },
 
   // ── Head-to-head
@@ -1228,6 +1215,16 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   challengeButtonDesc: {
     ...typography.micro,
     color: colors.textTertiary,
+  },
+  challengeBackLink: {
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+    marginBottom: spacing.sm,
+  },
+  challengeBackLinkText: {
+    ...typography.microMedium,
+    color: colors.goldBright,
+    textDecorationLine: 'underline',
   },
 
   // ── Challenge modal

@@ -29,6 +29,7 @@ import { useNavTabs } from '../hooks/useNavTabs';
 import { getAllEarnedBadges, buildBadgeContext, deriveFromContext, BADGES, TIER_COLORS, getBadgeProgress, Badge } from '../utils/badges';
 import { computeLevelProgress, LevelProgress, getTierLabel, getLevelTier } from '../utils/levels';
 import { ChevronRightIcon, BadgeIconView, UsersIcon, CheckIcon, CrossIcon, FlameIcon } from '../components/Icons';
+import { decodeChallenge } from '../utils/challengeCode';
 import PageHeader from '../components/PageHeader';
 
 const EMPTY_FLAG_STATS: FlagStats = {};
@@ -760,6 +761,13 @@ export default function StatsScreen() {
             <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
             {selectedChallenge && (() => {
               const ch = selectedChallenge;
+              // Reconstruct myResults from fullCode if missing (older challenge data)
+              if (!ch.myResults && ch.fullCode && ch.direction === 'sent') {
+                const decoded = decodeChallenge(ch.fullCode);
+                if (decoded.status === 'ok') {
+                  ch.myResults = decoded.data.hostResults.map((r) => r.correct);
+                }
+              }
               const hasOpponent = ch.opponentName !== null && ch.opponentScore !== null;
               const won = hasOpponent && ch.myScore > ch.opponentScore!;
               const lost = hasOpponent && ch.myScore < ch.opponentScore!;
