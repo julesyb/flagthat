@@ -74,7 +74,6 @@ export default function ResultsScreen({ route, navigation }: Props) {
   // Phase 6: Everything else
   const restFade = useRef(new Animated.Value(0)).current;
   // Perfect celebration + hero glow for great scores
-  const confettiOpacity = useRef(new Animated.Value(0)).current;
   const heroGlow = useRef(new Animated.Value(0)).current;
   // Review items
   const reviewAnims = useRef(results.map(() => new Animated.Value(0))).current;
@@ -366,26 +365,17 @@ export default function ResultsScreen({ route, navigation }: Props) {
       ),
     ).start();
 
-    // Celebration intensity scaling
+    // Celebration intensity scaling (no flashing banner)
     if (isPerfect) {
-      // Full celebration: sound + haptic + pulsing banner + hero glow
+      // Perfect: sound + haptic + hero glow
       setTimeout(() => {
         hapticCorrect();
         playCelebrationSound();
       }, revealDelay);
-      const loopAnim = Animated.loop(
-        Animated.sequence([
-          Animated.timing(confettiOpacity, { toValue: 1, duration: 500, delay: revealDelay, useNativeDriver: true }),
-          Animated.timing(confettiOpacity, { toValue: 0.3, duration: 500, useNativeDriver: true }),
-        ]),
-      );
-      loopAnim.start();
-      // Hero glow pulse
       Animated.sequence([
         Animated.timing(heroGlow, { toValue: 1, duration: 400, delay: revealDelay, useNativeDriver: false }),
         Animated.timing(heroGlow, { toValue: 0, duration: 600, useNativeDriver: false }),
       ]).start();
-      return () => { loopAnim.stop(); };
     } else if (accuracy >= 90) {
       // Great score: haptic + hero glow flash (gold tint)
       setTimeout(() => {
@@ -473,18 +463,15 @@ export default function ResultsScreen({ route, navigation }: Props) {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <ScreenContainer>
 
-        {/* ── PERFECT BANNER ── */}
-        {isPerfect && (
-          <Animated.View style={[styles.celebrationBanner, { opacity: confettiOpacity }]}>
-            <Text style={styles.celebrationText}>{t('results.perfectScore')}</Text>
-          </Animated.View>
-        )}
+        {/* Perfect banner removed */}
 
         {/* ══════════════════════════════════════════════════════════
             HERO: The score reveal. This IS the experience.
             Phase 1: accuracy counts up  0% → 87%
             Phase 2: "8/10 correct" fades in
+            Hidden for challenge mode — h2h card is the hero instead.
             ══════════════════════════════════════════════════════════ */}
+        {!isChallenge && (
         <Animated.View style={[styles.heroCard, { borderColor: heroGlowColor, borderWidth: 2 }]}>
           <Text style={styles.heroEyebrow}>
             {isDaily ? t('results.dailyTitle', { number: dailyNumber }) : `${modeLabel} / ${categoryLabel}`}
@@ -498,6 +485,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
             {correct}/{questionTotal} {t('results.correct').toLowerCase()}
           </Animated.Text>
         </Animated.View>
+        )}
 
         {/* ── HEAD-TO-HEAD (challenge mode) ── */}
         {h2h && challenge && (
@@ -580,29 +568,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
           </Animated.View>
         )}
 
-        {/* ── CHALLENGE BACK (right after h2h for momentum) ── */}
-        {isChallenge && canChallenge && !reviewOnly && (
-          <Animated.View style={{ opacity: scoreFade }}>
-            <TouchableOpacity
-              style={styles.challengeButton}
-              onPress={() => { hapticTap(); navigation.replace('GameSetup', { initialMode: config.mode, ...(config.difficulty && { initialDifficulty: config.difficulty }) }); }}
-              activeOpacity={0.7}
-              accessibilityRole="button"
-              accessibilityLabel={t('challenge.challengeBack')}
-            >
-              <View style={styles.challengeButtonInner}>
-                <UsersIcon size={18} color={colors.goldBright} />
-                <View style={styles.challengeButtonContent}>
-                  <Text style={styles.challengeButtonTitle}>{t('challenge.challengeBack')}</Text>
-                  <Text style={styles.challengeButtonDesc}>{t('challenge.challengeBackDesc')}</Text>
-                </View>
-                <ChevronRightIcon size={14} color={colors.goldBright} />
-              </View>
-            </TouchableOpacity>
-          </Animated.View>
-        )}
-
-        {/* ── SEND RESULTS BACK (for received challenges) ── */}
+        {/* ── SEND RESULTS BACK (for received challenges — shown first) ── */}
         {isChallenge && challenge && playerName && !reviewOnly && (
           <Animated.View style={{ opacity: scoreFade }}>
             <TouchableOpacity
@@ -617,6 +583,28 @@ export default function ResultsScreen({ route, navigation }: Props) {
                 <View style={styles.challengeButtonContent}>
                   <Text style={styles.challengeButtonTitle}>{t('challenge.sendResultsBack')}</Text>
                   <Text style={styles.challengeButtonDesc}>{t('challenge.sendResultsBackDesc')}</Text>
+                </View>
+                <ChevronRightIcon size={14} color={colors.goldBright} />
+              </View>
+            </TouchableOpacity>
+          </Animated.View>
+        )}
+
+        {/* ── CHALLENGE BACK (after send results) ── */}
+        {isChallenge && canChallenge && !reviewOnly && (
+          <Animated.View style={{ opacity: scoreFade }}>
+            <TouchableOpacity
+              style={styles.challengeButton}
+              onPress={() => { hapticTap(); navigation.replace('GameSetup', { initialMode: config.mode, ...(config.difficulty && { initialDifficulty: config.difficulty }) }); }}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel={t('challenge.challengeBack')}
+            >
+              <View style={styles.challengeButtonInner}>
+                <UsersIcon size={18} color={colors.goldBright} />
+                <View style={styles.challengeButtonContent}>
+                  <Text style={styles.challengeButtonTitle}>{t('challenge.challengeBack')}</Text>
+                  <Text style={styles.challengeButtonDesc}>{t('challenge.challengeBackDesc')}</Text>
                 </View>
                 <ChevronRightIcon size={14} color={colors.goldBright} />
               </View>
@@ -695,8 +683,8 @@ export default function ResultsScreen({ route, navigation }: Props) {
           </Animated.View>
         )}
 
-        {/* ── INSIGHT CHIPS ── */}
-        {!reviewOnly && (
+        {/* ── INSIGHT CHIPS (hidden for challenges) ── */}
+        {!reviewOnly && !isChallenge && (
           <Animated.View style={[styles.insightRow, { opacity: restFade }]}>
             {newCountriesCount > 0 && (
               <View style={styles.insightChip}>
@@ -725,7 +713,8 @@ export default function ResultsScreen({ route, navigation }: Props) {
           </Animated.View>
         )}
 
-        {/* ── ACTION BUTTONS ── */}
+        {/* ── ACTION BUTTONS (hidden for challenges — they have Send Results + Challenge Again) ── */}
+        {!isChallenge && (
         <Animated.View style={[styles.buttonRow, { opacity: restFade }]}>
           {!isBaseline && (
             <TouchableOpacity style={styles.secondaryButton} onPress={handleShare} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel={t('common.share')}>
@@ -741,6 +730,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
             </TouchableOpacity>
           )}
         </Animated.View>
+        )}
 
         {/* ── CHALLENGE A FRIEND ── */}
         {canChallenge && !isChallenge && !reviewOnly && (
@@ -759,8 +749,8 @@ export default function ResultsScreen({ route, navigation }: Props) {
         )}
 
 
-        {/* ── NEWLY EARNED BADGES ── */}
-        {newBadges.length > 0 && (
+        {/* ── NEWLY EARNED BADGES (hidden for challenges) ── */}
+        {newBadges.length > 0 && !isChallenge && (
           <Animated.View style={[styles.badgesSection, { opacity: restFade }]}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>{t('results.badgesUnlocked')}</Text>
@@ -788,8 +778,8 @@ export default function ResultsScreen({ route, navigation }: Props) {
           </Animated.View>
         )}
 
-        {/* ── YOUR PROGRESS (animated bar) ── */}
-        {overallStats && !reviewOnly && (
+        {/* ── YOUR PROGRESS (animated bar) — hidden for challenges ── */}
+        {overallStats && !reviewOnly && !isChallenge && (
           <Animated.View style={[styles.progressSection, { opacity: restFade }]}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>{t('results.yourProgress')}</Text>
@@ -845,6 +835,12 @@ export default function ResultsScreen({ route, navigation }: Props) {
             <Text style={styles.sectionTitle}>{t('common.review')}</Text>
             <Text style={styles.sectionMeta}>{correct}/{questionTotal} {t('results.correct').toLowerCase()}</Text>
           </View>
+          {isChallenge && challenge && (
+            <View style={styles.reviewH2hHeader}>
+              <Text style={styles.reviewH2hLabel}>{playerName || t('challenge.you')}</Text>
+              <Text style={styles.reviewH2hLabel}>{challenge.hostName}</Text>
+            </View>
+          )}
         </Animated.View>
         {results.map((result, index) => {
           const itemTime = Math.round(result.timeTaken / 100) / 10;
@@ -862,6 +858,12 @@ export default function ResultsScreen({ route, navigation }: Props) {
                 },
               ]}
             >
+              {/* Yours vs Theirs icons for challenge mode */}
+              {isChallenge && opponentResult !== undefined && (
+                <View style={styles.reviewH2hIcons}>
+                  {result.correct ? <CheckIcon size={14} color={colors.success} /> : <CrossIcon size={14} color={colors.error} />}
+                </View>
+              )}
               <Text style={[styles.reviewIndex, result.correct ? styles.reviewIndexCorrect : styles.reviewIndexWrong]}>
                 {index + 1}
               </Text>
@@ -874,16 +876,17 @@ export default function ResultsScreen({ route, navigation }: Props) {
                 {result.userAnswer === 'SKIPPED' && (
                   <Text style={styles.reviewAnswer}>{t('results.skipped')}</Text>
                 )}
-                {isChallenge && opponentResult && (
-                  <Text style={styles.reviewOpponent}>
-                    {challenge.hostName}: {opponentResult.correct ? <CheckIcon size={12} color={colors.success} /> : <CrossIcon size={12} color={colors.error} />}
-                  </Text>
-                )}
               </View>
-              <View style={styles.reviewRight}>
-                <Text style={[styles.reviewTime, isFastest && styles.reviewTimeFastest]}>{itemTime}s</Text>
-                {result.correct ? <CheckIcon size={18} color={colors.success} /> : <CrossIcon size={18} color={colors.error} />}
-              </View>
+              {isChallenge && opponentResult !== undefined ? (
+                <View style={styles.reviewH2hIcons}>
+                  {opponentResult.correct ? <CheckIcon size={14} color={colors.success} /> : <CrossIcon size={14} color={colors.error} />}
+                </View>
+              ) : (
+                <View style={styles.reviewRight}>
+                  <Text style={[styles.reviewTime, isFastest && styles.reviewTimeFastest]}>{itemTime}s</Text>
+                  {result.correct ? <CheckIcon size={18} color={colors.success} /> : <CrossIcon size={18} color={colors.error} />}
+                </View>
+              )}
             </Animated.View>
           );
         })}
@@ -947,12 +950,6 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   content: { padding: spacing.md, paddingBottom: spacing.xxl },
 
   // ── Celebration
-  celebrationBanner: {
-    backgroundColor: colors.warning, padding: spacing.md,
-    alignItems: 'center', marginBottom: spacing.sm, borderRadius: borderRadius.md,
-  },
-  celebrationText: { ...typography.headingUpper, color: colors.primary },
-
   // ── Hero (THE centerpiece)
   heroCard: {
     backgroundColor: colors.surface,
@@ -1128,6 +1125,16 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   reviewTime: { ...typography.microMedium, color: colors.textTertiary },
   reviewTimeFastest: { color: colors.success },
   reviewOpponent: { ...typography.micro, color: colors.textTertiary, marginTop: spacing.xxs },
+  reviewH2hHeader: {
+    flexDirection: 'row', justifyContent: 'space-between',
+    paddingHorizontal: 14, marginBottom: spacing.xs,
+  },
+  reviewH2hLabel: {
+    ...typography.eyebrow, color: colors.textTertiary,
+  },
+  reviewH2hIcons: {
+    width: 24, alignItems: 'center', justifyContent: 'center',
+  },
 
   // ── Head-to-head
   h2hCard: {
