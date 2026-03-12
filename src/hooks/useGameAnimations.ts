@@ -30,18 +30,15 @@ export function useGameAnimations() {
     fadeAnim.setValue(1);
     Animated.timing(fadeAnim, {
       toValue: 0,
-      duration: 150,
+      duration: 120,
       useNativeDriver: true,
     }).start(() => {
       onMidpoint?.();
-      // Small delay to allow new image to start loading before fading in
-      setTimeout(() => {
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: true,
-        }).start();
-      }, 50);
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 150,
+        useNativeDriver: true,
+      }).start();
     });
   }, [fadeAnim]);
 

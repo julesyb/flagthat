@@ -232,6 +232,7 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
           <FlagImage
             countryCode={question.flag.id}
             size="hero"
+            transition={0}
           />
         </View>
 
