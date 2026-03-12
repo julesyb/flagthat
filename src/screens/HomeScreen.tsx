@@ -27,7 +27,7 @@ import ScreenContainer from '../components/ScreenContainer';
 import SegBtn from '../components/SegBtn';
 import ConfigRow, { ConfigCard } from '../components/ConfigRow';
 import { useNavTabs } from '../hooks/useNavTabs';
-import { computeLevelProgress, LevelProgress, getLevelTier } from '../utils/levels';
+import { computeLevelProgress, LevelProgress } from '../utils/levels';
 import { t } from '../utils/i18n';
 import { translateName, flagName } from '../data/countryNames';
 
