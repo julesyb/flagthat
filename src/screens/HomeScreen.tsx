@@ -16,11 +16,11 @@ import { useTheme } from '../contexts/ThemeContext';
 import { ThemeColors } from '../utils/theme';
 import { getTotalFlagCount, getCategoryCount } from '../data';
 import { initAudio, hapticTap, hapticCorrect, hapticWrong, playWrongSound, setSoundsEnabled, setHapticsEnabled } from '../utils/feedback';
-import { getStats, getDayStreak, getSettings, getMissedFlagIds, getBaselineData, BaselineData, getFlagStats, getBadgeData, getDayStreakInfo, getPersistedLevel, persistLevel } from '../utils/storage';
-import { generateQuestions } from '../utils/gameEngine';
+import { getStats, getSettings, getMissedFlagIds, getBaselineData, isDailyCompleteToday, BaselineData, getFlagStats, getBadgeData, getDayStreakInfo, getPersistedLevel, persistLevel } from '../utils/storage';
+import { generateQuestions, getDailyNumber } from '../utils/gameEngine';
 import { RootStackParamList } from '../types/navigation';
 import { GameMode, UserStats, GameQuestion, CategoryId, BASELINE_REGIONS } from '../types';
-import { PlayIcon, ChevronRightIcon, CheckIcon, FlameIcon, LinkIcon } from '../components/Icons';
+import { PlayIcon, ChevronRightIcon, CheckIcon, LinkIcon, CalendarIcon } from '../components/Icons';
 import FlagImage from '../components/FlagImage';
 import BottomNav from '../components/BottomNav';
 import ScreenContainer from '../components/ScreenContainer';
@@ -148,9 +148,9 @@ export default function HomeScreen({ navigation }: Props) {
   const [questionCount, setQuestionCount] = useState(10);
   const [questionCountAll, setQuestionCountAll] = useState(false);
   const [stats, setStats] = useState<UserStats | null>(null);
-  const [dayStreak, setDayStreak] = useState(0);
   const [teaserKey, setTeaserKey] = useState(0);
   const [weakFlagCount, setWeakFlagCount] = useState(0);
+  const [dailyDone, setDailyDone] = useState(false);
   const [autocomplete, setAutocomplete] = useState(false);
   const [baseline, setBaseline] = useState<BaselineData | null>(null);
   const [levelProgress, setLevelProgress] = useState<LevelProgress | null>(null);
@@ -175,8 +175,9 @@ export default function HomeScreen({ navigation }: Props) {
 
   useFocusEffect(
     useCallback(() => {
-      getDayStreak().then(setDayStreak);
+      getStats().then(setStats);
       getMissedFlagIds().then((ids) => setWeakFlagCount(ids.length));
+      isDailyCompleteToday().then(setDailyDone);
       getBaselineData().then(setBaseline);
       setTeaserKey((k) => k + 1);
       Promise.all([getStats(), getFlagStats(), getBadgeData(), getDayStreakInfo(), getPersistedLevel()]).then(
@@ -214,37 +215,19 @@ export default function HomeScreen({ navigation }: Props) {
             <Text style={styles.wmFlag}>Flag</Text>
             <Text style={styles.wmThat}>That</Text>
           </Text>
-          <View style={styles.headerRight}>
-            {levelProgress && (
-              <TouchableOpacity
-                style={styles.levelBadge}
-                onPress={() => navigation.navigate('Stats')}
-                activeOpacity={0.7}
-                accessibilityRole="button"
-                accessibilityLabel={t('stats.level', { level: levelProgress.currentLevel })}
-                accessibilityHint={t('a11y.opensStats')}
-              >
-                <Text style={styles.levelBadgeLabel}>{t('stats.levelLabel')}</Text>
-                <Text style={styles.levelBadgeNum}>{levelProgress.currentLevel}</Text>
-              </TouchableOpacity>
-            )}
+          {levelProgress && (
             <TouchableOpacity
-              style={styles.streakBadge}
+              style={styles.levelBadge}
               onPress={() => navigation.navigate('Stats')}
               activeOpacity={0.7}
               accessibilityRole="button"
-              accessibilityLabel={`${dayStreak} ${t('home.dayStreak')}`}
+              accessibilityLabel={t('stats.level', { level: levelProgress.currentLevel })}
               accessibilityHint={t('a11y.opensStats')}
             >
-              <FlameIcon size={16} color={dayStreak > 0 ? colors.goldBright : colors.textTertiary} />
-              <Text style={[styles.streakNum, dayStreak === 0 && styles.streakNumInactive]}>{dayStreak}</Text>
-              <View style={styles.streakPips}>
-                {Array.from({ length: 7 }).map((_, i) => (
-                  <View key={i} style={[styles.pip, i < Math.min(dayStreak, 7) && styles.pipLit]} />
-                ))}
-              </View>
+              <Text style={styles.levelBadgeLabel}>{t('stats.levelLabel')}</Text>
+              <Text style={styles.levelBadgeNum}>{levelProgress.currentLevel}</Text>
             </TouchableOpacity>
-          </View>
+          )}
         </View>
 
         {/* ── FLAG TEASER ── */}
@@ -323,6 +306,32 @@ export default function HomeScreen({ navigation }: Props) {
           </View>
 
           <View style={styles.modeList}>
+            <TouchableOpacity
+              style={[styles.modeRow, dailyDone && styles.modeRowDisabled]}
+              activeOpacity={dailyDone ? 1 : 0.85}
+              disabled={dailyDone}
+              onPress={() => {
+                hapticTap();
+                navigation.navigate('Game', {
+                  config: { mode: 'daily', category: 'all', questionCount: 10, displayMode: 'flag' },
+                });
+              }}
+              accessibilityRole="button"
+              accessibilityLabel={dailyDone ? t('home.comeBackTomorrow') : t('home.daily', { number: getDailyNumber() })}
+              accessibilityHint={dailyDone ? undefined : t('a11y.opensMode')}
+              accessibilityState={{ disabled: dailyDone }}
+            >
+              <View style={[styles.modeBar, { backgroundColor: dailyDone ? colors.dim : colors.modeGold }]} />
+              <CalendarIcon size={15} color={dailyDone ? colors.textTertiary : colors.goldBright} />
+              <Text style={[styles.modeTitle, dailyDone ? styles.modeTitleDisabled : { color: colors.goldBright }]}>
+                {t('home.daily', { number: getDailyNumber() })}
+              </Text>
+              <Text style={styles.modeTag}>
+                {dailyDone ? t('home.comeBackTomorrow') : t('home.tenFlags')}
+              </Text>
+              {dailyDone ? <CheckIcon size={14} color={colors.success} /> : <ChevronRightIcon size={14} color={colors.dim} />}
+            </TouchableOpacity>
+
             <TouchableOpacity
               style={styles.modeRow}
               activeOpacity={0.85}
@@ -547,11 +556,6 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     fontSize: fontSize.title,
     color: colors.goldBright,
   },
-  headerRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
   levelBadge: {
     alignItems: 'center',
     paddingVertical: spacing.xs,
@@ -575,42 +579,6 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     color: colors.goldBright,
     letterSpacing: -0.5,
     lineHeight: 18,
-  },
-  streakBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    paddingLeft: spacing.sm + 2,
-    borderRadius: borderRadius.full,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-  },
-  streakNum: {
-    fontFamily: fontFamily.display,
-    fontSize: fontSize.lg,
-    color: colors.goldBright,
-    letterSpacing: -0.8,
-    lineHeight: 22,
-  },
-  streakNumInactive: {
-    color: colors.textTertiary,
-  },
-  streakPips: {
-    flexDirection: 'row',
-    gap: 3,
-    marginLeft: 2,
-  },
-  pip: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: colors.pipInactive,
-  },
-  pipLit: {
-    backgroundColor: colors.pipActive,
   },
 
   // ── Onboarding progress
@@ -851,6 +819,12 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     fontSize: fontSize.sm,
     color: colors.ink,
     letterSpacing: -0.1,
+  },
+  modeRowDisabled: {
+    opacity: 0.6,
+  },
+  modeTitleDisabled: {
+    color: colors.textTertiary,
   },
   modeTag: {
     ...typography.micro,

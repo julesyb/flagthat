@@ -338,6 +338,17 @@ export interface DailyChallengeData {
   score: number;
 }
 
+export async function isDailyCompleteToday(): Promise<boolean> {
+  try {
+    const json = await AsyncStorage.getItem(DAILY_CHALLENGE_KEY);
+    if (!json) return false;
+    const data: DailyChallengeData = JSON.parse(json);
+    return data.completed && data.date === getTodayDate();
+  } catch {
+    return false;
+  }
+}
+
 export async function saveDailyChallenge(results: GameResult[]): Promise<void> {
   try {
     const score = results.filter((r) => r.correct).length;

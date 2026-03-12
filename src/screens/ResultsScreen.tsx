@@ -19,12 +19,12 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { spacing, typography, fontFamily, fontSize, buildButtons, borderRadius, APP_URL, ThemeColors } from '../utils/theme';
 import { useTheme } from '../contexts/ThemeContext';
 import { getStreakFromResults, generateDailyShareGrid, generateShareGrid, getDailyNumber, modeLabelKey } from '../utils/gameEngine';
-import { updateStats, updateFlagResults, saveDailyChallenge, incrementDailyChallenges, markShared, saveBaselineResult, getStats, getFlagStats, getDayStreakInfo, getBadgeData, persistEarnedBadges, getMissedFlagIds, addGameHistoryEntry, getChallengeName, saveChallengeName, addChallengeToHistory, recordRegionScore, getPersistedLevel, persistLevel } from '../utils/storage';
+import { updateStats, updateFlagResults, saveDailyChallenge, incrementDailyChallenges, markShared, saveBaselineResult, getStats, getFlagStats, getDayStreakInfo, getBadgeData, persistEarnedBadges, getMissedFlagIds, addGameHistoryEntry, getChallengeName, saveChallengeName, addChallengeToHistory, recordRegionScore, getPersistedLevel, persistLevel, UNLOCK_THRESHOLD } from '../utils/storage';
 import { BaselineRegionId, UserStats, GameMode, CategoryId, BASELINE_REGIONS } from '../types';
 import { t } from '../utils/i18n';
 import { hapticCorrect, hapticTap, playCelebrationSound } from '../utils/feedback';
 import { FlagImageSmall } from '../components/FlagImage';
-import { CheckIcon, CrossIcon, ChevronRightIcon, BarChartIcon, CalendarIcon, UsersIcon, CrosshairIcon, BadgeIconView } from '../components/Icons';
+import { CheckIcon, CrossIcon, ChevronRightIcon, GlobeIcon, UsersIcon, BadgeIconView } from '../components/Icons';
 import BottomNav from '../components/BottomNav';
 import ScreenContainer from '../components/ScreenContainer';
 import { useNavTabs } from '../hooks/useNavTabs';
@@ -36,6 +36,121 @@ import { computeLevelProgress, getTierLabel, getLevelTier } from '../utils/level
 import { encodeChallenge, ChallengeData, CHALLENGE_MODES, generateShortCode, generateChallengeShareCard, encodeResponse } from '../utils/challengeCode';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Results'>;
+
+// ── Extracted helpers for processResults ──
+
+interface PreGameSnapshot {
+  preStats: UserStats;
+  preFlagStats: Awaited<ReturnType<typeof getFlagStats>>;
+  preBadgeIds: Set<string>;
+  wasNewBestStreak: boolean;
+}
+
+async function snapshotPreGameState(streak: number): Promise<PreGameSnapshot> {
+  const [preStats, preFlagStats, preDayStreakInfo, preBadgeData, preMissed] = await Promise.all([
+    getStats(), getFlagStats(), getDayStreakInfo(), getBadgeData(), getMissedFlagIds(),
+  ]);
+  const preCtx = buildBadgeContext(preStats, preFlagStats, preDayStreakInfo, preBadgeData, preMissed.length);
+  const preBadgeIds = new Set(getAllEarnedBadges(preCtx, preBadgeData.earnedBadgeIds).map((b) => b.id));
+
+  const wasNewBestStreak = streak > preStats.bestStreak;
+
+  return { preStats, preFlagStats, preBadgeIds, wasNewBestStreak };
+}
+
+async function persistGameData(
+  results: import('../types').GameResult[],
+  config: import('../types').GameConfig,
+  correct: number,
+  streak: number,
+  accuracy: number,
+  isDaily: boolean,
+  isChallenge: boolean,
+  challenge: ChallengeData | undefined,
+  playerName: string | undefined,
+): Promise<void> {
+  const correctResults = results.filter((r) => r.correct);
+  const speedData = correctResults.length > 0
+    ? { correctTimeMs: correctResults.reduce((sum, r) => sum + r.timeTaken, 0), correctCount: correctResults.length }
+    : undefined;
+  await updateStats(correct, results.length, streak, config.mode, config.category, speedData);
+  await updateFlagResults(results);
+  await addGameHistoryEntry(accuracy, config.mode);
+
+  if ((BASELINE_REGIONS as readonly string[]).includes(config.category)) {
+    await recordRegionScore(config.category as BaselineRegionId, correct, results.length);
+  }
+  if (isDaily) {
+    await saveDailyChallenge(results);
+    await incrementDailyChallenges();
+  }
+  if (isChallenge && challenge && playerName) {
+    const shortCode = generateShortCode(challenge);
+    const hostScore = challenge.hostResults.filter((r) => r.correct).length;
+    addChallengeToHistory({
+      shortCode,
+      mode: config.mode,
+      date: new Date().toISOString(),
+      myName: playerName,
+      myScore: correct,
+      totalFlags: results.length,
+      opponentName: challenge.hostName,
+      opponentScore: hostScore,
+      direction: 'received',
+      fullCode: encodeChallenge(challenge) || '',
+      myResults: results.map((r) => r.correct),
+      opponentResults: challenge.hostResults.map((r) => r.correct),
+    });
+  }
+}
+
+interface PostGameResult {
+  postStats: UserStats;
+  postFlagStats: Awaited<ReturnType<typeof getFlagStats>>;
+  postDayStreakCount: number;
+  postBadges: EarnedBadge[];
+  levelUp: number | null;
+}
+
+async function evaluatePostGameProgression(
+  results: import('../types').GameResult[],
+  correct: number,
+  reviewOnly: boolean,
+): Promise<PostGameResult> {
+  const [postStats, postFlagStats, postDayStreakInfo, postBadgeData, postMissed] = await Promise.all([
+    getStats(), getFlagStats(), getDayStreakInfo(), getBadgeData(), getMissedFlagIds(),
+  ]);
+  const postCtx = buildBadgeContext(postStats, postFlagStats, postDayStreakInfo, postBadgeData, postMissed.length);
+  const perGameIds = !reviewOnly ? detectPerGameBadges(results, correct, results.length) : [];
+  const allPersistedIds = [...postBadgeData.earnedBadgeIds, ...perGameIds];
+  const postBadges = getAllEarnedBadges(postCtx, allPersistedIds);
+  await persistEarnedBadges(postBadges.map((b) => b.id));
+
+  // Level-up detection
+  let levelUp: number | null = null;
+  if (!reviewOnly) {
+    const prePersisted = await getPersistedLevel();
+    const levelCtx = {
+      stats: postStats,
+      flagStats: postFlagStats,
+      badgeData: { ...postBadgeData, earnedBadgeIds: postBadges.map((b) => b.id) },
+      dayStreakInfo: postDayStreakInfo,
+    };
+    const lp = computeLevelProgress(levelCtx, prePersisted);
+    if (lp.currentLevel > prePersisted) {
+      await persistLevel(lp.currentLevel);
+      levelUp = lp.currentLevel;
+    }
+  }
+
+  return {
+    postStats,
+    postFlagStats,
+    postDayStreakCount: postDayStreakInfo.current,
+    postBadges,
+    levelUp,
+  };
+}
 
 export default function ResultsScreen({ route, navigation }: Props) {
   const { colors } = useTheme();
@@ -84,8 +199,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
   const [newBadges, setNewBadges] = useState<EarnedBadge[]>([]);
   const [totalBadgesEarned, setTotalBadgesEarned] = useState(0);
   const [isNewBestStreak, setIsNewBestStreak] = useState(false);
-  const [prevAccuracy, setPrevAccuracy] = useState<number | null>(null);
-  const [weakFlagCount, setWeakFlagCount] = useState(0);
+  const [newCountriesCount, setNewCountriesCount] = useState(0);
   const [levelUpTo, setLevelUpTo] = useState<number | null>(null);
 
   // Challenge modal state
@@ -225,97 +339,37 @@ export default function ResultsScreen({ route, navigation }: Props) {
   useEffect(() => {
     // ── Data processing ──
     async function processResults() {
-      // ── Snapshot pre-game state ──
-      const [preStats, preFlagStats, preDayStreakInfo, preBadgeData, preMissed] = await Promise.all([
-        getStats(), getFlagStats(), getDayStreakInfo(), getBadgeData(), getMissedFlagIds(),
-      ]);
-      const preCtx = buildBadgeContext(preStats, preFlagStats, preDayStreakInfo, preBadgeData, preMissed.length);
-      const preBadgeIds = new Set(getAllEarnedBadges(preCtx, preBadgeData.earnedBadgeIds).map((b) => b.id));
+      const { preFlagStats, preBadgeIds, wasNewBestStreak } =
+        await snapshotPreGameState(streak);
 
-      const wasNewBestStreak = streak > preStats.bestStreak;
-      const prevAcc = preStats.totalAnswered > 0
-        ? Math.round((preStats.totalCorrect / preStats.totalAnswered) * 100) : null;
-
-      // ── Persist game data ──
       if (!reviewOnly) {
-        const correctResults = results.filter((r) => r.correct);
-        const speedData = correctResults.length > 0
-          ? { correctTimeMs: correctResults.reduce((sum, r) => sum + r.timeTaken, 0), correctCount: correctResults.length }
-          : undefined;
-        await updateStats(correct, results.length, streak, config.mode, config.category, speedData);
-        await updateFlagResults(results);
-        await addGameHistoryEntry(accuracy, config.mode);
-        // Record per-region score for region-based games
-        if ((BASELINE_REGIONS as readonly string[]).includes(config.category)) {
-          await recordRegionScore(config.category as BaselineRegionId, correct, results.length);
-        }
-        if (isDaily) {
-          await saveDailyChallenge(results);
-          await incrementDailyChallenges();
-        }
-        // Save received challenge to history
-        if (isChallenge && challenge && playerName) {
-          const shortCode = generateShortCode(challenge);
-          const hostScore = challenge.hostResults.filter((r) => r.correct).length;
-          addChallengeToHistory({
-            shortCode,
-            mode: config.mode,
-            date: new Date().toISOString(),
-            myName: playerName,
-            myScore: correct,
-            totalFlags: results.length,
-            opponentName: challenge.hostName,
-            opponentScore: hostScore,
-            direction: 'received',
-            fullCode: encodeChallenge(challenge) || '',
-            myResults: results.map((r) => r.correct),
-            opponentResults: challenge.hostResults.map((r) => r.correct),
-          });
-        }
+        await persistGameData(
+          results, config, correct, streak, accuracy,
+          isDaily, isChallenge, challenge, playerName,
+        );
       }
       if (isBaseline) {
         const regionTotal = getCategoryCount(config.category as CategoryId);
         await saveBaselineResult(config.category as BaselineRegionId, results, regionTotal);
       }
 
-      // ── Snapshot post-game state and evaluate badges ──
-      const [postStats, postFlagStats, postDayStreakInfo, postBadgeData, postMissed] = await Promise.all([
-        getStats(), getFlagStats(), getDayStreakInfo(), getBadgeData(), getMissedFlagIds(),
-      ]);
-      const postCtx = buildBadgeContext(postStats, postFlagStats, postDayStreakInfo, postBadgeData, postMissed.length);
-      // Merge persisted IDs + per-game badges detected from results, then evaluate
-      const perGameIds = !reviewOnly ? detectPerGameBadges(results, correct, results.length) : [];
-      const allPersistedIds = [...postBadgeData.earnedBadgeIds, ...perGameIds];
-      const postBadges = getAllEarnedBadges(postCtx, allPersistedIds);
-      // Single persist call for all earned badges
-      await persistEarnedBadges(postBadges.map((b) => b.id));
+      const { postStats, postFlagStats, postDayStreakCount, postBadges, levelUp } =
+        await evaluatePostGameProgression(results, correct, !!reviewOnly);
 
+      // ── Update component state ──
       setOverallStats(postStats);
-      setDayStreakCount(postDayStreakInfo.current);
+      setDayStreakCount(postDayStreakCount);
+      const seen = Object.values(postFlagStats).filter((fs) => fs.right >= UNLOCK_THRESHOLD).length;
+      const preSeen = Object.values(preFlagStats).filter((fs) => fs.right >= UNLOCK_THRESHOLD).length;
       setNewBadges(postBadges.filter((b) => !preBadgeIds.has(b.id)));
       setTotalBadgesEarned(postBadges.length);
       setIsNewBestStreak(wasNewBestStreak && !reviewOnly);
-      setPrevAccuracy(prevAcc);
-      setWeakFlagCount(postMissed.length);
-
-      // ── Level-up detection ──
-      if (!reviewOnly) {
-        const prePersisted = await getPersistedLevel();
-        const levelCtx = {
-          stats: postStats,
-          flagStats: postFlagStats,
-          badgeData: { ...postBadgeData, earnedBadgeIds: postBadges.map((b) => b.id) },
-          dayStreakInfo: postDayStreakInfo,
-        };
-        const lp = computeLevelProgress(levelCtx, prePersisted);
-        if (lp.currentLevel > prePersisted) {
-          await persistLevel(lp.currentLevel);
-          setLevelUpTo(lp.currentLevel);
-          // Only fire celebration sound if perfect-score celebration won't already play it
-          if (!isPerfect) {
-            hapticCorrect();
-            playCelebrationSound();
-          }
+      setNewCountriesCount(reviewOnly ? 0 : seen - preSeen);
+      if (levelUp !== null) {
+        setLevelUpTo(levelUp);
+        if (!isPerfect) {
+          hapticCorrect();
+          playCelebrationSound();
         }
       }
     }
@@ -434,14 +488,6 @@ export default function ResultsScreen({ route, navigation }: Props) {
           : t('results.playAgain');
 
   const dataLoaded = overallStats !== null;
-  const accDiff = prevAccuracy !== null ? accuracy - prevAccuracy : null;
-  const accInsight = !dataLoaded
-    ? null
-    : prevAccuracy === null
-    ? t('results.firstGame')
-    : accDiff !== null && accDiff > 0 ? t('results.aboveAverage', { pct: accDiff })
-    : accDiff !== null && accDiff < 0 ? t('results.belowAverage', { pct: Math.abs(accDiff) })
-    : null;
 
   // Hero glow: interpolate to a warm gold border overlay
   const heroGlowColor = heroGlow.interpolate({
@@ -578,28 +624,18 @@ export default function ResultsScreen({ route, navigation }: Props) {
                 <ChevronRightIcon size={14} color={colors.goldBright} />
               </View>
             </TouchableOpacity>
-          </Animated.View>
-        )}
-
-        {/* ── CHALLENGE BACK (after send results) ── */}
-        {isChallenge && canChallenge && !reviewOnly && (
-          <Animated.View style={{ opacity: scoreFade }}>
-            <TouchableOpacity
-              style={styles.challengeButton}
-              onPress={() => { hapticTap(); navigation.replace('GameSetup', { initialMode: config.mode, ...(config.difficulty && { initialDifficulty: config.difficulty }) }); }}
-              activeOpacity={0.7}
-              accessibilityRole="button"
-              accessibilityLabel={t('challenge.challengeBack')}
-            >
-              <View style={styles.challengeButtonInner}>
-                <UsersIcon size={18} color={colors.goldBright} />
-                <View style={styles.challengeButtonContent}>
-                  <Text style={styles.challengeButtonTitle}>{t('challenge.challengeBack')}</Text>
-                  <Text style={styles.challengeButtonDesc}>{t('challenge.challengeBackDesc')}</Text>
-                </View>
-                <ChevronRightIcon size={14} color={colors.goldBright} />
-              </View>
-            </TouchableOpacity>
+            {/* Challenge Back as text link underneath */}
+            {canChallenge && (
+              <TouchableOpacity
+                style={[styles.challengeBackLink, { marginTop: -spacing.sm }]}
+                onPress={() => { hapticTap(); navigation.replace('GameSetup', { initialMode: config.mode, ...(config.difficulty && { initialDifficulty: config.difficulty }) }); }}
+                activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel={t('challenge.challengeBack')}
+              >
+                <Text style={styles.challengeBackLinkText}>{t('challenge.challengeBack')}</Text>
+              </TouchableOpacity>
+            )}
           </Animated.View>
         )}
 
@@ -678,19 +714,11 @@ export default function ResultsScreen({ route, navigation }: Props) {
         {/* ── INSIGHT CHIPS (hidden for challenges) ── */}
         {!reviewOnly && !isChallenge && (
           <Animated.View style={[styles.insightRow, { opacity: restFade }]}>
-            {accInsight && (
+            {newCountriesCount > 0 && (
               <View style={styles.insightChip}>
-                <BarChartIcon size={13} color={accDiff !== null && accDiff >= 0 ? colors.success : colors.textTertiary} />
-                <Text style={[styles.insightText, accDiff !== null && accDiff > 0 && { color: colors.success }]}>
-                  {accInsight}
-                </Text>
-              </View>
-            )}
-            {dayStreakCount > 0 && (
-              <View style={styles.insightChip}>
-                <CalendarIcon size={13} color={colors.accent} />
-                <Text style={[styles.insightText, { color: colors.accent }]}>
-                  {dayStreakCount} {t('stats.dayStreak').toLowerCase()}
+                <GlobeIcon size={13} color={colors.success} />
+                <Text style={[styles.insightText, { color: colors.success }]}>
+                  {t('results.newCountries', { count: newCountriesCount })}
                 </Text>
               </View>
             )}
@@ -757,36 +785,6 @@ export default function ResultsScreen({ route, navigation }: Props) {
           </Animated.View>
         )}
 
-        {/* ── YOUR PROGRESS (animated bar) — hidden for challenges ── */}
-        {overallStats && !reviewOnly && !isChallenge && (
-          <Animated.View style={[styles.progressSection, { opacity: restFade }]}>
-
-            {weakFlagCount > 0 && (
-              <TouchableOpacity
-                style={styles.practiceButton}
-                onPress={() => navigation.replace('Game', {
-                  config: { mode: 'practice', category: 'all', questionCount: weakFlagCount, displayMode: 'flag' },
-                })}
-                activeOpacity={0.7}
-                accessibilityRole="button"
-                accessibilityLabel={t('results.practiceWeak')}
-                accessibilityHint={t('results.flagsToReview', { count: weakFlagCount })}
-              >
-                <CrosshairIcon size={16} color={colors.accent} />
-                <Text style={styles.practiceButtonText}>{t('results.practiceWeak')}</Text>
-                <Text style={styles.practiceButtonMeta}>{t('results.flagsToReview', { count: weakFlagCount })}</Text>
-                <ChevronRightIcon size={14} color={colors.accent} />
-              </TouchableOpacity>
-            )}
-
-            <TouchableOpacity style={styles.viewStatsButton} onPress={() => navigation.navigate('Stats')} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel={t('results.viewAllStats')}>
-              <BarChartIcon size={16} color={colors.ink} />
-              <Text style={styles.viewStatsText}>{t('results.viewAllStats')}</Text>
-              <ChevronRightIcon size={14} color={colors.textTertiary} />
-            </TouchableOpacity>
-          </Animated.View>
-        )}
-
         {/* ── REVIEW ── */}
         <Animated.View style={{ opacity: restFade }}>
           <View style={styles.sectionHeader}>
@@ -795,8 +793,9 @@ export default function ResultsScreen({ route, navigation }: Props) {
           </View>
           {isChallenge && challenge && (
             <View style={styles.reviewH2hHeader}>
-              <Text style={styles.reviewH2hLabel}>{playerName || t('challenge.you')}</Text>
-              <Text style={styles.reviewH2hLabel}>{challenge.hostName}</Text>
+              <View style={{ flex: 1 }} />
+              <Text numberOfLines={1} style={[styles.reviewH2hLabel, { width: 40, textAlign: 'center' }]}>{playerName || t('challenge.you')}</Text>
+              <Text numberOfLines={1} style={[styles.reviewH2hLabel, { width: 40, textAlign: 'center' }]}>{challenge.hostName}</Text>
             </View>
           )}
         </Animated.View>
@@ -816,15 +815,11 @@ export default function ResultsScreen({ route, navigation }: Props) {
                 },
               ]}
             >
-              {/* Yours vs Theirs icons for challenge mode */}
-              {isChallenge && opponentResult !== undefined && (
-                <View style={styles.reviewH2hIcons}>
-                  {result.correct ? <CheckIcon size={14} color={colors.success} /> : <CrossIcon size={14} color={colors.error} />}
-                </View>
+              {!isChallenge && (
+                <Text style={[styles.reviewIndex, result.correct ? styles.reviewIndexCorrect : styles.reviewIndexWrong]}>
+                  {index + 1}
+                </Text>
               )}
-              <Text style={[styles.reviewIndex, result.correct ? styles.reviewIndexCorrect : styles.reviewIndexWrong]}>
-                {index + 1}
-              </Text>
               <FlagImageSmall countryCode={result.question.flag.id} />
               <View style={styles.reviewContent}>
                 <Text style={styles.reviewName}>{result.question.flag.name}</Text>
@@ -836,9 +831,14 @@ export default function ResultsScreen({ route, navigation }: Props) {
                 )}
               </View>
               {isChallenge && opponentResult !== undefined ? (
-                <View style={styles.reviewH2hIcons}>
-                  {opponentResult.correct ? <CheckIcon size={14} color={colors.success} /> : <CrossIcon size={14} color={colors.error} />}
-                </View>
+                <>
+                  <View style={styles.reviewH2hIcons}>
+                    {result.correct ? <CheckIcon size={16} color={colors.success} /> : <CrossIcon size={16} color={colors.error} />}
+                  </View>
+                  <View style={styles.reviewH2hIcons}>
+                    {opponentResult.correct ? <CheckIcon size={16} color={colors.success} /> : <CrossIcon size={16} color={colors.error} />}
+                  </View>
+                </>
               ) : (
                 <View style={styles.reviewRight}>
                   <Text style={[styles.reviewTime, isFastest && styles.reviewTimeFastest]}>{itemTime}s</Text>
@@ -878,7 +878,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
               placeholderTextColor={colors.textTertiary}
               autoCapitalize="words"
               autoCorrect={false}
-              maxLength={20}
+              maxLength={8}
               autoFocus
               returnKeyType="done"
               onSubmitEditing={challengeName.trim().length > 0 ? handleChallengeShare : undefined}
@@ -1028,10 +1028,10 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   // ── Buttons
   buttonRow: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.md },
   buttonHalf: { flex: 1 },
-  secondaryButton: { ...btn.secondary, justifyContent: 'center', alignItems: 'center' },
-  secondaryButtonText: { ...btn.secondaryText, textAlign: 'center' },
-  primaryButton: { ...btn.primary, justifyContent: 'center', alignItems: 'center' },
-  primaryButtonText: { ...btn.primaryText, textAlign: 'center' },
+  secondaryButton: { ...btn.secondary, justifyContent: 'center', alignItems: 'center', paddingVertical: 12, paddingHorizontal: 18 },
+  secondaryButtonText: { ...btn.secondaryText, textAlign: 'center', fontSize: 15 },
+  primaryButton: { ...btn.primary, justifyContent: 'center', alignItems: 'center', paddingVertical: 12, paddingHorizontal: 18 },
+  primaryButtonText: { ...btn.primaryText, textAlign: 'center', fontSize: 15 },
 
   // ── Badges
   badgesSection: { marginBottom: spacing.md },
@@ -1046,30 +1046,6 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   badgeDesc: { ...typography.micro, color: colors.textSecondary },
   badgeTierPill: { borderRadius: borderRadius.full, paddingVertical: 3, paddingHorizontal: 10 },
   badgeTierText: { ...typography.eyebrow },
-
-  // ── Actions
-  progressSection: { marginBottom: spacing.md },
-  practiceButton: {
-    flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
-    backgroundColor: colors.accentBg, borderRadius: borderRadius.lg,
-    borderWidth: 1.5, borderColor: colors.accent, padding: 14, marginBottom: 8,
-  },
-  practiceButtonText: {
-    ...typography.actionLabel, letterSpacing: 0.8, color: colors.accent,
-  },
-  practiceButtonMeta: {
-    ...typography.micro,
-    color: colors.textTertiary, flex: 1, textAlign: 'right',
-  },
-  viewStatsButton: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    gap: spacing.sm, backgroundColor: colors.surface,
-    borderRadius: borderRadius.lg, borderWidth: 1, borderColor: colors.border,
-    padding: 14,
-  },
-  viewStatsText: {
-    ...typography.actionLabel, letterSpacing: 0.8, color: colors.ink, flex: 1,
-  },
 
   // ── Sections
   sectionHeader: {
@@ -1099,14 +1075,14 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   reviewTime: { ...typography.microMedium, color: colors.textTertiary },
   reviewTimeFastest: { color: colors.success },
   reviewH2hHeader: {
-    flexDirection: 'row', justifyContent: 'space-between',
+    flexDirection: 'row', alignItems: 'center', gap: 12,
     paddingHorizontal: 14, marginBottom: spacing.xs,
   },
   reviewH2hLabel: {
     ...typography.eyebrow, color: colors.textTertiary,
   },
   reviewH2hIcons: {
-    width: 24, alignItems: 'center', justifyContent: 'center',
+    width: 40, alignItems: 'center', justifyContent: 'center',
   },
 
   // ── Head-to-head
@@ -1244,6 +1220,16 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   challengeButtonDesc: {
     ...typography.micro,
     color: colors.textTertiary,
+  },
+  challengeBackLink: {
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+    marginBottom: spacing.sm,
+  },
+  challengeBackLinkText: {
+    ...typography.microMedium,
+    color: colors.goldBright,
+    textDecorationLine: 'underline',
   },
 
   // ── Challenge modal
