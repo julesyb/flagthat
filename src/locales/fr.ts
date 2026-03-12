@@ -187,6 +187,7 @@ const fr: DeepPartial<TranslationStrings> = {
     improvementUp: '+{pct}%, bravo !',
     improvementSame: 'Stable',
     improvementDown: '{pct}% à rattraper, vous pouvez le faire',
+    avgSpeed: 'Vit. moy.',
     mastered: 'Maîtrisés',
     activityTitle: 'Activité',
     last28Days: '28 derniers jours',

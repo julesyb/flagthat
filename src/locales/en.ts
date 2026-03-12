@@ -206,6 +206,7 @@ const en = {
     allTime: 'All time',
     roundsPlayed: 'rounds played',
     streak: 'Streak',
+    avgSpeed: 'Avg Speed',
     mastered: 'Mastered',
     activityTitle: 'Activity',
     last28Days: 'Last 28 days',

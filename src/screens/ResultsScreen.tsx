@@ -227,7 +227,11 @@ export default function ResultsScreen({ route, navigation }: Props) {
 
       // ── Persist game data ──
       if (!reviewOnly) {
-        await updateStats(correct, results.length, streak, config.mode, config.category);
+        const correctResults = results.filter((r) => r.correct);
+        const speedData = correctResults.length > 0
+          ? { correctTimeMs: correctResults.reduce((sum, r) => sum + r.timeTaken, 0), correctCount: correctResults.length }
+          : undefined;
+        await updateStats(correct, results.length, streak, config.mode, config.category, speedData);
         await updateFlagResults(results);
         await addGameHistoryEntry(accuracy, config.mode);
         if (isDaily) {

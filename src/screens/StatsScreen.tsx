@@ -352,6 +352,14 @@ export default function StatsScreen() {
               <Text style={styles.heroStatLabel}>{t('stats.accuracy')}</Text>
             </View>
             <View style={[styles.heroStatItem, styles.heroStatDivider]}>
+              <Text style={styles.heroStatValue}>
+                {stats.totalCorrectCount > 0
+                  ? `${(Math.round(stats.totalCorrectTimeMs / stats.totalCorrectCount / 100) / 10).toFixed(1)}s`
+                  : '-'}
+              </Text>
+              <Text style={styles.heroStatLabel}>{t('stats.avgSpeed')}</Text>
+            </View>
+            <View style={[styles.heroStatItem, styles.heroStatDivider]}>
               <Text style={styles.heroStatValue}>{countriesSeen}</Text>
               <Text style={styles.heroStatLabel}>{t('stats.mastered')}</Text>
             </View>

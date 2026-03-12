@@ -187,6 +187,7 @@ const zh: DeepPartial<TranslationStrings> = {
     improvementUp: '\u63d0\u5347{pct}%, \u7ee7\u7eed\u52a0\u6cb9!',
     improvementSame: '\u4fdd\u6301\u7a33\u5b9a',
     improvementDown: '\u8fd8\u5dee{pct}%, \u4f60\u53ef\u4ee5\u7684',
+    avgSpeed: '\u5e73\u5747\u901f\u5ea6',
     mastered: '\u5df2\u638c\u63e1',
     activityTitle: '\u6d3b\u52a8',
     last28Days: '\u6700\u8fd128\u5929',

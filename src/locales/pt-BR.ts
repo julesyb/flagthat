@@ -187,6 +187,7 @@ const ptBR: DeepPartial<TranslationStrings> = {
     improvementUp: '+{pct}%, muito bem!',
     improvementSame: 'Estavel',
     improvementDown: '{pct}% para recuperar, voce consegue',
+    avgSpeed: 'Vel. Med.',
     mastered: 'Dominados',
     activityTitle: 'Atividade',
     last28Days: 'Últimos 28 dias',

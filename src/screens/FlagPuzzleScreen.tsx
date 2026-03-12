@@ -92,11 +92,15 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
     setQuestionStartTime(Date.now());
   }, []);
 
+  const revealDelayRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const REVEAL_PAUSE_MS = 2000;
+
   useEffect(() => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
       if (revealIntervalRef.current) clearInterval(revealIntervalRef.current);
       if (autoAdvanceRef.current) clearTimeout(autoAdvanceRef.current);
+      if (revealDelayRef.current) clearTimeout(revealDelayRef.current);
     };
   }, []);
 
@@ -111,15 +115,19 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
 
     setRevealedCount(startRevealCount);
 
-    revealIntervalRef.current = setInterval(() => {
-      setRevealedCount((prev) => {
-        const next = Math.min(prev + tilesPerStep, TOTAL_TILES);
-        if (next >= TOTAL_TILES && revealIntervalRef.current) {
-          clearInterval(revealIntervalRef.current);
-        }
-        return next;
-      });
-    }, intervalMs);
+    // Pause before starting the progressive reveal
+    revealDelayRef.current = setTimeout(() => {
+      revealDelayRef.current = null;
+      revealIntervalRef.current = setInterval(() => {
+        setRevealedCount((prev) => {
+          const next = Math.min(prev + tilesPerStep, TOTAL_TILES);
+          if (next >= TOTAL_TILES && revealIntervalRef.current) {
+            clearInterval(revealIntervalRef.current);
+          }
+          return next;
+        });
+      }, intervalMs);
+    }, REVEAL_PAUSE_MS);
 
     setTimeRemaining(timeLimit);
     timerRef.current = setInterval(() => {
@@ -133,6 +141,7 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
     }, 1000);
 
     return () => {
+      if (revealDelayRef.current) clearTimeout(revealDelayRef.current);
       if (revealIntervalRef.current) clearInterval(revealIntervalRef.current);
       if (timerRef.current) clearInterval(timerRef.current);
     };
@@ -183,6 +192,7 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
         setShowSuggestions(false);
         setRevealOrder(generateRevealOrder());
         setRevealedCount(0);
+        setTimeRemaining(timeLimit);
         setQuestionStartTime(Date.now());
         Keyboard.dismiss();
       });
@@ -201,6 +211,7 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
 
       if (timerRef.current) clearInterval(timerRef.current);
       if (revealIntervalRef.current) clearInterval(revealIntervalRef.current);
+      if (revealDelayRef.current) { clearTimeout(revealDelayRef.current); revealDelayRef.current = null; }
 
       hapticTap();
       const correct = answer.length > 0 && checkAnswer(answer, currentQuestion.flag.name);
