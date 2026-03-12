@@ -207,7 +207,7 @@ export default function GameScreen({ route, navigation }: Props) {
 
       const feedbackDelay = isTimeAttack
         ? (correct ? 300 : 600)
-        : (correct ? 1200 : 1200);
+        : 1200;
 
       if (isEliminated) {
         autoAdvanceRef.current = setTimeout(() => {
@@ -418,7 +418,9 @@ export default function GameScreen({ route, navigation }: Props) {
                       <Text
                         style={[
                           styles.mapOptionLabel,
-                          !(showFeedback && isCorrect) && styles.mapOptionLabelHidden,
+                          !showFeedback && styles.mapOptionLabelHidden,
+                          showFeedback && isCorrect && styles.mapOptionLabelCorrect,
+                          showFeedback && isSelected && !isCorrect && styles.mapOptionLabelWrong,
                         ]}
                         numberOfLines={1}
                       >
@@ -648,11 +650,17 @@ const styles = StyleSheet.create({
   },
   mapOptionLabel: {
     ...typography.captionBold,
-    color: colors.success,
+    color: colors.textSecondary,
     textAlign: 'center',
   },
   mapOptionLabelHidden: {
     opacity: 0,
+  },
+  mapOptionLabelCorrect: {
+    color: colors.success,
+  },
+  mapOptionLabelWrong: {
+    color: colors.error,
   },
   feedbackContainer: {
     marginTop: spacing.lg,
