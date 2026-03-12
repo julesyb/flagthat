@@ -344,9 +344,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     overflow: 'hidden',
     ...shadows.large,
   },
-  heroInner: {
-    zIndex: 1,
-  },
+  heroInner: {},
   flagMosaic: {
     flexDirection: 'row',
     alignItems: 'flex-end',
