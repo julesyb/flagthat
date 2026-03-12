@@ -15,7 +15,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
 import { ThemeColors, spacing, fontFamily, fontSize, borderRadius, typography } from '../utils/theme';
 import { useTheme } from '../contexts/ThemeContext';
-import { UserStats, GameMode, CategoryId } from '../types';
+import { UserStats, CategoryId } from '../types';
 import { getStats, getFlagStats, FlagStats, getDayStreakInfo, DayStreakInfo, getBadgeData, getMissedFlagIds, BadgeData, getGameHistory, GameHistoryEntry, getBaselineData, BaselineData, getChallengeHistory, ChallengeHistoryEntry } from '../utils/storage';
 import { getAllFlags, getTotalFlagCount } from '../data';
 
@@ -29,20 +29,35 @@ import { ChevronRightIcon, CrosshairIcon, BadgeIconView, UsersIcon } from '../co
 
 const REGIONS: CategoryId[] = ['africa', 'asia', 'europe', 'americas', 'oceania'];
 
+// All async data the stats screen needs, loaded atomically.
+interface StatsData {
+  stats: UserStats;
+  flagStats: FlagStats;
+  dayStreakInfo: DayStreakInfo;
+  badgeData: BadgeData;
+  weakFlagCount: number;
+  gameHistory: GameHistoryEntry[];
+  baseline: BaselineData | null;
+  challengeHistory: ChallengeHistoryEntry[];
+}
+
+async function loadStatsData(): Promise<StatsData> {
+  const [stats, flagStats, dayStreakInfo, badgeData, missed, gameHistory, baseline, challengeHistory] =
+    await Promise.all([
+      getStats(), getFlagStats(), getDayStreakInfo(), getBadgeData(),
+      getMissedFlagIds(), getGameHistory(), getBaselineData(), getChallengeHistory(),
+    ]);
+  return { stats, flagStats, dayStreakInfo, badgeData, weakFlagCount: missed.length, gameHistory, baseline, challengeHistory };
+}
+
 export default function StatsScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const onNavigate = useNavTabs();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const RANK_COLORS = useMemo(() => [colors.gradeS, colors.textTertiary, colors.warning], [colors]);
-  const [stats, setStats] = useState<UserStats | null>(null);
-  const [flagStats, setFlagStats] = useState<FlagStats>({});
-  const [dayStreakInfo, setDayStreakInfo] = useState<DayStreakInfo>({ current: 0, best: 0 });
-  const [badgeData, setBadgeData] = useState<BadgeData | null>(null);
-  const [weakFlagCount, setWeakFlagCount] = useState(0);
-  const [gameHistory, setGameHistory] = useState<GameHistoryEntry[]>([]);
-  const [baseline, setBaseline] = useState<BaselineData | null>(null);
-  const [challengeHistory, setChallengeHistory] = useState<ChallengeHistoryEntry[]>([]);
+
+  const [data, setData] = useState<StatsData | null>(null);
 
   // ── Animation values ──
   const hasAnimated = useRef(false);
@@ -69,105 +84,86 @@ export default function StatsScreen() {
     return () => countAnim.removeListener(listenerId);
   }, [countAnim]);
 
+  // ── Run intro/snap animations after data arrives ──
+  const runAnimations = useCallback((acc: number, pct: number, animate: boolean) => {
+    if (animate) {
+      hasAnimated.current = true;
+      heroFade.setValue(0);
+      heroSlide.setValue(12);
+      countAnim.setValue(0);
+      setDisplayAcc(0);
+      progressFade.setValue(0);
+      progressBarAnim.setValue(0);
+      regionFade.setValue(0);
+      restFade.setValue(0);
+
+      Animated.parallel([
+        Animated.timing(heroFade, { toValue: 1, duration: 300, useNativeDriver: true }),
+        Animated.spring(heroSlide, { toValue: 0, friction: 8, tension: 80, useNativeDriver: true }),
+      ]).start();
+
+      Animated.timing(countAnim, {
+        toValue: acc, duration: 1000, delay: 200,
+        easing: Easing.out(Easing.cubic), useNativeDriver: false,
+      }).start();
+
+      const progressDelay = 500;
+      Animated.timing(progressFade, {
+        toValue: 1, duration: 300, delay: progressDelay, useNativeDriver: true,
+      }).start();
+      Animated.timing(progressBarAnim, {
+        toValue: pct, duration: 800, delay: progressDelay + 100,
+        easing: Easing.out(Easing.cubic), useNativeDriver: false,
+      }).start();
+
+      Animated.timing(regionFade, {
+        toValue: 1, duration: 300, delay: progressDelay + 300, useNativeDriver: true,
+      }).start();
+
+      Animated.timing(restFade, {
+        toValue: 1, duration: 400, delay: progressDelay + 500, useNativeDriver: true,
+      }).start();
+    } else {
+      heroFade.setValue(1);
+      heroSlide.setValue(0);
+      countAnim.setValue(acc);
+      setDisplayAcc(acc);
+      progressFade.setValue(1);
+      progressBarAnim.setValue(pct);
+      regionFade.setValue(1);
+      restFade.setValue(1);
+    }
+  }, [heroFade, heroSlide, countAnim, progressFade, progressBarAnim, regionFade, restFade]);
+
   useFocusEffect(
     useCallback(() => {
       let cancelled = false;
-      const isFirstLoad = !hasAnimated.current;
+      const shouldAnimate = !hasAnimated.current;
 
-      async function loadData() {
-        try {
-          const [s, fs, dsInfo, bd, missed, gh, bl, ch] = await Promise.all([
-            getStats(), getFlagStats(), getDayStreakInfo(), getBadgeData(), getMissedFlagIds(), getGameHistory(), getBaselineData(), getChallengeHistory(),
-          ]);
-          if (!cancelled) {
-            setStats(s);
-            setFlagStats(fs);
-            setDayStreakInfo(dsInfo);
-            setBadgeData(bd);
-            setWeakFlagCount(missed.length);
-            setGameHistory(gh);
-            setBaseline(bl);
-            setChallengeHistory(ch);
+      loadStatsData().then((loaded) => {
+        if (cancelled) return;
+        setData(loaded);
 
-            const acc = s.totalAnswered > 0
-              ? Math.round((s.totalCorrect / s.totalAnswered) * 100) : 0;
-            const totalF = getTotalFlagCount();
-            const seen = Object.values(fs).filter((f) => f.right > 0).length;
-            const pct = totalF > 0 ? seen / totalF : 0;
+        const acc = loaded.stats.totalAnswered > 0
+          ? Math.round((loaded.stats.totalCorrect / loaded.stats.totalAnswered) * 100) : 0;
+        const totalF = getTotalFlagCount();
+        const seen = Object.values(loaded.flagStats).filter((f) => f.right > 0).length;
+        const pct = totalF > 0 ? seen / totalF : 0;
 
-            if (isFirstLoad) {
-              // ── Full intro animation on first visit ──
-              hasAnimated.current = true;
+        runAnimations(acc, pct, shouldAnimate);
+      });
 
-              heroFade.setValue(0);
-              heroSlide.setValue(12);
-              countAnim.setValue(0);
-              setDisplayAcc(0);
-              progressFade.setValue(0);
-              progressBarAnim.setValue(0);
-              regionFade.setValue(0);
-              restFade.setValue(0);
-
-              Animated.parallel([
-                Animated.timing(heroFade, { toValue: 1, duration: 300, useNativeDriver: true }),
-                Animated.spring(heroSlide, { toValue: 0, friction: 8, tension: 80, useNativeDriver: true }),
-              ]).start();
-
-              Animated.timing(countAnim, {
-                toValue: acc, duration: 1000, delay: 200,
-                easing: Easing.out(Easing.cubic), useNativeDriver: false,
-              }).start();
-
-              const progressDelay = 500;
-              Animated.timing(progressFade, {
-                toValue: 1, duration: 300, delay: progressDelay, useNativeDriver: true,
-              }).start();
-              Animated.timing(progressBarAnim, {
-                toValue: pct, duration: 800, delay: progressDelay + 100,
-                easing: Easing.out(Easing.cubic), useNativeDriver: false,
-              }).start();
-
-              Animated.timing(regionFade, {
-                toValue: 1, duration: 300, delay: progressDelay + 300, useNativeDriver: true,
-              }).start();
-
-              Animated.timing(restFade, {
-                toValue: 1, duration: 400, delay: progressDelay + 500, useNativeDriver: true,
-              }).start();
-            } else {
-              // ── Instant snap on revisit (data already refreshed) ──
-              heroFade.setValue(1);
-              heroSlide.setValue(0);
-              countAnim.setValue(acc);
-              setDisplayAcc(acc);
-              progressFade.setValue(1);
-              progressBarAnim.setValue(pct);
-              regionFade.setValue(1);
-              restFade.setValue(1);
-            }
-          }
-        } catch {
-          if (!cancelled) {
-            setStats((prev) => prev ?? {
-              totalGamesPlayed: 0, totalCorrect: 0, totalAnswered: 0,
-              bestStreak: 0, bestTimeAttackScore: 0,
-              modeStats: {
-                easy: { correct: 0, total: 0 }, medium: { correct: 0, total: 0 },
-                hard: { correct: 0, total: 0 }, flashflag: { correct: 0, total: 0 },
-                flagpuzzle: { correct: 0, total: 0 }, timeattack: { correct: 0, total: 0 },
-                neighbors: { correct: 0, total: 0 }, impostor: { correct: 0, total: 0 },
-                capitalconnection: { correct: 0, total: 0 }, daily: { correct: 0, total: 0 },
-                practice: { correct: 0, total: 0 }, baseline: { correct: 0, total: 0 },
-              },
-              categoryStats: {},
-            });
-          }
-        }
-      }
-      loadData();
       return () => { cancelled = true; };
-    }, []),
+    }, [runAnimations]),
   );
+
+  // ── All computed values derived from `data` ──
+  // Each memo takes `data` as its single dependency. When `data` is null
+  // (still loading), they return safe empty/null defaults. This means
+  // every hook runs on every render (no conditional-hook risk) and there
+  // is exactly one loading gate (`!data`) before the JSX.
+
+  const flagStats = data?.flagStats ?? {};
 
   const top10 = React.useMemo(() => {
     return Object.entries(flagStats)
@@ -179,7 +175,6 @@ export default function StatsScreen() {
         const accA = a.right / totalA;
         const accB = b.right / totalB;
         if (accA !== accB) return accB - accA;
-        // Tie-break: faster avg time wins (lower is better)
         const avgA = a.totalTimeRight && a.right > 0 ? a.totalTimeRight / a.right : Infinity;
         const avgB = b.totalTimeRight && b.right > 0 ? b.totalTimeRight / b.right : Infinity;
         return avgA - avgB;
@@ -201,24 +196,20 @@ export default function StatsScreen() {
       .slice(0, 10);
   }, [flagStats]);
 
-  // Single badge context memo — consumed by earnedBadges, nextMilestone, and badge grid
   const badgeCtx = React.useMemo(() => {
-    if (!badgeData || !stats) return null;
-    return buildBadgeContext(stats, flagStats, dayStreakInfo, badgeData, weakFlagCount);
-  }, [stats, flagStats, dayStreakInfo, badgeData, weakFlagCount]);
+    if (!data) return null;
+    return buildBadgeContext(data.stats, data.flagStats, data.dayStreakInfo, data.badgeData, data.weakFlagCount);
+  }, [data]);
 
-  // Pre-compute derived values once (countriesSeen, totalFlags, modesPlayed)
-  // so getBadgeProgress doesn't recompute them per badge in loops
   const derived = React.useMemo(() => {
     return badgeCtx ? deriveFromContext(badgeCtx) : null;
   }, [badgeCtx]);
 
   const earnedBadges = React.useMemo(() => {
-    if (!badgeCtx || !badgeData) return [];
-    return getAllEarnedBadges(badgeCtx, badgeData.earnedBadgeIds);
-  }, [badgeCtx, badgeData]);
+    if (!badgeCtx || !data) return [];
+    return getAllEarnedBadges(badgeCtx, data.badgeData.earnedBadgeIds);
+  }, [badgeCtx, data]);
 
-  // ── Next milestone computation (uses shared getBadgeProgress) ──
   const nextMilestone = React.useMemo(() => {
     if (!badgeCtx || !derived) return null;
     const earnedIdSet = new Set(earnedBadges.map((b) => b.id));
@@ -239,14 +230,13 @@ export default function StatsScreen() {
     return candidates[0];
   }, [badgeCtx, derived, earnedBadges]);
 
-  // Activity heatmap: 7x4 grid of last 28 days
   const activityGrid = React.useMemo(() => {
+    const gh = data?.gameHistory ?? [];
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // Build date-keyed count map from history (O(n))
     const countMap = new Map<string, number>();
-    for (const entry of gameHistory) {
+    for (const entry of gh) {
       countMap.set(entry.date, (countMap.get(entry.date) || 0) + 1);
     }
 
@@ -267,19 +257,18 @@ export default function StatsScreen() {
 
     const maxCount = Math.max(...cells.map((c) => c.count), 1);
     return { cells, maxCount, hasActivity };
-  }, [gameHistory]);
+  }, [data]);
 
-  // Score distribution: bucket accuracies into ranges
-  // (must be above the early return to satisfy Rules of Hooks)
   const distribution = React.useMemo(() => {
-    if (gameHistory.length === 0) return null;
+    const gh = data?.gameHistory ?? [];
+    if (gh.length === 0) return null;
     const buckets = [
       { label: '90-100', min: 90, max: 100, count: 0 },
       { label: '70-89', min: 70, max: 89, count: 0 },
       { label: '50-69', min: 50, max: 69, count: 0 },
       { label: '0-49', min: 0, max: 49, count: 0 },
     ];
-    for (const entry of gameHistory) {
+    for (const entry of gh) {
       for (const bucket of buckets) {
         if (entry.accuracy >= bucket.min && entry.accuracy <= bucket.max) {
           bucket.count++;
@@ -288,24 +277,22 @@ export default function StatsScreen() {
       }
     }
     const maxCount = Math.max(...buckets.map((b) => b.count), 1);
-    return { buckets, maxCount, total: gameHistory.length };
-  }, [gameHistory]);
+    return { buckets, maxCount, total: gh.length };
+  }, [data]);
 
-  // Sorted badges: earned first, then in-progress, then locked
-  // (must be above the early return to satisfy Rules of Hooks)
   const sortedBadges = React.useMemo(() => {
     const earnedIdSet = new Set(earnedBadges.map((b) => b.id));
     return BADGES.map((badge) => {
       const earned = earnedIdSet.has(badge.id);
       const progress = !earned && badgeCtx && derived ? getBadgeProgress(badge, badgeCtx, derived) : null;
       const inProgress = !earned && progress != null && progress.progress > 0;
-      // Sort key: 0 = earned, 1 = in-progress, 2 = locked
       const order = earned ? 0 : inProgress ? 1 : 2;
       return { badge, earned, progress, order };
     }).sort((a, b) => a.order - b.order);
   }, [earnedBadges, badgeCtx, derived]);
 
-  if (!stats) {
+  // ── Loading gate: single check, all hooks above ──
+  if (!data) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
@@ -316,16 +303,19 @@ export default function StatsScreen() {
     );
   }
 
+  // ── Destructure for render (data is guaranteed non-null below) ──
+  const { dayStreakInfo, weakFlagCount, baseline, challengeHistory } = data;
+
   const totalFlags = getTotalFlagCount();
-  const countriesSeen = Object.values(flagStats).filter((fs) => fs.right > 0).length;
-  const overallAccuracy = stats.totalAnswered > 0
-    ? Math.round((stats.totalCorrect / stats.totalAnswered) * 100) : 0;
+  const countriesSeen = Object.values(data.flagStats).filter((fs) => fs.right > 0).length;
+  const overallAccuracy = data.stats.totalAnswered > 0
+    ? Math.round((data.stats.totalCorrect / data.stats.totalAnswered) * 100) : 0;
   const progressPct = totalFlags > 0 ? Math.round((countriesSeen / totalFlags) * 100) : 0;
 
   // Region accuracy data (only regions with games played)
   const regionData = REGIONS
     .map((regionId) => {
-      const cs = stats.categoryStats[regionId];
+      const cs = data.stats.categoryStats[regionId];
       if (!cs || cs.total === 0) return null;
       const pct = Math.round((cs.correct / cs.total) * 100);
       return { id: regionId, pct, correct: cs.correct, total: cs.total };
@@ -357,7 +347,7 @@ export default function StatsScreen() {
           <View style={styles.pageHeader}>
             <Text style={styles.pageTitle}>{t('stats.yourStats')}</Text>
             <Text style={styles.pageSub}>
-              {t('stats.allTime')} - {stats.totalGamesPlayed} {t('stats.roundsPlayed')}
+              {t('stats.allTime')} - {data.stats.totalGamesPlayed} {t('stats.roundsPlayed')}
             </Text>
           </View>
           <View style={styles.heroCard}>
@@ -427,10 +417,10 @@ export default function StatsScreen() {
           </Animated.View>
         )}
 
-        {(stats.bestTimeAttackScore || 0) > 0 && (
+        {(data.stats.bestTimeAttackScore || 0) > 0 && (
           <Animated.View style={[styles.tile, { marginTop: 8, opacity: progressFade }]}>
             <Text style={styles.tileLabel}>{t('stats.bestTimedQuiz')}</Text>
-            <Text style={styles.tileVal}>{stats.bestTimeAttackScore}<Text style={styles.tileUnit}> {t('stats.in60s')}</Text></Text>
+            <Text style={styles.tileVal}>{data.stats.bestTimeAttackScore}<Text style={styles.tileUnit}> {t('stats.in60s')}</Text></Text>
           </Animated.View>
         )}
 
