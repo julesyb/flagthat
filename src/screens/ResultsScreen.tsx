@@ -104,20 +104,19 @@ async function persistGameData(
   }
 }
 
-interface PostGameBadgeResult {
+interface PostGameResult {
   postStats: UserStats;
   postFlagStats: Awaited<ReturnType<typeof getFlagStats>>;
   postDayStreakCount: number;
   postBadges: EarnedBadge[];
-  postBadgeData: Awaited<ReturnType<typeof getBadgeData>>;
-  postDayStreakInfo: Awaited<ReturnType<typeof getDayStreakInfo>>;
+  levelUp: number | null;
 }
 
-async function snapshotPostGameAndEvaluateBadges(
+async function evaluatePostGameProgression(
   results: import('../types').GameResult[],
   correct: number,
   reviewOnly: boolean,
-): Promise<PostGameBadgeResult> {
+): Promise<PostGameResult> {
   const [postStats, postFlagStats, postDayStreakInfo, postBadgeData, postMissed] = await Promise.all([
     getStats(), getFlagStats(), getDayStreakInfo(), getBadgeData(), getMissedFlagIds(),
   ]);
@@ -127,13 +126,29 @@ async function snapshotPostGameAndEvaluateBadges(
   const postBadges = getAllEarnedBadges(postCtx, allPersistedIds);
   await persistEarnedBadges(postBadges.map((b) => b.id));
 
+  // Level-up detection
+  let levelUp: number | null = null;
+  if (!reviewOnly) {
+    const prePersisted = await getPersistedLevel();
+    const levelCtx = {
+      stats: postStats,
+      flagStats: postFlagStats,
+      badgeData: { ...postBadgeData, earnedBadgeIds: postBadges.map((b) => b.id) },
+      dayStreakInfo: postDayStreakInfo,
+    };
+    const lp = computeLevelProgress(levelCtx, prePersisted);
+    if (lp.currentLevel > prePersisted) {
+      await persistLevel(lp.currentLevel);
+      levelUp = lp.currentLevel;
+    }
+  }
+
   return {
     postStats,
     postFlagStats,
     postDayStreakCount: postDayStreakInfo.current,
     postBadges,
-    postBadgeData,
-    postDayStreakInfo,
+    levelUp,
   };
 }
 
@@ -338,8 +353,8 @@ export default function ResultsScreen({ route, navigation }: Props) {
         await saveBaselineResult(config.category as BaselineRegionId, results, regionTotal);
       }
 
-      const { postStats, postFlagStats, postDayStreakCount, postBadges, postBadgeData, postDayStreakInfo } =
-        await snapshotPostGameAndEvaluateBadges(results, correct, !!reviewOnly);
+      const { postStats, postFlagStats, postDayStreakCount, postBadges, levelUp } =
+        await evaluatePostGameProgression(results, correct, !!reviewOnly);
 
       // ── Update component state ──
       setOverallStats(postStats);
@@ -350,24 +365,11 @@ export default function ResultsScreen({ route, navigation }: Props) {
       setTotalBadgesEarned(postBadges.length);
       setIsNewBestStreak(wasNewBestStreak && !reviewOnly);
       setNewCountriesCount(reviewOnly ? 0 : seen - preSeen);
-      // ── Level-up detection ──
-      if (!reviewOnly) {
-        const prePersisted = await getPersistedLevel();
-        const levelCtx = {
-          stats: postStats,
-          flagStats: postFlagStats,
-          badgeData: { ...postBadgeData, earnedBadgeIds: postBadges.map((b) => b.id) },
-          dayStreakInfo: postDayStreakInfo,
-        };
-        const lp = computeLevelProgress(levelCtx, prePersisted);
-        if (lp.currentLevel > prePersisted) {
-          await persistLevel(lp.currentLevel);
-          setLevelUpTo(lp.currentLevel);
-          // Only fire celebration sound if perfect-score celebration won't already play it
-          if (!isPerfect) {
-            hapticCorrect();
-            playCelebrationSound();
-          }
+      if (levelUp !== null) {
+        setLevelUpTo(levelUp);
+        if (!isPerfect) {
+          hapticCorrect();
+          playCelebrationSound();
         }
       }
     }
