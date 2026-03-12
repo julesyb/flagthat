@@ -12,7 +12,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ThemeColors, spacing, typography, fontFamily, buildNav, buildButtons, borderRadius } from '../utils/theme';
+import { ThemeColors, spacing, typography, fontFamily, buildNav, buildButtons, borderRadius, layout } from '../utils/theme';
 import { useTheme } from '../contexts/ThemeContext';
 import { GameQuestion, GameResult } from '../types';
 import { generateQuestions, generateDailyQuestions, generatePracticeQuestions, checkAnswer } from '../utils/gameEngine';
@@ -564,7 +564,7 @@ const createStyles = (colors: ThemeColors) => {
     alignItems: 'center',
     alignSelf: 'center',
     width: '100%',
-    maxWidth: 420,
+    maxWidth: layout.maxFlagWidth,
     marginBottom: spacing.md,
   },
   questionText: {
