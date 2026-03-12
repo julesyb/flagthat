@@ -139,7 +139,7 @@ function FlagTeaser({ onAnswer }: { onAnswer?: () => void }) {
 }
 
 export default function HomeScreen({ navigation }: Props) {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const onNavigate = useNavTabs();
   const totalFlags = getTotalFlagCount();
@@ -197,7 +197,7 @@ export default function HomeScreen({ navigation }: Props) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={colors.background} />
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.background} />
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <ScreenContainer>

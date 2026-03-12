@@ -37,7 +37,7 @@ const REGIONS: { id: BaselineRegionId; categoryId: CategoryId }[] = [
 const HERO_FLAGS = ['jp', 'br', 'gb', 'za'];
 
 export default function OnboardingScreen({ navigation }: Props) {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const [baseline, setBaseline] = useState<BaselineData | null>(null);
   const [showTests, setShowTests] = useState(false);
@@ -130,7 +130,7 @@ export default function OnboardingScreen({ navigation }: Props) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={colors.background} />
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.background} />
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
