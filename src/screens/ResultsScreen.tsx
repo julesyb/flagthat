@@ -221,7 +221,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
       for (const r of results) {
         if (r.correct) {
           const prev = preFlagStats[r.question.flag.id];
-          if (!prev || prev.right === 0) newCountries++;
+          if ((prev?.right ?? 0) === UNLOCK_THRESHOLD - 1) newCountries++;
         }
       }
 
