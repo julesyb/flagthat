@@ -44,6 +44,7 @@ export default function StatsScreen() {
   const [challengeHistory, setChallengeHistory] = useState<ChallengeHistoryEntry[]>([]);
 
   // ── Animation values ──
+  const hasAnimated = useRef(false);
   const heroFade = useRef(new Animated.Value(0)).current;
   const heroSlide = useRef(new Animated.Value(12)).current;
   const countAnim = useRef(new Animated.Value(0)).current;
@@ -70,16 +71,7 @@ export default function StatsScreen() {
   useFocusEffect(
     useCallback(() => {
       let cancelled = false;
-
-      // Reset all animations
-      heroFade.setValue(0);
-      heroSlide.setValue(12);
-      countAnim.setValue(0);
-      setDisplayAcc(0);
-      progressFade.setValue(0);
-      progressBarAnim.setValue(0);
-      regionFade.setValue(0);
-      restFade.setValue(0);
+      const isFirstLoad = !hasAnimated.current;
 
       async function loadData() {
         try {
@@ -97,44 +89,62 @@ export default function StatsScreen() {
             setBaseline(bl);
             setChallengeHistory(ch);
 
-            // ── Kick off animation sequence after data loads ──
-            const acc = styles.totalAnswered > 0
-              ? Math.round((styles.totalCorrect / styles.totalAnswered) * 100) : 0;
+            const acc = s.totalAnswered > 0
+              ? Math.round((s.totalCorrect / s.totalAnswered) * 100) : 0;
             const totalF = getTotalFlagCount();
             const seen = Object.values(fs).filter((f) => f.right > 0).length;
             const pct = totalF > 0 ? seen / totalF : 0;
 
-            // Phase 1: Hero card slides in
-            Animated.parallel([
-              Animated.timing(heroFade, { toValue: 1, duration: 300, useNativeDriver: true }),
-              Animated.spring(heroSlide, { toValue: 0, friction: 8, tension: 80, useNativeDriver: true }),
-            ]).start();
+            if (isFirstLoad) {
+              // ── Full intro animation on first visit ──
+              hasAnimated.current = true;
 
-            // Phase 2: Accuracy count-up (0 → target)
-            Animated.timing(countAnim, {
-              toValue: acc, duration: 1000, delay: 200,
-              easing: Easing.out(Easing.cubic), useNativeDriver: false,
-            }).start();
+              heroFade.setValue(0);
+              heroSlide.setValue(12);
+              countAnim.setValue(0);
+              setDisplayAcc(0);
+              progressFade.setValue(0);
+              progressBarAnim.setValue(0);
+              regionFade.setValue(0);
+              restFade.setValue(0);
 
-            // Phase 3: Progress section
-            const progressDelay = 1500;
-            Animated.timing(progressFade, {
-              toValue: 1, duration: 300, delay: progressDelay, useNativeDriver: true,
-            }).start();
-            Animated.timing(progressBarAnim, {
-              toValue: pct, duration: 800, delay: progressDelay + 100,
-              easing: Easing.out(Easing.cubic), useNativeDriver: false,
-            }).start();
+              Animated.parallel([
+                Animated.timing(heroFade, { toValue: 1, duration: 300, useNativeDriver: true }),
+                Animated.spring(heroSlide, { toValue: 0, friction: 8, tension: 80, useNativeDriver: true }),
+              ]).start();
 
-            // Phase 4: Region breakdown
-            Animated.timing(regionFade, {
-              toValue: 1, duration: 300, delay: progressDelay + 300, useNativeDriver: true,
-            }).start();
+              Animated.timing(countAnim, {
+                toValue: acc, duration: 1000, delay: 200,
+                easing: Easing.out(Easing.cubic), useNativeDriver: false,
+              }).start();
 
-            // Phase 5: Rest (badges, ranks, settings)
-            Animated.timing(restFade, {
-              toValue: 1, duration: 400, delay: progressDelay + 500, useNativeDriver: true,
-            }).start();
+              const progressDelay = 500;
+              Animated.timing(progressFade, {
+                toValue: 1, duration: 300, delay: progressDelay, useNativeDriver: true,
+              }).start();
+              Animated.timing(progressBarAnim, {
+                toValue: pct, duration: 800, delay: progressDelay + 100,
+                easing: Easing.out(Easing.cubic), useNativeDriver: false,
+              }).start();
+
+              Animated.timing(regionFade, {
+                toValue: 1, duration: 300, delay: progressDelay + 300, useNativeDriver: true,
+              }).start();
+
+              Animated.timing(restFade, {
+                toValue: 1, duration: 400, delay: progressDelay + 500, useNativeDriver: true,
+              }).start();
+            } else {
+              // ── Instant snap on revisit (data already refreshed) ──
+              heroFade.setValue(1);
+              heroSlide.setValue(0);
+              countAnim.setValue(acc);
+              setDisplayAcc(acc);
+              progressFade.setValue(1);
+              progressBarAnim.setValue(pct);
+              regionFade.setValue(1);
+              restFade.setValue(1);
+            }
           }
         } catch {
           if (!cancelled) {
@@ -161,14 +171,14 @@ export default function StatsScreen() {
 
   const top10 = React.useMemo(() => {
     return Object.entries(flagStats)
-      .filter(([, s]) => styles.right > 0)
+      .filter(([, s]) => s.right > 0)
       .sort(([, a], [, b]) => b.right - a.right)
       .slice(0, 10);
   }, [flagStats]);
 
   const bottom10 = React.useMemo(() => {
     return Object.entries(flagStats)
-      .filter(([, s]) => styles.wrong > 0 && styles.rightStreak < 3)
+      .filter(([, s]) => s.wrong > 0 && s.rightStreak < 3)
       .sort(([, a], [, b]) => b.wrong - a.wrong)
       .slice(0, 10);
   }, [flagStats]);
@@ -783,7 +793,7 @@ const styles = StyleSheet.create({
   practiceCtaLeft: {
     width: 36,
     height: 36,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     borderRadius: borderRadius.md,
     justifyContent: 'center',
     alignItems: 'center',

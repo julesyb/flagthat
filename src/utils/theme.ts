@@ -22,36 +22,50 @@
 // Re-export config constants for backward compat
 export { APP_DOMAIN, APP_URL } from './config';
 
-// ---- Single source of truth for every color value ----
-const palette = {
-  ink: '#1A1820',         // Near-black warm ink (primary text)
-  inkLight: '#2A2A45',    // Lighter midnight (secondary surfaces)
-  inkSecondary: '#4A4558', // Warm slate (secondary text)
-  gold: '#9A5C0A',        // Dark gold (CTA button on light bg, AA 5.0:1 on cream)
-  goldBright: '#E9BA4C',  // Bright gold (accents, active indicators, streaks)
-  goldShadow: '#5C3506',  // Deep gold (hard shadow on gold CTA)
-  red: '#C43030',         // Warm red (errors, hard difficulty, AA 5.2:1 on cream)
-  redLight: '#EC6666',    // Soft coral (dark-surface error text)
-  muted: '#6E6878',       // Warm purple-grey (tertiary text, AA 4.5:1 on cream)
-  dim: '#C8C2D4',         // Light lavender-grey (inactive elements, dividers)
-  rule: '#E6DDD5',        // Warm rule line
-  ruleDark: '#D6CCC3',    // Warmer rule (stronger emphasis)
-  paper: '#F5EFE6',       // Warm parchment background
-  paperDark: '#EDE6DC',   // Darker parchment (raised surfaces)
+// ---- Shared raw palette (constant across themes) ----
+const raw = {
+  gold: '#9A5C0A',
+  goldBright: '#E9BA4C',
+  goldShadow: '#5C3506',
+  red: '#C43030',
+  redLight: '#EC6666',
+  green: '#1E8F56',
+  greenBright: '#3DBF80',
+  blue: '#4DA8E8',
+  purple: '#A47FD4',
   white: '#FFFFFF',
   black: '#000000',
-  green: '#1E8F56',       // Emerald green (success, easy difficulty, AA 4.6:1 on cream)
-  greenBright: '#3DBF80', // Bright emerald (dark-surface success text)
-  blue: '#4DA8E8',        // Sky blue (info accents)
-  purple: '#A47FD4',      // Soft purple (mode accents, variety)
+};
+
+// ---- Dark palette (DEFAULT) — aligned with HTML prototype vars ----
+const palette = {
+  ink: '#EEE9E2',           // --ink: light text on dark background
+  inkSecondary: '#B8B2A8',  // --ink-2: secondary text
+  gold: raw.goldBright,     // Bright gold as CTA on dark
+  goldBright: raw.goldBright,
+  goldShadow: raw.goldShadow,
+  red: raw.redLight,        // Lighter red for dark bg readability
+  redLight: raw.redLight,
+  muted: '#6E6878',         // --muted: tertiary text
+  dim: '#3D3A4A',           // --dim: dimmed elements
+  paper: '#15141A',         // --bg: dark background
+  paperDark: '#1D1C23',     // --surface: raised dark surface
+  raise: '#25242D',         // --raise: secondary raised surface
+  white: raw.white,
+  black: raw.black,
+  green: raw.greenBright,   // Brighter green for dark bg
+  greenBright: raw.greenBright,
+  blue: raw.blue,
+  purple: raw.purple,
+  playText: '#130F00',      // --play-text: dark text on gold CTA
 };
 
 export const colors = {
   // Brand palette (direct access for commonly needed raw colors)
   ink: palette.ink,
   red: palette.red,
-  rule: palette.rule,
-  ruleDark: palette.ruleDark,
+  rule: 'rgba(255,255,255,0.07)',
+  ruleDark: 'rgba(255,255,255,0.13)',
   white: palette.white,
   black: palette.black,
   gold: palette.gold,
@@ -59,44 +73,45 @@ export const colors = {
   purple: palette.purple,
   dim: palette.dim,
 
-  // Semantic roles (all reference palette)
+  // Semantic roles
   primary: palette.ink,
-  primaryLight: palette.inkLight,
+  primaryLight: palette.paperDark,
   accent: palette.gold,
   accentLight: palette.goldBright,
   success: palette.green,
   error: palette.red,
   warning: palette.gold,
   background: palette.paper,
-  surface: palette.white,
-  surfaceSecondary: palette.paperDark,
+  surface: palette.paperDark,
+  surfaceSecondary: palette.raise,
   text: palette.ink,
   textSecondary: palette.inkSecondary,
   textTertiary: palette.muted,
-  border: palette.rule,
-  borderLight: palette.paperDark,
-  shadow: 'rgba(26, 24, 32, 0.06)',
-  overlay: 'rgba(26, 24, 32, 0.5)',
-  inkAlpha10: 'rgba(26, 24, 32, 0.10)',
+  border: 'rgba(255,255,255,0.07)',
+  borderLight: 'rgba(255,255,255,0.13)',
+  shadow: 'rgba(0, 0, 0, 0.22)',
+  overlay: 'rgba(0, 0, 0, 0.6)',
+  inkAlpha10: 'rgba(238, 233, 226, 0.10)',
+  playText: palette.playText,
 
-  // Grade colors (distinct per tier for visual differentiation)
-  gradeS: palette.gold,
-  gradeA: palette.green,
-  gradeB: palette.blue,
+  // Grade colors
+  gradeS: raw.goldBright,
+  gradeA: raw.greenBright,
+  gradeB: raw.blue,
   gradeC: palette.muted,
-  gradeD: palette.red,
+  gradeD: raw.redLight,
   gradeF: palette.ink,
 
   // Difficulty colors
-  diffEasy: palette.green,
-  diffMedium: palette.goldBright,
-  diffHard: palette.red,
-  diffEasyBg: 'rgba(30, 143, 86, 0.08)',
-  diffEasyBorder: 'rgba(30, 143, 86, 0.25)',
+  diffEasy: raw.greenBright,
+  diffMedium: raw.goldBright,
+  diffHard: raw.redLight,
+  diffEasyBg: 'rgba(61, 191, 128, 0.12)',
+  diffEasyBorder: 'rgba(61, 191, 128, 0.30)',
   diffMediumBg: 'rgba(233, 186, 76, 0.12)',
   diffMediumBorder: 'rgba(233, 186, 76, 0.40)',
-  diffHardBg: 'rgba(196, 48, 48, 0.08)',
-  diffHardBorder: 'rgba(196, 48, 48, 0.25)',
+  diffHardBg: 'rgba(236, 102, 102, 0.12)',
+  diffHardBorder: 'rgba(236, 102, 102, 0.30)',
 
   // Translucent helpers (for dark backgrounds)
   whiteAlpha15: 'rgba(255,255,255,0.15)',
@@ -106,37 +121,40 @@ export const colors = {
   whiteAlpha60: 'rgba(255,255,255,0.60)',
   whiteAlpha70: 'rgba(255,255,255,0.70)',
 
-  // Dark surface feedback (on dark/navy backgrounds)
+  // Dark surface feedback
   darkSurface: 'rgba(255,255,255,0.07)',
-  darkBorder: 'rgba(255,255,255,0.1)',
-  successOnDark: 'rgba(61,191,128,0.10)',
-  successBorderOnDark: 'rgba(61,191,128,0.30)',
-  successTextOnDark: '#3DBF80',
-  errorOnDark: 'rgba(236,102,102,0.10)',
-  errorBorderOnDark: 'rgba(236,102,102,0.30)',
-  errorTextOnDark: '#EC6666',
+  darkBorder: 'rgba(255,255,255,0.12)',
+  successOnDark: 'rgba(61,191,128,0.15)',
+  successBorderOnDark: 'rgba(61,191,128,0.35)',
+  successTextOnDark: raw.greenBright,
+  errorOnDark: 'rgba(236,102,102,0.15)',
+  errorBorderOnDark: 'rgba(236,102,102,0.35)',
+  errorTextOnDark: raw.redLight,
 
-  // Light feedback backgrounds (on white/paper)
-  successBg: 'rgba(30, 143, 86, 0.08)',
-  errorBg: 'rgba(196, 48, 48, 0.08)',
-  warningBg: 'rgba(154, 92, 10, 0.08)',
-  accentBg: 'rgba(154, 92, 10, 0.06)',
+  // Feedback backgrounds (on dark surfaces)
+  successBg: 'rgba(61, 191, 128, 0.12)',
+  errorBg: 'rgba(236, 102, 102, 0.12)',
+  warningBg: 'rgba(233, 186, 76, 0.12)',
+  accentBg: 'rgba(233, 186, 76, 0.08)',
 
-  // Badge tier colors (AA on cream)
-  tierBronze: '#8B5523',   // 5.4:1 on cream
-  tierSilver: '#6B6B6B',   // 5.0:1 on cream
-  tierGold: '#9A5C0A',     // 5.0:1 on cream
-  tierPlatinum: '#5254CC',  // 5.7:1 on cream
+  // Badge tier colors (AA on dark)
+  tierBronze: '#C4884A',
+  tierSilver: '#A0A0A0',
+  tierGold: raw.goldBright,
+  tierPlatinum: '#8B8DFF',
+
+  // Nav
+  navBg: 'rgba(21,20,26,0.97)',
 
   // Map
-  mapBackground: '#F5F0E8',
-  mapZoomSurface: 'rgba(255,255,255,0.92)',
+  mapBackground: palette.paperDark,
+  mapZoomSurface: 'rgba(29, 28, 35, 0.92)',
 
   // Streak / progress
-  pipActive: palette.goldBright,
+  pipActive: raw.goldBright,
   pipInactive: palette.dim,
 
-  // Gold alpha (for active cards on light bg)
+  // Gold alpha (for active cards on dark bg)
   goldAlpha10: 'rgba(233, 186, 76, 0.10)',
   goldAlpha15: 'rgba(233, 186, 76, 0.15)',
   goldAlpha50: 'rgba(233, 186, 76, 0.50)',
@@ -145,10 +163,10 @@ export const colors = {
 
   // Mode bar colors (for game mode list)
   modeRed: '#E05555',
-  modeGold: palette.goldBright,
-  modeBlue: palette.blue,
-  modeGreen: palette.greenBright,
-  modePurple: palette.purple,
+  modeGold: raw.goldBright,
+  modeBlue: raw.blue,
+  modeGreen: raw.greenBright,
+  modePurple: raw.purple,
 };
 
 export const spacing = {
@@ -254,13 +272,12 @@ export const typography = {
 
 export const buttons = {
   primary: {
-    backgroundColor: palette.gold,
+    backgroundColor: raw.goldBright,
     paddingVertical: 16,
     paddingHorizontal: 24,
     alignItems: 'center' as const,
     borderRadius: borderRadius.lg,
-    // Hard offset gold shadow
-    shadowColor: palette.goldShadow,
+    shadowColor: raw.goldShadow,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 1,
     shadowRadius: 0,
@@ -271,15 +288,15 @@ export const buttons = {
     fontSize: fontSize.xl,
     letterSpacing: 0.8,
     textTransform: 'uppercase' as const,
-    color: palette.white,
+    color: palette.playText,
   },
   secondary: {
-    backgroundColor: palette.white,
+    backgroundColor: palette.paperDark,
     paddingVertical: 16,
     paddingHorizontal: 24,
     alignItems: 'center' as const,
     borderWidth: 1,
-    borderColor: palette.rule,
+    borderColor: 'rgba(255,255,255,0.07)',
     borderRadius: borderRadius.lg,
   },
   secondaryText: {
@@ -300,7 +317,7 @@ export const nav = {
     fontSize: fontSize.caption,
     fontFamily: fontFamily.bodyMedium,
     letterSpacing: 0.3,
-    color: palette.muted,
+    color: colors.textTertiary,
     textTransform: 'uppercase' as const,
   },
 };
@@ -323,37 +340,37 @@ export const screenContainer = {
 
 export const shadows = {
   small: {
-    shadowColor: colors.ink,
+    shadowColor: raw.black,
     shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 1,
+    shadowOpacity: 0.4,
     shadowRadius: 0,
     elevation: 1,
   },
   medium: {
-    shadowColor: colors.ink,
+    shadowColor: raw.black,
     shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
+    shadowOpacity: 0.5,
     shadowRadius: 0,
     elevation: 2,
   },
   large: {
-    shadowColor: colors.ink,
+    shadowColor: raw.black,
     shadowOffset: { width: 5, height: 5 },
-    shadowOpacity: 1,
+    shadowOpacity: 0.6,
     shadowRadius: 0,
     elevation: 4,
   },
   gold: {
-    shadowColor: palette.goldShadow,
+    shadowColor: raw.goldShadow,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 1,
     shadowRadius: 0,
     elevation: 3,
   },
   accent: {
-    shadowColor: colors.accent,
+    shadowColor: raw.goldShadow,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 1,
+    shadowOpacity: 0.8,
     shadowRadius: 0,
     elevation: 3,
   },

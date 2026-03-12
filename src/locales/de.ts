@@ -29,6 +29,7 @@ const de: typeof en = {
     modes: 'Modi',
     stats: 'Stats',
     browse: 'Stöbern',
+    settings: 'Einstellungen',
   },
 
   app: {

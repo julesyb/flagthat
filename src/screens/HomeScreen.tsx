@@ -24,6 +24,7 @@ import FlagImage from '../components/FlagImage';
 import BottomNav from '../components/BottomNav';
 import ScreenContainer from '../components/ScreenContainer';
 import SegBtn from '../components/SegBtn';
+import ConfigRow, { ConfigCard } from '../components/ConfigRow';
 import { useNavTabs } from '../hooks/useNavTabs';
 import SupportCard from '../components/SupportCard';
 import { preloadRewardedAd } from '../utils/ads';
@@ -76,6 +77,31 @@ function FlagTeaser() {
     }
   };
 
+  const renderOption = (opt: string, idx: number) => {
+    const isCorrect = opt === question.flag.name;
+    const isSelected = picked === opt;
+    const showCorrect = picked !== null && isCorrect;
+    const showWrong = isSelected && !isCorrect;
+    return (
+      <Animated.View
+        key={opt}
+        style={[
+          styles.optWrap,
+          { opacity: optAnims[idx], transform: [{ scale: optAnims[idx].interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }) }] },
+        ]}
+      >
+        <TouchableOpacity
+          style={[styles.optBtn, showCorrect && styles.optCorrect, showWrong && styles.optWrong]}
+          onPress={() => handlePick(opt)}
+          activeOpacity={0.8}
+          disabled={picked !== null}
+        >
+          <Text style={[styles.optText, showCorrect && styles.optTextCorrect, showWrong && styles.optTextWrong]}>{translateName(opt)}</Text>
+        </TouchableOpacity>
+      </Animated.View>
+    );
+  };
+
   return (
     <View style={styles.heroCard}>
       <Text style={styles.heroLabel}>{t('home.nameThisFlag')}</Text>
@@ -91,57 +117,10 @@ function FlagTeaser() {
       {!picked ? (
         <View style={styles.optsGrid}>
           <View style={styles.optsRow}>
-            {question.options.slice(0, 2).map((opt, i) => {
-              const isCorrect = opt === question.flag.name;
-              const isSelected = picked === opt;
-              const showCorrect = picked !== null && isCorrect;
-              const showWrong = isSelected && !isCorrect;
-              return (
-                <Animated.View
-                  key={opt}
-                  style={[
-                    styles.optWrap,
-                    { opacity: optAnims[i], transform: [{ scale: optAnims[i].interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }) }] },
-                  ]}
-                >
-                  <TouchableOpacity
-                    style={[styles.optBtn, showCorrect && styles.optCorrect, showWrong && styles.optWrong]}
-                    onPress={() => handlePick(opt)}
-                    activeOpacity={0.8}
-                    disabled={picked !== null}
-                  >
-                    <Text style={[styles.optText, showCorrect && styles.optTextCorrect, showWrong && styles.optTextWrong]}>{translateName(opt)}</Text>
-                  </TouchableOpacity>
-                </Animated.View>
-              );
-            })}
+            {question.options.slice(0, 2).map((opt, i) => renderOption(opt, i))}
           </View>
           <View style={styles.optsRow}>
-            {question.options.slice(2, 4).map((opt, i) => {
-              const idx = i + 2;
-              const isCorrect = opt === question.flag.name;
-              const isSelected = picked === opt;
-              const showCorrect = picked !== null && isCorrect;
-              const showWrong = isSelected && !isCorrect;
-              return (
-                <Animated.View
-                  key={opt}
-                  style={[
-                    styles.optWrap,
-                    { opacity: optAnims[idx], transform: [{ scale: optAnims[idx].interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }) }] },
-                  ]}
-                >
-                  <TouchableOpacity
-                    style={[styles.optBtn, showCorrect && styles.optCorrect, showWrong && styles.optWrong]}
-                    onPress={() => handlePick(opt)}
-                    activeOpacity={0.8}
-                    disabled={picked !== null}
-                  >
-                    <Text style={[styles.optText, showCorrect && styles.optTextCorrect, showWrong && styles.optTextWrong]}>{translateName(opt)}</Text>
-                  </TouchableOpacity>
-                </Animated.View>
-              );
-            })}
+            {question.options.slice(2, 4).map((opt, i) => renderOption(opt, i + 2))}
           </View>
         </View>
       ) : (
@@ -185,8 +164,8 @@ export default function HomeScreen({ navigation }: Props) {
     initAudio();
     preloadRewardedAd();
     getSettings().then((s) => {
-      setSoundsEnabled(styles.soundEnabled);
-      setHapticsEnabled(styles.hapticsEnabled);
+      setSoundsEnabled(s.soundEnabled);
+      setHapticsEnabled(s.hapticsEnabled);
     });
   }, []);
 
@@ -215,7 +194,7 @@ export default function HomeScreen({ navigation }: Props) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
+      <StatusBar barStyle="light-content" backgroundColor={colors.background} />
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <ScreenContainer>
@@ -252,79 +231,6 @@ export default function HomeScreen({ navigation }: Props) {
           )}
         </View>
 
-        {/* ── ONBOARDING PROGRESS ── */}
-        {!onboardingComplete && (
-          <View style={styles.onboardingWrap}>
-            <View style={styles.onboardingTop}>
-              <View style={styles.onboardingTopLeft}>
-                <Text style={styles.onboardingTitle}>{t('onboarding.baselineProgress')}</Text>
-                <Text style={styles.onboardingCount}>
-                  {t('onboarding.regionsComplete', { count: onboardingCount, total: ONBOARDING_REGIONS.length })}
-                </Text>
-              </View>
-              <TouchableOpacity
-                style={styles.onboardingCta}
-                activeOpacity={0.85}
-                onPress={() => {
-                  hapticTap();
-                  const count = getCategoryCount(nextRegion as CategoryId);
-                  navigation.navigate('Game', {
-                    config: { mode: 'baseline', category: nextRegion as CategoryId, questionCount: count, displayMode: 'flag' },
-                  });
-                }}
-              >
-                <Text style={styles.onboardingCtaText}>{t(`categories.${nextRegion}`)}</Text>
-                <ChevronRightIcon size={14} color={colors.white} />
-              </TouchableOpacity>
-            </View>
-            <View style={styles.onboardingBarRow}>
-              <View style={styles.onboardingBar}>
-                <Animated.View
-                  style={[
-                    styles.onboardingBarFill,
-                    { width: `${(onboardingCount / ONBOARDING_REGIONS.length) * 100}%` },
-                  ]}
-                />
-              </View>
-              <Text style={styles.onboardingMotivation}>{t('onboarding.baselineMotivation')}</Text>
-            </View>
-            {/* Region chips */}
-            <View style={styles.onboardingChips}>
-              {ONBOARDING_REGIONS.map((r) => {
-                const result = baseline?.regions[r];
-                const isDone = !!result;
-                return (
-                  <TouchableOpacity
-                    key={r}
-                    style={[
-                      styles.onboardingChip,
-                      isDone ? styles.onboardingChipDone : styles.onboardingChipPending,
-                    ]}
-                    activeOpacity={isDone ? 1 : 0.7}
-                    disabled={isDone}
-                    onPress={() => {
-                      hapticTap();
-                      const count = getCategoryCount(r as CategoryId);
-                      navigation.navigate('Game', {
-                        config: { mode: 'baseline', category: r as CategoryId, questionCount: count, displayMode: 'flag' },
-                      });
-                    }}
-                  >
-                    {isDone && <CheckIcon size={10} color={colors.success} />}
-                    <Text style={[
-                      styles.onboardingChipText,
-                      isDone ? styles.onboardingChipTextDone : styles.onboardingChipTextPending,
-                    ]}>
-                      {t(`categories.${r}`)}
-                    </Text>
-                    {isDone && <Text style={styles.onboardingChipPct}>{result!.accuracy}%</Text>}
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          </View>
-        )}
-
         {/* ── FLAG TEASER ── */}
         <FlagTeaser key={teaserKey} />
 
@@ -337,10 +243,9 @@ export default function HomeScreen({ navigation }: Props) {
         </View>
 
         {/* ── CONFIG ── */}
-        <View style={styles.configCard}>
-          <View style={styles.configRow}>
-            <Text style={styles.configLbl}>{t('home.cards')}</Text>
-            <View style={styles.segRow}>
+        <View style={{ marginHorizontal: spacing.md, marginTop: spacing.sm }}>
+          <ConfigCard>
+            <ConfigRow label={t('home.cards')} showDivider={false}>
               {QUESTION_COUNTS.map((c) => (
                 <SegBtn
                   key={c}
@@ -356,12 +261,8 @@ export default function HomeScreen({ navigation }: Props) {
                 onPress={() => setQuestionCountAll(true)}
                 maxWidth={54}
               />
-            </View>
-          </View>
-          <View style={styles.configDivider} />
-          <View style={styles.configRow}>
-            <Text style={styles.configLbl}>{t('home.difficulty')}</Text>
-            <View style={styles.segRow}>
+            </ConfigRow>
+            <ConfigRow label={t('home.difficulty')}>
               {MODE_KEYS.map((m) => (
                 <SegBtn
                   key={m}
@@ -371,30 +272,24 @@ export default function HomeScreen({ navigation }: Props) {
                   maxWidth={54}
                 />
               ))}
-            </View>
-          </View>
-          {mode === 'hard' && (
-            <>
-              <View style={styles.configDivider} />
-              <View style={styles.configRow}>
-                <Text style={styles.configLbl}>{t('home.hints')}</Text>
-                <View style={styles.segRow}>
-                  <SegBtn
-                    label={t('common.off')}
-                    active={!autocomplete}
-                    onPress={() => setAutocomplete(false)}
-                    maxWidth={54}
-                  />
-                  <SegBtn
-                    label={t('common.on')}
-                    active={autocomplete}
-                    onPress={() => setAutocomplete(true)}
-                    maxWidth={54}
-                  />
-                </View>
-              </View>
-            </>
-          )}
+            </ConfigRow>
+            {mode === 'hard' && (
+              <ConfigRow label={t('home.hints')}>
+                <SegBtn
+                  label={t('common.off')}
+                  active={!autocomplete}
+                  onPress={() => setAutocomplete(false)}
+                  maxWidth={54}
+                />
+                <SegBtn
+                  label={t('common.on')}
+                  active={autocomplete}
+                  onPress={() => setAutocomplete(true)}
+                  maxWidth={54}
+                />
+              </ConfigRow>
+            )}
+          </ConfigCard>
         </View>
 
         {/* ── GAME MODES ── */}
@@ -478,6 +373,78 @@ export default function HomeScreen({ navigation }: Props) {
         {/* ── SUPPORT ── */}
         <SupportCard gamesPlayed={stats?.totalGamesPlayed ?? 0} />
 
+        {/* ── ONBOARDING PROGRESS (at bottom until complete) ── */}
+        {!onboardingComplete && (
+          <View style={styles.onboardingWrap}>
+            <View style={styles.onboardingTop}>
+              <View style={styles.onboardingTopLeft}>
+                <Text style={styles.onboardingTitle}>{t('onboarding.baselineProgress')}</Text>
+                <Text style={styles.onboardingCount}>
+                  {t('onboarding.regionsComplete', { count: onboardingCount, total: ONBOARDING_REGIONS.length })}
+                </Text>
+              </View>
+              <TouchableOpacity
+                style={styles.onboardingCta}
+                activeOpacity={0.85}
+                onPress={() => {
+                  hapticTap();
+                  const count = getCategoryCount(nextRegion as CategoryId);
+                  navigation.navigate('Game', {
+                    config: { mode: 'baseline', category: nextRegion as CategoryId, questionCount: count, displayMode: 'flag' },
+                  });
+                }}
+              >
+                <Text style={styles.onboardingCtaText}>{t(`categories.${nextRegion}`)}</Text>
+                <ChevronRightIcon size={14} color={colors.white} />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.onboardingBarRow}>
+              <View style={styles.onboardingBar}>
+                <Animated.View
+                  style={[
+                    styles.onboardingBarFill,
+                    { width: `${(onboardingCount / ONBOARDING_REGIONS.length) * 100}%` },
+                  ]}
+                />
+              </View>
+              <Text style={styles.onboardingMotivation}>{t('onboarding.baselineMotivation')}</Text>
+            </View>
+            {/* Region chips */}
+            <View style={styles.onboardingChips}>
+              {ONBOARDING_REGIONS.map((r) => {
+                const result = baseline?.regions[r];
+                const isDone = !!result;
+                return (
+                  <TouchableOpacity
+                    key={r}
+                    style={[
+                      styles.onboardingChip,
+                      isDone ? styles.onboardingChipDone : styles.onboardingChipPending,
+                    ]}
+                    activeOpacity={isDone ? 1 : 0.7}
+                    disabled={isDone}
+                    onPress={() => {
+                      hapticTap();
+                      const count = getCategoryCount(r as CategoryId);
+                      navigation.navigate('Game', {
+                        config: { mode: 'baseline', category: r as CategoryId, questionCount: count, displayMode: 'flag' },
+                      });
+                    }}
+                  >
+                    {isDone && <CheckIcon size={10} color={colors.success} />}
+                    <Text style={[
+                      styles.onboardingChipText,
+                      isDone ? styles.onboardingChipTextDone : styles.onboardingChipTextPending,
+                    ]}>
+                      {t(`categories.${r}`)}
+                    </Text>
+                    {isDone && <Text style={styles.onboardingChipPct}>{result!.accuracy}%</Text>}
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
+        )}
 
         <View style={{ height: spacing.md }} />
         </ScreenContainer>
@@ -573,9 +540,9 @@ const styles = StyleSheet.create({
   onboardingWrap: {
     marginHorizontal: spacing.md,
     marginTop: spacing.md,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     borderWidth: 2,
-    borderColor: colors.ink,
+    borderColor: colors.border,
     borderRadius: borderRadius.lg,
     padding: spacing.md,
     gap: spacing.sm,
@@ -603,7 +570,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
-    backgroundColor: colors.ink,
+    backgroundColor: colors.goldBright,
     borderRadius: borderRadius.sm,
     paddingVertical: spacing.xs + 2,
     paddingHorizontal: spacing.sm + 2,
@@ -613,7 +580,7 @@ const styles = StyleSheet.create({
     fontSize: fontSize.sm,
     letterSpacing: 0.5,
     textTransform: 'uppercase',
-    color: colors.white,
+    color: colors.background,
   },
   onboardingBarRow: {
     gap: spacing.xs,
@@ -656,8 +623,8 @@ const styles = StyleSheet.create({
     borderColor: colors.success,
   },
   onboardingChipPending: {
-    backgroundColor: colors.ink,
-    borderColor: colors.ink,
+    backgroundColor: colors.goldAlpha15,
+    borderColor: colors.goldBright,
   },
   onboardingChipText: {
     fontFamily: fontFamily.bodyMedium,
@@ -668,7 +635,7 @@ const styles = StyleSheet.create({
     color: colors.success,
   },
   onboardingChipTextPending: {
-    color: colors.white,
+    color: colors.goldBright,
   },
   onboardingChipPct: {
     fontFamily: fontFamily.uiLabel,
@@ -676,28 +643,24 @@ const styles = StyleSheet.create({
     color: colors.success,
   },
 
-  // ── Hero flag teaser
+  // ── Hero flag teaser (light mode - no dark background)
   heroCard: {
-    backgroundColor: colors.ink,
     marginHorizontal: spacing.md,
     marginTop: spacing.md,
-    borderRadius: borderRadius.xl,
-    padding: spacing.lg,
-    paddingTop: spacing.lg,
-    ...shadows.large,
   },
   heroLabel: {
     fontFamily: fontFamily.uiLabel,
     fontSize: fontSize.xxs,
     letterSpacing: 1.5,
     textTransform: 'uppercase',
-    color: colors.whiteAlpha45,
-    marginBottom: spacing.md,
+    color: colors.textTertiary,
+    marginBottom: spacing.sm,
   },
   flagWrap: {
     width: '100%',
     aspectRatio: 3 / 2,
     overflow: 'hidden',
+    borderRadius: borderRadius.lg,
     position: 'relative',
   },
 
@@ -714,33 +677,33 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   optBtn: {
-    backgroundColor: colors.darkSurface,
+    backgroundColor: colors.surface,
     borderWidth: 1.5,
-    borderColor: colors.darkBorder,
+    borderColor: colors.border,
     borderRadius: borderRadius.md,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.sm,
     alignItems: 'center',
   },
   optCorrect: {
-    backgroundColor: colors.successOnDark,
-    borderColor: colors.successBorderOnDark,
+    backgroundColor: colors.successBg,
+    borderColor: colors.success,
   },
   optWrong: {
-    backgroundColor: colors.errorOnDark,
-    borderColor: colors.errorBorderOnDark,
+    backgroundColor: colors.errorBg,
+    borderColor: colors.error,
   },
   optText: {
     fontFamily: fontFamily.bodyMedium,
     fontSize: fontSize.body,
-    color: colors.whiteAlpha70,
+    color: colors.ink,
     textAlign: 'center',
   },
   optTextCorrect: {
-    color: colors.successTextOnDark,
+    color: colors.success,
   },
   optTextWrong: {
-    color: colors.errorTextOnDark,
+    color: colors.error,
   },
 
   // ── Teaser result
@@ -754,13 +717,13 @@ const styles = StyleSheet.create({
     fontSize: fontSize.lg,
     letterSpacing: 1,
     textTransform: 'uppercase',
-    color: colors.white,
+    color: colors.ink,
   },
   teaserResultCorrect: {
-    color: colors.successTextOnDark,
+    color: colors.success,
   },
   teaserResultWrong: {
-    color: colors.white,
+    color: colors.ink,
     fontSize: fontSize.xl,
   },
   teaserPlayBtn: {
@@ -802,41 +765,6 @@ const styles = StyleSheet.create({
   },
   playBtnText: {
     ...buttons.primaryText,
-  },
-
-  // ── Config card
-  configCard: {
-    marginHorizontal: spacing.md,
-    marginTop: spacing.sm,
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
-    borderWidth: 2,
-    borderColor: colors.rule,
-    overflow: 'hidden',
-  },
-  configRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.md,
-    gap: spacing.sm,
-  },
-  configDivider: {
-    height: 1,
-    backgroundColor: colors.rule,
-  },
-  configLbl: {
-    fontFamily: fontFamily.bodyMedium,
-    fontSize: fontSize.body,
-    color: colors.ink,
-    minWidth: 58,
-    flexShrink: 0,
-  },
-  segRow: {
-    flexDirection: 'row',
-    flex: 1,
-    gap: spacing.xs,
-    justifyContent: 'flex-end',
   },
 
   // ── Game modes

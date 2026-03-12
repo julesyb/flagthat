@@ -69,13 +69,13 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xl,
   },
   button: {
-    backgroundColor: colors.ink,
+    backgroundColor: colors.goldBright,
     paddingHorizontal: spacing.xl,
     paddingVertical: spacing.md,
     borderRadius: borderRadius.lg,
   },
   buttonText: {
     ...typography.bodyBold,
-    color: colors.white,
+    color: colors.background,
   },
 });

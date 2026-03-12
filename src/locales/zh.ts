@@ -29,6 +29,7 @@ const zh: typeof en = {
     modes: '\u6a21\u5f0f',
     stats: '\u7edf\u8ba1',
     browse: '\u6d4f\u89c8',
+    settings: '设置',
   },
 
   app: {

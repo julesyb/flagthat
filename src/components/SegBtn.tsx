@@ -35,8 +35,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   segBtnOn: {
-    backgroundColor: colors.ink,
-    borderColor: colors.ink,
+    backgroundColor: colors.goldBright,
+    borderColor: colors.goldBright,
   },
   segBtnText: {
     fontFamily: fontFamily.uiLabel,
@@ -45,6 +45,6 @@ const styles = StyleSheet.create({
     color: colors.textTertiary,
   },
   segBtnTextOn: {
-    color: colors.white,
+    color: colors.background,
   },
 });

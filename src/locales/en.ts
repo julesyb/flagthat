@@ -31,6 +31,7 @@ const en = {
     modes: 'Modes',
     stats: 'Stats',
     browse: 'Browse',
+    settings: 'Settings',
   },
 
   // ─── App / Header ────────────────────────────────────────
@@ -245,6 +246,8 @@ const en = {
 
   // ─── Browse Screen ──────────────────────────────────────
   browse: {
+    title: 'Browse',
+    countriesLabel: 'countries',
     searchPlaceholder: 'Search flags...',
     all: 'All',
     africa: 'Africa',

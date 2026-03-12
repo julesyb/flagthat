@@ -10,6 +10,7 @@ const TAB_ROUTES: Record<TabId, keyof RootStackParamList> = {
   Modes: 'GameSetup',
   Stats: 'Stats',
   Browse: 'Browse',
+  Settings: 'Settings',
 };
 
 /**

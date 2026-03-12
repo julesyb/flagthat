@@ -25,6 +25,7 @@ import { useNavTabs } from '../hooks/useNavTabs';
 import { t } from '../utils/i18n';
 import { hapticTap } from '../utils/feedback';
 import SegBtn from '../components/SegBtn';
+import ConfigRow, { ConfigCard } from '../components/ConfigRow';
 import {
   FlagIcon,
   LightningIcon,
@@ -61,18 +62,6 @@ const DIFFICULTIES: { key: QuizDifficulty; labelKey: string }[] = [
   { key: 'hard', labelKey: 'common.hard' },
 ];
 
-// Compact config row for secondary options (matches HomeScreen pattern)
-function ConfigRow({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <>
-      <View style={styles.configDivider} />
-      <View style={styles.configRow}>
-        <Text style={styles.configLbl}>{label}</Text>
-        <View style={styles.segRow}>{children}</View>
-      </View>
-    </>
-  );
-}
 
 
 export default function GameSetupScreen({ route, navigation }: Props) {
@@ -266,8 +255,8 @@ export default function GameSetupScreen({ route, navigation }: Props) {
           </View>
         )}
 
-        {/* Options card - compact rows matching HomeScreen config style */}
-        <View style={styles.configCard}>
+        {/* Options card */}
+        <ConfigCard>
 
           {/* Autocomplete (only for Hard quiz - first row, no divider above) */}
           {isQuiz && difficulty === 'hard' && (
@@ -350,7 +339,7 @@ export default function GameSetupScreen({ route, navigation }: Props) {
               />
             </ConfigRow>
           )}
-        </View>
+        </ConfigCard>
 
         {/* Filter */}
         <Text style={styles.sectionLabel}>{t('setup.filter')}</Text>
@@ -553,40 +542,6 @@ const styles = StyleSheet.create({
     color: colors.textTertiary,
   },
 
-  // Config card - compact rows matching HomeScreen pattern
-  configCard: {
-    marginTop: spacing.lg,
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
-    borderWidth: 1,
-    borderColor: colors.rule,
-    overflow: 'hidden',
-  },
-  configDivider: {
-    height: 1,
-    backgroundColor: colors.rule,
-  },
-  configRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.md,
-    gap: spacing.sm,
-  },
-  configLbl: {
-    fontFamily: fontFamily.bodyMedium,
-    fontSize: fontSize.caption,
-    color: colors.ink,
-    minWidth: 72,
-    flexShrink: 0,
-  },
-  segRow: {
-    flexDirection: 'row',
-    flex: 1,
-    gap: spacing.xs,
-    justifyContent: 'flex-end',
-  },
-
   // Filter section
   filterTypeRow: {
     flexDirection: 'row',
@@ -607,15 +562,15 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.md,
   },
   filterTypeChipActive: {
-    borderColor: colors.ink,
-    backgroundColor: colors.ink,
+    borderColor: colors.goldBright,
+    backgroundColor: colors.goldBright,
   },
   filterTypeText: {
     ...typography.label,
     color: colors.text,
   },
   filterTypeTextActive: {
-    color: colors.white,
+    color: colors.background,
   },
   chevronDown: {
     transform: [{ rotate: '90deg' }],
@@ -638,8 +593,8 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.md,
   },
   categoryChipActive: {
-    borderColor: colors.ink,
-    backgroundColor: colors.ink,
+    borderColor: colors.goldBright,
+    backgroundColor: colors.goldBright,
   },
   categoryTextGroup: {
     gap: 1,
@@ -649,7 +604,7 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   categoryLabelActive: {
-    color: colors.white,
+    color: colors.background,
   },
   categoryCount: {
     ...typography.caption,

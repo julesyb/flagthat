@@ -1,10 +1,10 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { colors, fontFamily, fontSize, spacing, layout } from '../utils/theme';
-import { HomeIcon, CrosshairIcon, BarChartIcon, GlobeIcon } from './Icons';
+import { HomeIcon, CrosshairIcon, BarChartIcon, GlobeIcon, GearIcon } from './Icons';
 import { t } from '../utils/i18n';
 
-export type TabId = 'Home' | 'Modes' | 'Stats' | 'Browse';
+export type TabId = 'Home' | 'Modes' | 'Stats' | 'Browse' | 'Settings';
 
 interface BottomNavProps {
   activeTab: TabId;
@@ -16,6 +16,7 @@ const TAB_ICONS: Record<TabId, (active: boolean) => React.ReactNode> = {
   Modes: (active) => <CrosshairIcon size={20} color={active ? colors.ink : colors.textTertiary} />,
   Stats: (active) => <BarChartIcon size={20} color={active ? colors.ink : colors.textTertiary} />,
   Browse: (active) => <GlobeIcon size={20} color={active ? colors.ink : colors.textTertiary} />,
+  Settings: (active) => <GearIcon size={20} color={active ? colors.ink : colors.textTertiary} />,
 };
 
 const TAB_KEYS: { id: TabId; labelKey: string }[] = [
@@ -23,6 +24,7 @@ const TAB_KEYS: { id: TabId; labelKey: string }[] = [
   { id: 'Modes', labelKey: 'nav.modes' },
   { id: 'Stats', labelKey: 'nav.stats' },
   { id: 'Browse', labelKey: 'nav.browse' },
+  { id: 'Settings', labelKey: 'nav.settings' },
 ];
 
 export default function BottomNav({ activeTab, onNavigate }: BottomNavProps) {
@@ -56,7 +58,7 @@ const styles = StyleSheet.create({
   container: {
     borderTopWidth: 1,
     borderTopColor: colors.rule,
-    backgroundColor: colors.background,
+    backgroundColor: colors.navBg,
     paddingTop: 6,
     paddingBottom: 20,
     alignItems: 'center',

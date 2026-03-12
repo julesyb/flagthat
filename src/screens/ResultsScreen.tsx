@@ -896,7 +896,7 @@ const styles = StyleSheet.create({
 
   // ── Hero (THE centerpiece)
   heroCard: {
-    backgroundColor: colors.ink,
+    backgroundColor: colors.surface,
     borderRadius: borderRadius.xl,
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.xl,
@@ -1161,11 +1161,11 @@ const styles = StyleSheet.create({
   },
   modalShare: {
     paddingVertical: 14, alignItems: 'center',
-    borderRadius: borderRadius.md, backgroundColor: colors.ink,
+    borderRadius: borderRadius.md, backgroundColor: colors.goldBright,
   },
   modalShareDisabled: { backgroundColor: colors.textTertiary },
   modalShareText: {
     fontFamily: fontFamily.uiLabel, fontSize: fontSize.caption,
-    letterSpacing: 0.5, textTransform: 'uppercase', color: colors.white,
+    letterSpacing: 0.5, textTransform: 'uppercase', color: colors.background,
   },
 });

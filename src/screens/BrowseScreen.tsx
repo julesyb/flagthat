@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -7,33 +7,45 @@ import {
   FlatList,
   SafeAreaView,
   TextInput,
+  ScrollView,
+  useWindowDimensions,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
-import { colors, spacing, typography, borderRadius, screenContainer } from '../utils/theme';
+import {
+  colors,
+  spacing,
+  typography,
+  borderRadius,
+  fontFamily,
+  fontSize,
+  screenContainer,
+} from '../utils/theme';
 import { FlagItem } from '../types';
 import { RootStackParamList } from '../types/navigation';
 import { getAllFlags } from '../data';
 import FlagImage from '../components/FlagImage';
 import { getMissedFlagIds, getFlagStats, FlagStats } from '../utils/storage';
 import { t } from '../utils/i18n';
-import { translateName, flagName } from '../data/countryNames';
+import { flagName } from '../data/countryNames';
 import BottomNav from '../components/BottomNav';
 import ScreenContainer from '../components/ScreenContainer';
 import { useNavTabs } from '../hooks/useNavTabs';
+import { SearchIcon } from '../components/Icons';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Browse'>;
 
 const REGIONS = ['All', 'Africa', 'Asia', 'Europe', 'Americas', 'Oceania'] as const;
 const REGION_KEYS: Record<string, string> = {
-  'All': 'browse.all',
-  'Africa': 'browse.africa',
-  'Asia': 'browse.asia',
-  'Europe': 'browse.europe',
-  'Americas': 'browse.americas',
-  'Oceania': 'browse.oceania',
+  All: 'browse.all',
+  Africa: 'browse.africa',
+  Asia: 'browse.asia',
+  Europe: 'browse.europe',
+  Americas: 'browse.americas',
+  Oceania: 'browse.oceania',
 };
 const PRACTICE_MORE = 'Practice More';
+const NUM_COLUMNS = 3;
 
 export default function BrowseScreen({ route, navigation }: Props) {
   const onNavigate = useNavTabs();
@@ -42,10 +54,10 @@ export default function BrowseScreen({ route, navigation }: Props) {
   const [selectedFilter, setSelectedFilter] = useState(initialRegion);
   const [missedFlagIds, setMissedFlagIds] = useState<string[]>([]);
   const [flagStats, setFlagStats] = useState<FlagStats>({});
+  const { width: screenWidth } = useWindowDimensions();
 
   const allFlags = useMemo(() => getAllFlags(), []);
 
-  // Reload missed flags each time the screen comes into focus
   useFocusEffect(
     useCallback(() => {
       getMissedFlagIds().then(setMissedFlagIds);
@@ -58,7 +70,6 @@ export default function BrowseScreen({ route, navigation }: Props) {
     if (selectedFilter === PRACTICE_MORE) {
       const missedSet = new Set(missedFlagIds);
       flags = flags.filter((f) => missedSet.has(f.id));
-      // Sort by most wrong first
       flags = flags.sort((a, b) => {
         const aWrong = flagStats[a.id]?.wrong ?? 0;
         const bWrong = flagStats[b.id]?.wrong ?? 0;
@@ -72,7 +83,11 @@ export default function BrowseScreen({ route, navigation }: Props) {
     }
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
-      flags = flags.filter((f) => f.name.toLowerCase().includes(q) || flagName(f).toLowerCase().includes(q));
+      flags = flags.filter(
+        (f) =>
+          f.name.toLowerCase().includes(q) ||
+          flagName(f).toLowerCase().includes(q),
+      );
     }
     return flags;
   }, [allFlags, selectedFilter, searchQuery, missedFlagIds, flagStats]);
@@ -81,25 +96,40 @@ export default function BrowseScreen({ route, navigation }: Props) {
     if (missedFlagIds.length > 0) {
       return [...REGIONS, PRACTICE_MORE];
     }
-    return REGIONS;
+    return [...REGIONS];
   }, [missedFlagIds]);
 
-  const renderItem = ({ item }: { item: FlagItem }) => {
-    const stats = flagStats[item.id];
-    const showWrongCount = selectedFilter === PRACTICE_MORE && stats;
+  // Calculate card dimensions based on available width
+  const cardGap = spacing.sm;
+  const horizontalPad = spacing.md * 2;
+  const availableWidth = Math.min(screenWidth, 600) - horizontalPad;
+  const cardWidth = (availableWidth - cardGap * (NUM_COLUMNS - 1)) / NUM_COLUMNS;
+  const flagHeight = Math.round(cardWidth * 0.67); // ~3:2 aspect ratio
 
+  const renderItem = ({ item, index }: { item: FlagItem; index: number }) => {
+    const isLastRow =
+      index >= filteredFlags.length - (filteredFlags.length % NUM_COLUMNS || NUM_COLUMNS);
     return (
-      <View style={styles.flagItem}>
-        <FlagImage countryCode={item.id} size="medium" />
-        <View style={styles.flagInfo}>
-          <Text style={styles.flagName}>{flagName(item)}</Text>
-          <Text style={styles.flagRegion}>
-            {item.region}
-            {showWrongCount
-              ? ` · ${stats.wrong === 1 ? t('browse.missedCount', { count: stats.wrong }) : t('browse.missedCountPlural', { count: stats.wrong })}`
-              : ''}
-          </Text>
+      <View
+        style={[
+          styles.card,
+          {
+            width: cardWidth,
+            marginRight: (index + 1) % NUM_COLUMNS === 0 ? 0 : cardGap,
+            marginBottom: isLastRow ? spacing.xxl : cardGap,
+          },
+        ]}
+      >
+        <View style={[styles.flagWrap, { height: flagHeight }]}>
+          <FlagImage
+            countryCode={item.id}
+            size="medium"
+            style={styles.flagImg}
+          />
         </View>
+        <Text style={styles.countryName} numberOfLines={1}>
+          {flagName(item)}
+        </Text>
       </View>
     );
   };
@@ -107,55 +137,77 @@ export default function BrowseScreen({ route, navigation }: Props) {
   return (
     <SafeAreaView style={styles.container}>
       <ScreenContainer flex>
-      <View style={styles.searchContainer}>
-        <TextInput
-          style={styles.searchInput}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          placeholder={t('browse.searchPlaceholder')}
-          placeholderTextColor={colors.textTertiary}
-          clearButtonMode="while-editing"
-          accessibilityLabel={t('browse.searchPlaceholder')}
+        {/* Page header */}
+        <View style={styles.pageHeader}>
+          <Text style={styles.pageTitle}>{t('browse.title')}</Text>
+          <Text style={styles.pageSub}>
+            {allFlags.length} {t('browse.countriesLabel')}
+          </Text>
+        </View>
+
+        {/* Search bar */}
+        <View style={styles.searchRow}>
+          <View style={styles.searchBar}>
+            <SearchIcon size={18} color={colors.textTertiary} />
+            <TextInput
+              style={styles.searchInput}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              placeholder={t('browse.searchPlaceholder')}
+              placeholderTextColor={colors.textTertiary}
+              clearButtonMode="while-editing"
+              accessibilityLabel={t('browse.searchPlaceholder')}
+            />
+          </View>
+        </View>
+
+        {/* Region filter chips */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.chipScroll}
+          style={styles.chipRow}
+        >
+          {filterOptions.map((filter) => {
+            const active = selectedFilter === filter;
+            return (
+              <TouchableOpacity
+                key={filter}
+                style={[styles.chip, active && styles.chipActive]}
+                onPress={() => setSelectedFilter(filter)}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.chipLabel, active && styles.chipLabelActive]}>
+                  {filter === PRACTICE_MORE
+                    ? t('browse.practiceMore')
+                    : REGION_KEYS[filter]
+                      ? t(REGION_KEYS[filter])
+                      : filter}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+
+        {/* Result count */}
+        <Text style={styles.resultCount}>
+          {selectedFilter === PRACTICE_MORE && filteredFlags.length === 0
+            ? t('browse.noMissedFlags')
+            : filteredFlags.length === 1
+              ? t('browse.flagCount', { count: filteredFlags.length })
+              : t('browse.flagCountPlural', { count: filteredFlags.length })}
+        </Text>
+
+        {/* Flag grid */}
+        <FlatList
+          data={filteredFlags}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          numColumns={NUM_COLUMNS}
+          contentContainerStyle={styles.grid}
+          showsVerticalScrollIndicator={false}
+          style={styles.list}
         />
-      </View>
-
-      <View style={styles.regionWrap}>
-        {filterOptions.map((filter) => (
-          <TouchableOpacity
-            key={filter}
-            style={[
-              styles.regionChip,
-              selectedFilter === filter && styles.regionChipActive,
-            ]}
-            onPress={() => setSelectedFilter(filter)}
-            activeOpacity={0.7}
-          >
-            <Text
-              style={[
-                styles.regionLabel,
-                selectedFilter === filter && styles.regionLabelActive,
-              ]}
-            >
-              {filter === PRACTICE_MORE ? t('browse.practiceMore') : (REGION_KEYS[filter] ? t(REGION_KEYS[filter]) : filter)}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      <Text style={styles.resultCount}>
-        {selectedFilter === PRACTICE_MORE && filteredFlags.length === 0
-          ? t('browse.noMissedFlags')
-          : filteredFlags.length === 1 ? t('browse.flagCount', { count: filteredFlags.length }) : t('browse.flagCountPlural', { count: filteredFlags.length })}
-      </Text>
-
-      <FlatList
-        data={filteredFlags}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-        style={{ flex: 1 }}
-      />
       </ScreenContainer>
       <BottomNav activeTab="Browse" onNavigate={onNavigate} />
     </SafeAreaView>
@@ -164,79 +216,109 @@ export default function BrowseScreen({ route, navigation }: Props) {
 
 const styles = StyleSheet.create({
   container: screenContainer,
-  searchContainer: {
-    paddingHorizontal: spacing.lg,
+  pageHeader: {
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.md,
+  },
+  pageTitle: {
+    fontFamily: fontFamily.display,
+    fontSize: fontSize.title,
+    letterSpacing: -0.5,
+    color: colors.text,
+    marginBottom: spacing.xxs,
+  },
+  pageSub: {
+    fontFamily: fontFamily.body,
+    fontSize: fontSize.caption,
+    color: colors.textTertiary,
+  },
+  searchRow: {
+    paddingHorizontal: spacing.md,
     paddingTop: spacing.md,
     paddingBottom: spacing.sm,
   },
-  searchInput: {
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: colors.surface,
-    padding: spacing.md,
-    ...typography.body,
-    color: colors.text,
+    borderRadius: borderRadius.xl,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm + 2,
+    gap: spacing.sm,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: borderRadius.md,
   },
-  regionWrap: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    paddingHorizontal: spacing.lg,
+  searchInput: {
+    flex: 1,
+    fontFamily: fontFamily.body,
+    fontSize: fontSize.body,
+    color: colors.text,
+    paddingVertical: 0,
+  },
+  chipRow: {
+    flexGrow: 0,
+    marginBottom: spacing.sm,
+  },
+  chipScroll: {
+    paddingHorizontal: spacing.md,
     gap: spacing.sm,
-    marginTop: spacing.sm,
-    marginBottom: spacing.md,
   },
-  regionChip: {
+  chip: {
     backgroundColor: colors.surface,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    borderWidth: 2,
-    borderColor: colors.ruleDark,
-    borderRadius: borderRadius.sm,
+    borderRadius: borderRadius.full,
+    borderWidth: 1.5,
+    borderColor: colors.border,
   },
-  regionChipActive: {
-    borderColor: colors.goldBright,
+  chipActive: {
     backgroundColor: colors.goldBright,
+    borderColor: colors.goldBright,
   },
-  regionLabel: {
-    ...typography.captionBold,
+  chipLabel: {
+    fontFamily: fontFamily.uiLabel,
+    fontSize: fontSize.sm,
     color: colors.textSecondary,
   },
-  regionLabelActive: {
-    color: colors.white,
+  chipLabelActive: {
+    color: colors.background,
   },
   resultCount: {
     ...typography.caption,
-    color: colors.textSecondary,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.sm,
+    color: colors.textTertiary,
+    paddingHorizontal: spacing.md,
     paddingBottom: spacing.sm,
   },
-  listContent: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xxl,
-  },
-  flagItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surfaceSecondary,
-    padding: spacing.md,
-    marginBottom: spacing.sm,
-    gap: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: borderRadius.md,
-  },
-  flagInfo: {
+  list: {
     flex: 1,
   },
-  flagName: {
-    ...typography.bodyBold,
-    color: colors.text,
+  grid: {
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.xxl,
   },
-  flagRegion: {
-    ...typography.caption,
-    color: colors.textSecondary,
-    marginTop: spacing.xxs,
+  card: {
+    alignItems: 'center',
+  },
+  flagWrap: {
+    width: '100%',
+    borderRadius: borderRadius.sm,
+    overflow: 'hidden',
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  flagImg: {
+    width: '100%',
+    height: '100%',
+  },
+  countryName: {
+    fontFamily: fontFamily.bodyMedium,
+    fontSize: fontSize.sm,
+    color: colors.text,
+    textAlign: 'center',
+    marginTop: spacing.xs,
+    paddingHorizontal: spacing.xxs,
   },
 });

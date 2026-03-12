@@ -300,7 +300,7 @@ export default function SettingsScreen() {
             activeOpacity={0.7}
           >
             <Text style={styles.settingLabel}>{t('settings.termsOfService')}</Text>
-            <Text style={styles.settingChevron}>&rsaquo;</Text>
+            <ChevronRightIcon size={18} color={colors.textTertiary} />
           </TouchableOpacity>
           <View style={styles.settingDivider} />
           <TouchableOpacity
@@ -309,7 +309,7 @@ export default function SettingsScreen() {
             activeOpacity={0.7}
           >
             <Text style={styles.settingLabel}>{t('settings.support')}</Text>
-            <Text style={styles.settingChevron}>&rsaquo;</Text>
+            <ChevronRightIcon size={18} color={colors.textTertiary} />
           </TouchableOpacity>
         </View>
 
@@ -325,7 +325,7 @@ export default function SettingsScreen() {
         </TouchableOpacity>
         </ScreenContainer>
       </ScrollView>
-      <BottomNav activeTab="Home" onNavigate={onNavigate} />
+      <BottomNav activeTab="Settings" onNavigate={onNavigate} />
     </SafeAreaView>
   );
 }
@@ -380,11 +380,6 @@ const styles = StyleSheet.create({
   settingValue: {
     ...typography.caption,
     color: colors.textTertiary,
-  },
-  settingChevron: {
-    fontSize: fontSize.heading,
-    color: colors.textTertiary,
-    lineHeight: 22,
   },
   settingDisabled: {
     opacity: 0.35,

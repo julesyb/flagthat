@@ -29,6 +29,7 @@ const ptBR: typeof en = {
     modes: 'Modos',
     stats: 'Stats',
     browse: 'Explorar',
+    settings: 'Configurações',
   },
 
   app: {

@@ -29,6 +29,7 @@ const es: typeof en = {
     modes: 'Modos',
     stats: 'Stats',
     browse: 'Explorar',
+    settings: 'Ajustes',
   },
 
   app: {
