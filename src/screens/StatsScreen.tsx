@@ -324,12 +324,6 @@ export default function StatsScreen() {
     outputRange: ['0%', '100%'],
   });
 
-  const accuracyLabel =
-    overallAccuracy === 100 ? t('stats.perfect') :
-    overallAccuracy >= 90 ? t('stats.excellent') :
-    overallAccuracy >= 70 ? t('stats.great') :
-    overallAccuracy > 0 ? t('stats.keepGoing') : '';
-
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -744,7 +738,8 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     borderRadius: borderRadius.lg,
     borderWidth: 1,
     borderColor: colors.border,
-    padding: spacing.lg,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.sm,
     flexDirection: 'row',
     marginBottom: spacing.md,
   },
@@ -757,10 +752,10 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     borderLeftColor: colors.border,
   },
   heroStatValue: {
-    ...typography.displayValue,
+    ...typography.statValue,
     color: colors.ink,
-    lineHeight: 36,
-    marginBottom: 5,
+    lineHeight: 26,
+    marginBottom: 2,
   },
   heroStatLabel: {
     ...typography.eyebrow,
