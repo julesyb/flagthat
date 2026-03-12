@@ -405,7 +405,7 @@ export default function HomeScreen({ navigation }: Props) {
                   });
                 }}
                 accessibilityRole="button"
-                accessibilityLabel={`Start ${t(`categories.${nextRegion}`)} baseline test`}
+                accessibilityLabel={`Start ${t(`categories.${nextRegion}`)} knowledge test`}
                 accessibilityHint="Begins the knowledge test for this region"
               >
                 <Text style={styles.onboardingCtaText}>{t(`categories.${nextRegion}`)}</Text>
@@ -445,7 +445,7 @@ export default function HomeScreen({ navigation }: Props) {
                       });
                     }}
                     accessibilityRole="button"
-                    accessibilityLabel={isDone ? `${t(`categories.${r}`)} completed, ${result!.accuracy}% accuracy` : `Start ${t(`categories.${r}`)} baseline test`}
+                    accessibilityLabel={isDone ? `${t(`categories.${r}`)} completed, ${result!.accuracy}% accuracy` : `Start ${t(`categories.${r}`)} knowledge test`}
                     accessibilityState={{ disabled: isDone }}
                   >
                     {isDone && <CheckIcon size={10} color={colors.success} />}
