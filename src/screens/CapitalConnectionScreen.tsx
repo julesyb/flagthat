@@ -305,17 +305,6 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
   },
-  exitButton: {
-    padding: spacing.sm,
-    width: 60,
-  },
-  exitText: {
-    fontSize: fontSize.sm,
-    fontFamily: fontFamily.uiLabelMedium,
-    letterSpacing: 0.5,
-    color: colors.textTertiary,
-    textTransform: 'uppercase',
-  },
   centerInfo: {
     alignItems: 'center',
   },
