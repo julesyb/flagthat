@@ -207,7 +207,7 @@ export default function GameScreen({ route, navigation }: Props) {
 
       const feedbackDelay = isTimeAttack
         ? (correct ? 300 : 600)
-        : 1200;
+        : (correct && !isMapMode ? 600 : 1200);
 
       if (isEliminated) {
         autoAdvanceRef.current = setTimeout(() => {
@@ -441,7 +441,9 @@ export default function GameScreen({ route, navigation }: Props) {
             {lastAnswerCorrect ? (
               <View style={styles.feedbackCorrectContainer}>
                 <Text style={styles.feedbackCorrect} accessibilityLiveRegion="polite">{t('common.correct')}</Text>
-                <Text style={styles.feedbackCountryName}>{flagName(currentQuestion.flag)}</Text>
+                {isMapMode && (
+                  <Text style={styles.feedbackCountryName}>{flagName(currentQuestion.flag)}</Text>
+                )}
               </View>
             ) : (
               <Text style={styles.feedbackWrong} accessibilityLiveRegion="polite">

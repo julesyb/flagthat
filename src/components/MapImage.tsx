@@ -72,6 +72,11 @@ export default function MapImage({ countryCode, size = 'hero', style }: MapImage
   const [zoomDelta, setZoomDelta] = useState(0);
   const scrollRef = useRef<ScrollView>(null);
 
+  // Reset zoom when switching to a different country
+  useEffect(() => {
+    setZoomDelta(0);
+  }, [countryCode]);
+
   const isInteractive = size === 'hero' || size === 'large';
 
   const dimensions = useMemo(() => {
