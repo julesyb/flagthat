@@ -29,6 +29,7 @@ import { t } from '../utils/i18n';
 import { flagName } from '../data/countryNames';
 import { buildChallengeQuestions } from '../utils/challengeCode';
 import { countCorrect, calculateProgress } from '../utils/gameHelpers';
+import { useLayout } from '../utils/useLayout';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'FlagPuzzle'>;
 
@@ -50,6 +51,7 @@ function generateRevealOrder(): number[] {
 export default function FlagPuzzleScreen({ route, navigation }: Props) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
+  const { isDesktop } = useLayout();
   const { config, challenge, playerName } = route.params;
   const timeLimit = config.timeLimit || 15;
   const { width: screenWidth } = useWindowDimensions();
@@ -323,6 +325,7 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
       <Animated.View
         style={[
           styles.questionContainer,
+          isDesktop && { maxHeight: 680 },
           { opacity: fadeAnim, transform: [{ translateX: shakeAnim }] },
         ]}
       >
@@ -505,7 +508,6 @@ const createStyles = (colors: ThemeColors) => {
     flex: 1,
     padding: spacing.lg,
     justifyContent: 'center',
-    maxHeight: 680,
   },
   flagContainer: {
     alignItems: 'center',

@@ -23,6 +23,7 @@ import ScreenContainer from '../components/ScreenContainer';
 import { t } from '../utils/i18n';
 import { flagName } from '../data/countryNames';
 import { countCorrect, countWrong, calculateProgress } from '../utils/gameHelpers';
+import { useLayout } from '../utils/useLayout';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CapitalConnection'>;
 
@@ -95,6 +96,7 @@ function generateQuestions(count: number, challengeFlagIds?: string[], difficult
 export default function CapitalConnectionScreen({ navigation, route }: Props) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
+  const { isDesktop } = useLayout();
   const { config, challenge, playerName } = route.params;
   const questions = useMemo(
     () => generateQuestions(config.questionCount, challenge?.flagIds, config.difficulty),
@@ -227,7 +229,7 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
         }
       />
 
-      <Animated.View style={[styles.questionContainer, { opacity: fadeAnim }]}>
+      <Animated.View style={[styles.questionContainer, isDesktop && { maxHeight: 680 }, { opacity: fadeAnim }]}>
         <View style={styles.flagContainer}>
           <FlagImage
             countryCode={question.flag.id}
@@ -326,7 +328,6 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     flex: 1,
     padding: spacing.lg,
     justifyContent: 'center',
-    maxHeight: 680,
   },
   flagContainer: {
     alignItems: 'center',
