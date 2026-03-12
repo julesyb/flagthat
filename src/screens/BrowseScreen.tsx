@@ -90,7 +90,7 @@ export default function BrowseScreen({ route, navigation }: Props) {
 
     return (
       <View style={styles.flagItem}>
-        <FlagImage countryCode={item.id} emoji={item.emoji} size="medium" />
+        <FlagImage countryCode={item.id} size="medium" />
         <View style={styles.flagInfo}>
           <Text style={styles.flagName}>{flagName(item)}</Text>
           <Text style={styles.flagRegion}>
@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderWidth: 2,
-    borderColor: colors.rule2,
+    borderColor: colors.ruleDark,
     borderRadius: borderRadius.sm,
   },
   regionChipActive: {

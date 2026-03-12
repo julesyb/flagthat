@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView, useWindowDimensions } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, useWindowDimensions, StyleProp, ViewStyle } from 'react-native';
 import { Image } from 'expo-image';
 import { colors, fontFamily, fontSize, borderRadius } from '../utils/theme';
 import { countryCoordinates } from '../data/countryCoordinates';
@@ -7,7 +7,7 @@ import { countryCoordinates } from '../data/countryCoordinates';
 interface MapImageProps {
   countryCode: string;
   size?: 'small' | 'medium' | 'large' | 'hero';
-  style?: object;
+  style?: StyleProp<ViewStyle>;
 }
 
 // CartoDB Positron no-labels — simple country outlines
@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: colors.mapBackground,
     borderWidth: 1,
-    borderColor: colors.rule2,
+    borderColor: colors.ruleDark,
     borderRadius: borderRadius.sm,
   },
   fallback: {
@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: colors.rule2,
+    borderColor: colors.ruleDark,
     borderRadius: borderRadius.sm,
   },
   fallbackText: {
@@ -272,11 +272,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accent,
     borderWidth: 3,
     borderColor: colors.white,
-    shadowColor: colors.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.5,
-    shadowRadius: 4,
-    elevation: 6,
+    shadowColor: colors.ink,
+    shadowOffset: { width: 2, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 2,
   },
   pinPoint: {
     width: 0,
@@ -302,7 +302,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: colors.rule2,
+    borderColor: colors.ruleDark,
     borderRadius: borderRadius.sm,
   },
   zoomText: {

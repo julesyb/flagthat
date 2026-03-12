@@ -265,6 +265,32 @@ const en = {
     notANeighbor: 'Not a neighbor',
   },
 
+  // ─── FlagFlash Screen ──────────────────────────────────
+  flagFlash: {
+    title: 'FlagFlash',
+    howToPlay: 'How to play',
+    holdPhone: 'Hold phone on your forehead',
+    friendsDescribe: 'Friends describe the flag to you',
+    tiltDown: 'TILT DOWN',
+    gotItRight: 'Got it right!',
+    tiltUp: 'TILT UP',
+    skipPass: 'Skip / Pass',
+    motionFallback: 'If motion is unavailable, tap buttons instead',
+    flagAppears: 'A flag name appears on screen',
+    correctLabel: 'CORRECT',
+    clickLeft: 'Click or press Left arrow',
+    skipLabel: 'SKIP',
+    clickRight: 'Click or press Right arrow',
+    ready: 'Ready!',
+    getReady: 'Get ready...',
+    holdForehead: 'Hold phone on forehead',
+    correctFeedback: 'CORRECT!',
+    passFeedback: 'PASS',
+    correctButton: 'Correct',
+    skipButton: 'Skip',
+    correctCount: '{count} correct',
+  },
+
   // ─── Flag Impostor Screen ───────────────────────────────
   impostor: {
     spotImpostor: 'Spot the impostor',

@@ -236,14 +236,14 @@ export default function App() {
 const loadingStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.paper,
+    backgroundColor: colors.background,
     justifyContent: 'center',
     alignItems: 'center',
     gap: 16,
   },
   text: {
     fontSize: fontSize.caption,
-    color: colors.slate,
+    color: colors.textSecondary,
     letterSpacing: 3,
     textTransform: 'uppercase',
   },

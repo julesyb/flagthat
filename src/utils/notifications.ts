@@ -39,15 +39,6 @@ export async function requestPermissions(): Promise<boolean> {
 }
 
 /**
- * Check current permission status without prompting.
- */
-export async function getPermissionStatus(): Promise<string> {
-  if (Platform.OS === 'web') return 'unavailable';
-  const { status } = await Notifications.getPermissionsAsync();
-  return status;
-}
-
-/**
  * Set up the Android notification channel.
  */
 export async function setupAndroidChannel(): Promise<void> {

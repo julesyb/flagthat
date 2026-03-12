@@ -57,9 +57,9 @@ export default function SupportCard({ gamesPlayed }: SupportCardProps) {
   // ── Thank-you state (shown briefly after watching)
   if (justThanked) {
     return (
-      <View style={[s.card, s.cardThanked]}>
+      <View style={[styles.card, styles.cardThanked]}>
         <HeartIcon size={16} color={colors.success} strokeWidth={2} filled />
-        <Text style={s.thankedText}>{t('support.thankYou')}</Text>
+        <Text style={styles.thankedText}>{t('support.thankYou')}</Text>
       </View>
     );
   }
@@ -67,28 +67,28 @@ export default function SupportCard({ gamesPlayed }: SupportCardProps) {
   // ── Returning supporter: compact row
   if (isSupporter) {
     return (
-      <View style={[s.card, s.cardCompactWrap]}>
+      <View style={[styles.card, styles.cardCompactWrap]}>
         <TouchableOpacity
-          style={s.cardCompact}
+          style={styles.cardCompact}
           onPress={handleWatch}
           activeOpacity={0.85}
           disabled={loading}
         >
           <HeartIcon size={14} color={colors.accent} strokeWidth={2} filled />
-          <Text style={s.compactText}>
+          <Text style={styles.compactText}>
             {totalWatched === 1
               ? t('support.totalWatched', { count: totalWatched })
               : t('support.totalWatchedPlural', { count: totalWatched })}
           </Text>
-          <View style={s.compactBtn}>
+          <View style={styles.compactBtn}>
             <PlayIcon size={8} color={colors.white} />
-            <Text style={s.compactBtnText}>
+            <Text style={styles.compactBtnText}>
               {loading ? '...' : t('support.watchAgain')}
             </Text>
           </View>
         </TouchableOpacity>
         {adFailed && (
-          <Text style={s.failedText}>{t('support.adFailed')}</Text>
+          <Text style={styles.failedText}>{t('support.adFailed')}</Text>
         )}
       </View>
     );
@@ -96,34 +96,34 @@ export default function SupportCard({ gamesPlayed }: SupportCardProps) {
 
   // ── First-time: full pitch
   return (
-    <View style={s.card}>
-      <View style={s.header}>
+    <View style={styles.card}>
+      <View style={styles.header}>
         <HeartIcon size={14} color={colors.accent} strokeWidth={2} filled />
-        <Text style={s.title}>{t('support.title')}</Text>
+        <Text style={styles.title}>{t('support.title')}</Text>
       </View>
 
-      <Text style={s.subtitle}>{t('support.subtitle')}</Text>
+      <Text style={styles.subtitle}>{t('support.subtitle')}</Text>
 
       <TouchableOpacity
-        style={[s.watchBtn, loading && s.watchBtnDisabled]}
+        style={[styles.watchBtn, loading && styles.watchBtnDisabled]}
         onPress={handleWatch}
         activeOpacity={0.85}
         disabled={loading}
       >
         <PlayIcon size={10} color={colors.white} />
-        <Text style={s.watchBtnText}>
+        <Text style={styles.watchBtnText}>
           {loading ? '...' : t('support.watchButton')}
         </Text>
       </TouchableOpacity>
 
       {adFailed && (
-        <Text style={s.failedText}>{t('support.adFailed')}</Text>
+        <Text style={styles.failedText}>{t('support.adFailed')}</Text>
       )}
     </View>
   );
 }
 
-const s = StyleSheet.create({
+const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.accentBg,
     borderWidth: 1,
@@ -139,7 +139,7 @@ const s = StyleSheet.create({
     justifyContent: 'center',
     gap: spacing.sm,
     backgroundColor: colors.successBg,
-    paddingVertical: 14,
+    paddingVertical: spacing.md,
   },
   cardCompactWrap: {
     paddingVertical: 0,
@@ -150,7 +150,7 @@ const s = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.sm,
     padding: spacing.md,
-    paddingVertical: 12,
+    paddingVertical: spacing.sm + spacing.xs,
   },
   header: {
     flexDirection: 'row',
@@ -177,7 +177,7 @@ const s = StyleSheet.create({
     gap: spacing.sm,
     backgroundColor: colors.ink,
     borderRadius: borderRadius.md,
-    paddingVertical: 12,
+    paddingVertical: spacing.sm + spacing.xs,
   },
   watchBtnDisabled: {
     opacity: 0.5,
@@ -203,11 +203,11 @@ const s = StyleSheet.create({
   compactBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: spacing.xs,
     backgroundColor: colors.ink,
     borderRadius: borderRadius.sm,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+    paddingVertical: spacing.xs + spacing.xxs,
+    paddingHorizontal: spacing.sm + spacing.xs,
   },
   compactBtnText: {
     fontFamily: fontFamily.uiLabel,

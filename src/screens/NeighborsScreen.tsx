@@ -199,7 +199,6 @@ export default function NeighborsScreen({ navigation, route }: Props) {
           <View style={styles.flagCenter}>
             <FlagImage
               countryCode={round.country.id}
-              emoji={round.country.emoji}
               size="large"
             />
             <Text style={styles.countryName}>{flagName(round.country)}</Text>
@@ -227,7 +226,7 @@ export default function NeighborsScreen({ navigation, route }: Props) {
                   activeOpacity={0.7}
                   disabled={submitted}
                 >
-                  <FlagImage countryCode={flag.id} emoji={flag.emoji} size="small" />
+                  <FlagImage countryCode={flag.id} size="small" />
                   {submitted && showCorrect && isSelected && (
                     <View style={[styles.resultBadgeCircle, styles.resultBadgeCorrect]}>
                       <CheckIcon size={12} color={colors.white} />
@@ -282,7 +281,7 @@ export default function NeighborsScreen({ navigation, route }: Props) {
                   if (!f) return null;
                   return (
                     <View key={id} style={styles.neighborChip}>
-                      <FlagImage countryCode={f.id} emoji={f.emoji} size="small" />
+                      <FlagImage countryCode={f.id} size="small" />
                       <Text style={styles.neighborChipText}>{flagName(f)}</Text>
                     </View>
                   );

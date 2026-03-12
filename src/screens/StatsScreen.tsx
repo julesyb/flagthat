@@ -569,7 +569,7 @@ export default function StatsScreen() {
             {top10.map(([id, fs], i) => (
               <View key={id} style={s.rankRow}>
                 <Text style={[s.rank, i < 3 && { color: RANK_COLORS[i] }]}>{i + 1}</Text>
-                <FlagImageSmall countryCode={id} emoji="" />
+                <FlagImageSmall countryCode={id} />
                 <Text style={s.rankName}>{flagNameMap[id] || id}</Text>
                 <View style={s.scoreBadge}>
                   <Text style={s.scoreBadgeText}>{fs.right}x</Text>
@@ -589,7 +589,7 @@ export default function StatsScreen() {
             {bottom10.map(([id, fs], i) => (
               <View key={id} style={s.rankRow}>
                 <Text style={s.rank}>{i + 1}</Text>
-                <FlagImageSmall countryCode={id} emoji="" />
+                <FlagImageSmall countryCode={id} />
                 <Text style={s.rankName}>{flagNameMap[id] || id}</Text>
                 <View style={[s.scoreBadge, s.scoreBadgeWrong]}>
                   <Text style={[s.scoreBadgeText, s.scoreBadgeTextWrong]}>{fs.wrong}x</Text>

@@ -162,7 +162,7 @@ export default function OnboardingScreen({ navigation }: Props) {
                     },
                   ]}
                 >
-                  <FlagImage countryCode={code} size="small" emoji="" />
+                  <FlagImage countryCode={code} size="small" />
                 </Animated.View>
               ))}
             </View>
@@ -387,7 +387,7 @@ const s = StyleSheet.create({
     borderRadius: borderRadius.lg,
     padding: spacing.lg,
     gap: spacing.md,
-    ...shadows.accentShadow,
+    ...shadows.accent,
   },
   primaryBtnIcon: {
     width: 44,
@@ -585,7 +585,7 @@ const s = StyleSheet.create({
     paddingHorizontal: spacing.xl,
     width: '100%',
     alignItems: 'center',
-    ...shadows.accentShadow,
+    ...shadows.accent,
   },
   startBtnText: {
     fontFamily: fontFamily.uiLabel,

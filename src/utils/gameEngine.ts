@@ -2,7 +2,8 @@ import { GameMode, FlagItem, GameQuestion, GameResult, GameConfig } from '../typ
 import { getFlagsForCategory, getAllFlags } from '../data';
 import { countryAliases, twinPairs } from '../data/countryAliases';
 import { translateName } from '../data/countryNames';
-import { colors, APP_DOMAIN } from './theme';
+import { colors } from './theme';
+import { APP_DOMAIN } from './config';
 
 export function shuffleArray<T>(array: T[]): T[] {
   const shuffled = [...array];

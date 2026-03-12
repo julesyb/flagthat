@@ -523,7 +523,7 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
                       <FakeFlagSvg flag={item.fakeFlag!} width={FLAG_W} height={FLAG_H} />
                     </View>
                   ) : (
-                    <FlagImage countryCode={item.flag!.id} emoji={item.flag!.emoji} size="medium" />
+                    <FlagImage countryCode={item.flag!.id} size="medium" />
                   )}
 
                   {isRevealed && (

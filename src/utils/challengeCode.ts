@@ -2,7 +2,7 @@ import { getAllFlags } from '../data';
 import { FlagItem, GameQuestion, GameMode } from '../types';
 import { shuffleArray } from './gameEngine';
 import { twinPairs } from '../data/countryAliases';
-import { APP_DOMAIN } from './theme';
+import { APP_DOMAIN } from './config';
 
 /** Modes that support the challenge feature */
 export const CHALLENGE_MODES: GameMode[] = [

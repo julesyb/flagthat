@@ -317,7 +317,6 @@ export default function GameScreen({ route, navigation }: Props) {
             <FlagImage
               countryCode={currentQuestion.flag.id}
               size="hero"
-              emoji={currentQuestion.flag.emoji}
             />
           )}
         </View>
@@ -413,7 +412,6 @@ export default function GameScreen({ route, navigation }: Props) {
                     <FlagImage
                       countryCode={optionFlag.id}
                       size="medium"
-                      emoji={optionFlag.emoji}
                     />
                   ) : (
                     <Text style={textStyle}>{translateName(option)}</Text>

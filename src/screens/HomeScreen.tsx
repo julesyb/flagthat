@@ -81,7 +81,6 @@ function FlagTeaser() {
       <View style={s.flagWrap}>
         <FlagImage
           countryCode={question.flag.id}
-          emoji={question.flag.emoji}
           size="hero"
           style={{ width: '100%' }}
         />

@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius, nav } from '../utils/theme';
+import { t } from '../utils/i18n';
 import { GameQuestion, GameResult } from '../types';
 import { generateQuestions } from '../utils/gameEngine';
 import {
@@ -305,8 +306,8 @@ export default function FlagFlashScreen({ route, navigation }: Props) {
         <StatusBar hidden />
         <ScreenContainer>
         <View style={styles.tutorialInner}>
-        <Text style={styles.tutorialTitle}>FlagFlash</Text>
-        <Text style={styles.tutorialSubtitle}>How to play</Text>
+        <Text style={styles.tutorialTitle}>{t('flagFlash.title')}</Text>
+        <Text style={styles.tutorialSubtitle}>{t('flagFlash.howToPlay')}</Text>
 
         <View style={styles.tutorialSteps}>
           {showTiltTutorial ? (
@@ -315,29 +316,29 @@ export default function FlagFlashScreen({ route, navigation }: Props) {
                 <View style={styles.stepIconBox}>
                   <Text style={styles.stepIconText}>1</Text>
                 </View>
-                <Text style={styles.stepText}>Hold phone on your forehead</Text>
+                <Text style={styles.stepText}>{t('flagFlash.holdPhone')}</Text>
               </View>
               <View style={styles.tutorialStep}>
                 <View style={styles.stepIconBox}>
                   <Text style={styles.stepIconText}>2</Text>
                 </View>
-                <Text style={styles.stepText}>Friends describe the flag to you</Text>
+                <Text style={styles.stepText}>{t('flagFlash.friendsDescribe')}</Text>
               </View>
               <View style={styles.tutorialStep}>
                 <View style={[styles.tiltDemo, { backgroundColor: colors.success }]}>
-                  <Text style={styles.tiltDemoText}>TILT DOWN</Text>
+                  <Text style={styles.tiltDemoText}>{t('flagFlash.tiltDown')}</Text>
                 </View>
-                <Text style={styles.stepText}>Got it right!</Text>
+                <Text style={styles.stepText}>{t('flagFlash.gotItRight')}</Text>
               </View>
               <View style={styles.tutorialStep}>
                 <View style={[styles.tiltDemo, { backgroundColor: colors.error }]}>
-                  <Text style={styles.tiltDemoText}>TILT UP</Text>
+                  <Text style={styles.tiltDemoText}>{t('flagFlash.tiltUp')}</Text>
                 </View>
-                <Text style={styles.stepText}>Skip / Pass</Text>
+                <Text style={styles.stepText}>{t('flagFlash.skipPass')}</Text>
               </View>
               {isMobileWeb && (
                 <Text style={styles.tiltFallbackNote}>
-                  If motion is unavailable, tap buttons instead
+                  {t('flagFlash.motionFallback')}
                 </Text>
               )}
             </>
@@ -347,19 +348,19 @@ export default function FlagFlashScreen({ route, navigation }: Props) {
                 <View style={styles.stepIconBox}>
                   <Text style={styles.stepIconText}>?</Text>
                 </View>
-                <Text style={styles.stepText}>A flag name appears on screen</Text>
+                <Text style={styles.stepText}>{t('flagFlash.flagAppears')}</Text>
               </View>
               <View style={styles.tutorialStep}>
                 <View style={[styles.tiltDemo, { backgroundColor: colors.success }]}>
-                  <Text style={styles.tiltDemoText}>CORRECT</Text>
+                  <Text style={styles.tiltDemoText}>{t('flagFlash.correctLabel')}</Text>
                 </View>
-                <Text style={styles.stepText}>Click or press Left arrow</Text>
+                <Text style={styles.stepText}>{t('flagFlash.clickLeft')}</Text>
               </View>
               <View style={styles.tutorialStep}>
                 <View style={[styles.tiltDemo, { backgroundColor: colors.error }]}>
-                  <Text style={styles.tiltDemoText}>SKIP</Text>
+                  <Text style={styles.tiltDemoText}>{t('flagFlash.skipLabel')}</Text>
                 </View>
-                <Text style={styles.stepText}>Click or press Right arrow</Text>
+                <Text style={styles.stepText}>{t('flagFlash.clickRight')}</Text>
               </View>
             </>
           )}
@@ -370,7 +371,7 @@ export default function FlagFlashScreen({ route, navigation }: Props) {
           onPress={handleReady}
           activeOpacity={0.8}
         >
-          <Text style={styles.readyButtonText}>Ready!</Text>
+          <Text style={styles.readyButtonText}>{t('flagFlash.ready')}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -378,7 +379,7 @@ export default function FlagFlashScreen({ route, navigation }: Props) {
           onPress={goHome}
           activeOpacity={0.7}
         >
-          <Text style={styles.exitButtonText}>Exit</Text>
+          <Text style={styles.exitButtonText}>{t('common.exit')}</Text>
         </TouchableOpacity>
         </View>
         </ScreenContainer>
@@ -392,7 +393,7 @@ export default function FlagFlashScreen({ route, navigation }: Props) {
       <View style={styles.countdownContainer}>
         <StatusBar hidden />
         <Text style={styles.countdownHint}>
-          {isWeb && !isMobileWeb ? 'Get ready...' : 'Hold phone on forehead'}
+          {isWeb && !isMobileWeb ? t('flagFlash.getReady') : t('flagFlash.holdForehead')}
         </Text>
         <Text style={styles.countdownNumber}>{countdown}</Text>
       </View>
@@ -435,9 +436,9 @@ export default function FlagFlashScreen({ route, navigation }: Props) {
       <ScreenContainer flex game>
       <View style={styles.gameContent}>
         {tiltState === 'correct' ? (
-          <Text style={styles.feedbackText}>CORRECT!</Text>
+          <Text style={styles.feedbackText}>{t('flagFlash.correctFeedback')}</Text>
         ) : tiltState === 'skip' ? (
-          <Text style={styles.feedbackText}>PASS</Text>
+          <Text style={styles.feedbackText}>{t('flagFlash.passFeedback')}</Text>
         ) : (
           <>
             {config.displayMode === 'map' ? (
@@ -449,7 +450,6 @@ export default function FlagFlashScreen({ route, navigation }: Props) {
               <FlagImage
                 countryCode={currentQuestion.flag.id}
                 size="hero"
-                emoji={currentQuestion.flag.emoji}
               />
             )}
             <Text style={styles.flagName}>{flagName(currentQuestion.flag)}</Text>
@@ -465,14 +465,14 @@ export default function FlagFlashScreen({ route, navigation }: Props) {
             onPress={() => handleTilt('correct')}
             activeOpacity={0.7}
           >
-            <Text style={styles.webButtonText}>Correct</Text>
+            <Text style={styles.webButtonText}>{t('flagFlash.correctButton')}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.webButton, styles.webButtonSkip]}
             onPress={() => handleTilt('skip')}
             activeOpacity={0.7}
           >
-            <Text style={styles.webButtonText}>Skip</Text>
+            <Text style={styles.webButtonText}>{t('flagFlash.skipButton')}</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -488,9 +488,9 @@ export default function FlagFlashScreen({ route, navigation }: Props) {
           onPress={exitGame}
           activeOpacity={0.7}
         >
-          <Text style={styles.exitButtonPlayingText}>Exit</Text>
+          <Text style={styles.exitButtonPlayingText}>{t('common.exit')}</Text>
         </TouchableOpacity>
-        <Text style={styles.scoreText}>{correctCount} correct</Text>
+        <Text style={styles.scoreText}>{t('flagFlash.correctCount', { count: correctCount })}</Text>
       </View>
     </View>
   );

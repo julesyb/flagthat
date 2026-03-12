@@ -17,16 +17,8 @@ export function setSoundsEnabled(enabled: boolean) {
   soundsEnabled = enabled;
 }
 
-export function getSoundsEnabled(): boolean {
-  return soundsEnabled;
-}
-
 export function setHapticsEnabled(enabled: boolean) {
   hapticsEnabled = enabled;
-}
-
-export function getHapticsEnabled(): boolean {
-  return hapticsEnabled;
 }
 
 // Haptic feedback

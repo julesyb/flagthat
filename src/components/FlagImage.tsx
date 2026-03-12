@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, ActivityIndicator, useWindowDimensions } from 'react-native';
+import { StyleSheet, View, Text, ActivityIndicator, useWindowDimensions, StyleProp, ViewStyle } from 'react-native';
 import { Image } from 'expo-image';
 import { colors, fontFamily, fontSize, borderRadius } from '../utils/theme';
 
 interface FlagImageProps {
   countryCode: string;
   size?: 'small' | 'medium' | 'large' | 'hero';
-  emoji?: string;
-  style?: object;
+  style?: StyleProp<ViewStyle>;
   accessibilityLabel?: string;
 }
 
@@ -28,7 +27,7 @@ function getFlagUrl(code: string, width: number): string {
   return `https://flagcdn.com/w${nearestCdnWidth(width)}/${code.toLowerCase()}.png`;
 }
 
-export default function FlagImage({ countryCode, size = 'large', emoji, style, accessibilityLabel }: FlagImageProps) {
+export default function FlagImage({ countryCode, size = 'large', style, accessibilityLabel }: FlagImageProps) {
   const { width: screenWidth } = useWindowDimensions();
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
@@ -104,7 +103,7 @@ export default function FlagImage({ countryCode, size = 'large', emoji, style, a
   );
 }
 
-export function FlagImageSmall({ countryCode, emoji }: { countryCode: string; emoji: string }) {
+export function FlagImageSmall({ countryCode }: { countryCode: string }) {
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
 
@@ -168,7 +167,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: colors.surfaceSecondary,
     borderWidth: 1,
-    borderColor: colors.rule2,
+    borderColor: colors.ruleDark,
   },
   smallImage: {
     width: 56,

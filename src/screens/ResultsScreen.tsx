@@ -811,7 +811,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
               <Text style={[st.reviewIndex, result.correct ? st.reviewIndexCorrect : st.reviewIndexWrong]}>
                 {index + 1}
               </Text>
-              <FlagImageSmall countryCode={result.question.flag.id} emoji={result.question.flag.emoji} />
+              <FlagImageSmall countryCode={result.question.flag.id} />
               <View style={st.reviewContent}>
                 <Text style={st.reviewName}>{result.question.flag.name}</Text>
                 {!result.correct && result.userAnswer !== 'SKIPPED' && (

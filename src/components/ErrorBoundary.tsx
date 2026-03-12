@@ -1,6 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { colors, spacing, typography } from '../utils/theme';
+import { colors, spacing, typography, borderRadius } from '../utils/theme';
 import { t } from '../utils/i18n';
 
 interface Props {
@@ -72,6 +72,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.ink,
     paddingHorizontal: spacing.xl,
     paddingVertical: spacing.md,
+    borderRadius: borderRadius.lg,
   },
   buttonText: {
     ...typography.bodyBold,
