@@ -1206,26 +1206,26 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 4,
-    paddingVertical: 2,
+    gap: spacing.xs,
+    paddingVertical: spacing.xxs,
   },
   heatmapDayRow: {
     flexDirection: 'row',
-    gap: 4,
+    gap: spacing.xs,
   },
   heatmapDayLabel: {
     width: 14,
     textAlign: 'center',
+    ...typography.micro,
     fontFamily: fontFamily.uiLabel,
-    fontSize: 9,
     lineHeight: 14,
     color: colors.textTertiary,
   },
   heatmapGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 4,
-    width: 7 * 14 + 6 * 4,  // 7 cols * dotSize + 6 gaps
+    gap: spacing.xs,
+    width: 7 * 14 + 6 * spacing.xs,  // 7 cols * dotSize + 6 gaps
   },
   heatmapDot: {
     width: 14,
