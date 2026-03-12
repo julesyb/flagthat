@@ -195,6 +195,11 @@ export default function GameSetupScreen({ route, navigation }: Props) {
 
   const diffLabel = t(DIFFICULTIES.find((d) => d.key === difficulty)?.labelKey ?? 'common.medium');
   const modeLabel = t(SETUP_MODES.find((m) => m.key === setupMode)?.labelKey ?? 'setup.quiz');
+  const startButtonColor = showDifficulty
+    ? difficulty === 'easy' ? colors.diffEasy
+      : difficulty === 'hard' ? colors.diffHard
+      : colors.diffMedium
+    : undefined;
   const startButtonLabel = isQuiz
     ? t('setup.startQuiz', { difficulty: diffLabel })
     : showDifficulty
@@ -440,19 +445,20 @@ export default function GameSetupScreen({ route, navigation }: Props) {
 
       {/* Pinned start button */}
       <View style={styles.startButtonWrap}>
-        <TouchableOpacity
-          style={[
-            styles.startButton,
-            showDifficulty && difficulty === 'easy' && { backgroundColor: colors.diffEasy },
-            showDifficulty && difficulty === 'hard' && { backgroundColor: colors.diffHard },
-          ]}
-          onPress={startGame}
-          activeOpacity={0.8}
-          accessibilityRole="button"
-          accessibilityLabel={startButtonLabel}
-        >
-          <Text style={styles.startButtonText}>{startButtonLabel}</Text>
-        </TouchableOpacity>
+        <ScreenContainer>
+          <TouchableOpacity
+            style={[
+              styles.startButton,
+              startButtonColor != null && { backgroundColor: startButtonColor },
+            ]}
+            onPress={startGame}
+            activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityLabel={startButtonLabel}
+          >
+            <Text style={styles.startButtonText}>{startButtonLabel}</Text>
+          </TouchableOpacity>
+        </ScreenContainer>
       </View>
 
       <BottomNav activeTab="Modes" onNavigate={onNavigate} />
