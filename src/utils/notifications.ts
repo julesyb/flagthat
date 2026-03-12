@@ -3,6 +3,7 @@ import * as Notifications from 'expo-notifications';
 import { getSettings, saveSettings, getDayStreak } from './storage';
 import { colors } from './theme';
 import { t } from './i18n';
+import { MS_PER_DAY } from './config';
 
 // Channel for Android
 const DAILY_CHANNEL_ID = 'daily-challenge';
@@ -65,7 +66,7 @@ function pickMessage(streak: number): { title: string; body: string } {
   // Rotate through 5 messages based on day of year
   const now = new Date();
   const start = new Date(now.getFullYear(), 0, 1);
-  const dayOfYear = Math.floor((now.getTime() - start.getTime()) / 86400000);
+  const dayOfYear = Math.floor((now.getTime() - start.getTime()) / MS_PER_DAY);
   const idx = (dayOfYear % 5) + 1;
   return {
     title: t(`notification.title${idx}`),

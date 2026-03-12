@@ -2,7 +2,8 @@ import { GameMode, FlagItem, GameQuestion, GameResult, GameConfig } from '../typ
 import { getFlagsForCategory, getAllFlags } from '../data';
 import { countryAliases, twinPairs } from '../data/countryAliases';
 import { translateName } from '../data/countryNames';
-import { APP_DOMAIN } from './config';
+import { APP_DOMAIN, MS_PER_DAY, DAILY_QUESTION_COUNT, DAILY_CHALLENGE_EPOCH, SHARE_GRID_ROW_SIZE, EASY_CHOICE_COUNT, STANDARD_CHOICE_COUNT } from './config';
+import { t } from './i18n';
 
 export function shuffleArray<T>(array: T[]): T[] {
   const shuffled = [...array];
@@ -48,9 +49,9 @@ export function getTodayDateString(): string {
 }
 
 export function getDailyNumber(): number {
-  const start = new Date('2026-03-11T00:00:00Z').getTime();
+  const start = new Date(DAILY_CHALLENGE_EPOCH).getTime();
   const now = new Date(getTodayDateString() + 'T00:00:00Z').getTime();
-  return Math.floor((now - start) / 86400000) + 1;
+  return Math.floor((now - start) / MS_PER_DAY) + 1;
 }
 
 export function generateDailyQuestions(dateStr?: string): GameQuestion[] {
@@ -58,7 +59,7 @@ export function generateDailyQuestions(dateStr?: string): GameQuestion[] {
   const seed = dateSeed(date);
   const allFlags = getAllFlags();
   const shuffled = seededShuffle(allFlags, seed);
-  const selected = shuffled.slice(0, 10);
+  const selected = shuffled.slice(0, DAILY_QUESTION_COUNT);
 
   const rng = seededRandom(seed + 1000);
 
@@ -68,8 +69,8 @@ export function generateDailyQuestions(dateStr?: string): GameQuestion[] {
     const twins = otherFlags.filter((f) => twinNames.includes(f.name));
     const nonTwins = otherFlags.filter((f) => !twinNames.includes(f.name));
 
-    // Pick 3 wrong answers, prioritizing twins
-    const wrongCount = 3;
+    // Pick wrong answers, prioritizing twins
+    const wrongCount = STANDARD_CHOICE_COUNT - 1;
     const seededShuffleTwins = [...twins].sort(() => rng() - 0.5);
     const selectedTwins = seededShuffleTwins.slice(0, wrongCount);
     const remaining = wrongCount - selectedTwins.length;
@@ -90,24 +91,23 @@ export function generateDailyShareGrid(results: GameResult[]): string {
   const correct = results.filter((r) => r.correct).length;
   const grid = results.map((r) => (r.correct ? '\u2b1b' : '\u2b1c')).join('');
   // Split into rows of 5
-  const row1 = grid.slice(0, 5);
-  const row2 = grid.slice(5, 10);
-  return `Flag That #${dailyNum}\n${correct}/10\n\n${row1}\n${row2}\n\n${APP_DOMAIN}`;
+  const row1 = grid.slice(0, SHARE_GRID_ROW_SIZE);
+  const row2 = grid.slice(SHARE_GRID_ROW_SIZE, DAILY_QUESTION_COUNT);
+  return `Flag That #${dailyNum}\n${correct}/${DAILY_QUESTION_COUNT}\n\n${row1}\n${row2}\n\n${APP_DOMAIN}`;
 }
 
 export function generateShareGrid(results: GameResult[], modeLabel: string, categoryLabel: string): string {
   const correct = results.filter((r) => r.correct).length;
   const accuracy = calculateAccuracy(results);
-  const grade = getGrade(accuracy);
   const grid = results.map((r) => (r.correct ? '\u2b1b' : '\u2b1c')).join('');
   // Split into rows of 5
   const rows: string[] = [];
-  for (let i = 0; i < grid.length; i += 5) {
-    rows.push(grid.slice(i, i + 5));
+  for (let i = 0; i < grid.length; i += SHARE_GRID_ROW_SIZE) {
+    rows.push(grid.slice(i, i + SHARE_GRID_ROW_SIZE));
   }
   const gridStr = rows.join('\n');
-  const perfectLine = accuracy === 100 ? '\nPERFECT SCORE!' : '';
-  return `Flag That - ${modeLabel}\n${correct}/${results.length} (${grade.label})${perfectLine}\n\n${gridStr}\n\n${APP_DOMAIN}`;
+  const perfectLine = accuracy === 100 ? `\n${t('results.perfectShareNote')}` : '';
+  return `Flag That - ${modeLabel}\n${correct}/${results.length} (${accuracy}%)${perfectLine}\n\n${gridStr}\n\n${APP_DOMAIN}`;
 }
 
 export function generateQuestions(config: GameConfig): GameQuestion[] {
@@ -145,7 +145,7 @@ function generateOptions(correctFlag: FlagItem, pool: FlagItem[], mode: GameMode
   const effectiveDifficulty = difficulty || (mode === 'easy' ? 'easy' : mode === 'hard' ? 'hard' : 'medium');
   if (effectiveDifficulty === 'hard' || mode === 'flashflag' || mode === 'flagpuzzle') return [];
 
-  const choiceCount = effectiveDifficulty === 'easy' ? 2 : 4;
+  const choiceCount = effectiveDifficulty === 'easy' ? EASY_CHOICE_COUNT : STANDARD_CHOICE_COUNT;
   const otherFlags = pool.filter((f) => f.id !== correctFlag.id);
 
   // Prioritize twin flags as wrong options so look-alikes appear together
@@ -220,14 +220,3 @@ export function getStreakFromResults(results: GameResult[]): number {
   return maxStreak;
 }
 
-export type GradeKey = 'gradeS' | 'gradeA' | 'gradeB' | 'gradeC' | 'gradeD' | 'gradeF';
-
-export function getGrade(accuracy: number): { label: string; colorKey: GradeKey } {
-  if (accuracy >= 95) return { label: 'S', colorKey: 'gradeS' };
-  if (accuracy >= 90) return { label: 'A+', colorKey: 'gradeA' };
-  if (accuracy >= 80) return { label: 'A', colorKey: 'gradeA' };
-  if (accuracy >= 70) return { label: 'B', colorKey: 'gradeB' };
-  if (accuracy >= 60) return { label: 'C', colorKey: 'gradeC' };
-  if (accuracy >= 50) return { label: 'D', colorKey: 'gradeD' };
-  return { label: 'F', colorKey: 'gradeF' };
-}

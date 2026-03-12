@@ -1,6 +1,6 @@
-import type en from './en';
+import { DeepPartial, TranslationStrings } from './types';
 
-const zh: typeof en = {
+const zh: DeepPartial<TranslationStrings> = {
   common: {
     loading: '\u52a0\u8f7d\u4e2d...',
     correct: '\u6b63\u786e\uff01',
@@ -22,6 +22,10 @@ const zh: typeof en = {
     new: '\u65b0',
     review: '\u56de\u987e',
     seeResults: '\u67e5\u770b\u7ed3\u679c',
+    flagOf: '{country}\u7684\u65d7\u5e1c',
+    vs: 'vs',
+    flags: '\u65d7\u5e1c',
+    perFlag: '\u6bcf\u9762\u65d7',
   },
 
   nav: {
@@ -402,6 +406,7 @@ const zh: typeof en = {
     previewTimeLimit: '{seconds}\u79d2/\u9762\u56fd\u65d7',
     previewValid: '\u6709\u6548\u4ee3\u7801',
     previewHostScore: '{name} \u7b54\u5bf9\u4e86 {correct}/{total}',
+    beatName: '\u51fb\u8d25 {name}',
     challengeBack: '\u53cd\u51fb\u6311\u6218',
     challengeBackDesc: '\u73a9\u4e00\u5c40\u65b0\u7684\u5e76\u53d1\u56de\u53bb',
     recentChallenges: 'Recent Challenges',

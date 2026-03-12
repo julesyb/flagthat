@@ -2,7 +2,8 @@ import { getAllFlags } from '../data';
 import { FlagItem, GameQuestion, GameMode } from '../types';
 import { shuffleArray } from './gameEngine';
 import { twinPairs } from '../data/countryAliases';
-import { APP_DOMAIN } from './config';
+import { APP_DOMAIN, MAX_CHALLENGE_FLAGS, MAX_CHALLENGE_NAME_LENGTH, MAX_HOSTNAME_LENGTH, SHORT_CODE_LENGTH, SPEED_FAST_MS, SPEED_MEDIUM_MS, SHARE_GRID_ROW_SIZE, EASY_CHOICE_COUNT, STANDARD_CHOICE_COUNT } from './config';
+import { t } from './i18n';
 
 /** Modes that support the challenge feature */
 export const CHALLENGE_MODES: GameMode[] = [
@@ -33,7 +34,7 @@ const INDEX_MODE = new Map(CHALLENGE_MODES.map((m, i) => [i, m]));
 
 /** Sanitize name for URL: keep alphanumeric + underscore, replace spaces */
 function sanitizeName(name: string): string {
-  return name.replace(/\s+/g, '_').replace(/[^A-Za-z0-9_]/g, '').slice(0, 15) || 'Player';
+  return name.replace(/\s+/g, '_').replace(/[^A-Za-z0-9_]/g, '').slice(0, MAX_CHALLENGE_NAME_LENGTH) || 'Player';
 }
 
 /**
@@ -41,7 +42,7 @@ function sanitizeName(name: string): string {
  * No base64 - the output goes directly into the URL path.
  */
 export function encodeChallenge(data: ChallengeData): string | null {
-  if (data.flagIds.length > 30) return null; // bit-packing limit
+  if (data.flagIds.length > MAX_CHALLENGE_FLAGS) return null; // bit-packing limit
   if (data.hostResults.length !== data.flagIds.length) return null;
   if (data.flagIds.some((id) => id.length !== 2)) return null;
   const modeIdx = MODE_INDEX.get(data.mode);
@@ -114,7 +115,7 @@ function decodeV3Raw(raw: string): ChallengeData | null {
   if (parts.length < 6 || parts.length > 7) return null;
 
   const [hostName, modeIdxStr, timeLimitStr, flags, correctHex, totalDeciStr, diffIdxStr] = parts;
-  if (!hostName || hostName.length > 50 || flags.length === 0 || flags.length % 2 !== 0 || flags.length > 60) return null;
+  if (!hostName || hostName.length > MAX_HOSTNAME_LENGTH || flags.length === 0 || flags.length % 2 !== 0 || flags.length > MAX_CHALLENGE_FLAGS * 2) return null;
 
   const modeIdx = parseInt(modeIdxStr, 10);
   const mode = INDEX_MODE.get(modeIdx);
@@ -156,7 +157,7 @@ function decodeV3Base64(encoded: string): ChallengeData | null {
   if (parts.length !== 5) return null;
 
   const [hostName, modeIdxStr, timeLimitStr, flags, packed] = parts;
-  if (!hostName || hostName.length > 50 || flags.length === 0 || flags.length % 2 !== 0) return null;
+  if (!hostName || hostName.length > MAX_HOSTNAME_LENGTH || flags.length === 0 || flags.length % 2 !== 0) return null;
 
   const modeIdx = parseInt(modeIdxStr, 10);
   const mode = INDEX_MODE.get(modeIdx);
@@ -187,7 +188,7 @@ function decodeV2(encoded: string): ChallengeData | null {
   if (parts.length !== 6) return null;
 
   const [hostName, modeIdxStr, timeLimitStr, flags, bits, timesStr] = parts;
-  if (!hostName || hostName.length > 50 || flags.length === 0 || flags.length % 2 !== 0) return null;
+  if (!hostName || hostName.length > MAX_HOSTNAME_LENGTH || flags.length === 0 || flags.length % 2 !== 0) return null;
 
   const modeIdx = parseInt(modeIdxStr, 10);
   const mode = INDEX_MODE.get(modeIdx);
@@ -263,7 +264,7 @@ export function buildChallengeQuestions(flagIds: string[], mode: GameMode, diffi
     const needsOptions = !isHardMode && (mode === 'easy' || mode === 'medium' || mode === 'timeattack');
     let options: string[] = [];
     if (needsOptions) {
-      const choiceCount = effectiveDifficulty === 'easy' ? 2 : 4;
+      const choiceCount = effectiveDifficulty === 'easy' ? EASY_CHOICE_COUNT : STANDARD_CHOICE_COUNT;
       const otherFlags = allFlags.filter((f) => f.id !== flag.id);
       const twinNames = twinPairs[flag.name] || [];
       const twinFlags = otherFlags.filter((f) => twinNames.includes(f.name));
@@ -308,11 +309,53 @@ export function generateShortCode(data: ChallengeData): string {
   const seed = `${data.hostName}|${data.mode}|${data.flagIds.join('')}|${data.hostResults.map((r) => r.correct ? '1' : '0').join('')}`;
   let hash = simpleHash(seed);
   let code = '';
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < SHORT_CODE_LENGTH; i++) {
     code += CODE_CHARS[hash % CODE_CHARS.length];
     hash = simpleHash(code + seed.slice(i));
   }
   return code;
+}
+
+/**
+ * Generate a Wordle-style challenge share card.
+ * Shows a visual grid of results with speed indicators,
+ * the host's score, and a deep link to play.
+ */
+export function generateChallengeShareCard(
+  results: { correct: boolean; timeMs: number }[],
+  hostName: string,
+  mode: GameMode,
+  challengeUrl: string,
+): string {
+  const correct = results.filter((r) => r.correct).length;
+  const total = results.length;
+
+  // Build visual grid: correct with speed tiers, wrong = red
+  // Fast (<2s) = gold, Medium (<5s) = green, Slow (5s+) = white, Wrong = red
+  const grid = results.map((r) => {
+    if (!r.correct) return '\uD83D\uDFE5'; // red square
+    if (r.timeMs < SPEED_FAST_MS) return '\uD83D\uDFE8'; // yellow square (lightning fast)
+    if (r.timeMs < SPEED_MEDIUM_MS) return '\uD83D\uDFE9'; // green square (solid)
+    return '\u2B1C'; // white square (slow but correct)
+  });
+
+  // Split into rows of 5
+  const rows: string[] = [];
+  for (let i = 0; i < grid.length; i += SHARE_GRID_ROW_SIZE) {
+    rows.push(grid.slice(i, i + SHARE_GRID_ROW_SIZE).join(''));
+  }
+  const gridStr = rows.join('\n');
+
+  const avgTime = results.length > 0
+    ? Math.round(results.reduce((s, r) => s + r.timeMs, 0) / results.length / 100) / 10
+    : 0;
+
+  const modeLabel = t(`modes.${mode}`);
+  const header = t('challenge.shareCardHeader', { mode: modeLabel, correct, total });
+  const avg = t('challenge.shareCardAvg', { time: avgTime });
+  const cta = t('challenge.shareCardCta', { name: hostName });
+
+  return `${header}\n${avg}\n\n${gridStr}\n\n${cta}\n${challengeUrl}`;
 }
 
 // ── Base64 helpers (for legacy V1/V2 decoding only) ──

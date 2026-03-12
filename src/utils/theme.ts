@@ -119,13 +119,8 @@ function buildColors(p: typeof darkPalette, isDark: boolean) {
     inkAlpha10: dk ? 'rgba(238, 233, 226, 0.10)' : 'rgba(26, 24, 32, 0.08)',
     playText: p.playText,
 
-    // Grade colors
-    gradeS: raw.goldBright,
-    gradeA: dk ? raw.greenBright : raw.green,
-    gradeB: raw.blue,
-    gradeC: p.muted,
-    gradeD: dk ? raw.redLight : raw.red,
-    gradeF: p.ink,
+    // Rank colors
+    rankGold: raw.goldBright,
 
     // Difficulty colors
     diffEasy: dk ? raw.greenBright : raw.green,
@@ -249,7 +244,7 @@ export const fontSize = {
   body: 16,       // body text, labels, options, card titles
   lg: 20,         // buttons, section titles, headings, stat values
   title: 28,      // page titles, wordmark, large headings
-  display: 42,    // gameplay titles (Flash Flag), grade letters, large stat numbers
+  display: 42,    // gameplay titles (Flash Flag), large stat numbers
   hero: 72,       // hero display numbers, countdown feedback
   countdown: 120, // full-screen countdown numbers
 };

@@ -380,7 +380,7 @@ export default function FlashFlagScreen({ route, navigation }: Props) {
           activeOpacity={0.8}
           accessibilityRole="button"
           accessibilityLabel={t('flashFlag.ready')}
-          accessibilityHint="Starts the Flash Flag game"
+          accessibilityHint={t('a11y.startsFlashFlag')}
         >
           <Text style={styles.readyButtonText}>{t('flashFlag.ready')}</Text>
         </TouchableOpacity>
@@ -487,7 +487,7 @@ export default function FlashFlagScreen({ route, navigation }: Props) {
             activeOpacity={0.7}
             accessibilityRole="button"
             accessibilityLabel={t('flashFlag.correctButton')}
-            accessibilityHint="Mark the current flag as correctly guessed"
+            accessibilityHint={t('a11y.markCorrect')}
           >
             <Text style={styles.webButtonText}>{t('flashFlag.correctButton')}</Text>
           </TouchableOpacity>
@@ -497,7 +497,7 @@ export default function FlashFlagScreen({ route, navigation }: Props) {
             activeOpacity={0.7}
             accessibilityRole="button"
             accessibilityLabel={t('flashFlag.skipButton')}
-            accessibilityHint="Skip the current flag"
+            accessibilityHint={t('a11y.skipFlag')}
           >
             <Text style={styles.webButtonText}>{t('flashFlag.skipButton')}</Text>
           </TouchableOpacity>
@@ -517,7 +517,7 @@ export default function FlashFlagScreen({ route, navigation }: Props) {
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           accessibilityRole="button"
           accessibilityLabel={t('common.exit')}
-          accessibilityHint="Ends the game and shows results"
+          accessibilityHint={t('a11y.endsGame')}
         >
           <CrossIcon size={18} color={isNeutral ? colors.whiteAlpha70 : colors.white} />
         </TouchableOpacity>

@@ -1,6 +1,6 @@
-import type en from './en';
+import { DeepPartial, TranslationStrings } from './types';
 
-const ptBR: typeof en = {
+const ptBR: DeepPartial<TranslationStrings> = {
   common: {
     loading: 'Carregando...',
     correct: 'Correto!',
@@ -22,6 +22,10 @@ const ptBR: typeof en = {
     new: 'Novo',
     review: 'Revisar',
     seeResults: 'Ver resultados',
+    flagOf: 'Bandeira de {country}',
+    vs: 'vs',
+    flags: 'Bandeiras',
+    perFlag: 'Por bandeira',
   },
 
   nav: {
@@ -402,6 +406,7 @@ const ptBR: typeof en = {
     previewTimeLimit: '{seconds}s por bandeira',
     previewValid: 'C\u00f3digo v\u00e1lido',
     previewHostScore: '{name} acertou {correct}/{total}',
+    beatName: 'Vencer {name}',
     challengeBack: 'Contra-desafio',
     challengeBackDesc: 'Jogue uma nova rodada e envie de volta',
     recentChallenges: 'Desafios recentes',

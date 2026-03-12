@@ -3,6 +3,7 @@ import { StyleSheet, View, Text, TouchableOpacity, ScrollView, useWindowDimensio
 import { Image } from 'expo-image';
 import { fontFamily, fontSize, borderRadius, shadows, ThemeColors } from '../utils/theme';
 import { useTheme } from '../contexts/ThemeContext';
+import { t } from '../utils/i18n';
 import { countryCoordinates } from '../data/countryCoordinates';
 
 interface MapImageProps {
@@ -235,7 +236,7 @@ export default function MapImage({ countryCode, size = 'hero', style }: MapImage
           disabled={zoom >= MAX_ZOOM}
           activeOpacity={0.7}
           accessibilityRole="button"
-          accessibilityLabel="Zoom in"
+          accessibilityLabel={t('a11y.zoomIn')}
           accessibilityState={{ disabled: zoom >= MAX_ZOOM }}
         >
           <Text style={[styles.zoomText, zoom >= MAX_ZOOM && styles.zoomTextDisabled]}>+</Text>
@@ -246,7 +247,7 @@ export default function MapImage({ countryCode, size = 'hero', style }: MapImage
           disabled={zoom <= 1}
           activeOpacity={0.7}
           accessibilityRole="button"
-          accessibilityLabel="Zoom out"
+          accessibilityLabel={t('a11y.zoomOut')}
           accessibilityState={{ disabled: zoom <= 1 }}
         >
           <Text style={[styles.zoomText, zoom <= 1 && styles.zoomTextDisabled]}>-</Text>

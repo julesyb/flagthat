@@ -1,6 +1,6 @@
-import type en from './en';
+import { DeepPartial, TranslationStrings } from './types';
 
-const de: typeof en = {
+const de: DeepPartial<TranslationStrings> = {
   common: {
     loading: 'Laden...',
     correct: 'Richtig!',
@@ -22,6 +22,10 @@ const de: typeof en = {
     new: 'Neu',
     review: '\u00dcberpr\u00fcfen',
     seeResults: 'Ergebnisse ansehen',
+    flagOf: 'Flagge von {country}',
+    vs: 'vs',
+    flags: 'Flaggen',
+    perFlag: 'Pro Flagge',
   },
 
   nav: {
@@ -403,6 +407,7 @@ const de: typeof en = {
     previewTimeLimit: '{seconds}s pro Flagge',
     previewValid: 'G\u00fcltiger Code',
     previewHostScore: '{name} hat {correct}/{total} richtig',
+    beatName: '{name} schlagen',
     challengeBack: 'Zur\u00fcckfordern',
     challengeBackDesc: 'Spiel eine neue Runde und sende sie zur\u00fcck',
     recentChallenges: 'Letzte Herausforderungen',

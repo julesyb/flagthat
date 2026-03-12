@@ -6,6 +6,10 @@ import es from '../locales/es';
 import de from '../locales/de';
 import ptBR from '../locales/pt-BR';
 import zh from '../locales/zh';
+import type { TranslationStrings, DeepPartial } from '../locales/types';
+
+// Re-export for any existing consumers
+export type { TranslationStrings, DeepPartial };
 
 export type LocaleCode = 'en' | 'fr' | 'es' | 'de' | 'pt-BR' | 'zh';
 
@@ -24,15 +28,27 @@ export const SUPPORTED_LOCALES: LocaleInfo[] = [
   { code: 'zh', name: '\u4e2d\u6587', englishName: 'Chinese' },
 ];
 
-export type TranslationStrings = typeof en;
+/** Deep-merge a partial locale over the English base so every key is guaranteed present */
+function deepMerge(base: TranslationStrings, partial: DeepPartial<TranslationStrings>): TranslationStrings {
+  const result = { ...base } as Record<string, unknown>;
+  for (const key of Object.keys(partial)) {
+    const val = (partial as Record<string, unknown>)[key];
+    if (val && typeof val === 'object' && !Array.isArray(val) && typeof (base as Record<string, unknown>)[key] === 'object') {
+      result[key] = deepMerge((base as Record<string, Record<string, unknown>>)[key] as TranslationStrings, val as DeepPartial<TranslationStrings>);
+    } else if (val !== undefined) {
+      result[key] = val;
+    }
+  }
+  return result as TranslationStrings;
+}
 
 const translations: Record<LocaleCode, TranslationStrings> = {
   en,
-  fr,
-  es,
-  de,
-  'pt-BR': ptBR,
-  zh,
+  fr: deepMerge(en, fr),
+  es: deepMerge(en, es),
+  de: deepMerge(en, de),
+  'pt-BR': deepMerge(en, ptBR),
+  zh: deepMerge(en, zh),
 };
 
 // Current active locale

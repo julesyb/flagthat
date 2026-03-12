@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -10,20 +10,36 @@ import {
   Keyboard,
   Alert,
   Platform,
+  Animated,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { spacing, fontFamily, fontSize, buildButtons, borderRadius, typography, ThemeColors } from '../utils/theme';
 import { useTheme } from '../contexts/ThemeContext';
 import { RootStackParamList } from '../types/navigation';
 import { decodeChallenge, buildChallengeQuestions, getScreenForMode, ChallengeData, ChallengeScreenName } from '../utils/challengeCode';
-import { hapticTap, hapticWrong } from '../utils/feedback';
+import { hapticTap, hapticWrong, hapticCorrect } from '../utils/feedback';
 import ScreenContainer from '../components/ScreenContainer';
 import BottomNav from '../components/BottomNav';
 import { useNavTabs } from '../hooks/useNavTabs';
 import { t } from '../utils/i18n';
 import { getChallengeName, saveChallengeName } from '../utils/storage';
+import { LinkIcon, PlayIcon } from '../components/Icons';
+import { GameMode } from '../types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'JoinChallenge'>;
+
+function getModeLabel(mode: GameMode): string {
+  const labels: Partial<Record<GameMode, string>> = {
+    easy: t('common.easy'),
+    medium: t('common.medium'),
+    hard: t('common.hard'),
+    timeattack: t('home.timedQuiz'),
+    flagpuzzle: t('setup.flagPuzzle'),
+    neighbors: t('setup.neighbors'),
+    capitalconnection: t('setup.capitalConnection'),
+  };
+  return labels[mode] || mode;
+}
 
 export default function JoinChallengeScreen({ route, navigation }: Props) {
   const { colors } = useTheme();
@@ -32,6 +48,11 @@ export default function JoinChallengeScreen({ route, navigation }: Props) {
   const initialCode = route.params?.code ?? '';
   const [code, setCode] = useState(initialCode);
   const [name, setName] = useState('');
+
+  // Animations
+  const cardSlide = useRef(new Animated.Value(0)).current;
+  const cardOpacity = useRef(new Animated.Value(0)).current;
+  const ctaScale = useRef(new Animated.Value(0.95)).current;
 
   useEffect(() => {
     getChallengeName().then((saved) => {
@@ -47,6 +68,24 @@ export default function JoinChallengeScreen({ route, navigation }: Props) {
 
   const preview: ChallengeData | null = decoded?.status === 'ok' ? decoded.data : null;
   const canPlay = decoded?.status === 'ok' && name.trim().length > 0;
+
+  // Animate challenge card in when preview becomes available
+  useEffect(() => {
+    if (preview) {
+      hapticCorrect();
+      cardSlide.setValue(20);
+      cardOpacity.setValue(0);
+      ctaScale.setValue(0.95);
+      Animated.parallel([
+        Animated.spring(cardSlide, { toValue: 0, useNativeDriver: true, tension: 80, friction: 10 }),
+        Animated.timing(cardOpacity, { toValue: 1, duration: 300, useNativeDriver: true }),
+        Animated.sequence([
+          Animated.delay(400),
+          Animated.spring(ctaScale, { toValue: 1, useNativeDriver: true, tension: 120, friction: 8 }),
+        ]),
+      ]).start();
+    }
+  }, [preview !== null]);
 
   const showError = (msg: string) => {
     hapticWrong();
@@ -81,7 +120,7 @@ export default function JoinChallengeScreen({ route, navigation }: Props) {
     saveChallengeName(name.trim());
 
     const screen: ChallengeScreenName = getScreenForMode(challenge.mode);
-    const params = {
+    const gameParams = {
       config: {
         mode: challenge.mode,
         category: 'all' as const,
@@ -93,7 +132,7 @@ export default function JoinChallengeScreen({ route, navigation }: Props) {
       playerName: name.trim(),
     };
 
-    (navigation.replace as (screen: string, params: typeof params) => void)(screen, params);
+    (navigation.replace as (screen: string, params: typeof gameParams) => void)(screen, gameParams);
   };
 
   const hostScore = preview
@@ -108,71 +147,132 @@ export default function JoinChallengeScreen({ route, navigation }: Props) {
         showsVerticalScrollIndicator={false}
       >
         <ScreenContainer>
-          {/* Challenge headline when code is valid */}
-          {preview ? (
-            <View style={styles.headline}>
-              <Text style={styles.headlineScore}>{hostScore}/{preview.flagIds.length}</Text>
-              <Text style={styles.headlineSub}>
-                {t('challenge.previewHostScore', { name: preview.hostName, correct: hostScore, total: preview.flagIds.length })}
-              </Text>
+          {/* ── EMPTY STATE: No code entered ── */}
+          {!preview && (
+            <View style={styles.emptyState}>
+              <View style={styles.iconCircle}>
+                <LinkIcon size={28} color={colors.goldBright} />
+              </View>
+              <Text style={styles.title}>{t('challenge.joinTitle')}</Text>
+              <Text style={styles.subtitle}>{t('challenge.joinSubtitle')}</Text>
+
+              <TextInput
+                style={styles.codeInput}
+                value={code}
+                onChangeText={setCode}
+                placeholder={t('challenge.codePlaceholder')}
+                placeholderTextColor={colors.textTertiary}
+                autoCapitalize="none"
+                autoCorrect={false}
+                returnKeyType="next"
+                multiline={false}
+                accessibilityLabel={t('challenge.codePlaceholder')}
+              />
+
+              {code.trim().length > 0 && decoded?.status === 'invalid' && (
+                <Text style={styles.error}>{t('challenge.invalidCode')}</Text>
+              )}
+              {decoded?.status === 'unsupported' && (
+                <Text style={styles.error}>{t('challenge.unsupportedCode')}</Text>
+              )}
+
+              <Text style={styles.hint}>{t('challenge.codeHint')}</Text>
             </View>
-          ) : (
-            <Text style={styles.title}>{t('challenge.joinTitle')}</Text>
           )}
 
-          {/* Code input - only show if no code pre-filled */}
-          {!initialCode && (
-            <TextInput
-              style={styles.input}
-              value={code}
-              onChangeText={setCode}
-              placeholder={t('challenge.codePlaceholder')}
-              placeholderTextColor={colors.textTertiary}
-              autoCapitalize="none"
-              autoCorrect={false}
-              returnKeyType="next"
-              accessibilityLabel={t('challenge.codePlaceholder')}
-            />
+          {/* ── CHALLENGE CARD: Code is valid ── */}
+          {preview && (
+            <Animated.View style={[
+              styles.challengeCard,
+              { opacity: cardOpacity, transform: [{ translateY: cardSlide }] },
+            ]}>
+              {/* Eyebrow */}
+              <Text style={styles.challengeEyebrow}>{t('challenge.headToHead').toUpperCase()}</Text>
+
+              {/* Opponent score hero */}
+              <View style={styles.opponentHero}>
+                <Text style={styles.opponentName}>{preview.hostName}</Text>
+                <Text style={styles.opponentScore}>{hostScore}/{preview.flagIds.length}</Text>
+              </View>
+
+              {/* Divider with "vs" */}
+              <View style={styles.vsDivider}>
+                <View style={styles.vsLine} />
+                <Text style={styles.vsText}>VS</Text>
+                <View style={styles.vsLine} />
+              </View>
+
+              {/* Challenge details */}
+              <View style={styles.detailRow}>
+                <View style={styles.detailItem}>
+                  <Text style={styles.detailValue}>{getModeLabel(preview.mode)}</Text>
+                  <Text style={styles.detailLabel}>{t('challenge.previewMode')}</Text>
+                </View>
+                <View style={styles.detailDivider} />
+                <View style={styles.detailItem}>
+                  <Text style={styles.detailValue}>{preview.flagIds.length}</Text>
+                  <Text style={styles.detailLabel}>{t('common.flags')}</Text>
+                </View>
+                <View style={styles.detailDivider} />
+                <View style={styles.detailItem}>
+                  <Text style={styles.detailValue}>{preview.timeLimit}s</Text>
+                  <Text style={styles.detailLabel}>{t('common.perFlag')}</Text>
+                </View>
+              </View>
+
+              {/* Host result dots */}
+              <View style={styles.dotRow}>
+                {preview.hostResults.map((r, i) => (
+                  <View
+                    key={i}
+                    style={[styles.dot, r.correct ? styles.dotCorrect : styles.dotWrong]}
+                  />
+                ))}
+              </View>
+            </Animated.View>
           )}
 
-          {/* Name input */}
-          <TextInput
-            style={styles.input}
-            value={name}
-            onChangeText={setName}
-            placeholder={t('challenge.namePlaceholder')}
-            placeholderTextColor={colors.textTertiary}
-            autoCapitalize="words"
-            autoCorrect={false}
-            maxLength={20}
-            autoFocus={!!initialCode}
-            returnKeyType="done"
-            onSubmitEditing={canPlay ? handlePlay : undefined}
-            accessibilityLabel={t('challenge.namePlaceholder')}
-          />
-
-          {/* Error state */}
-          {code.trim().length > 0 && decoded?.status === 'invalid' && (
-            <Text style={styles.error}>{t('challenge.invalidCode')}</Text>
-          )}
-          {decoded?.status === 'unsupported' && (
-            <Text style={styles.error}>{t('challenge.unsupportedCode')}</Text>
+          {/* ── NAME INPUT (always visible when challenge loaded) ── */}
+          {preview && (
+            <Animated.View style={{ opacity: cardOpacity }}>
+              <Text style={styles.nameLabel}>{t('challenge.enterName')}</Text>
+              <TextInput
+                style={styles.nameInput}
+                value={name}
+                onChangeText={setName}
+                placeholder={t('challenge.namePlaceholder')}
+                placeholderTextColor={colors.textTertiary}
+                autoCapitalize="words"
+                autoCorrect={false}
+                maxLength={20}
+                autoFocus={!!initialCode}
+                returnKeyType="done"
+                onSubmitEditing={canPlay ? handlePlay : undefined}
+                accessibilityLabel={t('challenge.namePlaceholder')}
+              />
+            </Animated.View>
           )}
 
-          <TouchableOpacity
-            style={[styles.playButton, !canPlay && styles.playButtonDisabled]}
-            onPress={handlePlay}
-            disabled={!canPlay}
-            activeOpacity={0.7}
-            accessibilityRole="button"
-            accessibilityLabel={t('challenge.play')}
-            accessibilityState={{ disabled: !canPlay }}
-          >
-            <Text style={styles.playButtonText}>{t('challenge.play')}</Text>
-          </TouchableOpacity>
+          {/* ── PLAY CTA ── */}
+          {preview && (
+            <Animated.View style={{ opacity: cardOpacity, transform: [{ scale: ctaScale }] }}>
+              <TouchableOpacity
+                style={[styles.playButton, !canPlay && styles.playButtonDisabled]}
+                onPress={handlePlay}
+                disabled={!canPlay}
+                activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel={t('a11y.acceptChallenge', { name: preview.hostName })}
+                accessibilityState={{ disabled: !canPlay }}
+              >
+                <PlayIcon size={16} color={colors.playText} />
+                <Text style={styles.playButtonText}>{t('challenge.beatName', { name: preview.hostName })}</Text>
+              </TouchableOpacity>
+            </Animated.View>
+          )}
         </ScreenContainer>
       </ScrollView>
-      <BottomNav activeTab="Play" onNavigate={onNavigate} />
+      <BottomNav activeTab="Modes" onNavigate={onNavigate} />
     </SafeAreaView>
   );
 }
@@ -186,31 +286,38 @@ const createStyles = (colors: ThemeColors) => {
   },
   content: {
     padding: spacing.lg,
-    paddingTop: spacing.xxl,
+    paddingTop: spacing.xl,
+  },
+
+  // ── Empty state
+  emptyState: {
+    alignItems: 'center',
+    paddingTop: spacing.xl,
+  },
+  iconCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: colors.goldBright + '18',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.lg,
   },
   title: {
     ...typography.title,
     color: colors.ink,
     textAlign: 'center',
-    marginBottom: spacing.lg,
+    marginBottom: spacing.sm,
   },
-  headline: {
-    alignItems: 'center',
-    marginBottom: spacing.xl,
-  },
-  headlineScore: {
-    fontFamily: fontFamily.display,
-    fontSize: fontSize.countdown,
-    color: colors.ink,
-    letterSpacing: -2,
-    lineHeight: 80,
-  },
-  headlineSub: {
+  subtitle: {
     ...typography.body,
     color: colors.textSecondary,
-    marginTop: spacing.xs,
+    textAlign: 'center',
+    marginBottom: spacing.xl,
+    paddingHorizontal: spacing.md,
   },
-  input: {
+  codeInput: {
+    width: '100%',
     backgroundColor: colors.surface,
     borderWidth: 2,
     borderColor: colors.border,
@@ -218,16 +325,146 @@ const createStyles = (colors: ThemeColors) => {
     padding: spacing.md,
     ...typography.body,
     color: colors.text,
-    marginBottom: spacing.sm,
+    textAlign: 'center',
   },
   error: {
     ...typography.micro,
     color: colors.error,
-    marginBottom: spacing.sm,
+    marginTop: spacing.sm,
+    textAlign: 'center',
   },
+  hint: {
+    ...typography.micro,
+    color: colors.textTertiary,
+    marginTop: spacing.md,
+    textAlign: 'center',
+  },
+
+  // ── Challenge card
+  challengeCard: {
+    backgroundColor: colors.surface,
+    borderWidth: 2,
+    borderColor: colors.goldBright + '40',
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
+    marginBottom: spacing.lg,
+  },
+  challengeEyebrow: {
+    fontFamily: fontFamily.uiLabel,
+    fontSize: fontSize.xs,
+    letterSpacing: 2,
+    color: colors.goldBright,
+    textAlign: 'center',
+    marginBottom: spacing.md,
+  },
+  opponentHero: {
+    alignItems: 'center',
+    marginBottom: spacing.md,
+  },
+  opponentName: {
+    fontFamily: fontFamily.bodyBold,
+    fontSize: fontSize.lg,
+    color: colors.ink,
+    marginBottom: spacing.xs,
+  },
+  opponentScore: {
+    fontFamily: fontFamily.display,
+    fontSize: fontSize.hero,
+    color: colors.ink,
+    letterSpacing: -2,
+    lineHeight: 80,
+  },
+  // ── VS divider
+  vsDivider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: spacing.md,
+  },
+  vsLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: colors.border,
+  },
+  vsText: {
+    fontFamily: fontFamily.uiLabel,
+    fontSize: fontSize.xs,
+    letterSpacing: 2,
+    color: colors.textTertiary,
+    marginHorizontal: spacing.md,
+  },
+
+  // ── Challenge details
+  detailRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.md,
+  },
+  detailItem: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  detailValue: {
+    fontFamily: fontFamily.bodyBold,
+    fontSize: fontSize.sm,
+    color: colors.ink,
+    marginBottom: 2,
+  },
+  detailLabel: {
+    ...typography.micro,
+    color: colors.textTertiary,
+  },
+  detailDivider: {
+    width: 1,
+    height: 28,
+    backgroundColor: colors.border,
+  },
+
+  // ── Dot row (host results preview)
+  dotRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+    gap: 4,
+    marginTop: spacing.sm,
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  dotCorrect: {
+    backgroundColor: colors.success,
+  },
+  dotWrong: {
+    backgroundColor: colors.error,
+  },
+
+  // ── Name input
+  nameLabel: {
+    ...typography.microMedium,
+    color: colors.textSecondary,
+    marginBottom: spacing.xs,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  nameInput: {
+    backgroundColor: colors.surface,
+    borderWidth: 2,
+    borderColor: colors.border,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+    ...typography.body,
+    color: colors.text,
+    marginBottom: spacing.md,
+  },
+
+  // ── Play button
   playButton: {
     ...btn.primary,
-    marginTop: spacing.md,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: spacing.sm,
   },
   playButtonDisabled: {
     backgroundColor: colors.textTertiary,

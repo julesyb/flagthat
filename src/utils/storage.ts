@@ -1,5 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { UserStats, GameMode, CategoryId, GameResult, BaselineRegionId } from '../types';
+import { MS_PER_DAY, MASTERED_STREAK, MAX_GAME_HISTORY, MAX_CHALLENGE_HISTORY } from './config';
+
+// Re-export for existing consumers
+export { MASTERED_STREAK };
 
 const STATS_KEY = '@flagsareus_stats';
 const FLAG_STATS_KEY = '@flagsareus_flag_stats';
@@ -283,7 +287,7 @@ export async function getDayStreakInfo(): Promise<DayStreakInfo> {
     const today = getTodayDate();
     if (lastDate === today) return { current: streak, best: bestStreak };
     const diffDays = Math.round(
-      (new Date(today + 'T00:00:00').getTime() - new Date(lastDate + 'T00:00:00').getTime()) / 86400000,
+      (new Date(today + 'T00:00:00').getTime() - new Date(lastDate + 'T00:00:00').getTime()) / MS_PER_DAY,
     );
     return { current: diffDays === 1 ? streak : 0, best: bestStreak };
   } catch {
@@ -302,7 +306,7 @@ async function recordDayPlayed(): Promise<number> {
       best = data.best || data.streak || 0;
       if (data.lastDate === today) return data.streak;
       const diffDays = Math.round(
-        (new Date(today + 'T00:00:00').getTime() - new Date(data.lastDate + 'T00:00:00').getTime()) / 86400000,
+        (new Date(today + 'T00:00:00').getTime() - new Date(data.lastDate + 'T00:00:00').getTime()) / MS_PER_DAY,
       );
       if (diffDays === 1) streak = data.streak + 1;
     }
@@ -387,7 +391,6 @@ async function appendDailyLog(date: string, score: number, results: GameResult[]
 // Per-flag stats: tracks wrong/right counts and consecutive-right streak.
 // Once rightStreak reaches MASTERED_STREAK, the flag is considered "learned"
 // and drops out of Practice More. Getting it wrong again resets the streak.
-export const MASTERED_STREAK = 3;
 export interface FlagStats {
   [flagId: string]: { wrong: number; right: number; rightStreak: number; totalTimeRight?: number };
 }
@@ -448,8 +451,6 @@ export interface GameHistoryEntry {
   mode: GameMode;
   date: string;
 }
-
-const MAX_GAME_HISTORY = 50;
 
 export async function getGameHistory(): Promise<GameHistoryEntry[]> {
   try {
@@ -563,8 +564,6 @@ export interface ChallengeHistoryEntry {
   direction: 'sent' | 'received';
   fullCode: string;         // Full FT2: code for resharing
 }
-
-const MAX_CHALLENGE_HISTORY = 10;
 
 export async function getChallengeHistory(): Promise<ChallengeHistoryEntry[]> {
   try {

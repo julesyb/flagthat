@@ -18,7 +18,7 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { spacing, typography, fontFamily, fontSize, buildButtons, borderRadius, APP_URL, ThemeColors } from '../utils/theme';
 import { useTheme } from '../contexts/ThemeContext';
-import { getStreakFromResults, getGrade, generateDailyShareGrid, generateShareGrid, getDailyNumber } from '../utils/gameEngine';
+import { getStreakFromResults, generateDailyShareGrid, generateShareGrid, getDailyNumber } from '../utils/gameEngine';
 import { updateStats, updateFlagResults, saveDailyChallenge, incrementDailyChallenges, markShared, saveBaselineResult, getStats, getFlagStats, getDayStreakInfo, getBadgeData, persistEarnedBadges, getMissedFlagIds, addGameHistoryEntry, getChallengeName, saveChallengeName, addChallengeToHistory } from '../utils/storage';
 import { BaselineRegionId, UserStats, GameMode, CategoryId } from '../types';
 import { t } from '../utils/i18n';
@@ -32,7 +32,7 @@ import { countCorrect } from '../utils/gameHelpers';
 import { RootStackParamList } from '../types/navigation';
 import { getAllEarnedBadges, detectPerGameBadges, buildBadgeContext, BADGES, TIER_COLORS, EarnedBadge } from '../utils/badges';
 import { getTotalFlagCount, getCategoryCount } from '../data';
-import { encodeChallenge, ChallengeData, CHALLENGE_MODES, generateShortCode } from '../utils/challengeCode';
+import { encodeChallenge, ChallengeData, CHALLENGE_MODES, generateShortCode, generateChallengeShareCard } from '../utils/challengeCode';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Results'>;
 
@@ -49,7 +49,6 @@ export default function ResultsScreen({ route, navigation }: Props) {
   const questionTotal = isBaseline ? getCategoryCount(config.category as CategoryId) : results.length;
   const accuracy = questionTotal > 0 ? Math.round((correct / questionTotal) * 100) : 0;
   const streak = getStreakFromResults(results);
-  const grade = getGrade(accuracy);
   const avgTime = results.length > 0
     ? Math.round(results.reduce((sum, r) => sum + r.timeTaken, 0) / results.length / 1000 * 10) / 10
     : 0;
@@ -66,10 +65,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
   // Phase 1: Count-up (0 → accuracy%)
   const countAnim = useRef(new Animated.Value(0)).current;
   const [displayAcc, setDisplayAcc] = useState(0);
-  // Phase 2: Grade reveal (springs in after count-up)
-  const gradeScale = useRef(new Animated.Value(0)).current;
-  const gradeOpacity = useRef(new Animated.Value(0)).current;
-  // Phase 3: Score line fade
+  // Phase 2: Score line fade
   const scoreFade = useRef(new Animated.Value(0)).current;
   // Phase 4: Timeline dots (staggered springs)
   const dotAnims = useRef(results.map(() => new Animated.Value(0))).current;
@@ -131,8 +127,12 @@ export default function ResultsScreen({ route, navigation }: Props) {
     }
     const shortCode = generateShortCode(challengeData);
     const link = `${APP_URL}/c/${code}`;
-    const headline = t('challenge.shareMessage', { correct, total: results.length });
-    const message = `${headline}\n\n${link}`;
+    const message = generateChallengeShareCard(
+      hostResults,
+      name,
+      config.mode,
+      link,
+    );
     // Save to challenge history
     addChallengeToHistory({
       shortCode,
@@ -173,7 +173,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
 
   // Head-to-head comparison data
   const h2h = isChallenge && challenge ? (() => {
-    const hostCorrect = countCorrect(challenge.hostResults);
+    const hostCorrect = challenge.hostResults.filter((r) => r.correct).length;
     const playerCorrect = countCorrect(results);
     const h2hTotal = challenge.flagIds.length;
     // Compute raw averages in ms for fair comparison (host times have 100ms granularity from encoding)
@@ -304,24 +304,14 @@ export default function ResultsScreen({ route, navigation }: Props) {
       useNativeDriver: false,
     }).start();
 
-    // Phase 2: Grade reveal (after count-up)
-    const gradeDelay = 1500;
-    Animated.parallel([
-      Animated.spring(gradeScale, {
-        toValue: 1, friction: 4, tension: 100, delay: gradeDelay, useNativeDriver: true,
-      }),
-      Animated.timing(gradeOpacity, {
-        toValue: 1, duration: 200, delay: gradeDelay, useNativeDriver: true,
-      }),
-    ]).start();
-
-    // Phase 3: Score text
+    // Phase 2: Score text (after count-up)
+    const revealDelay = 1500;
     Animated.timing(scoreFade, {
-      toValue: 1, duration: 300, delay: gradeDelay + 200, useNativeDriver: true,
+      toValue: 1, duration: 300, delay: revealDelay, useNativeDriver: true,
     }).start();
 
-    // Phase 4: Timeline dots (staggered)
-    const dotsDelay = gradeDelay + 400;
+    // Phase 3: Timeline dots (staggered)
+    const dotsDelay = revealDelay + 200;
     Animated.stagger(
       60,
       dotAnims.map((a) =>
@@ -329,12 +319,12 @@ export default function ResultsScreen({ route, navigation }: Props) {
       ),
     ).start();
 
-    // Phase 5: Stats
+    // Phase 4: Stats
     Animated.timing(statsFade, {
       toValue: 1, duration: 400, delay: dotsDelay + results.length * 60 + 100, useNativeDriver: true,
     }).start();
 
-    // Phase 6: Rest
+    // Phase 5: Rest
     const restDelay = dotsDelay + results.length * 60 + 400;
     Animated.timing(restFade, {
       toValue: 1, duration: 400, delay: restDelay, useNativeDriver: true,
@@ -354,17 +344,17 @@ export default function ResultsScreen({ route, navigation }: Props) {
       setTimeout(() => {
         hapticCorrect();
         playCelebrationSound();
-      }, gradeDelay);
+      }, revealDelay);
       const loopAnim = Animated.loop(
         Animated.sequence([
-          Animated.timing(confettiOpacity, { toValue: 1, duration: 500, delay: gradeDelay, useNativeDriver: true }),
+          Animated.timing(confettiOpacity, { toValue: 1, duration: 500, delay: revealDelay, useNativeDriver: true }),
           Animated.timing(confettiOpacity, { toValue: 0.3, duration: 500, useNativeDriver: true }),
         ]),
       );
       loopAnim.start();
       // Hero glow pulse
       Animated.sequence([
-        Animated.timing(heroGlow, { toValue: 1, duration: 400, delay: gradeDelay, useNativeDriver: false }),
+        Animated.timing(heroGlow, { toValue: 1, duration: 400, delay: revealDelay, useNativeDriver: false }),
         Animated.timing(heroGlow, { toValue: 0, duration: 600, useNativeDriver: false }),
       ]).start();
       return () => { loopAnim.stop(); };
@@ -372,14 +362,14 @@ export default function ResultsScreen({ route, navigation }: Props) {
       // Great score: haptic + hero glow flash (gold tint)
       setTimeout(() => {
         hapticCorrect();
-      }, gradeDelay);
+      }, revealDelay);
       Animated.sequence([
-        Animated.timing(heroGlow, { toValue: 0.7, duration: 350, delay: gradeDelay, useNativeDriver: false }),
+        Animated.timing(heroGlow, { toValue: 0.7, duration: 350, delay: revealDelay, useNativeDriver: false }),
         Animated.timing(heroGlow, { toValue: 0, duration: 500, useNativeDriver: false }),
       ]).start();
     } else if (accuracy >= 80) {
       // Good score: light haptic
-      setTimeout(() => hapticTap(), gradeDelay);
+      setTimeout(() => hapticTap(), revealDelay);
     }
   }, []);
 
@@ -465,8 +455,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
         {/* ══════════════════════════════════════════════════════════
             HERO: The score reveal. This IS the experience.
             Phase 1: accuracy counts up  0% → 87%
-            Phase 2: grade letter springs in
-            Phase 3: "8/10 correct" fades in
+            Phase 2: "8/10 correct" fades in
             ══════════════════════════════════════════════════════════ */}
         <Animated.View style={[styles.heroCard, { borderColor: heroGlowColor, borderWidth: 2 }]}>
           <Text style={styles.heroEyebrow}>
@@ -476,14 +465,6 @@ export default function ResultsScreen({ route, navigation }: Props) {
           {/* Count-up number */}
           <Text style={styles.heroAccuracy}>{displayAcc}%</Text>
 
-          {/* Grade letter (springs in after count-up) */}
-          <Animated.View style={[
-            styles.heroGradeWrap,
-            { opacity: gradeOpacity, transform: [{ scale: gradeScale }] },
-          ]}>
-            <Text style={[styles.heroGrade, { color: colors[grade.colorKey] }]}>{grade.label}</Text>
-          </Animated.View>
-
           {/* Score line */}
           <Animated.Text style={[styles.heroScoreText, { opacity: scoreFade }]}>
             {correct}/{questionTotal} {t('results.correct').toLowerCase()}
@@ -492,38 +473,104 @@ export default function ResultsScreen({ route, navigation }: Props) {
 
         {/* ── HEAD-TO-HEAD (challenge mode) ── */}
         {h2h && challenge && (
-          <Animated.View style={[styles.h2hCard, { opacity: scoreFade }]}>
+          <Animated.View style={[styles.h2hCard, {
+            opacity: scoreFade,
+            borderColor: h2h.winner === 'player' ? colors.success
+              : h2h.winner === 'host' ? colors.error
+              : colors.goldBright,
+          }]}>
+            {/* Result banner */}
+            <View style={[styles.h2hBanner, {
+              backgroundColor: h2h.winner === 'player' ? colors.success + '18'
+                : h2h.winner === 'host' ? colors.error + '18'
+                : colors.goldBright + '18',
+            }]}>
+              <Text style={[styles.h2hBannerText, {
+                color: h2h.winner === 'player' ? colors.success
+                  : h2h.winner === 'host' ? colors.error
+                  : colors.goldBright,
+              }]}>
+                {h2h.winner === 'player' ? t('challenge.youWin')
+                  : h2h.winner === 'host' ? t('challenge.theyWin', { name: challenge.hostName })
+                  : t('challenge.tie')}
+              </Text>
+            </View>
+
             <Text style={styles.h2hTitle}>{t('challenge.headToHead')}</Text>
+
             <View style={styles.h2hRow}>
+              {/* Player side */}
               <View style={styles.h2hPlayer}>
                 <Text style={[
                   styles.h2hName,
                   h2h.winner === 'player' && styles.h2hNameWinner,
                 ]}>{playerName || t('challenge.you')}</Text>
-                <Text style={styles.h2hScore}>{h2h.playerCorrect}/{h2h.h2hTotal}</Text>
-                <Text style={styles.h2hTime}>{h2h.playerAvg}s {t('results.avgTime').toLowerCase()}</Text>
+                <Text style={[styles.h2hScoreBig, h2h.winner === 'player' && { color: colors.success }]}>{h2h.playerCorrect}</Text>
+                <Text style={styles.h2hScoreSub}>/{h2h.h2hTotal}</Text>
+                <Text style={styles.h2hTime}>{h2h.playerAvg}s avg</Text>
               </View>
+
+              {/* VS circle */}
               <View style={styles.h2hVs}>
-                <Text style={styles.h2hVsText}>{t('common.vs')}</Text>
+                <Text style={styles.h2hVsText}>VS</Text>
               </View>
+
+              {/* Host side */}
               <View style={styles.h2hPlayer}>
                 <Text style={[
                   styles.h2hName,
                   h2h.winner === 'host' && styles.h2hNameWinner,
                 ]}>{challenge.hostName}</Text>
-                <Text style={styles.h2hScore}>{h2h.hostCorrect}/{h2h.h2hTotal}</Text>
-                <Text style={styles.h2hTime}>{h2h.hostAvg}s {t('results.avgTime').toLowerCase()}</Text>
+                <Text style={[styles.h2hScoreBig, h2h.winner === 'host' && { color: colors.success }]}>{h2h.hostCorrect}</Text>
+                <Text style={styles.h2hScoreSub}>/{h2h.h2hTotal}</Text>
+                <Text style={styles.h2hTime}>{h2h.hostAvg}s avg</Text>
               </View>
             </View>
-            <Text style={[styles.h2hResult, {
-              color: h2h.winner === 'player' ? colors.success
-                : h2h.winner === 'host' ? colors.error
-                : colors.textSecondary,
-            }]}>
-              {h2h.winner === 'player' ? t('challenge.youWin')
-                : h2h.winner === 'host' ? t('challenge.theyWin', { name: challenge.hostName })
-                : t('challenge.tie')}
-            </Text>
+
+            {/* Per-flag comparison dots */}
+            <View style={styles.h2hDotsSection}>
+              <View style={styles.h2hDotsRow}>
+                {results.map((r, i) => {
+                  const hostR = challenge.hostResults[i];
+                  const playerWon = r.correct && (!hostR || !hostR.correct);
+                  const hostWon = (!r.correct) && hostR?.correct;
+                  return (
+                    <View key={i} style={styles.h2hDotPair}>
+                      <View style={[styles.h2hDotSmall,
+                        r.correct ? styles.h2hDotCorrect : styles.h2hDotWrong,
+                        playerWon && styles.h2hDotWin,
+                      ]} />
+                      <View style={[styles.h2hDotSmall,
+                        hostR?.correct ? styles.h2hDotCorrect : styles.h2hDotWrong,
+                        hostWon && styles.h2hDotWin,
+                      ]} />
+                    </View>
+                  );
+                })}
+              </View>
+            </View>
+          </Animated.View>
+        )}
+
+        {/* ── CHALLENGE BACK (right after h2h for momentum) ── */}
+        {isChallenge && canChallenge && !reviewOnly && (
+          <Animated.View style={{ opacity: scoreFade }}>
+            <TouchableOpacity
+              style={styles.challengeButton}
+              onPress={() => { hapticTap(); navigation.replace('GameSetup', { initialMode: config.mode, ...(config.difficulty && { initialDifficulty: config.difficulty }) }); }}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel={t('challenge.challengeBack')}
+            >
+              <View style={styles.challengeButtonInner}>
+                <UsersIcon size={18} color={colors.goldBright} />
+                <View style={styles.challengeButtonContent}>
+                  <Text style={styles.challengeButtonTitle}>{t('challenge.challengeBack')}</Text>
+                  <Text style={styles.challengeButtonDesc}>{t('challenge.challengeBackDesc')}</Text>
+                </View>
+                <ChevronRightIcon size={14} color={colors.goldBright} />
+              </View>
+            </TouchableOpacity>
           </Animated.View>
         )}
 
@@ -649,34 +696,18 @@ export default function ResultsScreen({ route, navigation }: Props) {
         {canChallenge && !isChallenge && !reviewOnly && (
           <Animated.View style={{ opacity: restFade }}>
             <TouchableOpacity
-              style={styles.challengeButton}
+              style={styles.challengeShareButton}
               onPress={handleChallengeTap}
               activeOpacity={0.7}
               accessibilityRole="button"
               accessibilityLabel={t('challenge.challengeFriend')}
-              accessibilityHint="Shares a challenge link so a friend can beat your score"
             >
-              <UsersIcon size={18} color={colors.ink} />
-              <Text style={styles.challengeButtonTitle}>{t('challenge.challengeFriend')}</Text>
+              <UsersIcon size={16} color={colors.goldBright} />
+              <Text style={styles.challengeShareText}>{t('challenge.challengeFriend')}</Text>
             </TouchableOpacity>
           </Animated.View>
         )}
 
-        {/* ── CHALLENGE BACK ── */}
-        {isChallenge && canChallenge && !reviewOnly && (
-          <Animated.View style={{ opacity: restFade }}>
-            <TouchableOpacity
-              style={styles.challengeButton}
-              onPress={() => { hapticTap(); navigation.replace('GameSetup', { initialMode: config.mode, ...(config.difficulty && { initialDifficulty: config.difficulty }) }); }}
-              activeOpacity={0.7}
-              accessibilityRole="button"
-              accessibilityLabel={t('challenge.challengeBack')}
-            >
-              <UsersIcon size={18} color={colors.ink} />
-              <Text style={styles.challengeButtonTitle}>{t('challenge.challengeBack')}</Text>
-            </TouchableOpacity>
-          </Animated.View>
-        )}
 
         {/* ── NEWLY EARNED BADGES ── */}
         {newBadges.length > 0 && (
@@ -824,7 +855,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
           activeOpacity={1}
           onPress={() => setShowChallengeModal(false)}
           accessibilityRole="button"
-          accessibilityLabel="Close dialog"
+          accessibilityLabel={t('common.closeDialog')}
         >
           <TouchableOpacity activeOpacity={1} style={styles.modalCard} onPress={() => {}}>
             <Text style={styles.modalTitle}>{t('challenge.enterName')}</Text>
@@ -892,15 +923,6 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     color: colors.white,
     letterSpacing: -3,
     lineHeight: 120,
-  },
-  heroGradeWrap: {
-    marginTop: spacing.xs,
-    marginBottom: spacing.sm,
-  },
-  heroGrade: {
-    fontFamily: fontFamily.display,
-    fontSize: fontSize.display, // 42px
-    letterSpacing: -1,
   },
   heroScoreText: {
     fontFamily: fontFamily.bodyMedium, fontSize: fontSize.lg,
@@ -1060,8 +1082,21 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   // ── Head-to-head
   h2hCard: {
     backgroundColor: colors.surface, borderRadius: borderRadius.lg,
-    borderWidth: 2, borderColor: colors.ink, padding: spacing.lg,
-    marginBottom: spacing.sm,
+    borderWidth: 2, padding: spacing.lg,
+    marginBottom: spacing.sm, overflow: 'hidden',
+  },
+  h2hBanner: {
+    paddingVertical: spacing.sm,
+    marginTop: -spacing.lg,
+    marginHorizontal: -spacing.lg,
+    marginBottom: spacing.md,
+    alignItems: 'center',
+  },
+  h2hBannerText: {
+    fontFamily: fontFamily.uiLabel,
+    fontSize: fontSize.sm,
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
   },
   h2hTitle: {
     ...typography.eyebrow,
@@ -1072,40 +1107,113 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   },
   h2hPlayer: { flex: 1, alignItems: 'center' },
   h2hName: {
-    ...typography.bodyBold,
+    ...typography.microMedium,
     color: colors.ink, marginBottom: spacing.xs,
+    textTransform: 'uppercase', letterSpacing: 0.5,
   },
   h2hNameWinner: { color: colors.success },
-  h2hScore: {
-    ...typography.title,
+  h2hScoreBig: {
+    fontFamily: fontFamily.display,
+    fontSize: fontSize.display,
     color: colors.ink,
+    letterSpacing: -1,
+    lineHeight: 48,
+  },
+  h2hScoreSub: {
+    ...typography.body,
+    color: colors.textTertiary,
+    marginTop: -4,
   },
   h2hTime: {
     ...typography.micro,
-    color: colors.textTertiary, marginTop: spacing.xxs,
+    color: colors.textTertiary, marginTop: spacing.xs,
   },
   h2hVs: {
-    width: 40, height: 40, borderRadius: borderRadius.full,
+    width: 36, height: 36, borderRadius: borderRadius.full,
     backgroundColor: colors.surfaceSecondary,
     justifyContent: 'center', alignItems: 'center',
   },
   h2hVsText: {
-    ...typography.eyebrow,
+    fontFamily: fontFamily.uiLabel,
+    fontSize: fontSize.xs,
+    letterSpacing: 1,
     color: colors.textTertiary,
   },
-  h2hResult: {
-    ...typography.headingUpper,
-    textAlign: 'center', marginTop: spacing.md,
+  h2hDotsSection: {
+    marginTop: spacing.md,
+    paddingTop: spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+  h2hDotsRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  h2hDotPair: {
+    alignItems: 'center',
+    gap: 2,
+  },
+  h2hDotSmall: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  h2hDotCorrect: {
+    backgroundColor: colors.success + '60',
+  },
+  h2hDotWrong: {
+    backgroundColor: colors.error + '60',
+  },
+  h2hDotWin: {
+    backgroundColor: colors.success,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
 
   // ── Challenge button
+  challengeShareButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    borderWidth: 2,
+    borderColor: colors.goldBright,
+    borderRadius: borderRadius.md,
+    paddingVertical: spacing.sm + 2,
+    paddingHorizontal: spacing.lg,
+    marginBottom: spacing.md,
+  },
+  challengeShareText: {
+    ...typography.bodyBold,
+    color: colors.goldBright,
+  },
   challengeButton: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm,
-    backgroundColor: colors.surface, borderWidth: 2, borderColor: colors.ink,
-    borderRadius: borderRadius.lg, paddingVertical: 14, marginBottom: spacing.md,
+    backgroundColor: colors.surface,
+    borderWidth: 2,
+    borderColor: colors.goldBright + '50',
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
+    marginBottom: spacing.md,
+  },
+  challengeButtonInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm + 2,
+  },
+  challengeButtonContent: {
+    flex: 1,
   },
   challengeButtonTitle: {
-    ...typography.actionLabel, color: colors.ink,
+    ...typography.bodyBold,
+    color: colors.goldBright,
+    marginBottom: 2,
+  },
+  challengeButtonDesc: {
+    ...typography.micro,
+    color: colors.textTertiary,
   },
 
   // ── Challenge modal

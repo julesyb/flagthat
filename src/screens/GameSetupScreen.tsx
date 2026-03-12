@@ -324,7 +324,7 @@ export default function GameSetupScreen({ route, navigation }: Props) {
                   label={t('setup.timeSuffix', { t: seconds })}
                   active={timeLimit === seconds}
                   onPress={() => setTimeLimit(seconds)}
-                  accessibilityLabel={`${t('setup.timeLimit')}: ${seconds} seconds`}
+                  accessibilityLabel={t('a11y.timeLimitSeconds', { label: t('setup.timeLimit'), seconds })}
                 />
               ))}
             </ConfigRow>
@@ -339,14 +339,14 @@ export default function GameSetupScreen({ route, navigation }: Props) {
                   label={String(count)}
                   active={!questionCountAll && questionCount === count}
                   onPress={() => { setQuestionCount(count); setQuestionCountAll(false); }}
-                  accessibilityLabel={`${count} questions`}
+                  accessibilityLabel={t('common.nQuestions', { n: count })}
                 />
               ))}
               <SegBtn
                 label={t('common.all')}
                 active={questionCountAll}
                 onPress={() => setQuestionCountAll(true)}
-                accessibilityLabel="All questions"
+                accessibilityLabel={t('common.allQuestions')}
               />
             </ConfigRow>
           )}
@@ -360,14 +360,14 @@ export default function GameSetupScreen({ route, navigation }: Props) {
                   label={String(count)}
                   active={!questionCountAll && questionCount === count}
                   onPress={() => { setQuestionCount(count); setQuestionCountAll(false); }}
-                  accessibilityLabel={`${count} questions`}
+                  accessibilityLabel={t('common.nQuestions', { n: count })}
                 />
               ))}
               <SegBtn
                 label={t('common.all')}
                 active={questionCountAll}
                 onPress={() => setQuestionCountAll(true)}
-                accessibilityLabel="All questions"
+                accessibilityLabel={t('common.allQuestions')}
               />
             </ConfigRow>
           )}

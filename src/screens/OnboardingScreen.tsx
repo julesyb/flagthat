@@ -218,7 +218,7 @@ export default function OnboardingScreen({ navigation }: Props) {
               <View style={styles.testHeader}>
                 <Text style={styles.testTitle}>{t('onboarding.subtitle')}</Text>
                 {!allDone && (
-                  <TouchableOpacity onPress={handleStartPlaying} activeOpacity={0.6} accessibilityRole="button" accessibilityLabel={t('onboarding.skip')} accessibilityHint="Skip knowledge tests and go to the home screen">
+                  <TouchableOpacity onPress={handleStartPlaying} activeOpacity={0.6} accessibilityRole="button" accessibilityLabel={t('onboarding.skip')} accessibilityHint={t('a11y.skipOnboarding')}>
                     <Text style={styles.skipText}>{t('onboarding.skip')}</Text>
                   </TouchableOpacity>
                 )}

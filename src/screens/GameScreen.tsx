@@ -360,7 +360,7 @@ export default function GameScreen({ route, navigation }: Props) {
                     activeOpacity={0.7}
                     accessibilityRole="button"
                     accessibilityLabel={pair.display}
-                    accessibilityHint="Select this country as your answer"
+                    accessibilityHint={t('a11y.selectAnswer')}
                   >
                     <Text style={styles.suggestionText}>{pair.display}</Text>
                   </TouchableOpacity>

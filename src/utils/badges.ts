@@ -5,7 +5,7 @@ import { colors } from './theme';
 
 export type BadgeTier = 'bronze' | 'silver' | 'gold' | 'platinum';
 
-export type BadgeIcon = 'flag' | 'globe' | 'check' | 'play' | 'lightning' | 'calendar' | 'clock' | 'crosshair' | 'link' | 'eye' | 'compass' | 'heart';
+export type BadgeIcon = 'flag' | 'globe' | 'check' | 'play' | 'lightning' | 'flame' | 'calendar' | 'clock' | 'crosshair' | 'link' | 'eye' | 'compass' | 'heart';
 
 export interface Badge {
   id: string;

@@ -292,7 +292,7 @@ export default function SettingsScreen() {
             activeOpacity={0.7}
             accessibilityRole="button"
             accessibilityLabel={`${t('settings.language')}: ${currentLocaleName}`}
-            accessibilityHint="Opens language selection"
+            accessibilityHint={t('a11y.opensLanguage')}
             accessibilityState={{ expanded: langOpen }}
           >
             <View style={styles.settingInfo}>
@@ -383,7 +383,7 @@ export default function SettingsScreen() {
           activeOpacity={0.7}
           accessibilityRole="button"
           accessibilityLabel={t('settings.resetAllData')}
-          accessibilityHint="Permanently deletes all your progress and statistics"
+          accessibilityHint={t('a11y.deletesProgress')}
         >
           <Text style={styles.resetButtonText}>{t('settings.resetAllData')}</Text>
         </TouchableOpacity>
