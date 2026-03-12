@@ -218,15 +218,12 @@ export default function HomeScreen({ navigation }: Props) {
             accessibilityLabel={`${dayStreak} ${t('home.dayStreak')}`}
             accessibilityHint="Opens your stats"
           >
-            <FlameIcon size={18} color={dayStreak > 0 ? colors.goldBright : colors.textTertiary} />
+            <FlameIcon size={16} color={dayStreak > 0 ? colors.goldBright : colors.textTertiary} filled={dayStreak > 0} />
             <Text style={[styles.streakNum, dayStreak === 0 && styles.streakNumInactive]}>{dayStreak}</Text>
-            <View style={styles.streakMeta}>
-              <Text style={styles.streakLabel}>{t('home.dayStreak')}</Text>
-              <View style={styles.streakPips}>
-                {Array.from({ length: 7 }).map((_, i) => (
-                  <View key={i} style={[styles.pip, i < Math.min(dayStreak, 7) && styles.pipLit]} />
-                ))}
-              </View>
+            <View style={styles.streakPips}>
+              {Array.from({ length: 7 }).map((_, i) => (
+                <View key={i} style={[styles.pip, i < Math.min(dayStreak, 7) && styles.pipLit]} />
+              ))}
             </View>
           </TouchableOpacity>
         </View>
@@ -515,7 +512,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   streakBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 9,
+    gap: 6,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
     paddingLeft: spacing.sm + 2,
@@ -534,20 +531,10 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   streakNumInactive: {
     color: colors.textTertiary,
   },
-  streakMeta: {
-    gap: 3,
-  },
-  streakLabel: {
-    fontFamily: fontFamily.uiLabel,
-    fontSize: fontSize.xs,
-    letterSpacing: 0.9,
-    textTransform: 'uppercase',
-    color: colors.textTertiary,
-    lineHeight: 10,
-  },
   streakPips: {
     flexDirection: 'row',
     gap: 3,
+    marginLeft: 2,
   },
   pip: {
     width: 6,

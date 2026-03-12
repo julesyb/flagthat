@@ -29,8 +29,8 @@ export function HomeIcon({ size = 16, color, strokeWidth = 1.5, filled = false }
 // Flame — streak indicator
 export function FlameIcon({ size = 16, color, filled = true }: IconProps) {
   return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill={filled ? color : 'none'} stroke={color} strokeWidth={filled ? 0 : 1.5}>
-      <Path d="M12 2C12 2 8.5 7 8.5 11C8.5 13 9.5 14.5 10.5 15.5C9.5 14 10 12 12 10C12 13 14 15 14 17C14 19 12.5 21 10 22C14 22 18 19.5 18 15C18 9 12 2 12 2Z" />
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill={filled ? color : 'none'} stroke={filled ? 'none' : color} strokeWidth={filled ? 0 : 1.5} strokeLinecap="round" strokeLinejoin="round">
+      <Path d="M12 2C8 7 5 11 5 15C5 18.87 8.13 22 12 22C15.87 22 19 18.87 19 15C19 11 16 7 12 2Z" />
     </Svg>
   );
 }
