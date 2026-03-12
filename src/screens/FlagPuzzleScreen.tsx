@@ -331,6 +331,7 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
             <FlagImage
               countryCode={currentQuestion.flag.id}
               size="hero"
+              transition={0}
             />
             {!showFeedback && (
               <View style={[styles.tileGrid, { width: flagWidth, height: flagHeight }]} pointerEvents="none">

@@ -50,6 +50,7 @@ interface StatsData {
   challengeHistory: ChallengeHistoryEntry[];
   regionScoreHistory: RegionScoreHistory;
   persistedLevel: number;
+  levelProgress: LevelProgress;
 }
 
 async function loadStatsData(): Promise<StatsData> {
@@ -58,7 +59,10 @@ async function loadStatsData(): Promise<StatsData> {
       getStats(), getFlagStats(), getDayStreakInfo(), getBadgeData(),
       getMissedFlagIds(), getGameHistory(), getChallengeHistory(), getRegionScoreHistory(), getPersistedLevel(),
     ]);
-  return { stats, flagStats, dayStreakInfo, badgeData, weakFlagCount: missed.length, gameHistory, challengeHistory, regionScoreHistory, persistedLevel };
+  const lp = computeLevelProgress({ stats, flagStats, badgeData, dayStreakInfo }, persistedLevel);
+  // Persist new high-water mark (fire-and-forget)
+  persistLevel(lp.currentLevel);
+  return { stats, flagStats, dayStreakInfo, badgeData, weakFlagCount: missed.length, gameHistory, challengeHistory, regionScoreHistory, persistedLevel, levelProgress: lp };
 }
 
 export default function StatsScreen() {
@@ -111,11 +115,7 @@ export default function StatsScreen() {
 
         const acc = loaded.stats.totalAnswered > 0
           ? Math.round((loaded.stats.totalCorrect / loaded.stats.totalAnswered) * 100) : 0;
-        const lp = computeLevelProgress(
-          { stats: loaded.stats, flagStats: loaded.flagStats, badgeData: loaded.badgeData, dayStreakInfo: loaded.dayStreakInfo },
-          loaded.persistedLevel,
-        );
-        const pct = lp.target > 0 ? Math.min(lp.progress / lp.target, 1) : 0;
+        const pct = loaded.levelProgress.target > 0 ? Math.min(loaded.levelProgress.progress / loaded.levelProgress.target, 1) : 0;
 
         if (shouldAnimate) {
           hasAnimated.current = true;
@@ -233,16 +233,7 @@ export default function StatsScreen() {
     return getAllEarnedBadges(badgeCtx, data.badgeData.earnedBadgeIds);
   }, [badgeCtx, data]);
 
-  const levelProgress = React.useMemo<LevelProgress | null>(() => {
-    if (!data) return null;
-    const lp = computeLevelProgress(
-      { stats: data.stats, flagStats: data.flagStats, badgeData: data.badgeData, dayStreakInfo: data.dayStreakInfo },
-      data.persistedLevel,
-    );
-    // Persist new high-water mark (fire-and-forget)
-    persistLevel(lp.currentLevel);
-    return lp;
-  }, [data]);
+  const levelProgress = data?.levelProgress ?? null;
 
   const activityGrid = React.useMemo(() => {
     const gh = data?.gameHistory ?? [];

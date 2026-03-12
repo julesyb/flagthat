@@ -204,6 +204,7 @@ export default function NeighborsScreen({ navigation, route }: Props) {
             <FlagImage
               countryCode={round.country.id}
               size="large"
+              transition={0}
             />
             <Text style={styles.countryName}>{flagName(round.country)}</Text>
           </View>

@@ -322,6 +322,7 @@ export default function GameScreen({ route, navigation }: Props) {
             <FlagImage
               countryCode={currentQuestion.flag.id}
               size="hero"
+              transition={0}
             />
           )}
         </View>

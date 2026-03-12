@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { StyleSheet, View, Text, ActivityIndicator, useWindowDimensions, StyleProp, ViewStyle } from 'react-native';
 import { Image } from 'expo-image';
 import { fontFamily, fontSize, borderRadius, ThemeColors } from '../utils/theme';
@@ -12,6 +12,8 @@ interface FlagImageProps {
   fill?: boolean;
   style?: StyleProp<ViewStyle>;
   accessibilityLabel?: string;
+  /** Image crossfade duration in ms. Set to 0 when parent handles fade animation. */
+  transition?: number;
 }
 
 const SIZE_MAP = {
@@ -31,12 +33,19 @@ function getFlagUrl(code: string, width: number): string {
   return `https://flagcdn.com/w${nearestCdnWidth(width)}/${code.toLowerCase()}.png`;
 }
 
-export default function FlagImage({ countryCode, size = 'large', fill, style, accessibilityLabel }: FlagImageProps) {
+export default function FlagImage({ countryCode, size = 'large', fill, style, accessibilityLabel, transition: transitionProp }: FlagImageProps) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { width: screenWidth } = useWindowDimensions();
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
+  const transitionMs = transitionProp ?? 200;
+
+  // Reset loading state when the flag changes so stale images don't linger
+  useEffect(() => {
+    setLoaded(false);
+    setError(false);
+  }, [countryCode]);
 
   const a11yLabel = accessibilityLabel || t('common.flagOf', { country: countryCode.toUpperCase() });
 
@@ -64,7 +73,7 @@ export default function FlagImage({ countryCode, size = 'large', fill, style, ac
             source={{ uri: getFlagUrl(countryCode, requestWidth) }}
             style={[styles.image, { width: '100%', height: '100%' }]}
             contentFit="contain"
-            transition={200}
+            transition={transitionMs}
             priority="high"
             cachePolicy="memory-disk"
             onLoad={() => setLoaded(true)}
@@ -100,7 +109,7 @@ export default function FlagImage({ countryCode, size = 'large', fill, style, ac
           source={{ uri: getFlagUrl(countryCode, requestWidth) }}
           style={[styles.image, fillStyle]}
           contentFit="contain"
-          transition={200}
+          transition={transitionMs}
           cachePolicy="memory-disk"
           onLoad={() => setLoaded(true)}
           onError={() => { setError(true); setLoaded(false); }}

@@ -60,14 +60,21 @@ export interface LevelContext {
   dayStreakInfo: DayStreakInfo;
 }
 
+// Cached evaluation context to avoid re-computing Object.values/getTotalFlagCount per level
+interface EvalCache {
+  entries: { wrong: number; right: number; rightStreak: number; totalTimeRight?: number; totalTimeWrong?: number }[];
+  totalFlags: number;
+}
+
 // ─── Evaluate a single requirement ────────────────────────────
 // Returns { progress, target } - level is complete when progress >= target
 export function evaluateRequirement(
   req: LevelRequirement,
   ctx: LevelContext,
+  cache?: EvalCache,
 ): { progress: number; target: number } {
-  const entries = Object.values(ctx.flagStats);
-  const totalFlags = getTotalFlagCount();
+  const entries = cache?.entries ?? Object.values(ctx.flagStats);
+  const totalFlags = cache?.totalFlags ?? getTotalFlagCount();
 
   switch (req.type) {
     case 'flags_correct_once': {
@@ -363,6 +370,8 @@ export function getTierLabel(tier: LevelTier): string {
 // so levels are one-way doors (never regress).
 export function computeLevelProgress(ctx: LevelContext, persistedLevel: number = 0): LevelProgress {
   let currentLevel = persistedLevel;
+  // Build cache once so Object.values and getTotalFlagCount aren't repeated per level
+  const cache: EvalCache = { entries: Object.values(ctx.flagStats), totalFlags: getTotalFlagCount() };
 
   for (const levelDef of LEVELS) {
     // Levels at or below the persisted floor are already completed
@@ -370,7 +379,7 @@ export function computeLevelProgress(ctx: LevelContext, persistedLevel: number =
       currentLevel = Math.max(currentLevel, levelDef.level);
       continue;
     }
-    const { progress, target } = evaluateRequirement(levelDef.requirement, ctx);
+    const { progress, target } = evaluateRequirement(levelDef.requirement, ctx, cache);
     if (progress >= target) {
       currentLevel = levelDef.level;
     } else {
