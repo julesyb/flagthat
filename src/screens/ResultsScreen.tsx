@@ -577,7 +577,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
 
         {/* ── CHALLENGE BACK (right after h2h for momentum) ── */}
         {isChallenge && canChallenge && !reviewOnly && (
-          <Animated.View style={{ opacity: restFade }}>
+          <Animated.View style={{ opacity: scoreFade }}>
             <TouchableOpacity
               style={styles.challengeButton}
               onPress={() => { hapticTap(); navigation.replace('GameSetup', { initialMode: config.mode, ...(config.difficulty && { initialDifficulty: config.difficulty }) }); }}
@@ -719,21 +719,14 @@ export default function ResultsScreen({ route, navigation }: Props) {
         {canChallenge && !isChallenge && !reviewOnly && (
           <Animated.View style={{ opacity: restFade }}>
             <TouchableOpacity
-              style={styles.challengeButton}
+              style={styles.challengeShareButton}
               onPress={handleChallengeTap}
               activeOpacity={0.7}
               accessibilityRole="button"
               accessibilityLabel={t('challenge.challengeFriend')}
-              accessibilityHint="Shares a challenge link so a friend can beat your score"
             >
-              <View style={styles.challengeButtonInner}>
-                <UsersIcon size={18} color={colors.goldBright} />
-                <View style={styles.challengeButtonContent}>
-                  <Text style={styles.challengeButtonTitle}>{t('challenge.challengeFriend')}</Text>
-                  <Text style={styles.challengeButtonDesc}>{t('challenge.challengeDesc')}</Text>
-                </View>
-                <ChevronRightIcon size={14} color={colors.goldBright} />
-              </View>
+              <UsersIcon size={16} color={colors.goldBright} />
+              <Text style={styles.challengeShareText}>{t('challenge.challengeFriend')}</Text>
             </TouchableOpacity>
           </Animated.View>
         )}
@@ -1213,6 +1206,22 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   },
 
   // ── Challenge button
+  challengeShareButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    borderWidth: 2,
+    borderColor: colors.goldBright,
+    borderRadius: borderRadius.md,
+    paddingVertical: spacing.sm + 2,
+    paddingHorizontal: spacing.lg,
+    marginBottom: spacing.md,
+  },
+  challengeShareText: {
+    ...typography.bodyBold,
+    color: colors.goldBright,
+  },
   challengeButton: {
     backgroundColor: colors.surface,
     borderWidth: 2,

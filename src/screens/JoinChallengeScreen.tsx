@@ -139,10 +139,6 @@ export default function JoinChallengeScreen({ route, navigation }: Props) {
     ? preview.hostResults.filter((r) => r.correct).length
     : 0;
 
-  const hostAccuracy = preview
-    ? Math.round((hostScore / preview.flagIds.length) * 100)
-    : 0;
-
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
@@ -197,7 +193,6 @@ export default function JoinChallengeScreen({ route, navigation }: Props) {
               <View style={styles.opponentHero}>
                 <Text style={styles.opponentName}>{preview.hostName}</Text>
                 <Text style={styles.opponentScore}>{hostScore}/{preview.flagIds.length}</Text>
-                <Text style={styles.opponentAccuracy}>{hostAccuracy}%</Text>
               </View>
 
               {/* Divider with "vs" */}
@@ -216,12 +211,12 @@ export default function JoinChallengeScreen({ route, navigation }: Props) {
                 <View style={styles.detailDivider} />
                 <View style={styles.detailItem}>
                   <Text style={styles.detailValue}>{preview.flagIds.length}</Text>
-                  <Text style={styles.detailLabel}>Flags</Text>
+                  <Text style={styles.detailLabel}>{t('common.flags')}</Text>
                 </View>
                 <View style={styles.detailDivider} />
                 <View style={styles.detailItem}>
                   <Text style={styles.detailValue}>{preview.timeLimit}s</Text>
-                  <Text style={styles.detailLabel}>Per flag</Text>
+                  <Text style={styles.detailLabel}>{t('common.perFlag')}</Text>
                 </View>
               </View>
 
@@ -260,7 +255,7 @@ export default function JoinChallengeScreen({ route, navigation }: Props) {
 
           {/* ── PLAY CTA ── */}
           {preview && (
-            <Animated.View style={{ transform: [{ scale: ctaScale }] }}>
+            <Animated.View style={{ opacity: cardOpacity, transform: [{ scale: ctaScale }] }}>
               <TouchableOpacity
                 style={[styles.playButton, !canPlay && styles.playButtonDisabled]}
                 onPress={handlePlay}
@@ -271,7 +266,7 @@ export default function JoinChallengeScreen({ route, navigation }: Props) {
                 accessibilityState={{ disabled: !canPlay }}
               >
                 <PlayIcon size={16} color={colors.playText} />
-                <Text style={styles.playButtonText}>Beat {preview.hostName}</Text>
+                <Text style={styles.playButtonText}>{t('challenge.beatName', { name: preview.hostName })}</Text>
               </TouchableOpacity>
             </Animated.View>
           )}
@@ -379,13 +374,6 @@ const createStyles = (colors: ThemeColors) => {
     letterSpacing: -2,
     lineHeight: 80,
   },
-  opponentAccuracy: {
-    fontFamily: fontFamily.uiLabel,
-    fontSize: fontSize.sm,
-    color: colors.textSecondary,
-    marginTop: spacing.xs,
-  },
-
   // ── VS divider
   vsDivider: {
     flexDirection: 'row',

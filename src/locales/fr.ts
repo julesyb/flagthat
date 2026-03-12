@@ -22,6 +22,10 @@ const fr: typeof en = {
     new: 'Nouveau',
     review: 'Revoir',
     seeResults: 'Voir les r\u00e9sultats',
+    flagOf: 'Drapeau de {country}',
+    vs: 'vs',
+    flags: 'Drapeaux',
+    perFlag: 'Par drapeau',
   },
 
   nav: {
@@ -402,6 +406,7 @@ const fr: typeof en = {
     previewTimeLimit: '{seconds}s par drapeau',
     previewValid: 'Code valide',
     previewHostScore: '{name} a obtenu {correct}/{total}',
+    beatName: 'Battre {name}',
     challengeBack: 'Contre-d\u00e9fi',
     challengeBackDesc: 'Jouez une nouvelle manche et renvoyez-la',
     recentChallenges: 'Defis recents',

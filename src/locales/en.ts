@@ -23,6 +23,8 @@ const en = {
     seeResults: 'See Results',
     flagOf: 'Flag of {country}',
     vs: 'vs',
+    flags: 'Flags',
+    perFlag: 'Per flag',
   },
 
   // ─── Bottom Nav ──────────────────────────────────────────
@@ -364,6 +366,7 @@ const en = {
     previewTimeLimit: '{seconds}s per flag',
     previewValid: 'Valid code',
     previewHostScore: '{name} got {correct}/{total}',
+    beatName: 'Beat {name}',
     challengeBack: 'Challenge Back',
     challengeBackDesc: 'Play a new round and send it back',
     recentChallenges: 'Recent Challenges',
