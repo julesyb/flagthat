@@ -6,7 +6,7 @@ export type RootStackParamList = {
   Home: undefined;
   GameSetup: { initialMode?: GameMode; initialDifficulty?: 'easy' | 'medium' | 'hard' } | undefined;
   Game: { config: GameConfig; challenge?: ChallengeData; playerName?: string };
-  FlagFlash: { config: GameConfig };
+  FlashFlag: { config: GameConfig };
   FlagPuzzle: { config: GameConfig; challenge?: ChallengeData; playerName?: string };
   Neighbors: { config: GameConfig; challenge?: ChallengeData; playerName?: string };
   FlagImpostor: { config: GameConfig };

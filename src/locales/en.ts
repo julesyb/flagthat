@@ -80,8 +80,8 @@ const en = {
     gameMode: 'Game Mode',
     quiz: 'Quiz',
     quizDesc: 'Classic flag quiz',
-    flagFlash: 'FlagFlash',
-    flagFlashDesc: 'Party mode, tilt to play',
+    flashFlag: 'Flash Flag',
+    flashFlagDesc: 'Party mode, tilt to play',
     flagPuzzle: 'Flag Puzzle',
     flagPuzzleDesc: 'Flag reveals over time',
     timedQuiz: 'Timed Quiz',
@@ -281,9 +281,9 @@ const en = {
     notANeighbor: 'Not a neighbor',
   },
 
-  // ─── FlagFlash Screen ──────────────────────────────────
-  flagFlash: {
-    title: 'FlagFlash',
+  // ─── Flash Flag Screen ──────────────────────────────────
+  flashFlag: {
+    title: 'Flash Flag',
     howToPlay: 'How to play',
     holdPhone: 'Hold phone on your forehead',
     friendsDescribe: 'Friends describe the flag to you',
@@ -445,7 +445,7 @@ const en = {
     easy: 'Easy',
     medium: 'Medium',
     hard: 'Hard',
-    flagflash: 'FlagFlash',
+    flashflag: 'Flash Flag',
     flagpuzzle: 'Flag Puzzle',
     timeattack: 'Timed Quiz',
     neighbors: 'Neighbors',

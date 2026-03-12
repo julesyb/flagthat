@@ -21,7 +21,7 @@ import ResultsScreen from './src/screens/ResultsScreen';
 import StatsScreen from './src/screens/StatsScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
 import BrowseScreen from './src/screens/BrowseScreen';
-import FlagFlashScreen from './src/screens/FlagFlashScreen';
+import FlashFlagScreen from './src/screens/FlashFlagScreen';
 import FlagPuzzleScreen from './src/screens/FlagPuzzleScreen';
 import NeighborsScreen from './src/screens/NeighborsScreen';
 import FlagImpostorScreen from './src/screens/FlagImpostorScreen';
@@ -142,8 +142,8 @@ function AppContent() {
           options={{ headerShown: false, gestureEnabled: false }}
         />
         <Stack.Screen
-          name="FlagFlash"
-          component={FlagFlashScreen}
+          name="FlashFlag"
+          component={FlashFlagScreen}
           options={{ headerShown: false, gestureEnabled: false }}
         />
         <Stack.Screen

@@ -1,4 +1,4 @@
-export type GameMode = 'easy' | 'medium' | 'hard' | 'flagflash' | 'flagpuzzle' | 'timeattack' | 'neighbors' | 'impostor' | 'capitalconnection' | 'daily' | 'practice' | 'baseline';
+export type GameMode = 'easy' | 'medium' | 'hard' | 'flashflag' | 'flagpuzzle' | 'timeattack' | 'neighbors' | 'impostor' | 'capitalconnection' | 'daily' | 'practice' | 'baseline';
 
 export type BaselineRegionId = 'africa' | 'asia' | 'europe' | 'americas' | 'oceania';
 
@@ -39,7 +39,7 @@ export interface GameConfig {
   mode: GameMode;
   category: CategoryId;
   questionCount: number;
-  timeLimit?: number; // seconds, for FlagFlash
+  timeLimit?: number; // seconds, for Flash Flag
   displayMode?: DisplayMode; // flag (default) or map
   autocomplete?: boolean; // enable autocomplete suggestions in hard mode
   guessLimit?: number; // max wrong guesses before game over (omitted or 0 = unlimited)
@@ -72,7 +72,7 @@ export const GAME_MODES: Record<GameMode, { label: string; description: string; 
   easy: { label: 'Easy', description: '2 multiple choice options', icon: '2' },
   medium: { label: 'Medium', description: '4 multiple choice options', icon: '4' },
   hard: { label: 'Hard', description: 'Free-form, type the answer', icon: 'Aa' },
-  flagflash: { label: 'FlagFlash', description: 'Party mode, tilt to play', icon: '!!' },
+  flashflag: { label: 'Flash Flag', description: 'Party mode, tilt to play', icon: '!!' },
   flagpuzzle: { label: 'Flag Puzzle', description: 'Flag reveals over time', icon: '??' },
   timeattack: { label: 'Timed Quiz', description: 'Race the clock', icon: '00' },
   neighbors: { label: 'Neighbors', description: 'Find all bordering countries', icon: 'NB' },

@@ -155,7 +155,7 @@ export default function StatsScreen() {
               bestStreak: 0, bestTimeAttackScore: 0,
               modeStats: {
                 easy: { correct: 0, total: 0 }, medium: { correct: 0, total: 0 },
-                hard: { correct: 0, total: 0 }, flagflash: { correct: 0, total: 0 },
+                hard: { correct: 0, total: 0 }, flashflag: { correct: 0, total: 0 },
                 flagpuzzle: { correct: 0, total: 0 }, timeattack: { correct: 0, total: 0 },
                 neighbors: { correct: 0, total: 0 }, impostor: { correct: 0, total: 0 },
                 capitalconnection: { correct: 0, total: 0 }, daily: { correct: 0, total: 0 },

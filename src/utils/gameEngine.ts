@@ -143,7 +143,7 @@ export function generatePracticeQuestions(flagIds: string[]): GameQuestion[] {
 
 function generateOptions(correctFlag: FlagItem, pool: FlagItem[], mode: GameMode, difficulty?: 'easy' | 'medium' | 'hard'): string[] {
   const effectiveDifficulty = difficulty || (mode === 'easy' ? 'easy' : mode === 'hard' ? 'hard' : 'medium');
-  if (effectiveDifficulty === 'hard' || mode === 'flagflash' || mode === 'flagpuzzle') return [];
+  if (effectiveDifficulty === 'hard' || mode === 'flashflag' || mode === 'flagpuzzle') return [];
 
   const choiceCount = effectiveDifficulty === 'easy' ? 2 : 4;
   const otherFlags = pool.filter((f) => f.id !== correctFlag.id);

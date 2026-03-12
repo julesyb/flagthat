@@ -361,7 +361,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     fontFamily: fontFamily.display,
     fontSize: fontSize.gameTitle,
     lineHeight: 44,
-    color: colors.white,
+    color: colors.text,
     letterSpacing: -0.5,
   },
   wmLine2: {
@@ -395,7 +395,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   primaryBtnIcon: {
     width: 44,
     height: 44,
-    backgroundColor: 'rgba(19,15,0,0.2)',
+    backgroundColor: colors.whiteAlpha20,
     borderRadius: borderRadius.md,
     justifyContent: 'center',
     alignItems: 'center',

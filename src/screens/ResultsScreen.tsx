@@ -432,7 +432,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
       return;
     }
     const map: Partial<Record<GameMode, keyof RootStackParamList>> = {
-      flagflash: 'FlagFlash', flagpuzzle: 'FlagPuzzle', neighbors: 'Neighbors',
+      flashflag: 'FlashFlag', flagpuzzle: 'FlagPuzzle', neighbors: 'Neighbors',
       impostor: 'FlagImpostor', capitalconnection: 'CapitalConnection',
     };
     navigation.replace((map[config.mode] || 'Game') as 'Game', { config });

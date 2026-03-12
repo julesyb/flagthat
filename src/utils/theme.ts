@@ -255,9 +255,9 @@ export const fontSize = {
   title: 28,      // title-level display
   wordmark: 34,   // app wordmark
   stat: 38,       // large stat tile numbers
-  gameTitle: 42,  // gameplay large titles (FlagFlash)
+  gameTitle: 42,  // gameplay large titles (Flash Flag)
   hero: 52,       // hero display numbers
-  gameFeedback: 56, // gameplay feedback text (FlagFlash)
+  gameFeedback: 56, // gameplay feedback text (Flash Flag)
   grade: 72,      // grade letter / big score display
   countdown: 120, // full-screen countdown numbers
 };
