@@ -305,6 +305,18 @@ export default function StatsScreen() {
   const progressPct = totalFlags > 0 ? Math.round((countriesSeen / totalFlags) * 100) : 0;
   const earnedIds = new Set(earnedBadges.map((b) => b.id));
 
+  // Sorted badges: earned first, then in-progress, then locked
+  const sortedBadges = React.useMemo(() => {
+    return BADGES.map((badge) => {
+      const earned = earnedIds.has(badge.id);
+      const progress = !earned && badgeCtx && derived ? getBadgeProgress(badge, badgeCtx, derived) : null;
+      const inProgress = !earned && progress != null && progress.progress > 0;
+      // Sort key: 0 = earned, 1 = in-progress, 2 = locked
+      const order = earned ? 0 : inProgress ? 1 : 2;
+      return { badge, earned, progress, order };
+    }).sort((a, b) => a.order - b.order);
+  }, [earnedIds, badgeCtx, derived]);
+
   // Region accuracy data (only regions with games played)
   const regionData = REGIONS
     .map((regionId) => {
@@ -627,22 +639,8 @@ export default function StatsScreen() {
             <Text style={styles.sectionMeta}>{t('stats.badgesEarned', { earned: earnedBadges.length, total: BADGES.length })}</Text>
           </View>
           <View style={styles.badgeGrid}>
-            {[...BADGES].sort((a, b) => {
-              const aEarned = earnedIds.has(a.id);
-              const bEarned = earnedIds.has(b.id);
-              if (aEarned !== bEarned) return aEarned ? -1 : 1;
-              if (!aEarned && badgeCtx && derived) {
-                const aP = getBadgeProgress(a, badgeCtx, derived);
-                const bP = getBadgeProgress(b, badgeCtx, derived);
-                const aInProgress = aP && aP.progress > 0;
-                const bInProgress = bP && bP.progress > 0;
-                if (aInProgress !== bInProgress) return aInProgress ? -1 : 1;
-              }
-              return 0;
-            }).map((badge) => {
-              const earned = earnedIds.has(badge.id);
+            {sortedBadges.map(({ badge, earned, progress }) => {
               const tierColor = TIER_COLORS[badge.tier];
-              const progress = !earned && badgeCtx && derived ? getBadgeProgress(badge, badgeCtx, derived) : null;
               return (
                 <View key={badge.id} style={[styles.badgeCard, !earned && styles.badgeCardLocked]}>
                   <View style={[styles.badgeIconWrap, { backgroundColor: earned ? tierColor + '18' : colors.surfaceSecondary }]}>
