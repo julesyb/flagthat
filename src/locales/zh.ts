@@ -72,6 +72,7 @@ const zh: typeof en = {
 
   setup: {
     gameMode: '\u6e38\u620f\u6a21\u5f0f',
+    chooseYourGame: '\u9009\u62e9\u4f60\u7684\u6e38\u620f',
     quiz: '\u7b54\u9898',
     quizDesc: '\u7ecf\u5178\u56fd\u65d7\u7b54\u9898',
     flagFlash: 'FlagFlash',

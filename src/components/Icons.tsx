@@ -119,11 +119,11 @@ export function ClockIcon({ size = 16, color, strokeWidth = 1.5 }: IconProps) {
 }
 
 // Flag — flag display mode toggle
-export function FlagIcon({ size = 16, color, strokeWidth = 1.5 }: IconProps) {
+export function FlagIcon({ size = 16, color, strokeWidth = 1.5, filled = false }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth}>
       <Path d="M4 21V4" />
-      <Path d="M4 4 C4 4 7 2 10 4 C13 6 16 4 20 4 L20 15 C20 15 17 17 14 15 C11 13 8 15 4 15" />
+      <Path d="M4 4 C4 4 7 2 10 4 C13 6 16 4 20 4 L20 15 C20 15 17 17 14 15 C11 13 8 15 4 15" fill={filled ? color : 'none'} fillOpacity={filled ? 0.2 : 0} />
     </Svg>
   );
 }

@@ -72,6 +72,7 @@ const de: typeof en = {
 
   setup: {
     gameMode: 'Spielmodus',
+    chooseYourGame: 'Wähle dein Spiel',
     quiz: 'Quiz',
     quizDesc: 'Klassisches Flaggen-Quiz',
     flagFlash: 'FlagFlash',

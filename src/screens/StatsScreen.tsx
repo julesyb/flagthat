@@ -25,7 +25,7 @@ import BottomNav from '../components/BottomNav';
 import ScreenContainer from '../components/ScreenContainer';
 import { useNavTabs } from '../hooks/useNavTabs';
 import { getAllEarnedBadges, buildBadgeContext, deriveFromContext, BADGES, TIER_COLORS, getBadgeProgress } from '../utils/badges';
-import { ChevronRightIcon, CrosshairIcon, BadgeIconView } from '../components/Icons';
+import { ChevronRightIcon, CrosshairIcon, BadgeIconView, UsersIcon } from '../components/Icons';
 
 const REGIONS: CategoryId[] = ['africa', 'asia', 'europe', 'americas', 'oceania'];
 

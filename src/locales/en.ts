@@ -78,6 +78,7 @@ const en = {
   // ─── Game Setup ──────────────────────────────────────────
   setup: {
     gameMode: 'Game Mode',
+    chooseYourGame: 'Choose Your Game',
     quiz: 'Quiz',
     quizDesc: 'Classic flag quiz',
     flagFlash: 'FlagFlash',

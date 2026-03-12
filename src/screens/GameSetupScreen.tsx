@@ -49,12 +49,12 @@ type SetupMode = 'quiz' | 'flagflash' | 'flagpuzzle' | 'timeattack' | 'neighbors
 type QuizDifficulty = 'easy' | 'medium' | 'hard';
 
 const SETUP_MODES: { key: SetupMode; labelKey: string; descKey: string; icon: (active: boolean, colors: ThemeColors) => React.ReactNode }[] = [
-  { key: 'quiz', labelKey: 'setup.quiz', descKey: 'setup.quizDesc', icon: (a, c) => <FlagIcon size={18} color={a ? c.goldBright : c.textTertiary} /> },
-  { key: 'flagflash', labelKey: 'setup.flagFlash', descKey: 'setup.flagFlashDesc', icon: (a, c) => <LightningIcon size={18} color={a ? c.goldBright : c.textTertiary} /> },
-  { key: 'flagpuzzle', labelKey: 'setup.flagPuzzle', descKey: 'setup.flagPuzzleDesc', icon: (a, c) => <PuzzleIcon size={18} color={a ? c.goldBright : c.textTertiary} /> },
-  { key: 'timeattack', labelKey: 'setup.timedQuiz', descKey: 'setup.timedQuizDesc', icon: (a, c) => <ClockIcon size={18} color={a ? c.goldBright : c.textTertiary} /> },
-  { key: 'neighbors', labelKey: 'setup.neighbors', descKey: 'setup.neighborsDesc', icon: (a, c) => <UsersIcon size={18} color={a ? c.goldBright : c.textTertiary} /> },
-  { key: 'capitalconnection', labelKey: 'setup.capitalQuiz', descKey: 'setup.capitalQuizDesc', icon: (a, c) => <LinkIcon size={18} color={a ? c.goldBright : c.textTertiary} /> },
+  { key: 'quiz', labelKey: 'setup.quiz', descKey: 'setup.quizDesc', icon: (a, c) => <FlagIcon size={22} color={a ? c.goldBright : c.textTertiary} filled={a} /> },
+  { key: 'flagflash', labelKey: 'setup.flagFlash', descKey: 'setup.flagFlashDesc', icon: (a, c) => <LightningIcon size={22} color={a ? c.goldBright : c.textTertiary} filled={a} /> },
+  { key: 'flagpuzzle', labelKey: 'setup.flagPuzzle', descKey: 'setup.flagPuzzleDesc', icon: (a, c) => <PuzzleIcon size={22} color={a ? c.goldBright : c.textTertiary} /> },
+  { key: 'timeattack', labelKey: 'setup.timedQuiz', descKey: 'setup.timedQuizDesc', icon: (a, c) => <ClockIcon size={22} color={a ? c.goldBright : c.textTertiary} /> },
+  { key: 'neighbors', labelKey: 'setup.neighbors', descKey: 'setup.neighborsDesc', icon: (a, c) => <UsersIcon size={22} color={a ? c.goldBright : c.textTertiary} /> },
+  { key: 'capitalconnection', labelKey: 'setup.capitalQuiz', descKey: 'setup.capitalQuizDesc', icon: (a, c) => <LinkIcon size={22} color={a ? c.goldBright : c.textTertiary} strokeWidth={a ? 2 : 1.5} /> },
 ];
 
 const DIFFICULTIES: { key: QuizDifficulty; labelKey: string }[] = [
@@ -209,6 +209,9 @@ export default function GameSetupScreen({ route, navigation }: Props) {
         showsVerticalScrollIndicator={false}
       >
         <ScreenContainer>
+        {/* Screen title */}
+        <Text style={styles.screenTitle}>{t('setup.chooseYourGame')}</Text>
+
         {/* Game Mode Grid */}
         <View style={styles.modeGrid}>
           {SETUP_MODES.map((m) => {
@@ -554,13 +557,13 @@ const createStyles = (colors: ThemeColors) => {
     backgroundColor: colors.goldAlpha10,
   },
   modeIconBadge: {
-    width: 36,
-    height: 36,
+    width: 42,
+    height: 42,
     backgroundColor: colors.surfaceSecondary,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: spacing.xs,
-    borderRadius: borderRadius.sm,
+    marginBottom: spacing.sm,
+    borderRadius: borderRadius.lg,
   },
   modeIconBadgeActive: {
     backgroundColor: colors.goldAlpha15,
