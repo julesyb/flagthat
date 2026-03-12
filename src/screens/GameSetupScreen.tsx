@@ -478,7 +478,7 @@ const createStyles = (colors: ThemeColors) => {
 
   // Screen title - prominent heading for the page
   screenTitle: {
-    ...typography.heading,
+    ...typography.title,
     color: colors.text,
     marginBottom: spacing.md,
   },
@@ -494,10 +494,7 @@ const createStyles = (colors: ThemeColors) => {
     marginBottom: spacing.md,
   },
   diffLabel: {
-    fontFamily: fontFamily.uiLabel,
-    fontSize: fontSize.xs,
-    letterSpacing: 1,
-    textTransform: 'uppercase',
+    ...typography.eyebrow,
     color: colors.textTertiary,
     marginBottom: spacing.sm,
   },

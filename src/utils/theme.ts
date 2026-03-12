@@ -255,11 +255,13 @@ export const fontSize = {
 };
 
 export const typography = {
+  // ── Page-level titles (LibreBaskerville 28px) ──
   title: {
     fontSize: fontSize.title,
     fontFamily: fontFamily.display,
     letterSpacing: -0.5,
   },
+  // ── Section headings (Barlow SemiBold 20px) ──
   heading: {
     fontSize: fontSize.lg,
     fontFamily: fontFamily.uiLabel,
@@ -271,6 +273,7 @@ export const typography = {
     letterSpacing: 0.3,
     textTransform: 'uppercase' as const,
   },
+  // ── Body text (Barlow 16px) ──
   body: {
     fontSize: fontSize.body,
     fontFamily: fontFamily.body,
@@ -279,6 +282,7 @@ export const typography = {
     fontSize: fontSize.body,
     fontFamily: fontFamily.bodyBold,
   },
+  // ── Captions / subtitles (Barlow 13px) ──
   caption: {
     fontSize: fontSize.sm,
     fontFamily: fontFamily.body,
@@ -288,15 +292,58 @@ export const typography = {
     fontFamily: fontFamily.uiLabelMedium,
     letterSpacing: 0.2,
   },
+  // ── Labels (Barlow Medium 16px) ──
   label: {
     fontSize: fontSize.body,
     fontFamily: fontFamily.bodyMedium,
   },
+  // ── Eyebrow labels (Barlow SemiBold 11px, uppercase) ──
   eyebrow: {
     fontSize: fontSize.xs,
     fontFamily: fontFamily.uiLabel,
-    letterSpacing: 2,
+    letterSpacing: 1.2,
     textTransform: 'uppercase' as const,
+  },
+  // ── Small text presets (11px) — for badges, chips, meta text ──
+  micro: {
+    fontSize: fontSize.xs,
+    fontFamily: fontFamily.body,
+  },
+  microMedium: {
+    fontSize: fontSize.xs,
+    fontFamily: fontFamily.bodyMedium,
+  },
+  microBold: {
+    fontSize: fontSize.xs,
+    fontFamily: fontFamily.bodyBold,
+  },
+  // ── Caption strong (13px SemiBold) — badge names, milestone titles ──
+  captionStrong: {
+    fontSize: fontSize.sm,
+    fontFamily: fontFamily.bodyBold,
+  },
+  // ── Small bold label (11px SemiBold, no uppercase) — nav tabs, score badges ──
+  tag: {
+    fontSize: fontSize.xs,
+    fontFamily: fontFamily.uiLabel,
+  },
+  // ── Action label (13px SemiBold, uppercase) — button text, CTAs ──
+  actionLabel: {
+    fontSize: fontSize.sm,
+    fontFamily: fontFamily.uiLabel,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase' as const,
+  },
+  // ── Display numerals (LibreBaskerville at lg/display/hero/countdown sizes) ──
+  statValue: {
+    fontSize: fontSize.lg,
+    fontFamily: fontFamily.display,
+    letterSpacing: -0.5,
+  },
+  displayValue: {
+    fontSize: fontSize.display,
+    fontFamily: fontFamily.display,
+    letterSpacing: -1,
   },
 };
 

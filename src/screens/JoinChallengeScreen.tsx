@@ -12,7 +12,7 @@ import {
   Platform,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { spacing, fontFamily, fontSize, buildButtons, borderRadius, ThemeColors } from '../utils/theme';
+import { spacing, fontFamily, fontSize, buildButtons, borderRadius, typography, ThemeColors } from '../utils/theme';
 import { useTheme } from '../contexts/ThemeContext';
 import { RootStackParamList } from '../types/navigation';
 import { decodeChallenge, buildChallengeQuestions, getScreenForMode, ChallengeData, ChallengeScreenName } from '../utils/challengeCode';
@@ -189,11 +189,9 @@ const createStyles = (colors: ThemeColors) => {
     paddingTop: spacing.xxl,
   },
   title: {
-    fontFamily: fontFamily.display,
-    fontSize: fontSize.title,
+    ...typography.title,
     color: colors.ink,
     textAlign: 'center',
-    letterSpacing: -0.5,
     marginBottom: spacing.lg,
   },
   headline: {
@@ -208,8 +206,7 @@ const createStyles = (colors: ThemeColors) => {
     lineHeight: 80,
   },
   headlineSub: {
-    fontFamily: fontFamily.body,
-    fontSize: fontSize.body,
+    ...typography.body,
     color: colors.textSecondary,
     marginTop: spacing.xs,
   },
@@ -219,14 +216,12 @@ const createStyles = (colors: ThemeColors) => {
     borderColor: colors.border,
     borderRadius: borderRadius.md,
     padding: spacing.md,
-    fontFamily: fontFamily.body,
-    fontSize: fontSize.body,
+    ...typography.body,
     color: colors.text,
     marginBottom: spacing.sm,
   },
   error: {
-    fontFamily: fontFamily.body,
-    fontSize: fontSize.xs,
+    ...typography.micro,
     color: colors.error,
     marginBottom: spacing.sm,
   },

@@ -229,15 +229,12 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     paddingTop: spacing.md,
   },
   pageTitle: {
-    fontFamily: fontFamily.display,
-    fontSize: fontSize.title,
-    letterSpacing: -0.5,
+    ...typography.title,
     color: colors.text,
     marginBottom: spacing.xxs,
   },
   pageSub: {
-    fontFamily: fontFamily.body,
-    fontSize: fontSize.sm,
+    ...typography.caption,
     color: colors.textTertiary,
   },
   searchRow: {
@@ -258,8 +255,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    fontFamily: fontFamily.body,
-    fontSize: fontSize.body,
+    ...typography.body,
     color: colors.text,
     paddingVertical: 0,
   },
@@ -283,8 +279,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     borderColor: colors.goldBright,
   },
   chipLabel: {
-    fontFamily: fontFamily.uiLabel,
-    fontSize: fontSize.xs,
+    ...typography.tag,
     color: colors.textSecondary,
   },
   chipLabelActive: {
@@ -314,8 +309,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     alignItems: 'center',
   },
   countryName: {
-    fontFamily: fontFamily.bodyMedium,
-    fontSize: fontSize.xs,
+    ...typography.microMedium,
     color: colors.text,
     textAlign: 'center',
     marginTop: spacing.xs,

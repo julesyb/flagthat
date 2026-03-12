@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
-import { fontFamily, fontSize, spacing, borderRadius, shadows, ThemeColors } from '../utils/theme';
+import { fontFamily, fontSize, spacing, borderRadius, shadows, typography, ThemeColors } from '../utils/theme';
 import { useTheme } from '../contexts/ThemeContext';
 import { getBaselineData, BaselineData, skipOnboarding } from '../utils/storage';
 import { getCategoryCount, getAllFlags } from '../data';
@@ -364,8 +364,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     borderColor: colors.whiteAlpha20,
   },
   welcomeText: {
-    fontFamily: fontFamily.body,
-    fontSize: fontSize.body,
+    ...typography.body,
     color: colors.whiteAlpha60,
     marginBottom: spacing.xs,
   },
@@ -386,8 +385,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     color: colors.accentLight,
   },
   tagline: {
-    fontFamily: fontFamily.bodyMedium,
-    fontSize: fontSize.body,
+    ...typography.label,
     color: colors.whiteAlpha70,
     lineHeight: 24,
   },
@@ -427,8 +425,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     marginBottom: 2,
   },
   primaryBtnSub: {
-    fontFamily: fontFamily.body,
-    fontSize: fontSize.sm,
+    ...typography.caption,
     color: colors.playText,
   },
   secondaryBtn: {
@@ -459,8 +456,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     marginBottom: 2,
   },
   secondaryBtnSub: {
-    fontFamily: fontFamily.body,
-    fontSize: fontSize.sm,
+    ...typography.caption,
     color: colors.textTertiary,
   },
 
@@ -503,8 +499,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     borderRadius: borderRadius.full,
   },
   progressText: {
-    fontFamily: fontFamily.bodyMedium,
-    fontSize: fontSize.xs,
+    ...typography.microMedium,
     color: colors.textTertiary,
   },
 
@@ -563,8 +558,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     flex: 1,
   },
   regionName: {
-    fontFamily: fontFamily.bodyBold,
-    fontSize: fontSize.body,
+    ...typography.bodyBold,
     color: colors.ink,
     marginBottom: 2,
   },
@@ -572,8 +566,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     color: colors.success,
   },
   regionSub: {
-    fontFamily: fontFamily.body,
-    fontSize: fontSize.sm,
+    ...typography.caption,
     color: colors.textTertiary,
     lineHeight: 18,
   },
@@ -592,8 +585,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     gap: spacing.md,
   },
   allDoneText: {
-    fontFamily: fontFamily.body,
-    fontSize: fontSize.body,
+    ...typography.body,
     color: colors.textSecondary,
   },
   startBtn: {

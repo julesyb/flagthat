@@ -404,10 +404,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     paddingBottom: spacing.xxl,
   },
   sectionTitle: {
-    fontFamily: fontFamily.uiLabel,
-    fontSize: fontSize.xs,
-    letterSpacing: 1.2,
-    textTransform: 'uppercase',
+    ...typography.eyebrow,
     color: colors.textTertiary,
     marginBottom: spacing.sm,
     marginTop: spacing.lg,
@@ -437,7 +434,6 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   settingLabel: {
     ...typography.bodyBold,
     color: colors.text,
-    fontSize: fontSize.body,
   },
   settingDesc: {
     ...typography.caption,
@@ -454,7 +450,6 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   settingTimeValue: {
     ...typography.bodyBold,
     color: colors.text,
-    fontSize: fontSize.body,
     letterSpacing: 0.5,
   },
   themeRow: {
@@ -485,7 +480,6 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   langOptionText: {
     ...typography.body,
     color: colors.text,
-    fontSize: fontSize.body,
   },
   langOptionActive: {
     fontFamily: fontFamily.bodyBold,

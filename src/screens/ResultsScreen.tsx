@@ -883,8 +883,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     marginBottom: spacing.sm,
   },
   heroEyebrow: {
-    fontFamily: fontFamily.uiLabel, fontSize: fontSize.xs,
-    letterSpacing: 1.5, textTransform: 'uppercase',
+    ...typography.eyebrow,
     color: colors.whiteAlpha45, marginBottom: spacing.lg,
   },
   heroAccuracy: {
@@ -927,23 +926,21 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   timelineStat: { flex: 1, alignItems: 'center' },
   timelineDivider: { width: 1, height: 36, backgroundColor: colors.border },
   timelineStatValue: {
-    fontFamily: fontFamily.display, fontSize: fontSize.lg,
-    color: colors.ink, letterSpacing: -0.5,
+    ...typography.statValue, color: colors.ink,
   },
   timelineStatUnit: {
-    fontFamily: fontFamily.bodyMedium, fontSize: fontSize.sm, color: colors.textTertiary,
+    ...typography.captionBold, color: colors.textTertiary,
   },
   timelineStatLabel: {
-    fontFamily: fontFamily.uiLabel, fontSize: fontSize.xs, letterSpacing: 0.8,
-    textTransform: 'uppercase', color: colors.textTertiary, marginTop: spacing.xxs,
+    ...typography.eyebrow,
+    color: colors.textTertiary, marginTop: spacing.xxs,
   },
   newBestPill: {
     backgroundColor: colors.accentBg, borderRadius: borderRadius.full,
     paddingVertical: 2, paddingHorizontal: 8, marginTop: spacing.xxs,
   },
   newBestPillText: {
-    fontFamily: fontFamily.uiLabel, fontSize: fontSize.xs,
-    letterSpacing: 0.6, textTransform: 'uppercase', color: colors.accent,
+    ...typography.eyebrow, color: colors.accent,
   },
 
   // ── Daily Grid
@@ -952,8 +949,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     padding: spacing.lg, alignItems: 'center', marginBottom: spacing.sm,
   },
   dailyGridTitle: {
-    fontFamily: fontFamily.uiLabel, fontSize: fontSize.xs,
-    letterSpacing: 1.5, textTransform: 'uppercase',
+    ...typography.eyebrow,
     color: colors.whiteAlpha45, marginBottom: spacing.md,
   },
   dailyGrid: { gap: 6 },
@@ -969,7 +965,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
     borderRadius: borderRadius.full, paddingVertical: 6, paddingHorizontal: 12,
   },
-  insightText: { fontFamily: fontFamily.bodyMedium, fontSize: fontSize.xs, color: colors.textSecondary },
+  insightText: { ...typography.microMedium, color: colors.textSecondary },
 
   // ── Buttons
   buttonRow: { gap: spacing.sm, marginBottom: spacing.md },
@@ -987,10 +983,10 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   },
   badgeIconWrap: { width: 36, height: 36, borderRadius: borderRadius.md, justifyContent: 'center', alignItems: 'center' },
   badgeContent: { flex: 1 },
-  badgeName: { fontFamily: fontFamily.bodyBold, fontSize: fontSize.sm, color: colors.ink, marginBottom: 2 },
-  badgeDesc: { fontFamily: fontFamily.body, fontSize: fontSize.xs, color: colors.textSecondary },
+  badgeName: { ...typography.captionStrong, color: colors.ink, marginBottom: 2 },
+  badgeDesc: { ...typography.micro, color: colors.textSecondary },
   badgeTierPill: { borderRadius: borderRadius.full, paddingVertical: 3, paddingHorizontal: 10 },
-  badgeTierText: { fontFamily: fontFamily.uiLabel, fontSize: fontSize.xs, letterSpacing: 0.8, textTransform: 'uppercase' },
+  badgeTierText: { ...typography.eyebrow },
 
   // ── Progress
   progressSection: { marginBottom: spacing.md },
@@ -1000,27 +996,26 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   },
   progressTopRow: { flexDirection: 'row', gap: spacing.lg, marginBottom: 14 },
   progressStat: { alignItems: 'center', flex: 1 },
-  progressStatValue: { fontFamily: fontFamily.display, fontSize: fontSize.lg, color: colors.ink, letterSpacing: -0.5 },
+  progressStatValue: { ...typography.statValue, color: colors.ink },
   progressStatLabel: {
-    fontFamily: fontFamily.uiLabel, fontSize: fontSize.xs, letterSpacing: 0.8,
-    textTransform: 'uppercase', color: colors.textTertiary, marginTop: spacing.xxs, textAlign: 'center',
+    ...typography.eyebrow,
+    color: colors.textTertiary, marginTop: spacing.xxs, textAlign: 'center',
   },
   progressBarWrap: {
     height: 7, backgroundColor: colors.border, borderRadius: borderRadius.full, overflow: 'hidden',
   },
   progressBarFill: { height: '100%', backgroundColor: colors.accent, borderRadius: borderRadius.full },
-  progressPctLabel: { fontFamily: fontFamily.bodyBold, fontSize: fontSize.xs, color: colors.ink, marginTop: 6 },
+  progressPctLabel: { ...typography.microBold, color: colors.ink, marginTop: 6 },
   practiceButton: {
     flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
     backgroundColor: colors.accentBg, borderRadius: borderRadius.lg,
     borderWidth: 1.5, borderColor: colors.accent, padding: 14, marginTop: 8,
   },
   practiceButtonText: {
-    fontFamily: fontFamily.uiLabel, fontSize: fontSize.sm,
-    letterSpacing: 0.8, textTransform: 'uppercase', color: colors.accent,
+    ...typography.actionLabel, letterSpacing: 0.8, color: colors.accent,
   },
   practiceButtonMeta: {
-    fontFamily: fontFamily.body, fontSize: fontSize.xs,
+    ...typography.micro,
     color: colors.textTertiary, flex: 1, textAlign: 'right',
   },
   viewStatsButton: {
@@ -1030,8 +1025,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     padding: 14, marginTop: 8,
   },
   viewStatsText: {
-    fontFamily: fontFamily.uiLabel, fontSize: fontSize.sm,
-    letterSpacing: 0.8, textTransform: 'uppercase', color: colors.ink, flex: 1,
+    ...typography.actionLabel, letterSpacing: 0.8, color: colors.ink, flex: 1,
   },
 
   // ── Sections
@@ -1040,10 +1034,9 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     marginTop: spacing.md, marginBottom: spacing.sm,
   },
   sectionTitle: {
-    fontFamily: fontFamily.uiLabel, fontSize: fontSize.xs,
-    letterSpacing: 1.2, textTransform: 'uppercase', color: colors.textTertiary,
+    ...typography.eyebrow, color: colors.textTertiary,
   },
-  sectionMeta: { fontFamily: fontFamily.body, fontSize: fontSize.xs, color: colors.textTertiary },
+  sectionMeta: { ...typography.micro, color: colors.textTertiary },
 
   // ── Review
   reviewItem: {
@@ -1057,12 +1050,12 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   reviewIndexCorrect: { color: colors.success },
   reviewIndexWrong: { color: colors.error },
   reviewContent: { flex: 1 },
-  reviewName: { fontFamily: fontFamily.bodyBold, fontSize: fontSize.body, color: colors.text },
-  reviewAnswer: { fontFamily: fontFamily.body, fontSize: fontSize.xs, color: colors.error, marginTop: spacing.xxs },
+  reviewName: { ...typography.bodyBold, color: colors.text },
+  reviewAnswer: { ...typography.micro, color: colors.error, marginTop: spacing.xxs },
   reviewRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  reviewTime: { fontFamily: fontFamily.bodyMedium, fontSize: fontSize.xs, color: colors.textTertiary },
+  reviewTime: { ...typography.microMedium, color: colors.textTertiary },
   reviewTimeFastest: { color: colors.success },
-  reviewOpponent: { fontFamily: fontFamily.body, fontSize: fontSize.xs, color: colors.textTertiary, marginTop: spacing.xxs },
+  reviewOpponent: { ...typography.micro, color: colors.textTertiary, marginTop: spacing.xxs },
 
   // ── Head-to-head
   h2hCard: {
@@ -1071,8 +1064,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     marginBottom: spacing.sm,
   },
   h2hTitle: {
-    fontFamily: fontFamily.uiLabel, fontSize: fontSize.xs,
-    letterSpacing: 1.2, textTransform: 'uppercase',
+    ...typography.eyebrow,
     color: colors.textTertiary, textAlign: 'center', marginBottom: spacing.md,
   },
   h2hRow: {
@@ -1080,16 +1072,16 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   },
   h2hPlayer: { flex: 1, alignItems: 'center' },
   h2hName: {
-    fontFamily: fontFamily.bodyBold, fontSize: fontSize.body,
+    ...typography.bodyBold,
     color: colors.ink, marginBottom: spacing.xs,
   },
   h2hNameWinner: { color: colors.success },
   h2hScore: {
-    fontFamily: fontFamily.display, fontSize: fontSize.title,
-    color: colors.ink, letterSpacing: -0.5,
+    ...typography.title,
+    color: colors.ink,
   },
   h2hTime: {
-    fontFamily: fontFamily.body, fontSize: fontSize.xs,
+    ...typography.micro,
     color: colors.textTertiary, marginTop: spacing.xxs,
   },
   h2hVs: {
@@ -1098,12 +1090,11 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     justifyContent: 'center', alignItems: 'center',
   },
   h2hVsText: {
-    fontFamily: fontFamily.uiLabel, fontSize: fontSize.xs,
-    color: colors.textTertiary, textTransform: 'uppercase',
+    ...typography.eyebrow,
+    color: colors.textTertiary,
   },
   h2hResult: {
-    fontFamily: fontFamily.uiLabel, fontSize: fontSize.lg,
-    letterSpacing: 0.8, textTransform: 'uppercase',
+    ...typography.headingUpper,
     textAlign: 'center', marginTop: spacing.md,
   },
 
@@ -1114,8 +1105,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     borderRadius: borderRadius.lg, paddingVertical: 14, marginBottom: spacing.md,
   },
   challengeButtonTitle: {
-    fontFamily: fontFamily.uiLabel, fontSize: fontSize.sm,
-    letterSpacing: 0.5, textTransform: 'uppercase', color: colors.ink,
+    ...typography.actionLabel, color: colors.ink,
   },
 
   // ── Challenge modal
@@ -1128,13 +1118,13 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     padding: spacing.xl, width: '100%', maxWidth: 360,
   },
   modalTitle: {
-    fontFamily: fontFamily.bodyBold, fontSize: fontSize.body,
+    ...typography.bodyBold,
     color: colors.ink, textAlign: 'center', marginBottom: spacing.md,
   },
   modalInput: {
     backgroundColor: colors.surfaceSecondary, borderWidth: 2, borderColor: colors.border,
     borderRadius: borderRadius.md, padding: spacing.md,
-    fontFamily: fontFamily.body, fontSize: fontSize.body,
+    ...typography.body,
     color: colors.text, textAlign: 'center', marginBottom: spacing.md,
   },
   modalShare: {
@@ -1143,7 +1133,6 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   },
   modalShareDisabled: { backgroundColor: colors.textTertiary },
   modalShareText: {
-    fontFamily: fontFamily.uiLabel, fontSize: fontSize.sm,
-    letterSpacing: 0.5, textTransform: 'uppercase', color: colors.playText,
+    ...typography.actionLabel, color: colors.playText,
   },
 }); };

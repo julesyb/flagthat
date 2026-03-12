@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { fontFamily, fontSize, spacing, borderRadius, ThemeColors } from '../utils/theme';
+import { fontFamily, fontSize, spacing, borderRadius, typography, ThemeColors } from '../utils/theme';
 import { useTheme } from '../contexts/ThemeContext';
 
 interface ConfigRowProps {
@@ -56,8 +56,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     gap: spacing.sm,
   },
   label: {
-    fontFamily: fontFamily.bodyMedium,
-    fontSize: fontSize.body,
+    ...typography.label,
     color: colors.ink,
     minWidth: 58,
     flexShrink: 0,

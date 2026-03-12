@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { spacing, fontFamily, fontSize, borderRadius, ThemeColors } from '../utils/theme';
+import { spacing, fontFamily, fontSize, borderRadius, typography, ThemeColors } from '../utils/theme';
 import { useTheme } from '../contexts/ThemeContext';
 import { hapticTap } from '../utils/feedback';
 
@@ -45,9 +45,8 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     borderColor: colors.goldBright,
   },
   segBtnText: {
-    fontFamily: fontFamily.uiLabel,
-    fontSize: fontSize.sm,
-    textTransform: 'uppercase',
+    ...typography.actionLabel,
+    letterSpacing: 0,
     color: colors.textTertiary,
   },
   segBtnTextOn: {
