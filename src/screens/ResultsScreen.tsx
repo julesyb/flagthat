@@ -19,7 +19,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius, screenContainer, APP_URL } from '../utils/theme';
 import { calculateAccuracy, getStreakFromResults, getGrade, generateDailyShareGrid, generateShareGrid, getDailyNumber } from '../utils/gameEngine';
 import { updateStats, updateFlagResults, saveDailyChallenge, incrementDailyChallenges, markShared, saveBaselineResult, getStats, getFlagStats, getDayStreakInfo, getBadgeData, persistEarnedBadges, getMissedFlagIds, addGameHistoryEntry, getSupportData, getChallengeName, saveChallengeName, addChallengeToHistory } from '../utils/storage';
-import { BaselineRegionId, UserStats, GameMode } from '../types';
+import { BaselineRegionId, UserStats, GameMode, CategoryId } from '../types';
 import { t } from '../utils/i18n';
 import { hapticCorrect, hapticTap, playCelebrationSound } from '../utils/feedback';
 import { FlagImageSmall } from '../components/FlagImage';
@@ -30,7 +30,7 @@ import { useNavTabs } from '../hooks/useNavTabs';
 import { countCorrect } from '../utils/gameHelpers';
 import { RootStackParamList } from '../types/navigation';
 import { getAllEarnedBadges, detectPerGameBadges, buildBadgeContext, BADGES, TIER_COLORS, EarnedBadge } from '../utils/badges';
-import { getTotalFlagCount } from '../data';
+import { getTotalFlagCount, getCategoryCount } from '../data';
 import { useInterstitialAdUnit, shouldShowAd, recordAdImpression, incrementGameCount } from '../utils/ads';
 import { encodeChallenge, ChallengeData, CHALLENGE_MODES, generateShortCode } from '../utils/challengeCode';
 
@@ -277,7 +277,8 @@ export default function ResultsScreen({ route, navigation }: Props) {
         }
       }
       if (isBaseline) {
-        await saveBaselineResult(config.category as BaselineRegionId, results);
+        const regionTotal = getCategoryCount(config.category as CategoryId);
+        await saveBaselineResult(config.category as BaselineRegionId, results, regionTotal);
       }
 
       // ── Snapshot post-game state and evaluate badges ──

@@ -521,10 +521,11 @@ export async function getBaselineData(): Promise<BaselineData | null> {
 export async function saveBaselineResult(
   region: BaselineRegionId,
   results: GameResult[],
+  regionTotal?: number,
 ): Promise<BaselineData> {
   const existing = await getBaselineData();
   const correct = results.filter((r) => r.correct).length;
-  const total = results.length;
+  const total = regionTotal ?? results.length;
   const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
 
   const data: BaselineData = existing ?? {

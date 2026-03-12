@@ -719,7 +719,7 @@ const styles = StyleSheet.create({
     color: colors.success,
   },
   teaserResultWrong: {
-    color: colors.ink,
+    color: colors.error,
     fontSize: fontSize.xl,
   },
   // ── Play button
