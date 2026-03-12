@@ -26,6 +26,7 @@ import { t, setLocale, getLocale, SUPPORTED_LOCALES, LocaleCode } from '../utils
 import { ChevronRightIcon, ChevronDownIcon, CheckIcon } from '../components/Icons';
 import BottomNav from '../components/BottomNav';
 import ScreenContainer from '../components/ScreenContainer';
+import PageHeader from '../components/PageHeader';
 import { useNavTabs } from '../hooks/useNavTabs';
 import { useTheme } from '../contexts/ThemeContext';
 
@@ -163,6 +164,7 @@ export default function SettingsScreen() {
         showsVerticalScrollIndicator={false}
       >
         <ScreenContainer>
+        <PageHeader title={t('settings.title')} subtitle={t('settings.subtitle')} />
         {/* Appearance */}
         <Text style={styles.sectionTitle}>{t('settings.appearance')}</Text>
 

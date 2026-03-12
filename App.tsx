@@ -31,7 +31,7 @@ import JoinChallengeScreen from './src/screens/JoinChallengeScreen';
 import ErrorBoundary from './src/components/ErrorBoundary';
 import { ChevronLeftIcon } from './src/components/Icons';
 import { RootStackParamList } from './src/types/navigation';
-import { colors, fontFamily, fontSize, APP_URL } from './src/utils/theme';
+import { colors, fontSize, APP_URL } from './src/utils/theme';
 import { ThemeProvider, useTheme } from './src/contexts/ThemeContext';
 import { configureNotificationHandler, syncNotificationSchedule } from './src/utils/notifications';
 import { initLocale, t } from './src/utils/i18n';
@@ -73,14 +73,9 @@ function useScreenOptions() {
       backgroundColor: c.background,
     },
     headerTintColor: c.text,
-    headerTitleStyle: {
-      fontFamily: fontFamily.uiLabel,
-      fontSize: fontSize.lg,
-      letterSpacing: 0.8,
-      textTransform: 'uppercase' as const,
-    },
     headerShadowVisible: false,
     headerBackTitleVisible: false,
+    title: '',
     contentStyle: {
       backgroundColor: c.background,
     },
@@ -130,7 +125,6 @@ function AppContent() {
           name="GameSetup"
           component={GameSetupScreen}
           options={({ navigation }) => ({
-            title: t('app.gameModes'),
             headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
           })}
         />
@@ -168,7 +162,6 @@ function AppContent() {
           name="JoinChallenge"
           component={JoinChallengeScreen}
           options={({ navigation }) => ({
-            title: t('challenge.joinTitle'),
             headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
           })}
         />
@@ -176,7 +169,6 @@ function AppContent() {
           name="Results"
           component={ResultsScreen}
           options={({ navigation }) => ({
-            title: t('app.results'),
             headerLeft: () => <BackButton onPress={() => navigation.navigate('Home')} />,
             gestureEnabled: false,
           })}
@@ -185,7 +177,6 @@ function AppContent() {
           name="Stats"
           component={StatsScreen}
           options={({ navigation }) => ({
-            title: t('app.statistics'),
             headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
           })}
         />
@@ -193,7 +184,6 @@ function AppContent() {
           name="Settings"
           component={SettingsScreen}
           options={({ navigation }) => ({
-            title: t('app.settings'),
             headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
           })}
         />
@@ -201,7 +191,6 @@ function AppContent() {
           name="Browse"
           component={BrowseScreen}
           options={({ navigation }) => ({
-            title: t('app.browseFlags'),
             headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
           })}
         />

@@ -227,6 +227,8 @@ const en = {
 
   // ─── Settings Screen ────────────────────────────────────
   settings: {
+    title: 'Settings',
+    subtitle: 'Customize your experience',
     soundHaptics: 'Sound & Haptics',
     soundEffects: 'Sound Effects',
     soundDesc: 'Correct, wrong, and celebration sounds',

@@ -27,6 +27,7 @@ import ScreenContainer from '../components/ScreenContainer';
 import { useNavTabs } from '../hooks/useNavTabs';
 import { getAllEarnedBadges, buildBadgeContext, deriveFromContext, BADGES, TIER_COLORS, getBadgeProgress, Badge } from '../utils/badges';
 import { ChevronRightIcon, BadgeIconView, UsersIcon } from '../components/Icons';
+import PageHeader from '../components/PageHeader';
 
 const REGIONS: CategoryId[] = ['africa', 'asia', 'europe', 'americas', 'oceania'];
 const EMPTY_FLAG_STATS: FlagStats = {};
@@ -329,10 +330,7 @@ export default function StatsScreen() {
         <Animated.View style={[
           { opacity: heroFade, transform: [{ translateY: heroSlide }] },
         ]}>
-          <View style={styles.pageHeader}>
-            <Text style={styles.pageTitle}>{t('stats.yourStats')}</Text>
-            <Text style={styles.pageSub}>{t('stats.allTime')}</Text>
-          </View>
+          <PageHeader title={t('stats.yourStats')} subtitle={t('stats.allTime')} />
           <View style={styles.heroCard}>
             <View style={styles.heroStatItem}>
               <Text style={[styles.heroStatValue, { color: colors.goldBright }]}>{stats.totalGamesPlayed}</Text>
@@ -766,20 +764,6 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   loadingText: { ...typography.body, color: colors.textSecondary },
   content: { padding: spacing.md, paddingBottom: spacing.xxl },
-
-  // ── Page Header
-  pageHeader: {
-    marginBottom: spacing.md,
-  },
-  pageTitle: {
-    ...typography.title,
-    color: colors.ink,
-    marginBottom: spacing.xxs,
-  },
-  pageSub: {
-    ...typography.caption,
-    color: colors.textTertiary,
-  },
 
   // ── Hero (3-column stats card)
   heroCard: {

@@ -31,6 +31,7 @@ import BottomNav from '../components/BottomNav';
 import ScreenContainer from '../components/ScreenContainer';
 import { useNavTabs } from '../hooks/useNavTabs';
 import { SearchIcon } from '../components/Icons';
+import PageHeader from '../components/PageHeader';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Browse'>;
 
@@ -138,13 +139,11 @@ export default function BrowseScreen({ route, navigation }: Props) {
   return (
     <SafeAreaView style={styles.container}>
       <ScreenContainer flex>
-        {/* Page header */}
-        <View style={styles.pageHeader}>
-          <Text style={styles.pageTitle}>{t('browse.title')}</Text>
-          <Text style={styles.pageSub}>
-            {allFlags.length} {t('browse.countriesLabel')}
-          </Text>
-        </View>
+        <PageHeader
+          title={t('browse.title')}
+          subtitle={`${allFlags.length} ${t('browse.countriesLabel')}`}
+          style={styles.pageHeader}
+        />
 
         {/* Search bar */}
         <View style={styles.searchRow}>
@@ -227,15 +226,6 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   pageHeader: {
     paddingHorizontal: spacing.md,
     paddingTop: spacing.md,
-  },
-  pageTitle: {
-    ...typography.title,
-    color: colors.text,
-    marginBottom: spacing.xxs,
-  },
-  pageSub: {
-    ...typography.caption,
-    color: colors.textTertiary,
   },
   searchRow: {
     paddingHorizontal: spacing.md,
