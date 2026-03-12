@@ -467,7 +467,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
         {!isChallenge && (
         <Animated.View style={[styles.heroCard, { borderColor: heroGlowColor, borderWidth: 2 }]}>
           <Text style={styles.heroEyebrow}>
-            {isDaily ? t('results.dailyTitle', { number: dailyNumber }) : `${modeLabel} / ${categoryLabel}`}
+            {isDaily ? t('results.dailyTitle', { number: dailyNumber }) : modeLabel}
           </Text>
 
           {/* Count-up number */}
