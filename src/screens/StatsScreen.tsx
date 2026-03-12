@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -31,6 +31,8 @@ import { ChevronRightIcon, BadgeIconView, UsersIcon } from '../components/Icons'
 const REGIONS: CategoryId[] = ['africa', 'asia', 'europe', 'americas', 'oceania'];
 const EMPTY_FLAG_STATS: FlagStats = {};
 const GOOD_ACCURACY_PCT = 70;
+const toPct = (e: { correct: number; total: number } | undefined) =>
+  e && e.total > 0 ? Math.round((e.correct / e.total) * 100) : null;
 const TIME_ATTACK_CONFIG = { mode: 'timeattack' as const, category: 'all' as const, questionCount: 999, timeLimit: 60, displayMode: 'flag' as const };
 
 // All async data the stats screen needs, loaded atomically.
@@ -426,8 +428,6 @@ export default function StatsScreen() {
 
           <View style={styles.regionCards}>
             {regionData.map(({ id, scores }) => {
-              const toPct = (e: { correct: number; total: number } | undefined) =>
-                e && e.total > 0 ? Math.round((e.correct / e.total) * 100) : null;
               const firstPct = toPct(scores?.first);
               const bestPct = toPct(scores?.best);
               const recentPct = toPct(scores?.mostRecent);
