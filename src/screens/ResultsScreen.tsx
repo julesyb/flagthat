@@ -32,7 +32,7 @@ import { countCorrect } from '../utils/gameHelpers';
 import { RootStackParamList } from '../types/navigation';
 import { getAllEarnedBadges, detectPerGameBadges, buildBadgeContext, BADGES, TIER_COLORS, EarnedBadge } from '../utils/badges';
 import { getCategoryCount } from '../data';
-import { computeLevelProgress, LevelProgress, TIER_LABELS, getLevelTier } from '../utils/levels';
+import { computeLevelProgress, TIER_LABELS, getLevelTier } from '../utils/levels';
 import { encodeChallenge, ChallengeData, CHALLENGE_MODES, generateShortCode, generateChallengeShareCard } from '../utils/challengeCode';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Results'>;
@@ -280,15 +280,18 @@ export default function ResultsScreen({ route, navigation }: Props) {
         const levelCtx = {
           stats: postStats,
           flagStats: postFlagStats,
-          badgeData: postBadgeData,
+          badgeData: { ...postBadgeData, earnedBadgeIds: postBadges.map((b) => b.id) },
           dayStreakInfo: postDayStreakInfo,
         };
         const lp = computeLevelProgress(levelCtx, prePersisted);
         if (lp.currentLevel > prePersisted) {
           await persistLevel(lp.currentLevel);
           setLevelUpTo(lp.currentLevel);
-          hapticCorrect();
-          playCelebrationSound();
+          // Only fire celebration if score-based celebration won't already play
+          if (!isPerfect && accuracy < 80) {
+            hapticCorrect();
+            playCelebrationSound();
+          }
         }
       }
     }
@@ -1011,7 +1014,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   practiceButton: {
     flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
     backgroundColor: colors.accentBg, borderRadius: borderRadius.lg,
-    borderWidth: 1.5, borderColor: colors.accent, padding: 14, marginTop: 8,
+    borderWidth: 1.5, borderColor: colors.accent, padding: 14, marginBottom: 8,
   },
   practiceButtonText: {
     ...typography.actionLabel, letterSpacing: 0.8, color: colors.accent,
@@ -1024,7 +1027,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     gap: spacing.sm, backgroundColor: colors.surface,
     borderRadius: borderRadius.lg, borderWidth: 1, borderColor: colors.border,
-    padding: 14, marginTop: 8,
+    padding: 14,
   },
   viewStatsText: {
     ...typography.actionLabel, letterSpacing: 0.8, color: colors.ink, flex: 1,

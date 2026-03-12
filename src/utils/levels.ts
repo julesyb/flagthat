@@ -399,7 +399,7 @@ export function computeLevelProgress(ctx: LevelContext, persistedLevel: number =
     progress: 1,
     target: 1,
     pct: 100,
-    description: 'All levels complete',
+    description: t('stats.levelMaxed'),
     isMaxLevel: true,
   };
 }
