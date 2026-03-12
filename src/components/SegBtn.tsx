@@ -8,15 +8,17 @@ interface SegBtnProps {
   active: boolean;
   onPress: () => void;
   maxWidth?: number;
+  accessibilityLabel?: string;
 }
 
-export default function SegBtn({ label, active, onPress, maxWidth = 80 }: SegBtnProps) {
+export default function SegBtn({ label, active, onPress, maxWidth = 80, accessibilityLabel }: SegBtnProps) {
   return (
     <TouchableOpacity
       style={[styles.segBtn, { maxWidth }, active && styles.segBtnOn]}
       onPress={() => { hapticTap(); onPress(); }}
       activeOpacity={0.7}
       accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel ?? label}
       accessibilityState={{ selected: active }}
     >
       <Text style={[styles.segBtnText, active && styles.segBtnTextOn]}>{label}</Text>

@@ -270,7 +270,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.sm,
   },
   fallbackText: {
-    fontSize: fontSize.lg,
+    fontSize: fontSize.body,
     color: colors.textTertiary,
   },
   pinMarker: {

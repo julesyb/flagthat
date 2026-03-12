@@ -258,6 +258,7 @@ export default function HomeScreen({ navigation }: Props) {
                   active={!questionCountAll && questionCount === c}
                   onPress={() => { setQuestionCount(c); setQuestionCountAll(false); }}
                   maxWidth={54}
+                  accessibilityLabel={`${c} cards`}
                 />
               ))}
               <SegBtn
@@ -265,6 +266,7 @@ export default function HomeScreen({ navigation }: Props) {
                 active={questionCountAll}
                 onPress={() => setQuestionCountAll(true)}
                 maxWidth={54}
+                accessibilityLabel="All cards"
               />
             </ConfigRow>
             <ConfigRow label={t('home.difficulty')}>
