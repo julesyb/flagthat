@@ -19,7 +19,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { spacing, typography, fontFamily, fontSize, buildButtons, borderRadius, APP_URL, ThemeColors } from '../utils/theme';
 import { useTheme } from '../contexts/ThemeContext';
 import { getStreakFromResults, generateDailyShareGrid, generateShareGrid, getDailyNumber } from '../utils/gameEngine';
-import { updateStats, updateFlagResults, saveDailyChallenge, incrementDailyChallenges, markShared, saveBaselineResult, getStats, getFlagStats, getDayStreakInfo, getBadgeData, persistEarnedBadges, getMissedFlagIds, addGameHistoryEntry, getChallengeName, saveChallengeName, addChallengeToHistory, recordRegionScore, getPersistedLevel, persistLevel } from '../utils/storage';
+import { updateStats, updateFlagResults, saveDailyChallenge, incrementDailyChallenges, markShared, saveBaselineResult, getStats, getFlagStats, getDayStreakInfo, getBadgeData, persistEarnedBadges, getMissedFlagIds, addGameHistoryEntry, getChallengeName, saveChallengeName, addChallengeToHistory, recordRegionScore, getPersistedLevel, persistLevel, UNLOCK_THRESHOLD } from '../utils/storage';
 import { BaselineRegionId, UserStats, GameMode, CategoryId, BASELINE_REGIONS } from '../types';
 import { t } from '../utils/i18n';
 import { hapticCorrect, hapticTap, playCelebrationSound } from '../utils/feedback';
@@ -36,6 +36,106 @@ import { computeLevelProgress, getTierLabel, getLevelTier } from '../utils/level
 import { encodeChallenge, ChallengeData, CHALLENGE_MODES, generateShortCode, generateChallengeShareCard, encodeResponse } from '../utils/challengeCode';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Results'>;
+
+// ── Extracted helpers for processResults ──
+
+interface PreGameSnapshot {
+  preStats: UserStats;
+  preFlagStats: Awaited<ReturnType<typeof getFlagStats>>;
+  preBadgeIds: Set<string>;
+  wasNewBestStreak: boolean;
+}
+
+async function snapshotPreGameState(streak: number): Promise<PreGameSnapshot> {
+  const [preStats, preFlagStats, preDayStreakInfo, preBadgeData, preMissed] = await Promise.all([
+    getStats(), getFlagStats(), getDayStreakInfo(), getBadgeData(), getMissedFlagIds(),
+  ]);
+  const preCtx = buildBadgeContext(preStats, preFlagStats, preDayStreakInfo, preBadgeData, preMissed.length);
+  const preBadgeIds = new Set(getAllEarnedBadges(preCtx, preBadgeData.earnedBadgeIds).map((b) => b.id));
+
+  const wasNewBestStreak = streak > preStats.bestStreak;
+
+  return { preStats, preFlagStats, preBadgeIds, wasNewBestStreak };
+}
+
+async function persistGameData(
+  results: import('../types').GameResult[],
+  config: import('../types').GameConfig,
+  correct: number,
+  streak: number,
+  accuracy: number,
+  isDaily: boolean,
+  isChallenge: boolean,
+  challenge: ChallengeData | undefined,
+  playerName: string | undefined,
+): Promise<void> {
+  const correctResults = results.filter((r) => r.correct);
+  const speedData = correctResults.length > 0
+    ? { correctTimeMs: correctResults.reduce((sum, r) => sum + r.timeTaken, 0), correctCount: correctResults.length }
+    : undefined;
+  await updateStats(correct, results.length, streak, config.mode, config.category, speedData);
+  await updateFlagResults(results);
+  await addGameHistoryEntry(accuracy, config.mode);
+
+  if ((BASELINE_REGIONS as readonly string[]).includes(config.category)) {
+    await recordRegionScore(config.category as BaselineRegionId, correct, results.length);
+  }
+  if (isDaily) {
+    await saveDailyChallenge(results);
+    await incrementDailyChallenges();
+  }
+  if (isChallenge && challenge && playerName) {
+    const shortCode = generateShortCode(challenge);
+    const hostScore = challenge.hostResults.filter((r) => r.correct).length;
+    addChallengeToHistory({
+      shortCode,
+      mode: config.mode,
+      date: new Date().toISOString(),
+      myName: playerName,
+      myScore: correct,
+      totalFlags: results.length,
+      opponentName: challenge.hostName,
+      opponentScore: hostScore,
+      direction: 'received',
+      fullCode: encodeChallenge(challenge) || '',
+      myResults: results.map((r) => r.correct),
+      opponentResults: challenge.hostResults.map((r) => r.correct),
+    });
+  }
+}
+
+interface PostGameBadgeResult {
+  postStats: UserStats;
+  postFlagStats: Awaited<ReturnType<typeof getFlagStats>>;
+  postDayStreakCount: number;
+  postBadges: EarnedBadge[];
+  postBadgeData: Awaited<ReturnType<typeof getBadgeData>>;
+  postDayStreakInfo: Awaited<ReturnType<typeof getDayStreakInfo>>;
+}
+
+async function snapshotPostGameAndEvaluateBadges(
+  results: import('../types').GameResult[],
+  correct: number,
+  reviewOnly: boolean,
+): Promise<PostGameBadgeResult> {
+  const [postStats, postFlagStats, postDayStreakInfo, postBadgeData, postMissed] = await Promise.all([
+    getStats(), getFlagStats(), getDayStreakInfo(), getBadgeData(), getMissedFlagIds(),
+  ]);
+  const postCtx = buildBadgeContext(postStats, postFlagStats, postDayStreakInfo, postBadgeData, postMissed.length);
+  const perGameIds = !reviewOnly ? detectPerGameBadges(results, correct, results.length) : [];
+  const allPersistedIds = [...postBadgeData.earnedBadgeIds, ...perGameIds];
+  const postBadges = getAllEarnedBadges(postCtx, allPersistedIds);
+  await persistEarnedBadges(postBadges.map((b) => b.id));
+
+  return {
+    postStats,
+    postFlagStats,
+    postDayStreakCount: postDayStreakInfo.current,
+    postBadges,
+    postBadgeData,
+    postDayStreakInfo,
+  };
+}
 
 export default function ResultsScreen({ route, navigation }: Props) {
   const { colors } = useTheme();
@@ -224,71 +324,28 @@ export default function ResultsScreen({ route, navigation }: Props) {
   useEffect(() => {
     // ── Data processing ──
     async function processResults() {
-      // ── Snapshot pre-game state ──
-      const [preStats, preFlagStats, preDayStreakInfo, preBadgeData, preMissed] = await Promise.all([
-        getStats(), getFlagStats(), getDayStreakInfo(), getBadgeData(), getMissedFlagIds(),
-      ]);
-      const preCtx = buildBadgeContext(preStats, preFlagStats, preDayStreakInfo, preBadgeData, preMissed.length);
-      const preBadgeIds = new Set(getAllEarnedBadges(preCtx, preBadgeData.earnedBadgeIds).map((b) => b.id));
+      const { preFlagStats, preBadgeIds, wasNewBestStreak } =
+        await snapshotPreGameState(streak);
 
-      const wasNewBestStreak = streak > preStats.bestStreak;
-
-      // ── Persist game data ──
       if (!reviewOnly) {
-        const correctResults = results.filter((r) => r.correct);
-        const speedData = correctResults.length > 0
-          ? { correctTimeMs: correctResults.reduce((sum, r) => sum + r.timeTaken, 0), correctCount: correctResults.length }
-          : undefined;
-        await updateStats(correct, results.length, streak, config.mode, config.category, speedData);
-        await updateFlagResults(results);
-        await addGameHistoryEntry(accuracy, config.mode);
-        // Record per-region score for region-based games
-        if ((BASELINE_REGIONS as readonly string[]).includes(config.category)) {
-          await recordRegionScore(config.category as BaselineRegionId, correct, results.length);
-        }
-        if (isDaily) {
-          await saveDailyChallenge(results);
-          await incrementDailyChallenges();
-        }
-        // Save received challenge to history
-        if (isChallenge && challenge && playerName) {
-          const shortCode = generateShortCode(challenge);
-          const hostScore = challenge.hostResults.filter((r) => r.correct).length;
-          addChallengeToHistory({
-            shortCode,
-            mode: config.mode,
-            date: new Date().toISOString(),
-            myName: playerName,
-            myScore: correct,
-            totalFlags: results.length,
-            opponentName: challenge.hostName,
-            opponentScore: hostScore,
-            direction: 'received',
-            fullCode: encodeChallenge(challenge) || '',
-            myResults: results.map((r) => r.correct),
-            opponentResults: challenge.hostResults.map((r) => r.correct),
-          });
-        }
+        await persistGameData(
+          results, config, correct, streak, accuracy,
+          isDaily, isChallenge, challenge, playerName,
+        );
       }
       if (isBaseline) {
         const regionTotal = getCategoryCount(config.category as CategoryId);
         await saveBaselineResult(config.category as BaselineRegionId, results, regionTotal);
       }
 
-      // ── Snapshot post-game state and evaluate badges ──
-      const [postStats, postFlagStats, postDayStreakInfo, postBadgeData, postMissed] = await Promise.all([
-        getStats(), getFlagStats(), getDayStreakInfo(), getBadgeData(), getMissedFlagIds(),
-      ]);
-      const postCtx = buildBadgeContext(postStats, postFlagStats, postDayStreakInfo, postBadgeData, postMissed.length);
-      // Merge persisted IDs + per-game badges detected from results, then evaluate
-      const perGameIds = !reviewOnly ? detectPerGameBadges(results, correct, results.length) : [];
-      const allPersistedIds = [...postBadgeData.earnedBadgeIds, ...perGameIds];
-      const postBadges = getAllEarnedBadges(postCtx, allPersistedIds);
-      // Single persist call for all earned badges
-      await persistEarnedBadges(postBadges.map((b) => b.id));
+      const { postStats, postFlagStats, postDayStreakCount, postBadges, postBadgeData, postDayStreakInfo } =
+        await snapshotPostGameAndEvaluateBadges(results, correct, !!reviewOnly);
 
+      // ── Update component state ──
       setOverallStats(postStats);
-      setDayStreakCount(postDayStreakInfo.current);
+      setDayStreakCount(postDayStreakCount);
+      const seen = Object.values(postFlagStats).filter((fs) => fs.right >= UNLOCK_THRESHOLD).length;
+      const preSeen = Object.values(preFlagStats).filter((fs) => fs.right >= UNLOCK_THRESHOLD).length;
       setNewBadges(postBadges.filter((b) => !preBadgeIds.has(b.id)));
       setTotalBadgesEarned(postBadges.length);
       setIsNewBestStreak(wasNewBestStreak && !reviewOnly);
