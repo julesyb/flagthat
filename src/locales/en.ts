@@ -212,7 +212,7 @@ const en = {
     last28Days: 'Last 28 days',
     gamesPlayedLabel: 'Games',
     bestIn60s: 'Best in 60s',
-    tryNow: 'Try now',
+    tryNow: 'Try Flags in 60s',
     firstScore: 'First',
     bestScore: 'Best',
     recentScore: 'Recent',

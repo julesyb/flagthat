@@ -10,6 +10,7 @@ export const SHARE_GRID_ROW_SIZE = 5;
 export const EASY_CHOICE_COUNT = 2;
 export const STANDARD_CHOICE_COUNT = 4;
 export const MASTERED_STREAK = 3;
+export const UNLOCK_THRESHOLD = 3;
 export const MAX_GAME_HISTORY = 50;
 export const MAX_CHALLENGE_HISTORY = 10;
 

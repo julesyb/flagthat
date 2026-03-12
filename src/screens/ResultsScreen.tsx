@@ -19,7 +19,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { spacing, typography, fontFamily, fontSize, buildButtons, borderRadius, APP_URL, ThemeColors } from '../utils/theme';
 import { useTheme } from '../contexts/ThemeContext';
 import { getStreakFromResults, generateDailyShareGrid, generateShareGrid, getDailyNumber } from '../utils/gameEngine';
-import { updateStats, updateFlagResults, saveDailyChallenge, incrementDailyChallenges, markShared, saveBaselineResult, getStats, getFlagStats, getDayStreakInfo, getBadgeData, persistEarnedBadges, getMissedFlagIds, addGameHistoryEntry, getChallengeName, saveChallengeName, addChallengeToHistory, recordRegionScore } from '../utils/storage';
+import { updateStats, updateFlagResults, saveDailyChallenge, incrementDailyChallenges, markShared, saveBaselineResult, getStats, getFlagStats, getDayStreakInfo, getBadgeData, persistEarnedBadges, getMissedFlagIds, addGameHistoryEntry, getChallengeName, saveChallengeName, addChallengeToHistory, recordRegionScore, UNLOCK_THRESHOLD } from '../utils/storage';
 import { BaselineRegionId, UserStats, GameMode, CategoryId } from '../types';
 import { t } from '../utils/i18n';
 import { hapticCorrect, hapticTap, playCelebrationSound } from '../utils/feedback';
@@ -282,7 +282,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
       setDayStreakCount(postDayStreakInfo.current);
       const totalF = getTotalFlagCount();
       setTotalFlags(totalF);
-      const seen = Object.values(postFlagStats).filter((fs) => fs.right > 0).length;
+      const seen = Object.values(postFlagStats).filter((fs) => fs.right >= UNLOCK_THRESHOLD).length;
       setCountriesSeen(seen);
       setNewBadges(postBadges.filter((b) => !preBadgeIds.has(b.id)));
       setTotalBadgesEarned(postBadges.length);

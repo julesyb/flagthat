@@ -1,5 +1,5 @@
 import { UserStats, GameResult } from '../types';
-import { FlagStats, DayStreakInfo, BadgeData } from './storage';
+import { FlagStats, DayStreakInfo, BadgeData, UNLOCK_THRESHOLD } from './storage';
 import { getTotalFlagCount } from '../data';
 import { colors } from './theme';
 
@@ -109,7 +109,7 @@ interface DerivedCtx {
 
 export function deriveFromContext(ctx: BadgeCheckContext): DerivedCtx {
   return {
-    countriesSeen: Object.values(ctx.flagStats).filter((s) => s.right > 0).length,
+    countriesSeen: Object.values(ctx.flagStats).filter((s) => s.right >= UNLOCK_THRESHOLD).length,
     totalFlags: getTotalFlagCount(),
     modesPlayed: PLAYABLE_MODES.filter((m) => ctx.stats.modeStats[m].total > 0).length,
   };
