@@ -38,17 +38,28 @@ function buildQuestionForFlag(flag: FlagItem, difficulty?: 'easy' | 'medium' | '
   if (!correctCapital) return null;
 
   const wrongCount = difficulty === 'easy' ? 1 : 3;
-  const localCities = countryCities[flag.id] ?? [];
+  const localCities = (countryCities[flag.id] ?? []).filter((c) => c !== correctCapital);
   const eligible = countries.filter((c) => countryCapitals[c.id]);
+  const otherCapitals = shuffleArray(
+    eligible.filter((c) => c.id !== flag.id).map((c) => countryCapitals[c.id])
+  );
 
   let wrongOptions: string[];
-  if (localCities.length >= wrongCount) {
-    wrongOptions = shuffleArray(localCities.filter((c) => c !== correctCapital)).slice(0, wrongCount);
+  if (difficulty === 'hard') {
+    // Hard: prioritize local cities as distractors (same-country cities are trickier)
+    const fromLocal = shuffleArray(localCities).slice(0, wrongCount);
+    const remaining = wrongCount - fromLocal.length;
+    wrongOptions = [...fromLocal, ...otherCapitals.slice(0, remaining)];
+  } else if (difficulty === 'easy') {
+    // Easy: only use capitals from other countries (more distinct)
+    wrongOptions = otherCapitals.slice(0, wrongCount);
   } else {
-    const otherCapitals = eligible
-      .filter((c) => c.id !== flag.id)
-      .map((c) => countryCapitals[c.id]);
-    wrongOptions = shuffleArray(otherCapitals).slice(0, wrongCount);
+    // Medium: mix of local cities and other capitals
+    if (localCities.length >= wrongCount) {
+      wrongOptions = shuffleArray(localCities).slice(0, wrongCount);
+    } else {
+      wrongOptions = otherCapitals.slice(0, wrongCount);
+    }
   }
 
   const options = shuffleArray([correctCapital, ...wrongOptions]);
