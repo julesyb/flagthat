@@ -341,6 +341,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     borderRadius: borderRadius.xl,
     padding: spacing.xl,
     paddingVertical: spacing.xxl,
+    paddingBottom: spacing.xxl + 40,
     overflow: 'hidden',
     ...shadows.large,
   },
