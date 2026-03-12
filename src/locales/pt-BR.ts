@@ -128,7 +128,7 @@ const ptBR: DeepPartial<TranslationStrings> = {
     avgTime: 'Tempo m\u00e9d.',
     youSaid: 'Sua resposta: {answer}',
     skipped: 'Pulada',
-    shareTitle: 'Flag That Daily Challenge',
+    shareTitle: 'Flag That Desafio Di\u00e1rio',
     shareScore: '{correct}/10',
     shareFooter: 'Pode me superar?\n{appUrl}',
     perfectShareNote: 'PONTUA\u00c7\u00c3O PERFEITA!',

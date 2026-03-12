@@ -128,7 +128,7 @@ const de: DeepPartial<TranslationStrings> = {
     avgTime: '\u00d8 Zeit',
     youSaid: 'Deine Antwort: {answer}',
     skipped: '\u00dcbersprungen',
-    shareTitle: 'Flag That Daily Challenge',
+    shareTitle: 'Flag That T\u00e4gliche Herausforderung',
     shareScore: '{correct}/10',
     shareFooter: 'Kannst du mich schlagen?\n{appUrl}',
     perfectShareNote: 'PERFEKTE PUNKTZAHL!',

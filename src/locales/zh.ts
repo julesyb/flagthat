@@ -128,7 +128,7 @@ const zh: DeepPartial<TranslationStrings> = {
     avgTime: '\u5e73\u5747\u65f6\u95f4',
     youSaid: '\u4f60\u7684\u7b54\u6848\uff1a{answer}',
     skipped: '\u8df3\u8fc7',
-    shareTitle: 'Flag That Daily Challenge',
+    shareTitle: 'Flag That \u6bcf\u65e5\u6311\u6218',
     shareScore: '{correct}/10',
     shareFooter: '\u6765\u6311\u6218\u6211\u7684\u5206\u6570\uff01\n{appUrl}',
     perfectShareNote: '\u6ee1\u5206\uff01',

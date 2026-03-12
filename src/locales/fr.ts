@@ -128,7 +128,7 @@ const fr: DeepPartial<TranslationStrings> = {
     avgTime: 'Temps moy.',
     youSaid: 'Votre r\u00e9ponse : {answer}',
     skipped: 'Pass\u00e9',
-    shareTitle: 'Flag That Daily Challenge',
+    shareTitle: 'Flag That D\u00e9fi Quotidien',
     shareScore: '{correct}/10',
     shareFooter: 'Battez mon score !\n{appUrl}',
     perfectShareNote: 'SCORE PARFAIT !',
