@@ -5,6 +5,12 @@ import { translateName } from '../data/countryNames';
 import { APP_DOMAIN, MS_PER_DAY, DAILY_QUESTION_COUNT, DAILY_CHALLENGE_EPOCH, SHARE_GRID_ROW_SIZE, EASY_CHOICE_COUNT, STANDARD_CHOICE_COUNT } from './config';
 import { t } from './i18n';
 
+/** Maps a GameMode to its display-label i18n key. Quiz difficulty modes (easy/medium/hard) all display as "Quiz". */
+export function modeLabelKey(mode: GameMode): string {
+  if (mode === 'easy' || mode === 'medium' || mode === 'hard') return 'modes.quiz';
+  return `modes.${mode}`;
+}
+
 export function shuffleArray<T>(array: T[]): T[] {
   const shuffled = [...array];
   for (let i = shuffled.length - 1; i > 0; i--) {
@@ -100,7 +106,7 @@ export function generateDailyShareGrid(results: GameResult[]): string {
   return `Flag That #${dailyNum}\n${correct}/${DAILY_QUESTION_COUNT}\n\n${row1}\n${row2}\n\n${APP_DOMAIN}`;
 }
 
-export function generateShareGrid(results: GameResult[], modeLabel: string, categoryLabel: string): string {
+export function generateShareGrid(results: GameResult[], modeLabel: string): string {
   const correct = results.filter((r) => r.correct).length;
   const accuracy = calculateAccuracy(results);
   const grid = results.map((r) => (r.correct ? '\u2b1b' : '\u2b1c')).join('');

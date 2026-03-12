@@ -20,6 +20,7 @@ import { UserStats, CategoryId, BaselineRegionId, BASELINE_REGIONS } from '../ty
 import { getStats, getFlagStats, FlagStats, getDayStreakInfo, DayStreakInfo, getBadgeData, getMissedFlagIds, BadgeData, getGameHistory, GameHistoryEntry, getChallengeHistory, ChallengeHistoryEntry, MASTERED_STREAK, UNLOCK_THRESHOLD, getRegionScoreHistory, RegionScoreHistory, getPersistedLevel, persistLevel } from '../utils/storage';
 import { GOOD_ACCURACY_PCT, UNLIMITED_QUESTIONS, TIMEATTACK_DEFAULT_TIME } from '../utils/config';
 import { getAllFlags, getCategoryCount } from '../data';
+import { modeLabelKey } from '../utils/gameEngine';
 
 import { t } from '../utils/i18n';
 import { FlagImageSmall } from '../components/FlagImage';
@@ -574,7 +575,7 @@ export default function StatsScreen() {
                         <Text style={styles.challengeCode}>{ch.shortCode}</Text>
                         <Text style={styles.challengeDate}>{dateStr}</Text>
                       </View>
-                      <Text style={styles.challengeMode}>{t(`modes.${ch.mode}`)}</Text>
+                      <Text style={styles.challengeMode}>{t(modeLabelKey(ch.mode))}</Text>
                       <View style={styles.challengeScoreRow}>
                         <Text style={styles.challengeScoreLabel}>{t('challenge.you')}:</Text>
                         <Text style={[styles.challengeScore, won && { color: colors.success }]}>
@@ -777,7 +778,7 @@ export default function StatsScreen() {
               return (
                 <>
                   <Text style={styles.modalTitle}>{t('challenge.headToHead')}</Text>
-                  <Text style={[styles.modalSubtitle, { marginBottom: spacing.md }]}>{t(`modes.${ch.mode}`)} - {dateStr}</Text>
+                  <Text style={[styles.modalSubtitle, { marginBottom: spacing.md }]}>{t(modeLabelKey(ch.mode))} - {dateStr}</Text>
 
                   {hasOpponent ? (
                     <View style={styles.h2hContainer}>

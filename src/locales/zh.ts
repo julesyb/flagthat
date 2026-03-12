@@ -104,7 +104,7 @@ const zh: DeepPartial<TranslationStrings> = {
     timeLimit: '\u65f6\u95f4\u9650\u5236',
     timeSuffix: '{t}\u79d2',
     questions: '\u9898\u6570',
-    startQuiz: '\u5f00\u59cb{difficulty}\u7b54\u9898',
+    startQuiz: '\u5f00\u59cb\u7b54\u9898',
     startMode: '\u5f00\u59cb{mode}',
   },
 
@@ -347,6 +347,7 @@ const zh: DeepPartial<TranslationStrings> = {
   },
 
   modes: {
+    quiz: '\u7b54\u9898',
     easy: '\u7b80\u5355',
     medium: '\u4e2d\u7b49',
     hard: '\u56f0\u96be',

@@ -1,6 +1,6 @@
 import { getAllFlags } from '../data';
 import { FlagItem, GameQuestion, GameMode } from '../types';
-import { shuffleArray } from './gameEngine';
+import { shuffleArray, modeLabelKey } from './gameEngine';
 import { twinPairs } from '../data/countryAliases';
 import { APP_DOMAIN, MAX_CHALLENGE_FLAGS, MAX_CHALLENGE_NAME_LENGTH, MAX_HOSTNAME_LENGTH, SHORT_CODE_LENGTH, SPEED_FAST_MS, SPEED_MEDIUM_MS, SHARE_GRID_ROW_SIZE, EASY_CHOICE_COUNT, STANDARD_CHOICE_COUNT } from './config';
 import { t } from './i18n';
@@ -350,7 +350,7 @@ export function generateChallengeShareCard(
     ? Math.round(results.reduce((s, r) => s + r.timeMs, 0) / results.length / 100) / 10
     : 0;
 
-  const modeLabel = t(`modes.${mode}`);
+  const modeLabel = t(modeLabelKey(mode));
   const header = t('challenge.shareCardHeader', { mode: modeLabel, correct, total });
   const avg = t('challenge.shareCardAvg', { time: avgTime });
   const cta = t('challenge.shareCardCta', { name: hostName });

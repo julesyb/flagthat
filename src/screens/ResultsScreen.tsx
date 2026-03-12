@@ -18,7 +18,7 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { spacing, typography, fontFamily, fontSize, buildButtons, borderRadius, APP_URL, ThemeColors } from '../utils/theme';
 import { useTheme } from '../contexts/ThemeContext';
-import { getStreakFromResults, generateDailyShareGrid, generateShareGrid, getDailyNumber } from '../utils/gameEngine';
+import { getStreakFromResults, generateDailyShareGrid, generateShareGrid, getDailyNumber, modeLabelKey } from '../utils/gameEngine';
 import { updateStats, updateFlagResults, saveDailyChallenge, incrementDailyChallenges, markShared, saveBaselineResult, getStats, getFlagStats, getDayStreakInfo, getBadgeData, persistEarnedBadges, getMissedFlagIds, addGameHistoryEntry, getChallengeName, saveChallengeName, addChallengeToHistory, recordRegionScore, getPersistedLevel, persistLevel, UNLOCK_THRESHOLD } from '../utils/storage';
 import { BaselineRegionId, UserStats, GameMode, CategoryId, BASELINE_REGIONS } from '../types';
 import { t } from '../utils/i18n';
@@ -445,15 +445,13 @@ export default function ResultsScreen({ route, navigation }: Props) {
     }
   }, []);
 
-  const categoryLabel = config.category === 'all'
-    ? t('categories.all') : t(`categories.${config.category}`);
-  const modeLabel = t(`modes.${config.mode}`);
+  const modeLabel = t(modeLabelKey(config.mode));
   const dailyNumber = isDaily ? getDailyNumber() : 0;
 
   const handleShare = async () => {
     const message = isDaily
       ? generateDailyShareGrid(results)
-      : generateShareGrid(results, modeLabel, categoryLabel);
+      : generateShareGrid(results, modeLabel);
     try { await Share.share({ message }); markShared(); } catch { /* cancelled */ }
   };
 
@@ -513,7 +511,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
         {!isChallenge && (
         <Animated.View style={[styles.heroCard, { borderColor: heroGlowColor, borderWidth: 2 }]}>
           <Text style={styles.heroEyebrow}>
-            {isDaily ? t('results.dailyTitle', { number: dailyNumber }) : `${modeLabel} / ${categoryLabel}`}
+            {isDaily ? t('results.dailyTitle', { number: dailyNumber }) : modeLabel}
           </Text>
 
           {/* Count-up number */}

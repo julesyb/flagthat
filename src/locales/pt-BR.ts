@@ -104,7 +104,7 @@ const ptBR: DeepPartial<TranslationStrings> = {
     timeLimit: 'Limite de tempo',
     timeSuffix: '{t}s',
     questions: 'Perguntas',
-    startQuiz: 'Iniciar quiz {difficulty}',
+    startQuiz: 'Iniciar quiz',
     startMode: 'Iniciar {mode}',
   },
 
@@ -347,9 +347,10 @@ const ptBR: DeepPartial<TranslationStrings> = {
   },
 
   modes: {
-    easy: 'F\u00e1cil',
-    medium: 'M\u00e9dio',
-    hard: 'Dif\u00edcil',
+    quiz: 'Quiz',
+    easy: 'Fácil',
+    medium: 'Médio',
+    hard: 'Difícil',
     flashflag: 'Flash Flag',
     flagpuzzle: 'Puzzle bandeira',
     timeattack: 'Quiz cronometrado',

@@ -195,7 +195,6 @@ export default function GameSetupScreen({ route, navigation }: Props) {
 
   const showQuestionCount = !isTimeAttack && !isFlagPuzzle && !isFlashFlag && filterType !== 'theme';
 
-  const diffLabel = t(DIFFICULTIES.find((d) => d.key === difficulty)?.labelKey ?? 'common.medium');
   const modeLabel = t(SETUP_MODES.find((m) => m.key === setupMode)?.labelKey ?? 'setup.quiz');
   const startButtonColor = showDifficulty
     ? difficulty === 'easy' ? colors.diffEasy
@@ -203,10 +202,8 @@ export default function GameSetupScreen({ route, navigation }: Props) {
       : colors.diffMedium
     : undefined;
   const startButtonLabel = isQuiz
-    ? t('setup.startQuiz', { difficulty: diffLabel })
-    : showDifficulty
-      ? t('setup.startMode', { mode: `${diffLabel} ${modeLabel}` })
-      : t('setup.startMode', { mode: modeLabel });
+    ? t('setup.startQuiz')
+    : t('setup.startMode', { mode: modeLabel });
 
   return (
     <SafeAreaView style={styles.container}>
