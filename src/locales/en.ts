@@ -252,7 +252,7 @@ const en = {
     firstScore: 'First',
     bestScore: 'Best',
     recentScore: 'Recent',
-    takeTestAgain: 'Take test again',
+    takeTest: 'Take Test',
     notPlayed: '-',
     badgeDetailEarned: 'Earned',
     badgeDetailInProgress: 'In progress',

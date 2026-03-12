@@ -489,7 +489,7 @@ export default function StatsScreen() {
                     activeOpacity={0.7}
                     style={styles.regionRetakeLink}
                   >
-                    <Text style={styles.regionRetakeLinkText}>{t('stats.takeTestAgain')}</Text>
+                    <Text style={styles.regionRetakeLinkText}>{t('stats.takeTest')}</Text>
                     <ChevronRightIcon size={12} color={colors.accent} />
                   </TouchableOpacity>
                 </View>

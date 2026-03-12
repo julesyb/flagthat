@@ -86,6 +86,14 @@
 - All user-facing text must use `t(key)` - never hardcode strings
 - Translation keys defined in `src/locales/en.ts`, other locales in same directory
 - Interpolation: `t('results.score', { correct: 5, total: 10 })`
+- **Every new or changed translation key must be added to ALL 6 locale files** (en, fr, es, de, pt-BR, zh). Never add a key to en.ts without adding the corresponding translation to every other locale.
+- After any change involving user-facing text, verify that no English strings leak through when switching languages. Treat untranslated strings as bugs.
+
+### Dynamic and Reusable Components
+- All new UI should be dynamic and data-driven. Avoid hardcoding values, labels, or lists that could change.
+- Before creating new components, check if an existing component in `src/components/` can be reused or extended.
+- When adding new features, review surrounding code for opportunities to extract reusable components or shared utilities.
+- Prefer configuration and props over duplication. If the same UI pattern appears more than once, extract it into a shared component.
 
 ### Accessibility
 - All interactive elements need `accessibilityRole="button"` and `accessibilityLabel={t(...)}`
