@@ -172,7 +172,17 @@ export default function StatsScreen() {
   const top10 = React.useMemo(() => {
     return Object.entries(flagStats)
       .filter(([, s]) => s.right > 0)
-      .sort(([, a], [, b]) => b.right - a.right)
+      .sort(([, a], [, b]) => {
+        const totalA = a.right + a.wrong;
+        const totalB = b.right + b.wrong;
+        const accA = a.right / totalA;
+        const accB = b.right / totalB;
+        if (accA !== accB) return accB - accA;
+        // Tie-break: faster avg time wins (lower is better)
+        const avgA = a.totalTimeRight ? a.totalTimeRight / a.right : Infinity;
+        const avgB = b.totalTimeRight ? b.totalTimeRight / b.right : Infinity;
+        return avgA - avgB;
+      })
       .slice(0, 10);
   }, [flagStats]);
 
@@ -624,17 +634,13 @@ export default function StatsScreen() {
               return (
                 <View key={badge.id} style={[styles.badgeCard, !earned && styles.badgeCardLocked]}>
                   <View style={[styles.badgeIconWrap, { backgroundColor: earned ? tierColor + '18' : colors.surfaceSecondary }]}>
-                    <BadgeIconView icon={badge.icon} color={earned ? tierColor : colors.textTertiary} />
+                    <BadgeIconView icon={badge.icon} size={14} color={earned ? tierColor : colors.textTertiary} />
                   </View>
-                  <Text style={[styles.badgeName, !earned && styles.badgeNameLocked]}>{badge.name}</Text>
-                  <Text style={[styles.badgeDesc, !earned && styles.badgeDescLocked]}>{badge.description}</Text>
+                  <Text style={[styles.badgeName, !earned && styles.badgeNameLocked]} numberOfLines={1}>{badge.name}</Text>
                   {progress && progress.progress > 0 && (
                     <View style={styles.badgeProgressWrap}>
                       <View style={[styles.badgeProgressFill, { width: `${progress.pct}%` }]} />
                     </View>
-                  )}
-                  {progress && progress.progress > 0 && (
-                    <Text style={styles.badgeProgressText}>{progress.progress}/{progress.target}</Text>
                   )}
                 </View>
               );
@@ -649,16 +655,21 @@ export default function StatsScreen() {
               <Text style={styles.sectionTitle}>{t('stats.bestFlags')}</Text>
               <Text style={styles.sectionMeta}>{t('stats.alwaysRight')}</Text>
             </View>
-            {top10.map(([id, fs], i) => (
-              <View key={id} style={styles.rankRow}>
-                <Text style={[styles.rank, i < 3 && { color: RANK_COLORS[i] }]}>{i + 1}</Text>
-                <FlagImageSmall countryCode={id} />
-                <Text style={styles.rankName}>{flagNameMap[id] || id}</Text>
-                <View style={styles.scoreBadge}>
-                  <Text style={styles.scoreBadgeText}>{fs.right}x</Text>
+            {top10.map(([id, fs], i) => {
+              const totalSeen = fs.right + fs.wrong;
+              const avgTime = fs.totalTimeRight ? (fs.totalTimeRight / fs.right).toFixed(1) : null;
+              return (
+                <View key={id} style={styles.rankRow}>
+                  <Text style={[styles.rank, i < 3 && { color: RANK_COLORS[i] }]}>{i + 1}</Text>
+                  <FlagImageSmall countryCode={id} />
+                  <Text style={styles.rankName}>{flagNameMap[id] || id}</Text>
+                  {avgTime && <Text style={styles.rankSpeed}>{avgTime}s</Text>}
+                  <View style={styles.scoreBadge}>
+                    <Text style={styles.scoreBadgeText}>{fs.right}/{totalSeen}</Text>
+                  </View>
                 </View>
-              </View>
-            ))}
+              );
+            })}
           </Animated.View>
         )}
 
@@ -1012,6 +1023,10 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     color: colors.ink,
     flex: 1,
   },
+  rankSpeed: {
+    ...typography.micro,
+    color: colors.textTertiary,
+  },
   scoreBadge: {
     backgroundColor: colors.successBg,
     borderRadius: borderRadius.full,
@@ -1156,49 +1171,41 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   badgeGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: 6,
   },
   badgeCard: {
-    width: '48%',
+    width: '23%',
     backgroundColor: colors.surface,
-    borderRadius: borderRadius.md,
+    borderRadius: borderRadius.sm,
     borderWidth: 1,
     borderColor: colors.border,
-    padding: 14,
+    padding: 8,
+    alignItems: 'center',
   },
   badgeCardLocked: { opacity: 0.45 },
   badgeIconWrap: {
-    width: 36, height: 36, borderRadius: borderRadius.md,
-    justifyContent: 'center', alignItems: 'center', marginBottom: 10,
+    width: 28, height: 28, borderRadius: borderRadius.sm,
+    justifyContent: 'center', alignItems: 'center', marginBottom: 6,
   },
   badgeName: {
-    ...typography.captionStrong,
+    fontFamily: fontFamily.uiLabel,
+    fontSize: 10,
     color: colors.ink,
-    marginBottom: 3,
+    textAlign: 'center',
   },
   badgeNameLocked: { color: colors.textTertiary },
-  badgeDesc: {
-    ...typography.micro,
-    color: colors.textSecondary,
-    lineHeight: 16,
-  },
-  badgeDescLocked: { color: colors.textTertiary },
   badgeProgressWrap: {
-    height: 4,
+    height: 3,
     backgroundColor: colors.border,
     borderRadius: borderRadius.full,
     overflow: 'hidden',
-    marginTop: 8,
+    marginTop: 5,
+    width: '100%',
   },
   badgeProgressFill: {
     height: '100%',
     backgroundColor: colors.warning,
     borderRadius: borderRadius.full,
-  },
-  badgeProgressText: {
-    ...typography.micro,
-    color: colors.textTertiary,
-    marginTop: 3,
   },
 
   // ── Activity Heatmap

@@ -388,7 +388,7 @@ async function appendDailyLog(date: string, score: number, results: GameResult[]
 // Once rightStreak reaches 3, the flag is considered "learned" and drops
 // out of Practice More. Getting it wrong again resets the streak.
 export interface FlagStats {
-  [flagId: string]: { wrong: number; right: number; rightStreak: number };
+  [flagId: string]: { wrong: number; right: number; rightStreak: number; totalTimeRight?: number };
 }
 
 export async function getFlagStats(): Promise<FlagStats> {
@@ -421,6 +421,7 @@ export async function updateFlagResults(results: GameResult[]): Promise<void> {
       if (r.correct) {
         stats[id].right += 1;
         stats[id].rightStreak += 1;
+        stats[id].totalTimeRight = (stats[id].totalTimeRight || 0) + r.timeTaken;
       } else {
         stats[id].wrong += 1;
         stats[id].rightStreak = 0;
