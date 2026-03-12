@@ -1012,8 +1012,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     borderWidth: 1.5, borderColor: colors.accent, padding: 14, marginTop: 8,
   },
   practiceButtonText: {
-    fontFamily: fontFamily.uiLabel, fontSize: fontSize.sm,
-    letterSpacing: 0.8, textTransform: 'uppercase', color: colors.accent,
+    ...typography.actionLabel, letterSpacing: 0.8, color: colors.accent,
   },
   practiceButtonMeta: {
     ...typography.micro,
@@ -1026,8 +1025,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     padding: 14, marginTop: 8,
   },
   viewStatsText: {
-    fontFamily: fontFamily.uiLabel, fontSize: fontSize.sm,
-    letterSpacing: 0.8, textTransform: 'uppercase', color: colors.ink, flex: 1,
+    ...typography.actionLabel, letterSpacing: 0.8, color: colors.ink, flex: 1,
   },
 
   // ── Sections
@@ -1107,8 +1105,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     borderRadius: borderRadius.lg, paddingVertical: 14, marginBottom: spacing.md,
   },
   challengeButtonTitle: {
-    fontFamily: fontFamily.uiLabel, fontSize: fontSize.sm,
-    letterSpacing: 0.5, textTransform: 'uppercase', color: colors.ink,
+    ...typography.actionLabel, color: colors.ink,
   },
 
   // ── Challenge modal
@@ -1136,7 +1133,6 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   },
   modalShareDisabled: { backgroundColor: colors.textTertiary },
   modalShareText: {
-    fontFamily: fontFamily.uiLabel, fontSize: fontSize.sm,
-    letterSpacing: 0.5, textTransform: 'uppercase', color: colors.playText,
+    ...typography.actionLabel, color: colors.playText,
   },
 }); };

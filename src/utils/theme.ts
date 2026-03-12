@@ -327,6 +327,13 @@ export const typography = {
     fontSize: fontSize.xs,
     fontFamily: fontFamily.uiLabel,
   },
+  // ── Action label (13px SemiBold, uppercase) — button text, CTAs ──
+  actionLabel: {
+    fontSize: fontSize.sm,
+    fontFamily: fontFamily.uiLabel,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase' as const,
+  },
   // ── Display numerals (LibreBaskerville at lg/display/hero/countdown sizes) ──
   statValue: {
     fontSize: fontSize.lg,

@@ -624,7 +624,7 @@ const createStyles = (colors: ThemeColors) => {
     backgroundColor: 'transparent',
   },
   revealInfo: { alignItems: 'center', gap: spacing.xxs },
-  fakeLabel: { fontFamily: fontFamily.uiLabel, fontSize: fontSize.sm, letterSpacing: 1.2, textTransform: 'uppercase', color: colors.accent },
+  fakeLabel: { ...typography.actionLabel, letterSpacing: 1.2, color: colors.accent },
   realName: { ...typography.captionStrong, color: colors.ink, textAlign: 'center' },
   realRegion: { ...typography.micro, color: colors.textTertiary },
   badge: {
