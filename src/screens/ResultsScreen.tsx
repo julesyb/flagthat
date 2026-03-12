@@ -24,7 +24,7 @@ import { BaselineRegionId, UserStats, GameMode, CategoryId, BASELINE_REGIONS } f
 import { t } from '../utils/i18n';
 import { hapticCorrect, hapticTap, playCelebrationSound } from '../utils/feedback';
 import { FlagImageSmall } from '../components/FlagImage';
-import { CheckIcon, CrossIcon, ChevronRightIcon, BarChartIcon, CalendarIcon, UsersIcon, CrosshairIcon, BadgeIconView } from '../components/Icons';
+import { CheckIcon, CrossIcon, ChevronRightIcon, GlobeIcon, UsersIcon, BadgeIconView } from '../components/Icons';
 import BottomNav from '../components/BottomNav';
 import ScreenContainer from '../components/ScreenContainer';
 import { useNavTabs } from '../hooks/useNavTabs';
@@ -84,8 +84,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
   const [newBadges, setNewBadges] = useState<EarnedBadge[]>([]);
   const [totalBadgesEarned, setTotalBadgesEarned] = useState(0);
   const [isNewBestStreak, setIsNewBestStreak] = useState(false);
-  const [prevAccuracy, setPrevAccuracy] = useState<number | null>(null);
-  const [weakFlagCount, setWeakFlagCount] = useState(0);
+  const [newCountriesCount, setNewCountriesCount] = useState(0);
   const [levelUpTo, setLevelUpTo] = useState<number | null>(null);
 
   // Challenge modal state
@@ -233,8 +232,6 @@ export default function ResultsScreen({ route, navigation }: Props) {
       const preBadgeIds = new Set(getAllEarnedBadges(preCtx, preBadgeData.earnedBadgeIds).map((b) => b.id));
 
       const wasNewBestStreak = streak > preStats.bestStreak;
-      const prevAcc = preStats.totalAnswered > 0
-        ? Math.round((preStats.totalCorrect / preStats.totalAnswered) * 100) : null;
 
       // ── Persist game data ──
       if (!reviewOnly) {
@@ -295,9 +292,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
       setNewBadges(postBadges.filter((b) => !preBadgeIds.has(b.id)));
       setTotalBadgesEarned(postBadges.length);
       setIsNewBestStreak(wasNewBestStreak && !reviewOnly);
-      setPrevAccuracy(prevAcc);
-      setWeakFlagCount(postMissed.length);
-
+      setNewCountriesCount(reviewOnly ? 0 : seen - preSeen);
       // ── Level-up detection ──
       if (!reviewOnly) {
         const prePersisted = await getPersistedLevel();
@@ -436,14 +431,6 @@ export default function ResultsScreen({ route, navigation }: Props) {
           : t('results.playAgain');
 
   const dataLoaded = overallStats !== null;
-  const accDiff = prevAccuracy !== null ? accuracy - prevAccuracy : null;
-  const accInsight = !dataLoaded
-    ? null
-    : prevAccuracy === null
-    ? t('results.firstGame')
-    : accDiff !== null && accDiff > 0 ? t('results.aboveAverage', { pct: accDiff })
-    : accDiff !== null && accDiff < 0 ? t('results.belowAverage', { pct: Math.abs(accDiff) })
-    : null;
 
   // Hero glow: interpolate to a warm gold border overlay
   const heroGlowColor = heroGlow.interpolate({
@@ -680,19 +667,11 @@ export default function ResultsScreen({ route, navigation }: Props) {
         {/* ── INSIGHT CHIPS (hidden for challenges) ── */}
         {!reviewOnly && !isChallenge && (
           <Animated.View style={[styles.insightRow, { opacity: restFade }]}>
-            {accInsight && (
+            {newCountriesCount > 0 && (
               <View style={styles.insightChip}>
-                <BarChartIcon size={13} color={accDiff !== null && accDiff >= 0 ? colors.success : colors.textTertiary} />
-                <Text style={[styles.insightText, accDiff !== null && accDiff > 0 && { color: colors.success }]}>
-                  {accInsight}
-                </Text>
-              </View>
-            )}
-            {dayStreakCount > 0 && (
-              <View style={styles.insightChip}>
-                <CalendarIcon size={13} color={colors.accent} />
-                <Text style={[styles.insightText, { color: colors.accent }]}>
-                  {dayStreakCount} {t('stats.dayStreak').toLowerCase()}
+                <GlobeIcon size={13} color={colors.success} />
+                <Text style={[styles.insightText, { color: colors.success }]}>
+                  {t('results.newCountries', { count: newCountriesCount })}
                 </Text>
               </View>
             )}
@@ -756,36 +735,6 @@ export default function ResultsScreen({ route, navigation }: Props) {
                 </View>
               );
             })}
-          </Animated.View>
-        )}
-
-        {/* ── YOUR PROGRESS (animated bar) — hidden for challenges ── */}
-        {overallStats && !reviewOnly && !isChallenge && (
-          <Animated.View style={[styles.progressSection, { opacity: restFade }]}>
-
-            {weakFlagCount > 0 && (
-              <TouchableOpacity
-                style={styles.practiceButton}
-                onPress={() => navigation.replace('Game', {
-                  config: { mode: 'practice', category: 'all', questionCount: weakFlagCount, displayMode: 'flag' },
-                })}
-                activeOpacity={0.7}
-                accessibilityRole="button"
-                accessibilityLabel={t('results.practiceWeak')}
-                accessibilityHint={t('results.flagsToReview', { count: weakFlagCount })}
-              >
-                <CrosshairIcon size={16} color={colors.accent} />
-                <Text style={styles.practiceButtonText}>{t('results.practiceWeak')}</Text>
-                <Text style={styles.practiceButtonMeta}>{t('results.flagsToReview', { count: weakFlagCount })}</Text>
-                <ChevronRightIcon size={14} color={colors.accent} />
-              </TouchableOpacity>
-            )}
-
-            <TouchableOpacity style={styles.viewStatsButton} onPress={() => navigation.navigate('Stats')} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel={t('results.viewAllStats')}>
-              <BarChartIcon size={16} color={colors.ink} />
-              <Text style={styles.viewStatsText}>{t('results.viewAllStats')}</Text>
-              <ChevronRightIcon size={14} color={colors.textTertiary} />
-            </TouchableOpacity>
           </Animated.View>
         )}
 
@@ -1030,10 +979,10 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   // ── Buttons
   buttonRow: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.md },
   buttonHalf: { flex: 1 },
-  secondaryButton: { ...btn.secondary, justifyContent: 'center', alignItems: 'center' },
-  secondaryButtonText: { ...btn.secondaryText, textAlign: 'center' },
-  primaryButton: { ...btn.primary, justifyContent: 'center', alignItems: 'center' },
-  primaryButtonText: { ...btn.primaryText, textAlign: 'center' },
+  secondaryButton: { ...btn.secondary, justifyContent: 'center', alignItems: 'center', paddingVertical: 12, paddingHorizontal: 18 },
+  secondaryButtonText: { ...btn.secondaryText, textAlign: 'center', fontSize: 15 },
+  primaryButton: { ...btn.primary, justifyContent: 'center', alignItems: 'center', paddingVertical: 12, paddingHorizontal: 18 },
+  primaryButtonText: { ...btn.primaryText, textAlign: 'center', fontSize: 15 },
 
   // ── Badges
   badgesSection: { marginBottom: spacing.md },
@@ -1048,30 +997,6 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   badgeDesc: { ...typography.micro, color: colors.textSecondary },
   badgeTierPill: { borderRadius: borderRadius.full, paddingVertical: 3, paddingHorizontal: 10 },
   badgeTierText: { ...typography.eyebrow },
-
-  // ── Actions
-  progressSection: { marginBottom: spacing.md },
-  practiceButton: {
-    flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
-    backgroundColor: colors.accentBg, borderRadius: borderRadius.lg,
-    borderWidth: 1.5, borderColor: colors.accent, padding: 14, marginBottom: 8,
-  },
-  practiceButtonText: {
-    ...typography.actionLabel, letterSpacing: 0.8, color: colors.accent,
-  },
-  practiceButtonMeta: {
-    ...typography.micro,
-    color: colors.textTertiary, flex: 1, textAlign: 'right',
-  },
-  viewStatsButton: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    gap: spacing.sm, backgroundColor: colors.surface,
-    borderRadius: borderRadius.lg, borderWidth: 1, borderColor: colors.border,
-    padding: 14,
-  },
-  viewStatsText: {
-    ...typography.actionLabel, letterSpacing: 0.8, color: colors.ink, flex: 1,
-  },
 
   // ── Sections
   sectionHeader: {

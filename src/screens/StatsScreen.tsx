@@ -28,7 +28,7 @@ import ScreenContainer from '../components/ScreenContainer';
 import { useNavTabs } from '../hooks/useNavTabs';
 import { getAllEarnedBadges, buildBadgeContext, deriveFromContext, BADGES, TIER_COLORS, getBadgeProgress, Badge } from '../utils/badges';
 import { computeLevelProgress, LevelProgress, getTierLabel, getLevelTier } from '../utils/levels';
-import { ChevronRightIcon, BadgeIconView, UsersIcon, CheckIcon, CrossIcon } from '../components/Icons';
+import { ChevronRightIcon, BadgeIconView, UsersIcon, CheckIcon, CrossIcon, FlameIcon } from '../components/Icons';
 import PageHeader from '../components/PageHeader';
 
 const EMPTY_FLAG_STATS: FlagStats = {};
@@ -326,7 +326,7 @@ export default function StatsScreen() {
   }
 
   // ── Destructure for render (data is guaranteed non-null below) ──
-  const { stats, challengeHistory, regionScoreHistory } = data;
+  const { stats, challengeHistory, regionScoreHistory, dayStreakInfo } = data;
 
   // Region data - show all regions regardless of whether played
   const regionData = BASELINE_REGIONS.map((regionId) => {
@@ -350,7 +350,18 @@ export default function StatsScreen() {
         <Animated.View style={[
           { opacity: heroFade, transform: [{ translateY: heroSlide }] },
         ]}>
-          <PageHeader title={t('stats.yourStats')} subtitle={t('stats.allTime')} />
+          <View style={styles.headerRow}>
+            <PageHeader title={t('stats.yourStats')} subtitle={t('stats.allTime')} />
+            <View style={styles.streakBadge}>
+              <FlameIcon size={16} color={dayStreakInfo.current > 0 ? colors.goldBright : colors.textTertiary} />
+              <Text style={[styles.streakNum, dayStreakInfo.current === 0 && styles.streakNumInactive]}>{dayStreakInfo.current}</Text>
+              <View style={styles.streakPips}>
+                {Array.from({ length: 7 }).map((_, i) => (
+                  <View key={i} style={[styles.pip, i < Math.min(dayStreakInfo.current, 7) && styles.pipLit]} />
+                ))}
+              </View>
+            </View>
+          </View>
           <View style={styles.heroCard}>
             <View style={styles.heroStatItem}>
               <Text style={[styles.heroStatValue, { color: colors.goldBright }]}>{stats.totalGamesPlayed}</Text>
@@ -639,7 +650,16 @@ export default function StatsScreen() {
           <Animated.View style={{ opacity: restFade }}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>{t('stats.weakFlags')}</Text>
-              <Text style={styles.sectionMeta}>{t('stats.practiceThese')}</Text>
+              <TouchableOpacity
+                onPress={() => navigation.navigate('Game', {
+                  config: { mode: 'practice', category: 'all', questionCount: data.weakFlagCount, displayMode: 'flag' },
+                })}
+                activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel={t('stats.practiceThese')}
+              >
+                <Text style={[styles.sectionMeta, { color: colors.accent, textDecorationLine: 'underline' }]}>{t('stats.practiceThese')}</Text>
+              </TouchableOpacity>
             </View>
             {bottom10.map(([id, fs], i) => {
               const totalSeen = fs.right + fs.wrong;
@@ -844,6 +864,49 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   loadingText: { ...typography.body, color: colors.textSecondary },
   content: { padding: spacing.md, paddingBottom: spacing.xxl },
+
+  // ── Header row with streak badge
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  streakBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    paddingLeft: spacing.sm + 2,
+    borderRadius: borderRadius.full,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+  },
+  streakNum: {
+    fontFamily: fontFamily.display,
+    fontSize: fontSize.lg,
+    color: colors.goldBright,
+    letterSpacing: -0.8,
+    lineHeight: 22,
+  },
+  streakNumInactive: {
+    color: colors.textTertiary,
+  },
+  streakPips: {
+    flexDirection: 'row',
+    gap: 3,
+    marginLeft: 2,
+  },
+  pip: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: colors.pipInactive,
+  },
+  pipLit: {
+    backgroundColor: colors.pipActive,
+  },
 
   // ── Hero (3-column stats card)
   heroCard: {
