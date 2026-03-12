@@ -218,10 +218,13 @@ export default function ResultsScreen({ route, navigation }: Props) {
         ? Math.round((preStats.totalCorrect / preStats.totalAnswered) * 100) : null;
 
       let newCountries = 0;
+      const rightCounts: Record<string, number> = {};
       for (const r of results) {
+        const id = r.question.flag.id;
         if (r.correct) {
-          const prev = preFlagStats[r.question.flag.id];
-          if ((prev?.right ?? 0) === UNLOCK_THRESHOLD - 1) newCountries++;
+          const running = (rightCounts[id] ?? (preFlagStats[id]?.right ?? 0)) + 1;
+          rightCounts[id] = running;
+          if (running === UNLOCK_THRESHOLD) newCountries++;
         }
       }
 
