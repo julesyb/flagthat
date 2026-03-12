@@ -391,15 +391,13 @@ export default function ResultsScreen({ route, navigation }: Props) {
     }
   }, []);
 
-  const categoryLabel = config.category === 'all'
-    ? t('categories.all') : t(`categories.${config.category}`);
   const modeLabel = t(`modes.${config.mode}`);
   const dailyNumber = isDaily ? getDailyNumber() : 0;
 
   const handleShare = async () => {
     const message = isDaily
       ? generateDailyShareGrid(results)
-      : generateShareGrid(results, modeLabel, categoryLabel);
+      : generateShareGrid(results, modeLabel);
     try { await Share.share({ message }); markShared(); } catch { /* cancelled */ }
   };
 

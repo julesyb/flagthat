@@ -96,7 +96,7 @@ export function generateDailyShareGrid(results: GameResult[]): string {
   return `Flag That #${dailyNum}\n${correct}/${DAILY_QUESTION_COUNT}\n\n${row1}\n${row2}\n\n${APP_DOMAIN}`;
 }
 
-export function generateShareGrid(results: GameResult[], modeLabel: string, categoryLabel: string): string {
+export function generateShareGrid(results: GameResult[], modeLabel: string): string {
   const correct = results.filter((r) => r.correct).length;
   const accuracy = calculateAccuracy(results);
   const grid = results.map((r) => (r.correct ? '\u2b1b' : '\u2b1c')).join('');

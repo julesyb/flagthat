@@ -195,7 +195,6 @@ export default function GameSetupScreen({ route, navigation }: Props) {
 
   const showQuestionCount = !isTimeAttack && !isFlagPuzzle && !isFlashFlag && filterType !== 'theme';
 
-  const diffLabel = t(DIFFICULTIES.find((d) => d.key === difficulty)?.labelKey ?? 'common.medium');
   const modeLabel = t(SETUP_MODES.find((m) => m.key === setupMode)?.labelKey ?? 'setup.quiz');
   const startButtonColor = showDifficulty
     ? difficulty === 'easy' ? colors.diffEasy
