@@ -16,4 +16,5 @@ export type RootStackParamList = {
   Settings: undefined;
   Browse: { region?: string } | undefined;
   JoinChallenge: { code?: string } | undefined;
+  ChallengeResponse: { code?: string } | undefined;
 };

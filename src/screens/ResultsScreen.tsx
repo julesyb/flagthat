@@ -32,7 +32,7 @@ import { countCorrect } from '../utils/gameHelpers';
 import { RootStackParamList } from '../types/navigation';
 import { getAllEarnedBadges, detectPerGameBadges, buildBadgeContext, BADGES, TIER_COLORS, EarnedBadge } from '../utils/badges';
 import { getTotalFlagCount, getCategoryCount } from '../data';
-import { encodeChallenge, ChallengeData, CHALLENGE_MODES, generateShortCode, generateChallengeShareCard } from '../utils/challengeCode';
+import { encodeChallenge, ChallengeData, CHALLENGE_MODES, generateShortCode, generateChallengeShareCard, encodeResponse } from '../utils/challengeCode';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Results'>;
 
@@ -169,6 +169,28 @@ export default function ResultsScreen({ route, navigation }: Props) {
       // Need name first
       setShowChallengeModal(true);
     }
+  };
+
+  const doShareResponse = async () => {
+    if (!challenge || !playerName) return;
+    const shortCode = generateShortCode(challenge);
+    const responseCode = encodeResponse({
+      recipientName: playerName,
+      shortCode,
+      recipientScore: correct,
+      totalFlags: results.length,
+    });
+    const link = `${APP_URL}/r/${responseCode}`;
+    const message = t('challenge.responseShareCard', {
+      name: playerName,
+      correct: String(correct),
+      total: String(results.length),
+      opponent: challenge.hostName,
+      link,
+    });
+    try {
+      await Share.share({ message });
+    } catch { /* share cancelled */ }
   };
 
   // Head-to-head comparison data
@@ -569,6 +591,28 @@ export default function ResultsScreen({ route, navigation }: Props) {
                 <View style={styles.challengeButtonContent}>
                   <Text style={styles.challengeButtonTitle}>{t('challenge.challengeBack')}</Text>
                   <Text style={styles.challengeButtonDesc}>{t('challenge.challengeBackDesc')}</Text>
+                </View>
+                <ChevronRightIcon size={14} color={colors.goldBright} />
+              </View>
+            </TouchableOpacity>
+          </Animated.View>
+        )}
+
+        {/* ── SEND RESULTS BACK (for received challenges) ── */}
+        {isChallenge && challenge && playerName && !reviewOnly && (
+          <Animated.View style={{ opacity: scoreFade }}>
+            <TouchableOpacity
+              style={styles.challengeButton}
+              onPress={() => { hapticTap(); doShareResponse(); }}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel={t('challenge.sendResultsBack')}
+            >
+              <View style={styles.challengeButtonInner}>
+                <UsersIcon size={18} color={colors.goldBright} />
+                <View style={styles.challengeButtonContent}>
+                  <Text style={styles.challengeButtonTitle}>{t('challenge.sendResultsBack')}</Text>
+                  <Text style={styles.challengeButtonDesc}>{t('challenge.sendResultsBackDesc')}</Text>
                 </View>
                 <ChevronRightIcon size={14} color={colors.goldBright} />
               </View>

@@ -358,6 +358,63 @@ export function generateChallengeShareCard(
   return `${header}\n${avg}\n\n${gridStr}\n\n${cta}\n${challengeUrl}`;
 }
 
+// ── Response code: recipient sends results back to challenger ──
+
+export interface ChallengeResponseData {
+  recipientName: string;
+  shortCode: string;
+  recipientScore: number;
+  totalFlags: number;
+}
+
+/**
+ * Encode a challenge response into a URL-safe string.
+ * Format: R~recipientName~shortCode~score~totalFlags
+ * The R~ prefix distinguishes response codes from challenge codes.
+ */
+export function encodeResponse(data: ChallengeResponseData): string {
+  const name = sanitizeName(data.recipientName);
+  return `R~${name}~${data.shortCode}~${data.recipientScore}~${data.totalFlags}`;
+}
+
+export type DecodeResponseResult =
+  | { status: 'ok'; data: ChallengeResponseData }
+  | { status: 'invalid' };
+
+/** Strip URL prefixes from a response code so users can paste full URLs */
+function stripResponseUrlPrefix(input: string): string {
+  const escaped = APP_DOMAIN.replace(/\./g, '\\.');
+  return input
+    .replace(new RegExp(`^https?://${escaped}/r/`, 'i'), '')
+    .replace(new RegExp(`^${escaped}/r/`, 'i'), '')
+    .replace(/^flagthat:\/\/r\//i, '');
+}
+
+/**
+ * Decode a challenge response code string.
+ * Handles full URLs pasted by the user.
+ */
+export function decodeResponse(code: string): DecodeResponseResult {
+  try {
+    const trimmed = stripResponseUrlPrefix(code.trim());
+    if (!trimmed.startsWith('R~')) return { status: 'invalid' };
+
+    const parts = trimmed.slice(2).split('~'); // strip R~ prefix
+    if (parts.length !== 4) return { status: 'invalid' };
+
+    const [recipientName, shortCode, scoreStr, totalStr] = parts;
+    if (!recipientName || !shortCode || shortCode.length !== SHORT_CODE_LENGTH) return { status: 'invalid' };
+
+    const recipientScore = parseInt(scoreStr, 10);
+    const totalFlags = parseInt(totalStr, 10);
+    if (isNaN(recipientScore) || isNaN(totalFlags) || recipientScore < 0 || totalFlags <= 0) return { status: 'invalid' };
+
+    return { status: 'ok', data: { recipientName, shortCode, recipientScore, totalFlags } };
+  } catch {
+    return { status: 'invalid' };
+  }
+}
+
 // ── Base64 helpers (for legacy V1/V2 decoding only) ──
 
 function fromBase64(encoded: string): string {

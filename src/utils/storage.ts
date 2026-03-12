@@ -604,6 +604,26 @@ export async function addChallengeToHistory(entry: ChallengeHistoryEntry): Promi
   }
 }
 
+export async function updateSentChallengeWithOpponent(
+  shortCode: string,
+  opponentName: string,
+  opponentScore: number,
+): Promise<boolean> {
+  try {
+    const history = await getChallengeHistory();
+    const idx = history.findIndex(
+      (h) => h.shortCode === shortCode && h.direction === 'sent',
+    );
+    if (idx < 0) return false;
+    history[idx].opponentName = opponentName;
+    history[idx].opponentScore = opponentScore;
+    await AsyncStorage.setItem(CHALLENGE_HISTORY_KEY, JSON.stringify(history));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 // ─── Region Score History ─────────────────────────────────
 export interface RegionScoreEntry {
   correct: number;
