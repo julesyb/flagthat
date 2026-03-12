@@ -327,7 +327,7 @@ export default function StatsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <ScreenContainer>
 
         {/* ══════════════════════════════════════════════════════════
@@ -410,7 +410,7 @@ export default function StatsScreen() {
         )}
 
         {(stats.bestTimeAttackScore || 0) > 0 && (
-          <Animated.View style={[styles.tile, { marginTop: 8, opacity: progressFade }]}>
+          <Animated.View style={[styles.tile, { marginTop: spacing.sm, opacity: progressFade }]}>
             <Text style={styles.tileLabel}>{t('stats.bestTimedQuiz')}</Text>
             <Text style={styles.tileVal}>{stats.bestTimeAttackScore}<Text style={styles.tileUnit}> {t('stats.in60s')}</Text></Text>
           </Animated.View>
@@ -486,7 +486,7 @@ export default function StatsScreen() {
                           <Text style={styles.regionImprovLabel}>{t('stats.baselineLabel', { pct: baselinePct })}</Text>
                         </View>
                         <View style={styles.regionImprovArrow}>
-                          <Text style={styles.regionImprovArrowText}>{isUp ? '\u2192' : isDown ? '\u2192' : '='}</Text>
+                          <Text style={styles.regionImprovArrowText}>{diff !== 0 ? '\u2192' : '='}</Text>
                         </View>
                         <View style={styles.regionImprovCol}>
                           <Text style={[styles.regionImprovNow, pct >= GOOD_ACCURACY_PCT && styles.regionImprovNowGood]}>{pct}%</Text>
@@ -700,7 +700,7 @@ export default function StatsScreen() {
             activeOpacity={0.7}
             accessibilityRole="button"
             accessibilityLabel={t('app.settings')}
-            accessibilityHint="Opens settings"
+            accessibilityHint={t('app.settings')}
           >
             <Text style={styles.settingsLinkText}>{t('app.settings')}</Text>
             <ChevronRightIcon size={14} color={colors.textTertiary} />
@@ -715,6 +715,7 @@ export default function StatsScreen() {
 
 const createStyles = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
+  scrollView: { flex: 1 },
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   loadingText: { ...typography.body, color: colors.textSecondary },
   content: { padding: spacing.md, paddingBottom: spacing.xxl },
