@@ -627,7 +627,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
             {/* Challenge Back as text link underneath */}
             {canChallenge && (
               <TouchableOpacity
-                style={styles.challengeBackLink}
+                style={[styles.challengeBackLink, { marginTop: -spacing.sm }]}
                 onPress={() => { hapticTap(); navigation.replace('GameSetup', { initialMode: config.mode, ...(config.difficulty && { initialDifficulty: config.difficulty }) }); }}
                 activeOpacity={0.7}
                 accessibilityRole="button"
@@ -815,6 +815,11 @@ export default function ResultsScreen({ route, navigation }: Props) {
                 },
               ]}
             >
+              {!isChallenge && (
+                <Text style={[styles.reviewIndex, result.correct ? styles.reviewIndexCorrect : styles.reviewIndexWrong]}>
+                  {index + 1}
+                </Text>
+              )}
               <FlagImageSmall countryCode={result.question.flag.id} />
               <View style={styles.reviewContent}>
                 <Text style={styles.reviewName}>{result.question.flag.name}</Text>
@@ -1070,7 +1075,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   reviewTime: { ...typography.microMedium, color: colors.textTertiary },
   reviewTimeFastest: { color: colors.success },
   reviewH2hHeader: {
-    flexDirection: 'row', alignItems: 'center',
+    flexDirection: 'row', alignItems: 'center', gap: 12,
     paddingHorizontal: 14, marginBottom: spacing.xs,
   },
   reviewH2hLabel: {

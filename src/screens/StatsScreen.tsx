@@ -762,10 +762,11 @@ export default function StatsScreen() {
             {selectedChallenge && (() => {
               const ch = selectedChallenge;
               // Reconstruct myResults from fullCode if missing (older challenge data)
-              if (!ch.myResults && ch.fullCode && ch.direction === 'sent') {
+              let myResults = ch.myResults;
+              if (!myResults && ch.fullCode && ch.direction === 'sent') {
                 const decoded = decodeChallenge(ch.fullCode);
                 if (decoded.status === 'ok') {
-                  ch.myResults = decoded.data.hostResults.map((r) => r.correct);
+                  myResults = decoded.data.hostResults.map((r) => r.correct);
                 }
               }
               const hasOpponent = ch.opponentName !== null && ch.opponentScore !== null;
@@ -814,7 +815,7 @@ export default function StatsScreen() {
                   </View>
 
                   {/* Per-question result details */}
-                  {(ch.myResults || ch.opponentResults) && (
+                  {(myResults || ch.opponentResults) && (
                     <View style={styles.h2hDetailsWrap}>
                       <View style={styles.h2hDetailsHeader}>
                         <Text style={[styles.h2hDetailsLabel, { flex: hasOpponent ? 1 : 0 }]}>{ch.myName || t('challenge.you')}</Text>
@@ -822,7 +823,7 @@ export default function StatsScreen() {
                         {hasOpponent && <Text style={[styles.h2hDetailsLabel, { flex: 1, textAlign: 'right' }]}>{ch.opponentName}</Text>}
                       </View>
                       {Array.from({ length: ch.totalFlags }).map((_, qi) => {
-                        const myOk = ch.myResults ? ch.myResults[qi] : undefined;
+                        const myOk = myResults ? myResults[qi] : undefined;
                         const oppOk = ch.opponentResults ? ch.opponentResults[qi] : undefined;
                         // Highlight the winner of each question
                         const myWon = myOk === true && oppOk === false;
