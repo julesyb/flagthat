@@ -192,10 +192,22 @@ export async function getStats(): Promise<UserStats> {
     const json = await AsyncStorage.getItem(STATS_KEY);
     if (json) {
       const parsed = JSON.parse(json);
+      const mergedModeStats = { ...DEFAULT_STATS.modeStats, ...(parsed.modeStats || {}) };
+
+      // Migrate renamed mode: flagflash -> flashflag (v1.1)
+      const old = (parsed.modeStats || {}) as Record<string, { correct: number; total: number }>;
+      if (old.flagflash && old.flagflash.total > 0) {
+        mergedModeStats.flashflag = {
+          correct: (mergedModeStats.flashflag?.correct || 0) + old.flagflash.correct,
+          total: (mergedModeStats.flashflag?.total || 0) + old.flagflash.total,
+        };
+        delete (mergedModeStats as Record<string, unknown>).flagflash;
+      }
+
       return {
         ...DEFAULT_STATS,
         ...parsed,
-        modeStats: { ...DEFAULT_STATS.modeStats, ...(parsed.modeStats || {}) },
+        modeStats: mergedModeStats,
         categoryStats: { ...parsed.categoryStats },
       };
     }

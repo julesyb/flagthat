@@ -395,7 +395,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   primaryBtnIcon: {
     width: 44,
     height: 44,
-    backgroundColor: colors.whiteAlpha20,
+    backgroundColor: 'rgba(19,15,0,0.2)', // warm dark overlay on constant gold CTA
     borderRadius: borderRadius.md,
     justifyContent: 'center',
     alignItems: 'center',
