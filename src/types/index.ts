@@ -2,6 +2,9 @@ export type GameMode = 'easy' | 'medium' | 'hard' | 'flashflag' | 'flagpuzzle' |
 
 export type BaselineRegionId = 'africa' | 'asia' | 'europe' | 'americas' | 'oceania';
 
+/** Canonical list of baseline regions — single source of truth. */
+export const BASELINE_REGIONS: BaselineRegionId[] = ['africa', 'asia', 'europe', 'americas', 'oceania'];
+
 export type DisplayMode = 'flag' | 'map';
 
 export type CategoryType = 'region' | 'theme';

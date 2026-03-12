@@ -16,8 +16,9 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
 import { ThemeColors, spacing, fontFamily, fontSize, borderRadius, typography } from '../utils/theme';
 import { useTheme } from '../contexts/ThemeContext';
-import { UserStats, CategoryId, BaselineRegionId } from '../types';
+import { UserStats, CategoryId, BaselineRegionId, BASELINE_REGIONS } from '../types';
 import { getStats, getFlagStats, FlagStats, getDayStreakInfo, DayStreakInfo, getBadgeData, getMissedFlagIds, BadgeData, getGameHistory, GameHistoryEntry, getChallengeHistory, ChallengeHistoryEntry, MASTERED_STREAK, UNLOCK_THRESHOLD, getRegionScoreHistory, RegionScoreHistory, getPersistedLevel, persistLevel } from '../utils/storage';
+import { GOOD_ACCURACY_PCT } from '../utils/config';
 import { getAllFlags, getCategoryCount } from '../data';
 
 import { t } from '../utils/i18n';
@@ -30,9 +31,8 @@ import { computeLevelProgress, LevelProgress, getTierLabel, getLevelTier } from 
 import { ChevronRightIcon, BadgeIconView, UsersIcon } from '../components/Icons';
 import PageHeader from '../components/PageHeader';
 
-const REGIONS: CategoryId[] = ['africa', 'asia', 'europe', 'americas', 'oceania'];
+const REGIONS = BASELINE_REGIONS;
 const EMPTY_FLAG_STATS: FlagStats = {};
-const GOOD_ACCURACY_PCT = 70;
 const toPct = (e: { correct: number; total: number } | undefined) =>
   e && e.total > 0 ? Math.round((e.correct / e.total) * 100) : null;
 const TIME_ATTACK_CONFIG = { mode: 'timeattack' as const, category: 'all' as const, questionCount: 999, timeLimit: 60, displayMode: 'flag' as const };

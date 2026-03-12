@@ -20,7 +20,7 @@ import { spacing, typography, fontFamily, fontSize, buildButtons, borderRadius, 
 import { useTheme } from '../contexts/ThemeContext';
 import { getStreakFromResults, generateDailyShareGrid, generateShareGrid, getDailyNumber } from '../utils/gameEngine';
 import { updateStats, updateFlagResults, saveDailyChallenge, incrementDailyChallenges, markShared, saveBaselineResult, getStats, getFlagStats, getDayStreakInfo, getBadgeData, persistEarnedBadges, getMissedFlagIds, addGameHistoryEntry, getChallengeName, saveChallengeName, addChallengeToHistory, recordRegionScore, getPersistedLevel, persistLevel } from '../utils/storage';
-import { BaselineRegionId, UserStats, GameMode, CategoryId } from '../types';
+import { BaselineRegionId, UserStats, GameMode, CategoryId, BASELINE_REGIONS } from '../types';
 import { t } from '../utils/i18n';
 import { hapticCorrect, hapticTap, playCelebrationSound } from '../utils/feedback';
 import { FlagImageSmall } from '../components/FlagImage';
@@ -223,9 +223,8 @@ export default function ResultsScreen({ route, navigation }: Props) {
         await updateFlagResults(results);
         await addGameHistoryEntry(accuracy, config.mode);
         // Record per-region score for region-based games
-        const regionIds = ['africa', 'asia', 'europe', 'americas', 'oceania'] as const;
-        if (regionIds.includes(config.category as typeof regionIds[number])) {
-          await recordRegionScore(config.category as typeof regionIds[number], correct, results.length);
+        if ((BASELINE_REGIONS as readonly string[]).includes(config.category)) {
+          await recordRegionScore(config.category as BaselineRegionId, correct, results.length);
         }
         if (isDaily) {
           await saveDailyChallenge(results);

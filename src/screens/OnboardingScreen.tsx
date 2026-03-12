@@ -19,19 +19,13 @@ import { hapticTap } from '../utils/feedback';
 import { CheckIcon, ChevronRightIcon, PlayIcon, BarChartIcon } from '../components/Icons';
 import FlagImage from '../components/FlagImage';
 import { RootStackParamList } from '../types/navigation';
-import { BaselineRegionId, CategoryId, FlagItem } from '../types';
+import { BaselineRegionId, CategoryId, FlagItem, BASELINE_REGIONS } from '../types';
 import { t } from '../utils/i18n';
 import ScreenContainer from '../components/ScreenContainer';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Onboarding'>;
 
-const REGIONS: { id: BaselineRegionId; categoryId: CategoryId }[] = [
-  { id: 'africa', categoryId: 'africa' },
-  { id: 'asia', categoryId: 'asia' },
-  { id: 'europe', categoryId: 'europe' },
-  { id: 'americas', categoryId: 'americas' },
-  { id: 'oceania', categoryId: 'oceania' },
-];
+const REGIONS = BASELINE_REGIONS.map((id) => ({ id, categoryId: id as CategoryId }));
 
 // Pick 4 recognizable flags for the hero mosaic
 const HERO_FLAGS = ['jp', 'br', 'gb', 'za'];

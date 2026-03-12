@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { UserStats, GameMode, CategoryId, GameResult, BaselineRegionId } from '../types';
+import { UserStats, GameMode, CategoryId, GameResult, BaselineRegionId, BASELINE_REGIONS } from '../types';
 import { MS_PER_DAY, MASTERED_STREAK, UNLOCK_THRESHOLD, MAX_GAME_HISTORY, MAX_CHALLENGE_HISTORY } from './config';
 
 // Re-export for existing consumers
@@ -501,7 +501,7 @@ export interface BaselineData {
   skipped?: boolean;
 }
 
-const BASELINE_REGIONS: BaselineRegionId[] = ['africa', 'asia', 'europe', 'americas', 'oceania'];
+// Use the canonical BASELINE_REGIONS from types
 
 export async function getBaselineData(): Promise<BaselineData | null> {
   try {

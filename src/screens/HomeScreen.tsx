@@ -19,7 +19,7 @@ import { initAudio, hapticTap, hapticCorrect, hapticWrong, playWrongSound, setSo
 import { getStats, getDayStreak, getSettings, getMissedFlagIds, getBaselineData, BaselineData, getFlagStats, getBadgeData, getDayStreakInfo, getPersistedLevel, persistLevel } from '../utils/storage';
 import { generateQuestions } from '../utils/gameEngine';
 import { RootStackParamList } from '../types/navigation';
-import { GameMode, UserStats, GameQuestion, CategoryId } from '../types';
+import { GameMode, UserStats, GameQuestion, CategoryId, BASELINE_REGIONS } from '../types';
 import { PlayIcon, ChevronRightIcon, ChevronDownIcon, ClockIcon, EyeIcon, CrosshairIcon, PuzzleIcon, CheckIcon, FlameIcon, UsersIcon, LinkIcon } from '../components/Icons';
 import FlagImage from '../components/FlagImage';
 import BottomNav from '../components/BottomNav';
@@ -30,10 +30,11 @@ import { useNavTabs } from '../hooks/useNavTabs';
 import { computeLevelProgress, LevelProgress } from '../utils/levels';
 import { t } from '../utils/i18n';
 import { translateName, flagName } from '../data/countryNames';
+import { HOME_QUESTION_COUNTS, ANIM_PULSE_DURATION_MS, ANIM_PULSE_DELAY_MS, ANIM_STAGGER_MS, ANIM_OPTION_DELAY_MS } from '../utils/config';
 
 const MODE_KEYS: GameMode[] = ['easy', 'medium', 'hard'];
 
-const QUESTION_COUNTS = [5, 10, 15, 20];
+const QUESTION_COUNTS = HOME_QUESTION_COUNTS;
 
 
 
@@ -56,12 +57,12 @@ function FlagTeaser({ onAnswer }: { onAnswer?: () => void }) {
     // Pop in options after a short delay
     const timer = setTimeout(() => {
       Animated.stagger(
-        100,
+        ANIM_STAGGER_MS,
         optAnims.map((a) =>
           Animated.spring(a, { toValue: 1, useNativeDriver: true, tension: 120, friction: 10 }),
         ),
       ).start();
-    }, 400);
+    }, ANIM_OPTION_DELAY_MS);
     return () => clearTimeout(timer);
   }, []);
 
@@ -163,10 +164,10 @@ export default function HomeScreen({ navigation }: Props) {
   const pulsePlayBtn = useCallback(() => {
     setTimeout(() => {
       Animated.sequence([
-        Animated.timing(playBtnScale, { toValue: 1.05, duration: 200, useNativeDriver: true }),
+        Animated.timing(playBtnScale, { toValue: 1.05, duration: ANIM_PULSE_DURATION_MS, useNativeDriver: true }),
         Animated.spring(playBtnScale, { toValue: 1, useNativeDriver: true, tension: 200, friction: 10 }),
       ]).start();
-    }, 600);
+    }, ANIM_PULSE_DELAY_MS);
   }, [playBtnScale]);
 
   useEffect(() => {
@@ -201,7 +202,7 @@ export default function HomeScreen({ navigation }: Props) {
     });
   };
 
-  const ONBOARDING_REGIONS = ['africa', 'asia', 'europe', 'americas', 'oceania'] as const;
+  const ONBOARDING_REGIONS = BASELINE_REGIONS;
   const onboardingComplete = baseline ? baseline.completedAt !== null : true;
   const onboardingCount = baseline ? ONBOARDING_REGIONS.filter((r) => baseline.regions[r]).length : 0;
   const nextRegion = baseline ? ONBOARDING_REGIONS.find((r) => !baseline.regions[r]) ?? 'africa' : 'africa';
@@ -810,7 +811,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     flexDirection: 'row',
     justifyContent: 'center',
     gap: spacing.sm,
-    paddingVertical: 15,
+    paddingVertical: spacing.md - 1,
   },
   playBtnText: {
     ...btn.primaryText,
@@ -840,7 +841,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm + 4,
-    paddingVertical: 11,
+    paddingVertical: spacing.sm + 3,
     paddingHorizontal: 2,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,

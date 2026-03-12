@@ -36,14 +36,17 @@ import {
   LinkIcon,
   ChevronRightIcon,
 } from '../components/Icons';
+import {
+  SETUP_QUESTION_COUNTS,
+  FLAGPUZZLE_TIMES,
+  TIMEATTACK_TIMES,
+  DEFAULT_GUESS_LIMIT,
+  GUESS_LIMIT_OPTIONS,
+} from '../utils/config';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'GameSetup'>;
 
-const QUESTION_COUNTS = [10, 20, 50, 100];
-const FLAGPUZZLE_TIMES = [15, 30, 60];
-const TIMEATTACK_TIMES = [30, 60, 90, 120];
-const DEFAULT_GUESS_LIMIT = 3;
-const GUESS_LIMIT_OPTIONS = [3, 5, 0] as const; // 0 = unlimited
+const QUESTION_COUNTS = SETUP_QUESTION_COUNTS;
 
 type SetupMode = 'quiz' | 'flashflag' | 'flagpuzzle' | 'timeattack' | 'neighbors' | 'capitalconnection';
 type QuizDifficulty = 'easy' | 'medium' | 'hard';
@@ -510,8 +513,8 @@ const createStyles = (colors: ThemeColors) => {
   },
   diffBtn: {
     flex: 1,
-    paddingVertical: 13,
-    paddingHorizontal: 8,
+    paddingVertical: spacing.sm + 5,
+    paddingHorizontal: spacing.sm,
     borderRadius: borderRadius.md,
     borderWidth: 1,
     borderColor: colors.border,
