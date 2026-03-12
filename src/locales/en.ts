@@ -230,6 +230,12 @@ const en = {
     am: 'AM',
     pm: 'PM',
     support: 'Support',
+    appearance: 'Appearance',
+    theme: 'Theme',
+    themeDesc: 'Switch between light and dark mode',
+    themeLight: 'Light',
+    themeDark: 'Dark',
+    themeSystem: 'System',
   },
 
   // ─── Support ───────────────────────────────────────────

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -15,7 +15,7 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
 import Constants from 'expo-constants';
-import { colors, spacing, typography, fontFamily, fontSize, borderRadius, screenContainer, APP_URL, APP_DOMAIN } from '../utils/theme';
+import { spacing, typography, fontFamily, fontSize, borderRadius, APP_URL, APP_DOMAIN, ThemeColors, ThemeMode } from '../utils/theme';
 import { getSettings, saveSettings, AppSettings, resetStats } from '../utils/storage';
 import {
   setSoundsEnabled,
@@ -27,10 +27,13 @@ import { ChevronRightIcon, ChevronDownIcon, CheckIcon } from '../components/Icon
 import BottomNav from '../components/BottomNav';
 import ScreenContainer from '../components/ScreenContainer';
 import { useNavTabs } from '../hooks/useNavTabs';
+import { useTheme } from '../contexts/ThemeContext';
 
 export default function SettingsScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const onNavigate = useNavTabs();
+  const { colors, themeMode, setThemeMode } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const [settings, setSettings] = useState<AppSettings>({
     soundEnabled: true,
     hapticsEnabled: true,
@@ -38,6 +41,7 @@ export default function SettingsScreen() {
     reminderHour: 9,
     reminderMinute: 0,
     locale: null,
+    themeMode: 'dark',
   });
   const [, forceRender] = useState(0);
   const [langOpen, setLangOpen] = useState(false);
@@ -152,13 +156,44 @@ export default function SettingsScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
         <ScreenContainer>
+        {/* Appearance */}
+        <Text style={styles.sectionTitle}>{t('settings.appearance')}</Text>
+
+        <View style={styles.settingCard}>
+          <View style={styles.settingRow}>
+            <View style={styles.settingInfo}>
+              <Text style={styles.settingLabel}>{t('settings.theme')}</Text>
+              <Text style={styles.settingDesc}>{t('settings.themeDesc')}</Text>
+            </View>
+          </View>
+          <View style={styles.settingDivider} />
+          <View style={styles.themeRow}>
+            {(['light', 'dark', 'system'] as const).map((mode) => {
+              const isActive = themeMode === mode;
+              const label = t(`settings.theme${mode.charAt(0).toUpperCase() + mode.slice(1)}` as 'settings.themeLight');
+              return (
+                <TouchableOpacity
+                  key={mode}
+                  style={[styles.themeOption, isActive && styles.themeOptionActive]}
+                  onPress={() => setThemeMode(mode)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[styles.themeOptionText, isActive && styles.themeOptionTextActive]}>
+                    {label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
+
         {/* Sound & Haptics */}
         <Text style={styles.sectionTitle}>{t('settings.soundHaptics')}</Text>
 
@@ -359,8 +394,11 @@ export default function SettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: screenContainer,
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
   content: {
     padding: spacing.lg,
     paddingBottom: spacing.xxl,
@@ -418,6 +456,28 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontSize: fontSize.body,
     letterSpacing: 0.5,
+  },
+  themeRow: {
+    flexDirection: 'row',
+    padding: spacing.sm,
+    gap: spacing.xs,
+  },
+  themeOption: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: 'center',
+    borderRadius: borderRadius.sm,
+  },
+  themeOptionActive: {
+    backgroundColor: colors.goldBright,
+  },
+  themeOptionText: {
+    ...typography.label,
+    color: colors.textSecondary,
+  },
+  themeOptionTextActive: {
+    color: colors.playText,
+    fontFamily: fontFamily.bodyBold,
   },
   langRowActive: {
     backgroundColor: colors.surfaceSecondary,

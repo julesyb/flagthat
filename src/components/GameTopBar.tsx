@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { colors, spacing, nav } from '../utils/theme';
+import { spacing, buildNav, ThemeColors } from '../utils/theme';
+import { useTheme } from '../contexts/ThemeContext';
 import { t } from '../utils/i18n';
 
 interface GameTopBarProps {
@@ -14,6 +15,9 @@ interface GameTopBarProps {
  * Provides a consistent Exit button on the left, with optional center and right slots.
  */
 export default function GameTopBar({ onExit, center, right }: GameTopBarProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   return (
     <View style={styles.topBar}>
       <TouchableOpacity
@@ -31,7 +35,9 @@ export default function GameTopBar({ onExit, center, right }: GameTopBarProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => {
+  const n = buildNav(colors);
+  return StyleSheet.create({
   topBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -40,10 +46,10 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
   },
   exitButton: {
-    ...nav.backButton,
+    ...n.backButton,
   },
   exitText: {
-    ...nav.backText,
+    ...n.backText,
   },
   centerSlot: {
     alignItems: 'center',
@@ -51,4 +57,6 @@ const styles = StyleSheet.create({
   spacer: {
     width: 60,
   },
-});
+  });
+};
+

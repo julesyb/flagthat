@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { colors, fontFamily, fontSize, spacing, borderRadius } from '../utils/theme';
+import { fontFamily, fontSize, spacing, borderRadius, ThemeColors } from '../utils/theme';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface ConfigRowProps {
   label: string;
@@ -13,6 +14,9 @@ interface ConfigRowProps {
  * Shared between HomeScreen and GameSetupScreen.
  */
 export default function ConfigRow({ label, children, showDivider = true }: ConfigRowProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   return (
     <>
       {showDivider && <View style={styles.divider} />}
@@ -26,10 +30,13 @@ export default function ConfigRow({ label, children, showDivider = true }: Confi
 
 /** Card wrapper for groups of ConfigRows. */
 export function ConfigCard({ children }: { children: React.ReactNode }) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   return <View style={styles.card}>{children}</View>;
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   card: {
     backgroundColor: colors.surface,
     borderRadius: borderRadius.lg,
@@ -62,3 +69,4 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
 });
+

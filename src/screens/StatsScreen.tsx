@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -13,7 +13,8 @@ import {
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
-import { colors, spacing, fontFamily, fontSize, borderRadius, screenContainer } from '../utils/theme';
+import { ThemeColors, spacing, fontFamily, fontSize, borderRadius } from '../utils/theme';
+import { useTheme } from '../contexts/ThemeContext';
 import { UserStats, GameMode, CategoryId } from '../types';
 import { getStats, getFlagStats, FlagStats, getDayStreakInfo, DayStreakInfo, getBadgeData, getMissedFlagIds, BadgeData, getGameHistory, GameHistoryEntry, getBaselineData, BaselineData, getChallengeHistory, ChallengeHistoryEntry } from '../utils/storage';
 import { getAllFlags, getTotalFlagCount } from '../data';
@@ -26,13 +27,14 @@ import { useNavTabs } from '../hooks/useNavTabs';
 import { getAllEarnedBadges, buildBadgeContext, deriveFromContext, BADGES, TIER_COLORS, getBadgeProgress } from '../utils/badges';
 import { ChevronRightIcon, CrosshairIcon, BadgeIconView } from '../components/Icons';
 
-const RANK_COLORS = [colors.gradeS, colors.textTertiary, colors.warning];
-
 const REGIONS: CategoryId[] = ['africa', 'asia', 'europe', 'americas', 'oceania'];
 
 export default function StatsScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const onNavigate = useNavTabs();
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+  const RANK_COLORS = useMemo(() => [colors.gradeS, colors.textTertiary, colors.warning], [colors]);
   const [stats, setStats] = useState<UserStats | null>(null);
   const [flagStats, setFlagStats] = useState<FlagStats>({});
   const [dayStreakInfo, setDayStreakInfo] = useState<DayStreakInfo>({ current: 0, best: 0 });
@@ -628,8 +630,8 @@ export default function StatsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: screenContainer,
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   loadingText: { fontFamily: fontFamily.body, fontSize: fontSize.body, color: colors.textSecondary },
   content: { padding: spacing.md, paddingBottom: spacing.xxl },

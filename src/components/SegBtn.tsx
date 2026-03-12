@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { colors, spacing, fontFamily, fontSize, borderRadius } from '../utils/theme';
+import { spacing, fontFamily, fontSize, borderRadius, ThemeColors } from '../utils/theme';
+import { useTheme } from '../contexts/ThemeContext';
 import { hapticTap } from '../utils/feedback';
 
 interface SegBtnProps {
@@ -12,6 +13,9 @@ interface SegBtnProps {
 }
 
 export default function SegBtn({ label, active, onPress, maxWidth = 80, accessibilityLabel }: SegBtnProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   return (
     <TouchableOpacity
       style={[styles.segBtn, { maxWidth }, active && styles.segBtnOn]}
@@ -26,7 +30,7 @@ export default function SegBtn({ label, active, onPress, maxWidth = 80, accessib
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   segBtn: {
     flex: 1,
     paddingVertical: spacing.sm,
@@ -50,3 +54,4 @@ const styles = StyleSheet.create({
     color: colors.playText,
   },
 });
+

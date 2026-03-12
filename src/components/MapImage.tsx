@@ -1,7 +1,8 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, useWindowDimensions, StyleProp, ViewStyle } from 'react-native';
 import { Image } from 'expo-image';
-import { colors, fontFamily, fontSize, borderRadius, shadows } from '../utils/theme';
+import { fontFamily, fontSize, borderRadius, shadows, ThemeColors } from '../utils/theme';
+import { useTheme } from '../contexts/ThemeContext';
 import { countryCoordinates } from '../data/countryCoordinates';
 
 interface MapImageProps {
@@ -67,6 +68,8 @@ function getCenterOffset(lat: number, lng: number, zoom: number, gridSize: numbe
 }
 
 export default function MapImage({ countryCode, size = 'hero', style }: MapImageProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { width: screenWidth } = useWindowDimensions();
   const coord = countryCoordinates[countryCode.toLowerCase()];
   const [zoomDelta, setZoomDelta] = useState(0);
@@ -253,7 +256,7 @@ export default function MapImage({ countryCode, size = 'hero', style }: MapImage
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   container: {
     overflow: 'hidden',
     backgroundColor: colors.mapBackground,
@@ -327,3 +330,4 @@ const styles = StyleSheet.create({
     color: colors.textTertiary,
   },
 });
+

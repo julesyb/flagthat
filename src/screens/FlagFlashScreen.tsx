@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,8 @@ import {
   Platform,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius, nav } from '../utils/theme';
+import { spacing, typography, fontFamily, fontSize, buildButtons, borderRadius, buildNav, ThemeColors } from '../utils/theme';
+import { useTheme } from '../contexts/ThemeContext';
 import { countCorrect } from '../utils/gameHelpers';
 import { t } from '../utils/i18n';
 import { GameQuestion, GameResult } from '../types';
@@ -63,6 +64,8 @@ async function requestMotionPermission(): Promise<boolean> {
 }
 
 export default function FlagFlashScreen({ route, navigation }: Props) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { config } = route.params;
   const [questions, setQuestions] = useState<GameQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -511,7 +514,10 @@ export default function FlagFlashScreen({ route, navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => {
+  const btn = buildButtons(colors);
+  const n = buildNav(colors);
+  return StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.primary,
@@ -584,12 +590,12 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
   },
   readyButton: {
-    ...buttons.primary,
+    ...btn.primary,
     backgroundColor: colors.accent,
     paddingHorizontal: spacing.xxl,
   },
   readyButtonText: {
-    ...buttons.primaryText,
+    ...btn.primaryText,
   },
   // Countdown
   countdownContainer: {
@@ -691,7 +697,7 @@ const styles = StyleSheet.create({
     padding: spacing.sm,
   },
   exitButtonText: {
-    ...nav.backText,
+    ...n.backText,
     color: colors.whiteAlpha50,
   },
   exitButtonPlaying: {
@@ -700,7 +706,8 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.sm,
   },
   exitButtonPlayingText: {
-    ...nav.backText,
+    ...n.backText,
     color: colors.whiteAlpha70,
   },
-});
+  });
+};

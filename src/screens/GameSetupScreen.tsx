@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -8,7 +8,8 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius, shadows, screenContainer } from '../utils/theme';
+import { spacing, typography, fontFamily, fontSize, buildButtons, borderRadius, shadows, ThemeColors } from '../utils/theme';
+import { useTheme } from '../contexts/ThemeContext';
 import {
   GameMode,
   DisplayMode,
@@ -47,13 +48,13 @@ const GUESS_LIMIT_OPTIONS = [3, 5, 0] as const; // 0 = unlimited
 type SetupMode = 'quiz' | 'flagflash' | 'flagpuzzle' | 'timeattack' | 'neighbors' | 'capitalconnection';
 type QuizDifficulty = 'easy' | 'medium' | 'hard';
 
-const SETUP_MODES: { key: SetupMode; labelKey: string; descKey: string; icon: (active: boolean) => React.ReactNode }[] = [
-  { key: 'quiz', labelKey: 'setup.quiz', descKey: 'setup.quizDesc', icon: (a) => <FlagIcon size={18} color={a ? colors.goldBright : colors.textTertiary} /> },
-  { key: 'flagflash', labelKey: 'setup.flagFlash', descKey: 'setup.flagFlashDesc', icon: (a) => <LightningIcon size={18} color={a ? colors.goldBright : colors.textTertiary} /> },
-  { key: 'flagpuzzle', labelKey: 'setup.flagPuzzle', descKey: 'setup.flagPuzzleDesc', icon: (a) => <PuzzleIcon size={18} color={a ? colors.goldBright : colors.textTertiary} /> },
-  { key: 'timeattack', labelKey: 'setup.timedQuiz', descKey: 'setup.timedQuizDesc', icon: (a) => <ClockIcon size={18} color={a ? colors.goldBright : colors.textTertiary} /> },
-  { key: 'neighbors', labelKey: 'setup.neighbors', descKey: 'setup.neighborsDesc', icon: (a) => <UsersIcon size={18} color={a ? colors.goldBright : colors.textTertiary} /> },
-  { key: 'capitalconnection', labelKey: 'setup.capitalQuiz', descKey: 'setup.capitalQuizDesc', icon: (a) => <LinkIcon size={18} color={a ? colors.goldBright : colors.textTertiary} /> },
+const SETUP_MODES: { key: SetupMode; labelKey: string; descKey: string; icon: (active: boolean, colors: ThemeColors) => React.ReactNode }[] = [
+  { key: 'quiz', labelKey: 'setup.quiz', descKey: 'setup.quizDesc', icon: (a, c) => <FlagIcon size={18} color={a ? c.goldBright : c.textTertiary} /> },
+  { key: 'flagflash', labelKey: 'setup.flagFlash', descKey: 'setup.flagFlashDesc', icon: (a, c) => <LightningIcon size={18} color={a ? c.goldBright : c.textTertiary} /> },
+  { key: 'flagpuzzle', labelKey: 'setup.flagPuzzle', descKey: 'setup.flagPuzzleDesc', icon: (a, c) => <PuzzleIcon size={18} color={a ? c.goldBright : c.textTertiary} /> },
+  { key: 'timeattack', labelKey: 'setup.timedQuiz', descKey: 'setup.timedQuizDesc', icon: (a, c) => <ClockIcon size={18} color={a ? c.goldBright : c.textTertiary} /> },
+  { key: 'neighbors', labelKey: 'setup.neighbors', descKey: 'setup.neighborsDesc', icon: (a, c) => <UsersIcon size={18} color={a ? c.goldBright : c.textTertiary} /> },
+  { key: 'capitalconnection', labelKey: 'setup.capitalQuiz', descKey: 'setup.capitalQuizDesc', icon: (a, c) => <LinkIcon size={18} color={a ? c.goldBright : c.textTertiary} /> },
 ];
 
 const DIFFICULTIES: { key: QuizDifficulty; labelKey: string }[] = [
@@ -65,8 +66,11 @@ const DIFFICULTIES: { key: QuizDifficulty; labelKey: string }[] = [
 
 
 export default function GameSetupScreen({ route, navigation }: Props) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const onNavigate = useNavTabs();
   const initialMode = route.params?.initialMode;
+  const initialDifficulty = route.params?.initialDifficulty;
 
   const [displayMode, setDisplayMode] = useState<DisplayMode>('flag');
   const [setupMode, setSetupMode] = useState<SetupMode>(() => {
@@ -81,6 +85,7 @@ export default function GameSetupScreen({ route, navigation }: Props) {
     }
   });
   const [difficulty, setDifficulty] = useState<QuizDifficulty>(() => {
+    if (initialDifficulty) return initialDifficulty;
     switch (initialMode) {
       case 'easy': return 'easy';
       case 'hard': return 'hard';
@@ -106,13 +111,24 @@ export default function GameSetupScreen({ route, navigation }: Props) {
   const resolvedMode: GameMode = isQuiz ? difficulty : (setupMode as GameMode);
 
   const showGuessLimit = setupMode !== 'timeattack' && setupMode !== 'flagpuzzle' && setupMode !== 'flagflash';
-  const showMapToggle = isQuiz || isFlagPuzzle;
+  const isCapitalConnection = setupMode === 'capitalconnection';
+  const showDifficulty = isQuiz || isTimeAttack || isCapitalConnection;
+  const showMapToggle = isQuiz;
 
-  // Set sensible default time limit when mode changes
+  // Set sensible defaults when mode changes
   useEffect(() => {
-    if (setupMode === 'flagflash') setTimeLimit(60);
-    else if (setupMode === 'flagpuzzle') setTimeLimit(15);
-    else if (setupMode === 'timeattack') setTimeLimit(60);
+    if (setupMode === 'flagflash') {
+      setTimeLimit(60);
+      setDisplayMode('flag');
+    } else if (setupMode === 'flagpuzzle') {
+      setTimeLimit(15);
+      setDisplayMode('flag');
+    } else if (setupMode === 'timeattack') {
+      setTimeLimit(60);
+      setDisplayMode('flag');
+    } else if (setupMode === 'neighbors' || setupMode === 'capitalconnection') {
+      setDisplayMode('flag');
+    }
   }, [setupMode]);
 
   const handleFilterTypeSelect = (type: CategoryType) => {
@@ -144,10 +160,11 @@ export default function GameSetupScreen({ route, navigation }: Props) {
       mode: resolvedMode,
       category: selectedCategory,
       questionCount: (isTimeAttack || isFlagFlash) ? 999 : effectiveQuestionCount,
-      displayMode,
+      ...(showMapToggle && { displayMode }),
       ...(hasTimeLimit && { timeLimit }),
       ...(difficulty === 'hard' && isQuiz && { autocomplete }),
       ...(showGuessLimit && guessLimit > 0 && { guessLimit }),
+      ...((isTimeAttack || isCapitalConnection) && { difficulty }),
     };
 
     if (isTimeAttack) {
@@ -176,9 +193,13 @@ export default function GameSetupScreen({ route, navigation }: Props) {
 
   const showQuestionCount = !isTimeAttack && !isFlagPuzzle && !isFlagFlash && filterType !== 'theme';
 
+  const diffLabel = t(DIFFICULTIES.find((d) => d.key === difficulty)?.labelKey ?? 'common.medium');
+  const modeLabel = t(SETUP_MODES.find((m) => m.key === setupMode)?.labelKey ?? 'setup.quiz');
   const startButtonLabel = isQuiz
-    ? t('setup.startQuiz', { difficulty: t(DIFFICULTIES.find((d) => d.key === difficulty)?.labelKey ?? 'common.medium') })
-    : t('setup.startMode', { mode: t(SETUP_MODES.find((m) => m.key === setupMode)?.labelKey ?? 'setup.quiz') });
+    ? t('setup.startQuiz', { difficulty: diffLabel })
+    : showDifficulty
+      ? t('setup.startMode', { mode: `${diffLabel} ${modeLabel}` })
+      : t('setup.startMode', { mode: modeLabel });
 
   return (
     <SafeAreaView style={styles.container}>
@@ -203,7 +224,7 @@ export default function GameSetupScreen({ route, navigation }: Props) {
                 accessibilityLabel={`${t(m.labelKey)}: ${t(m.descKey)}`}
               >
                 <View style={[styles.modeIconBadge, isActive && styles.modeIconBadgeActive]}>
-                  {m.icon(isActive)}
+                  {m.icon(isActive, colors)}
                 </View>
                 <Text style={[styles.modeLabel, isActive && styles.modeLabelActive]}>
                   {t(m.labelKey)}
@@ -216,8 +237,8 @@ export default function GameSetupScreen({ route, navigation }: Props) {
           })}
         </View>
 
-        {/* Difficulty hero section (only for Quiz mode) */}
-        {isQuiz && (
+        {/* Difficulty hero section */}
+        {showDifficulty && (
           <View style={styles.diffSection}>
             <Text style={styles.diffLabel}>{t('home.difficulty')}</Text>
             <View style={styles.diffGrid}>
@@ -257,6 +278,7 @@ export default function GameSetupScreen({ route, navigation }: Props) {
         )}
 
         {/* Options card */}
+        {!showDifficulty && <View style={styles.configCardSpacing} />}
         <ConfigCard>
 
           {/* Autocomplete (only for Hard quiz - first row, no divider above) */}
@@ -418,8 +440,8 @@ export default function GameSetupScreen({ route, navigation }: Props) {
         <TouchableOpacity
           style={[
             styles.startButton,
-            isQuiz && difficulty === 'easy' && { backgroundColor: colors.diffEasy },
-            isQuiz && difficulty === 'hard' && { backgroundColor: colors.diffHard },
+            showDifficulty && difficulty === 'easy' && { backgroundColor: colors.diffEasy },
+            showDifficulty && difficulty === 'hard' && { backgroundColor: colors.diffHard },
           ]}
           onPress={startGame}
           activeOpacity={0.8}
@@ -435,8 +457,13 @@ export default function GameSetupScreen({ route, navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: screenContainer,
+const createStyles = (colors: ThemeColors) => {
+  const btn = buildButtons(colors);
+  return StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
   scrollView: {
     flex: 1,
   },
@@ -451,6 +478,11 @@ const styles = StyleSheet.create({
     ...typography.heading,
     color: colors.text,
     marginBottom: spacing.md,
+  },
+
+  // Spacing for options card when difficulty section is hidden
+  configCardSpacing: {
+    marginTop: spacing.lg,
   },
 
   // Difficulty hero section
@@ -633,9 +665,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   startButton: {
-    ...buttons.primary,
+    ...btn.primary,
   },
   startButtonText: {
-    ...buttons.primaryText,
+    ...btn.primaryText,
   },
-});
+}); };

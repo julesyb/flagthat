@@ -1,16 +1,14 @@
 import React from 'react';
 import Svg, { Path, Circle, Line, Rect, Polyline, Polygon } from 'react-native-svg';
-import { colors } from '../utils/theme';
-
 interface IconProps {
   size?: number;
-  color?: string;
+  color: string;
   strokeWidth?: number;
   filled?: boolean;
 }
 
 // Play triangle — main play button icon
-export function PlayIcon({ size = 16, color = colors.white }: IconProps) {
+export function PlayIcon({ size = 16, color }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <Polygon points="6,3 20,12 6,21" fill={color} />
@@ -19,7 +17,7 @@ export function PlayIcon({ size = 16, color = colors.white }: IconProps) {
 }
 
 // Home — simple house silhouette for nav
-export function HomeIcon({ size = 16, color = colors.textSecondary, strokeWidth = 1.5, filled = false }: IconProps) {
+export function HomeIcon({ size = 16, color, strokeWidth = 1.5, filled = false }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill={filled ? color : 'none'} stroke={color} strokeWidth={strokeWidth}>
       <Path d="M3 10.5L12 3L21 10.5V20C21 20.55 20.55 21 20 21H4C3.45 21 3 20.55 3 20V10.5Z" />
@@ -29,7 +27,7 @@ export function HomeIcon({ size = 16, color = colors.textSecondary, strokeWidth 
 }
 
 // Lightning bolt — Quick Play / action icon
-export function LightningIcon({ size = 18, color = colors.white, strokeWidth = 1.5, filled = false }: IconProps) {
+export function LightningIcon({ size = 18, color, strokeWidth = 1.5, filled = false }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill={filled ? color : 'none'} stroke={color} strokeWidth={strokeWidth}>
       <Path d="M13 2L4.5 13.5H11L10 22L19.5 10H13L13 2Z" />
@@ -38,7 +36,7 @@ export function LightningIcon({ size = 18, color = colors.white, strokeWidth = 1
 }
 
 // Crosshair — Custom Game / Modes icon
-export function CrosshairIcon({ size = 16, color = colors.textSecondary, strokeWidth = 1.5 }: IconProps) {
+export function CrosshairIcon({ size = 16, color, strokeWidth = 1.5 }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth}>
       <Circle cx={12} cy={12} r={7} />
@@ -52,7 +50,7 @@ export function CrosshairIcon({ size = 16, color = colors.textSecondary, strokeW
 }
 
 // Bar chart — Statistics icon
-export function BarChartIcon({ size = 16, color = colors.textSecondary, strokeWidth = 1.5 }: IconProps) {
+export function BarChartIcon({ size = 16, color, strokeWidth = 1.5 }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth}>
       <Rect x={3} y={13} width={4} height={8} />
@@ -63,7 +61,7 @@ export function BarChartIcon({ size = 16, color = colors.textSecondary, strokeWi
 }
 
 // Puzzle piece — Flag Puzzle icon
-export function PuzzleIcon({ size = 16, color = colors.textSecondary, strokeWidth = 1.5 }: IconProps) {
+export function PuzzleIcon({ size = 16, color, strokeWidth = 1.5 }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth}>
       <Path d="M4 7h3a2 2 0 0 0 2-2 2 2 0 0 1 4 0 2 2 0 0 0 2 2h3v3a2 2 0 0 0 2 2 2 2 0 0 1 0 4 2 2 0 0 0-2 2v3H4v-3a2 2 0 0 1 0-4 2 2 0 0 0 0-4V7Z" />
@@ -72,7 +70,7 @@ export function PuzzleIcon({ size = 16, color = colors.textSecondary, strokeWidt
 }
 
 // Globe — Browse Flags icon
-export function GlobeIcon({ size = 16, color = colors.textSecondary, strokeWidth = 1.5 }: IconProps) {
+export function GlobeIcon({ size = 16, color, strokeWidth = 1.5 }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth}>
       <Circle cx={12} cy={12} r={9} />
@@ -83,7 +81,7 @@ export function GlobeIcon({ size = 16, color = colors.textSecondary, strokeWidth
 }
 
 // Chevron right — navigation / disclosure indicator
-export function ChevronRightIcon({ size = 16, color = colors.textTertiary, strokeWidth = 2 }: IconProps) {
+export function ChevronRightIcon({ size = 16, color, strokeWidth = 2 }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth}>
       <Polyline points="9 6 15 12 9 18" />
@@ -92,7 +90,7 @@ export function ChevronRightIcon({ size = 16, color = colors.textTertiary, strok
 }
 
 // Checkmark — correct answer
-export function CheckIcon({ size = 16, color = colors.success, strokeWidth = 2.5 }: IconProps) {
+export function CheckIcon({ size = 16, color, strokeWidth = 2.5 }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth}>
       <Polyline points="4 12 10 18 20 6" />
@@ -101,7 +99,7 @@ export function CheckIcon({ size = 16, color = colors.success, strokeWidth = 2.5
 }
 
 // Cross / X — wrong answer
-export function CrossIcon({ size = 16, color = colors.error, strokeWidth = 2.5 }: IconProps) {
+export function CrossIcon({ size = 16, color, strokeWidth = 2.5 }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth}>
       <Line x1={6} y1={6} x2={18} y2={18} />
@@ -111,7 +109,7 @@ export function CrossIcon({ size = 16, color = colors.error, strokeWidth = 2.5 }
 }
 
 // Clock — time limit / time attack
-export function ClockIcon({ size = 16, color = colors.textSecondary, strokeWidth = 1.5 }: IconProps) {
+export function ClockIcon({ size = 16, color, strokeWidth = 1.5 }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth}>
       <Circle cx={12} cy={12} r={9} />
@@ -121,7 +119,7 @@ export function ClockIcon({ size = 16, color = colors.textSecondary, strokeWidth
 }
 
 // Flag — flag display mode toggle
-export function FlagIcon({ size = 16, color = colors.textSecondary, strokeWidth = 1.5 }: IconProps) {
+export function FlagIcon({ size = 16, color, strokeWidth = 1.5 }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth}>
       <Path d="M4 21V4" />
@@ -131,7 +129,7 @@ export function FlagIcon({ size = 16, color = colors.textSecondary, strokeWidth 
 }
 
 // Users/Neighbors — people/connection icon
-export function UsersIcon({ size = 16, color = colors.textSecondary, strokeWidth = 1.5 }: IconProps) {
+export function UsersIcon({ size = 16, color, strokeWidth = 1.5 }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth}>
       <Path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
@@ -143,7 +141,7 @@ export function UsersIcon({ size = 16, color = colors.textSecondary, strokeWidth
 }
 
 // Eye — impostor/detect icon
-export function EyeIcon({ size = 16, color = colors.textSecondary, strokeWidth = 1.5 }: IconProps) {
+export function EyeIcon({ size = 16, color, strokeWidth = 1.5 }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth}>
       <Path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
@@ -153,7 +151,7 @@ export function EyeIcon({ size = 16, color = colors.textSecondary, strokeWidth =
 }
 
 // Link — connection/matching icon
-export function LinkIcon({ size = 16, color = colors.textSecondary, strokeWidth = 1.5 }: IconProps) {
+export function LinkIcon({ size = 16, color, strokeWidth = 1.5 }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth}>
       <Path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
@@ -164,7 +162,7 @@ export function LinkIcon({ size = 16, color = colors.textSecondary, strokeWidth 
 
 // Map pin — map display mode toggle
 // Chevron left — back navigation
-export function ChevronLeftIcon({ size = 16, color = colors.textTertiary, strokeWidth = 2 }: IconProps) {
+export function ChevronLeftIcon({ size = 16, color, strokeWidth = 2 }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
       <Path d="M15 18L9 12L15 6" />
@@ -173,7 +171,7 @@ export function ChevronLeftIcon({ size = 16, color = colors.textTertiary, stroke
 }
 
 // Gear — Settings icon
-export function GearIcon({ size = 16, color = colors.textSecondary, strokeWidth = 1.5 }: IconProps) {
+export function GearIcon({ size = 16, color, strokeWidth = 1.5 }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth}>
       <Circle cx={12} cy={12} r={3} />
@@ -183,7 +181,7 @@ export function GearIcon({ size = 16, color = colors.textSecondary, strokeWidth 
 }
 
 // Calendar — Daily Challenge icon
-export function CalendarIcon({ size = 16, color = colors.textSecondary, strokeWidth = 1.5 }: IconProps) {
+export function CalendarIcon({ size = 16, color, strokeWidth = 1.5 }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth}>
       <Rect x={3} y={4} width={18} height={18} rx={2} />
@@ -195,7 +193,7 @@ export function CalendarIcon({ size = 16, color = colors.textSecondary, strokeWi
 }
 
 // Bell — Notifications icon
-export function BellIcon({ size = 16, color = colors.textSecondary, strokeWidth = 1.5 }: IconProps) {
+export function BellIcon({ size = 16, color, strokeWidth = 1.5 }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth}>
       <Path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
@@ -205,7 +203,7 @@ export function BellIcon({ size = 16, color = colors.textSecondary, strokeWidth 
 }
 
 // Heart — support / love icon
-export function HeartIcon({ size = 16, color = colors.textSecondary, strokeWidth = 1.5, filled = false }: IconProps) {
+export function HeartIcon({ size = 16, color, strokeWidth = 1.5, filled = false }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill={filled ? color : 'none'} stroke={color} strokeWidth={strokeWidth}>
       <Path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z" />
@@ -213,7 +211,7 @@ export function HeartIcon({ size = 16, color = colors.textSecondary, strokeWidth
   );
 }
 
-export function MapPinIcon({ size = 16, color = colors.textSecondary, strokeWidth = 1.5 }: IconProps) {
+export function MapPinIcon({ size = 16, color, strokeWidth = 1.5 }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth}>
       <Path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
@@ -222,7 +220,7 @@ export function MapPinIcon({ size = 16, color = colors.textSecondary, strokeWidt
   );
 }
 
-export function CompassIcon({ size = 16, color = colors.textSecondary, strokeWidth = 1.5 }: IconProps) {
+export function CompassIcon({ size = 16, color, strokeWidth = 1.5 }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
       <Circle cx={12} cy={12} r={10} />
@@ -231,7 +229,7 @@ export function CompassIcon({ size = 16, color = colors.textSecondary, strokeWid
   );
 }
 
-export function SearchIcon({ size = 16, color = colors.textTertiary, strokeWidth = 1.5 }: IconProps) {
+export function SearchIcon({ size = 16, color, strokeWidth = 1.5 }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
       <Circle cx="11" cy="11" r="8" />
@@ -240,7 +238,7 @@ export function SearchIcon({ size = 16, color = colors.textTertiary, strokeWidth
   );
 }
 
-export function ChevronDownIcon({ size = 16, color = colors.textTertiary, strokeWidth = 2 }: IconProps) {
+export function ChevronDownIcon({ size = 16, color, strokeWidth = 2 }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
       <Polyline points="6 9 12 15 18 9" />

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -16,10 +16,11 @@ import {
   Alert,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius, screenContainer, APP_URL } from '../utils/theme';
-import { calculateAccuracy, getStreakFromResults, getGrade, generateDailyShareGrid, generateShareGrid, getDailyNumber } from '../utils/gameEngine';
+import { spacing, typography, fontFamily, fontSize, buildButtons, borderRadius, APP_URL, ThemeColors } from '../utils/theme';
+import { useTheme } from '../contexts/ThemeContext';
+import { getStreakFromResults, getGrade, generateDailyShareGrid, generateShareGrid, getDailyNumber } from '../utils/gameEngine';
 import { updateStats, updateFlagResults, saveDailyChallenge, incrementDailyChallenges, markShared, saveBaselineResult, getStats, getFlagStats, getDayStreakInfo, getBadgeData, persistEarnedBadges, getMissedFlagIds, addGameHistoryEntry, getChallengeName, saveChallengeName, addChallengeToHistory } from '../utils/storage';
-import { BaselineRegionId, UserStats, GameMode } from '../types';
+import { BaselineRegionId, UserStats, GameMode, CategoryId } from '../types';
 import { t } from '../utils/i18n';
 import { hapticCorrect, hapticTap, playCelebrationSound } from '../utils/feedback';
 import { FlagImageSmall } from '../components/FlagImage';
@@ -30,26 +31,29 @@ import { useNavTabs } from '../hooks/useNavTabs';
 import { countCorrect } from '../utils/gameHelpers';
 import { RootStackParamList } from '../types/navigation';
 import { getAllEarnedBadges, detectPerGameBadges, buildBadgeContext, BADGES, TIER_COLORS, EarnedBadge } from '../utils/badges';
-import { getTotalFlagCount } from '../data';
+import { getTotalFlagCount, getCategoryCount } from '../data';
 import { encodeChallenge, ChallengeData, CHALLENGE_MODES, generateShortCode } from '../utils/challengeCode';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Results'>;
 
 export default function ResultsScreen({ route, navigation }: Props) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const onNavigate = useNavTabs();
   const { results, config, reviewOnly, challenge, playerName } = route.params;
   const isChallenge = !!challenge;
   const canChallenge = CHALLENGE_MODES.includes(config.mode);
   const correct = countCorrect(results);
-  const accuracy = calculateAccuracy(results);
+  const isDaily = config.mode === 'daily';
+  const isBaseline = config.mode === 'baseline';
+  const questionTotal = isBaseline ? getCategoryCount(config.category as CategoryId) : results.length;
+  const accuracy = questionTotal > 0 ? Math.round((correct / questionTotal) * 100) : 0;
   const streak = getStreakFromResults(results);
   const grade = getGrade(accuracy);
   const avgTime = results.length > 0
     ? Math.round(results.reduce((sum, r) => sum + r.timeTaken, 0) / results.length / 1000 * 10) / 10
     : 0;
   const isPerfect = accuracy === 100 && results.length > 0;
-  const isDaily = config.mode === 'daily';
-  const isBaseline = config.mode === 'baseline';
 
   const fastestCorrect = results
     .filter((r) => r.correct)
@@ -113,6 +117,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
       timeLimit: config.timeLimit || 15,
       flagIds,
       hostResults,
+      ...(config.difficulty && { difficulty: config.difficulty }),
     };
     const code = encodeChallenge(challengeData);
     if (!code) {
@@ -248,7 +253,8 @@ export default function ResultsScreen({ route, navigation }: Props) {
         }
       }
       if (isBaseline) {
-        await saveBaselineResult(config.category as BaselineRegionId, results);
+        const regionTotal = getCategoryCount(config.category as CategoryId);
+        await saveBaselineResult(config.category as BaselineRegionId, results, regionTotal);
       }
 
       // ── Snapshot post-game state and evaluate badges ──
@@ -475,12 +481,12 @@ export default function ResultsScreen({ route, navigation }: Props) {
             styles.heroGradeWrap,
             { opacity: gradeOpacity, transform: [{ scale: gradeScale }] },
           ]}>
-            <Text style={[styles.heroGrade, { color: grade.color }]}>{grade.label}</Text>
+            <Text style={[styles.heroGrade, { color: colors[grade.colorKey] }]}>{grade.label}</Text>
           </Animated.View>
 
           {/* Score line */}
           <Animated.Text style={[styles.heroScoreText, { opacity: scoreFade }]}>
-            {correct}/{results.length} {t('results.correct').toLowerCase()}
+            {correct}/{questionTotal} {t('results.correct').toLowerCase()}
           </Animated.Text>
         </Animated.View>
 
@@ -661,7 +667,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
           <Animated.View style={{ opacity: restFade }}>
             <TouchableOpacity
               style={styles.challengeButton}
-              onPress={() => { hapticTap(); navigation.replace('GameSetup', { initialMode: config.mode }); }}
+              onPress={() => { hapticTap(); navigation.replace('GameSetup', { initialMode: config.mode, ...(config.difficulty && { initialDifficulty: config.difficulty }) }); }}
               activeOpacity={0.7}
               accessibilityRole="button"
               accessibilityLabel={t('challenge.challengeBack')}
@@ -756,7 +762,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
         <Animated.View style={{ opacity: restFade }}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>{t('common.review')}</Text>
-            <Text style={styles.sectionMeta}>{correct}/{results.length} {t('results.correct').toLowerCase()}</Text>
+            <Text style={styles.sectionMeta}>{correct}/{questionTotal} {t('results.correct').toLowerCase()}</Text>
           </View>
         </Animated.View>
         {results.map((result, index) => {
@@ -855,8 +861,8 @@ export default function ResultsScreen({ route, navigation }: Props) {
 }
 
 // ─── Styles ────────────────────────────────────────────────────
-const styles = StyleSheet.create({
-  container: screenContainer,
+const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors); return StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.md, paddingBottom: spacing.xxl },
 
   // ── Celebration
@@ -967,10 +973,10 @@ const styles = StyleSheet.create({
 
   // ── Buttons
   buttonRow: { gap: spacing.sm, marginBottom: spacing.md },
-  secondaryButton: { ...buttons.secondary, justifyContent: 'center', alignItems: 'center' },
-  secondaryButtonText: { ...buttons.secondaryText, textAlign: 'center' },
-  primaryButton: { ...buttons.primary, justifyContent: 'center', alignItems: 'center' },
-  primaryButtonText: { ...buttons.primaryText, textAlign: 'center' },
+  secondaryButton: { ...btn.secondary, justifyContent: 'center', alignItems: 'center' },
+  secondaryButtonText: { ...btn.secondaryText, textAlign: 'center' },
+  primaryButton: { ...btn.primary, justifyContent: 'center', alignItems: 'center' },
+  primaryButtonText: { ...btn.primaryText, textAlign: 'center' },
 
   // ── Badges
   badgesSection: { marginBottom: spacing.md },
@@ -1140,4 +1146,4 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.uiLabel, fontSize: fontSize.sm,
     letterSpacing: 0.5, textTransform: 'uppercase', color: colors.playText,
   },
-});
+}); };

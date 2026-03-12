@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { colors, fontFamily, spacing } from '../utils/theme';
+import { fontFamily, spacing, ThemeColors } from '../utils/theme';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface AppIconProps {
   size?: number;
@@ -14,6 +15,8 @@ interface AppIconProps {
  * Usage: <AppIcon size={120} variant="dark" />
  */
 export default function AppIcon({ size = 120, variant = 'dark' }: AppIconProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const isDark = variant === 'dark';
   const scale = size / 120;
   const textColor = isDark ? colors.white : colors.ink;
@@ -82,7 +85,7 @@ export default function AppIcon({ size = 120, variant = 'dark' }: AppIconProps) 
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   container: {
     position: 'relative',
     overflow: 'hidden',
@@ -109,3 +112,4 @@ const styles = StyleSheet.create({
     letterSpacing: -0.5,
   },
 });
+

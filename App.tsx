@@ -32,6 +32,7 @@ import ErrorBoundary from './src/components/ErrorBoundary';
 import { ChevronLeftIcon } from './src/components/Icons';
 import { RootStackParamList } from './src/types/navigation';
 import { colors, fontFamily, fontSize, APP_URL } from './src/utils/theme';
+import { ThemeProvider, useTheme } from './src/contexts/ThemeContext';
 import { configureNotificationHandler, syncNotificationSchedule } from './src/utils/notifications';
 import { initLocale, t } from './src/utils/i18n';
 import { hasCompletedOnboarding } from './src/utils/storage';
@@ -51,6 +52,7 @@ const linking = {
 };
 
 function BackButton({ onPress }: { onPress: () => void }) {
+  const { colors: c } = useTheme();
   return (
     <TouchableOpacity
       style={{ marginLeft: -8, padding: 8 }}
@@ -59,28 +61,31 @@ function BackButton({ onPress }: { onPress: () => void }) {
       accessibilityRole="button"
       accessibilityLabel={t('app.goBack')}
     >
-      <ChevronLeftIcon size={22} color={colors.ink} />
+      <ChevronLeftIcon size={22} color={c.ink} />
     </TouchableOpacity>
   );
 }
 
-const screenOptions = {
-  headerStyle: {
-    backgroundColor: colors.background,
-  },
-  headerTintColor: colors.text,
-  headerTitleStyle: {
-    fontFamily: fontFamily.uiLabel,
-    fontSize: fontSize.lg,
-    letterSpacing: 0.8,
-    textTransform: 'uppercase' as const,
-  },
-  headerShadowVisible: false,
-  headerBackTitleVisible: false,
-  contentStyle: {
-    backgroundColor: colors.background,
-  },
-};
+function useScreenOptions() {
+  const { colors: c } = useTheme();
+  return React.useMemo(() => ({
+    headerStyle: {
+      backgroundColor: c.background,
+    },
+    headerTintColor: c.text,
+    headerTitleStyle: {
+      fontFamily: fontFamily.uiLabel,
+      fontSize: fontSize.lg,
+      letterSpacing: 0.8,
+      textTransform: 'uppercase' as const,
+    },
+    headerShadowVisible: false,
+    headerBackTitleVisible: false,
+    contentStyle: {
+      backgroundColor: c.background,
+    },
+  }), [c]);
+}
 
 // Configure notification display behavior at module level
 configureNotificationHandler();
@@ -88,6 +93,7 @@ configureNotificationHandler();
 function AppContent() {
   const [localeReady, setLocaleReady] = useState(false);
   const [initialRoute, setInitialRoute] = useState<keyof RootStackParamList>('Home');
+  const screenOptions = useScreenOptions();
 
   useEffect(() => {
     if (Platform.OS === 'web') {
@@ -225,7 +231,9 @@ export default function App() {
 
   return (
     <ErrorBoundary>
-      <AppContent />
+      <ThemeProvider>
+        <AppContent />
+      </ThemeProvider>
       {Platform.OS === 'web' && <Analytics />}
     </ErrorBoundary>
   );

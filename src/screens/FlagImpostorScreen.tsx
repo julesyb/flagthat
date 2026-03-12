@@ -10,7 +10,8 @@ import {
 } from 'react-native';
 import Svg, { Rect, Path, Circle } from 'react-native-svg';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius, screenContainer } from '../utils/theme';
+import { spacing, typography, fontFamily, fontSize, buildButtons, borderRadius, ThemeColors } from '../utils/theme';
+import { useTheme } from '../contexts/ThemeContext';
 import { hapticTap, hapticCorrect, hapticWrong, playWrongSound } from '../utils/feedback';
 import { updateStats, updateFlagResults } from '../utils/storage';
 import { shuffleArray, getStreakFromResults } from '../utils/gameEngine';
@@ -400,6 +401,8 @@ function generateRounds(count: number): RoundData[] {
 }
 
 export default function FlagImpostorScreen({ navigation, route }: Props) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { config } = route.params;
   const rounds = useMemo(() => generateRounds(config.questionCount), [config.questionCount]);
   const [roundIndex, setRoundIndex] = useState(0);
@@ -580,8 +583,10 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: screenContainer,
+const createStyles = (colors: ThemeColors) => {
+  const btn = buildButtons(colors);
+  return StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
   topBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -651,6 +656,6 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: colors.rule,
   },
-  actionButton: { ...buttons.primary },
-  actionButtonText: { ...buttons.primaryText },
-});
+  actionButton: { ...btn.primary },
+  actionButtonText: { ...btn.primaryText },
+}); };

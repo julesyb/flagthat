@@ -12,7 +12,8 @@ import {
   Platform,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, fontFamily, fontSize, buttons, borderRadius, screenContainer } from '../utils/theme';
+import { spacing, fontFamily, fontSize, buildButtons, borderRadius, ThemeColors } from '../utils/theme';
+import { useTheme } from '../contexts/ThemeContext';
 import { RootStackParamList } from '../types/navigation';
 import { decodeChallenge, buildChallengeQuestions, getScreenForMode, ChallengeData, ChallengeScreenName } from '../utils/challengeCode';
 import { hapticTap, hapticWrong } from '../utils/feedback';
@@ -25,6 +26,8 @@ import { getChallengeName, saveChallengeName } from '../utils/storage';
 type Props = NativeStackScreenProps<RootStackParamList, 'JoinChallenge'>;
 
 export default function JoinChallengeScreen({ route, navigation }: Props) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const onNavigate = useNavTabs();
   const initialCode = route.params?.code ?? '';
   const [code, setCode] = useState(initialCode);
@@ -69,7 +72,7 @@ export default function JoinChallengeScreen({ route, navigation }: Props) {
     }
 
     const challenge = result.data;
-    const questions = buildChallengeQuestions(challenge.flagIds, challenge.mode);
+    const questions = buildChallengeQuestions(challenge.flagIds, challenge.mode, challenge.difficulty);
     if (!questions) {
       showError(t('challenge.invalidCode'));
       return;
@@ -84,6 +87,7 @@ export default function JoinChallengeScreen({ route, navigation }: Props) {
         category: 'all' as const,
         questionCount: challenge.flagIds.length,
         timeLimit: challenge.timeLimit,
+        ...(challenge.difficulty && { difficulty: challenge.difficulty }),
       },
       challenge,
       playerName: name.trim(),
@@ -173,8 +177,13 @@ export default function JoinChallengeScreen({ route, navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: screenContainer,
+const createStyles = (colors: ThemeColors) => {
+  const btn = buildButtons(colors);
+  return StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
   content: {
     padding: spacing.lg,
     paddingTop: spacing.xxl,
@@ -222,7 +231,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   playButton: {
-    ...buttons.primary,
+    ...btn.primary,
     marginTop: spacing.md,
   },
   playButtonDisabled: {
@@ -230,6 +239,6 @@ const styles = StyleSheet.create({
     shadowColor: colors.textTertiary,
   },
   playButtonText: {
-    ...buttons.primaryText,
+    ...btn.primaryText,
   },
-});
+}); };

@@ -15,6 +15,7 @@ export interface ChallengeData {
   timeLimit: number;
   flagIds: string[];
   hostResults: { correct: boolean; timeMs: number }[];
+  difficulty?: 'easy' | 'medium' | 'hard';
 }
 
 export type DecodeResult =
@@ -56,7 +57,12 @@ export function encodeChallenge(data: ChallengeData): string | null {
   const correctHex = (bits >>> 0).toString(16);
   const totalDeci = Math.round(data.hostResults.reduce((s, r) => s + r.timeMs, 0) / 100);
 
-  return `${name}~${modeIdx}~${data.timeLimit}~${flags}~${correctHex}~${totalDeci}`;
+  const base = `${name}~${modeIdx}~${data.timeLimit}~${flags}~${correctHex}~${totalDeci}`;
+  if (data.difficulty) {
+    const diffIdx = data.difficulty === 'easy' ? 0 : data.difficulty === 'hard' ? 2 : 1;
+    return `${base}~${diffIdx}`;
+  }
+  return base;
 }
 
 /** Strip URL prefixes so users can paste full URLs into the code input */
@@ -105,9 +111,9 @@ export function decodeChallenge(code: string): DecodeResult {
 
 function decodeV3Raw(raw: string): ChallengeData | null {
   const parts = raw.split('~');
-  if (parts.length !== 6) return null;
+  if (parts.length < 6 || parts.length > 7) return null;
 
-  const [hostName, modeIdxStr, timeLimitStr, flags, correctHex, totalDeciStr] = parts;
+  const [hostName, modeIdxStr, timeLimitStr, flags, correctHex, totalDeciStr, diffIdxStr] = parts;
   if (!hostName || hostName.length > 50 || flags.length === 0 || flags.length % 2 !== 0 || flags.length > 60) return null;
 
   const modeIdx = parseInt(modeIdxStr, 10);
@@ -137,7 +143,10 @@ function decodeV3Raw(raw: string): ChallengeData | null {
     return { correct, timeMs: correct ? avgTimeMs : 0 };
   });
 
-  return { hostName, mode, timeLimit, flagIds, hostResults };
+  const diffMap: Record<number, 'easy' | 'medium' | 'hard'> = { 0: 'easy', 1: 'medium', 2: 'hard' };
+  const difficulty = diffIdxStr !== undefined ? diffMap[parseInt(diffIdxStr, 10)] : undefined;
+
+  return { hostName, mode, timeLimit, flagIds, hostResults, ...(difficulty && { difficulty }) };
 }
 
 // Transitional: decode FT3- base64 codes from earlier builds
@@ -240,19 +249,21 @@ function decodeV1(encoded: string): ChallengeData | null {
  * Build GameQuestion array from challenge flag IDs.
  * For modes with multiple choice, generates options per question.
  */
-export function buildChallengeQuestions(flagIds: string[], mode: GameMode): GameQuestion[] | null {
+export function buildChallengeQuestions(flagIds: string[], mode: GameMode, difficulty?: 'easy' | 'medium' | 'hard'): GameQuestion[] | null {
   const allFlags = getAllFlags();
   const flagMap = new Map<string, FlagItem>(allFlags.map((f) => [f.id, f]));
+  const effectiveDifficulty = difficulty || (mode === 'easy' ? 'easy' : mode === 'hard' ? 'hard' : 'medium');
 
   const questions: GameQuestion[] = [];
   for (const id of flagIds) {
     const flag = flagMap.get(id);
     if (!flag) return null;
 
-    const needsOptions = mode === 'easy' || mode === 'medium' || mode === 'timeattack';
+    const isHardMode = effectiveDifficulty === 'hard';
+    const needsOptions = !isHardMode && (mode === 'easy' || mode === 'medium' || mode === 'timeattack');
     let options: string[] = [];
     if (needsOptions) {
-      const choiceCount = mode === 'easy' ? 2 : 4;
+      const choiceCount = effectiveDifficulty === 'easy' ? 2 : 4;
       const otherFlags = allFlags.filter((f) => f.id !== flag.id);
       const twinNames = twinPairs[flag.name] || [];
       const twinFlags = otherFlags.filter((f) => twinNames.includes(f.name));

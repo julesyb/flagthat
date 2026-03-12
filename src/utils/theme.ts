@@ -38,7 +38,7 @@ const raw = {
 };
 
 // ---- Dark palette (DEFAULT) — aligned with HTML prototype vars ----
-const palette = {
+const darkPalette = {
   ink: '#EEE9E2',           // --ink: light text on dark background
   inkSecondary: '#B8B2A8',  // --ink-2: secondary text
   gold: raw.goldBright,     // Bright gold as CTA on dark
@@ -60,114 +60,152 @@ const palette = {
   playText: '#130F00',      // --play-text: dark text on gold CTA
 };
 
-export const colors = {
-  // Brand palette (direct access for commonly needed raw colors)
-  ink: palette.ink,
-  red: palette.red,
-  rule: 'rgba(255,255,255,0.07)',
-  ruleDark: 'rgba(255,255,255,0.13)',
-  white: palette.white,
-  black: palette.black,
-  gold: palette.gold,
-  goldBright: palette.goldBright,
-  purple: palette.purple,
-  dim: palette.dim,
-
-  // Semantic roles
-  primary: palette.ink,
-  primaryLight: palette.paperDark,
-  accent: palette.gold,
-  accentLight: palette.goldBright,
-  success: palette.green,
-  error: palette.red,
-  warning: palette.gold,
-  background: palette.paper,
-  surface: palette.paperDark,
-  surfaceSecondary: palette.raise,
-  text: palette.ink,
-  textSecondary: palette.inkSecondary,
-  textTertiary: palette.muted,
-  border: 'rgba(255,255,255,0.07)',
-  borderLight: 'rgba(255,255,255,0.13)',
-  shadow: 'rgba(0, 0, 0, 0.22)',
-  overlay: 'rgba(0, 0, 0, 0.6)',
-  inkAlpha10: 'rgba(238, 233, 226, 0.10)',
-  playText: palette.playText,
-
-  // Grade colors
-  gradeS: raw.goldBright,
-  gradeA: raw.greenBright,
-  gradeB: raw.blue,
-  gradeC: palette.muted,
-  gradeD: raw.redLight,
-  gradeF: palette.ink,
-
-  // Difficulty colors
-  diffEasy: raw.greenBright,
-  diffMedium: raw.goldBright,
-  diffHard: raw.redLight,
-  diffEasyBg: 'rgba(61, 191, 128, 0.12)',
-  diffEasyBorder: 'rgba(61, 191, 128, 0.30)',
-  diffMediumBg: 'rgba(233, 186, 76, 0.12)',
-  diffMediumBorder: 'rgba(233, 186, 76, 0.40)',
-  diffHardBg: 'rgba(236, 102, 102, 0.12)',
-  diffHardBorder: 'rgba(236, 102, 102, 0.30)',
-
-  // Translucent helpers (for dark backgrounds)
-  whiteAlpha15: 'rgba(255,255,255,0.15)',
-  whiteAlpha20: 'rgba(255,255,255,0.20)',
-  whiteAlpha45: 'rgba(255,255,255,0.45)',
-  whiteAlpha50: 'rgba(255,255,255,0.50)',
-  whiteAlpha60: 'rgba(255,255,255,0.60)',
-  whiteAlpha70: 'rgba(255,255,255,0.70)',
-
-  // Dark surface feedback
-  darkSurface: 'rgba(255,255,255,0.07)',
-  darkBorder: 'rgba(255,255,255,0.12)',
-  successOnDark: 'rgba(61,191,128,0.15)',
-  successBorderOnDark: 'rgba(61,191,128,0.35)',
-  successTextOnDark: raw.greenBright,
-  errorOnDark: 'rgba(236,102,102,0.15)',
-  errorBorderOnDark: 'rgba(236,102,102,0.35)',
-  errorTextOnDark: raw.redLight,
-
-  // Feedback backgrounds (on dark surfaces)
-  successBg: 'rgba(61, 191, 128, 0.12)',
-  errorBg: 'rgba(236, 102, 102, 0.12)',
-  warningBg: 'rgba(233, 186, 76, 0.12)',
-  accentBg: 'rgba(233, 186, 76, 0.08)',
-
-  // Badge tier colors (AA on dark)
-  tierBronze: '#C4884A',
-  tierSilver: '#A0A0A0',
-  tierGold: raw.goldBright,
-  tierPlatinum: '#8B8DFF',
-
-  // Nav
-  navBg: 'rgba(21,20,26,0.97)',
-
-  // Map
-  mapBackground: palette.paperDark,
-  mapZoomSurface: 'rgba(29, 28, 35, 0.92)',
-
-  // Streak / progress
-  pipActive: raw.goldBright,
-  pipInactive: palette.dim,
-
-  // Gold alpha (for active cards on dark bg)
-  goldAlpha10: 'rgba(233, 186, 76, 0.10)',
-  goldAlpha15: 'rgba(233, 186, 76, 0.15)',
-  goldAlpha50: 'rgba(233, 186, 76, 0.50)',
-  goldGlow0: 'rgba(201, 150, 12, 0)',
-  goldGlow35: 'rgba(201, 150, 12, 0.35)',
-
-  // Mode bar colors (for game mode list)
-  modeRed: '#E05555',
-  modeGold: raw.goldBright,
-  modeBlue: raw.blue,
-  modeGreen: raw.greenBright,
-  modePurple: raw.purple,
+// ---- Light palette — warm parchment, classic Flag That ----
+const lightPalette = {
+  ink: '#1A1820',           // dark ink text
+  inkSecondary: '#5C5764',  // secondary text
+  gold: raw.gold,           // deeper gold for light bg
+  goldBright: raw.goldBright,
+  goldShadow: raw.goldShadow,
+  red: raw.red,             // standard red on light bg
+  redLight: raw.redLight,
+  muted: '#8A8494',         // tertiary text
+  dim: '#D5CFC6',           // dimmed elements on light bg
+  paper: '#F5EFE6',         // warm parchment background
+  paperDark: '#FFFFFF',     // white surface cards
+  raise: '#EDE7DE',         // secondary raised surface
+  white: raw.white,
+  black: raw.black,
+  green: raw.green,         // standard green on light bg
+  greenBright: raw.greenBright,
+  blue: raw.blue,
+  purple: raw.purple,
+  playText: '#130F00',      // dark text on gold CTA
 };
+
+function buildColors(p: typeof darkPalette, isDark: boolean) {
+  const dk = isDark;
+  return {
+    // Brand palette (direct access for commonly needed raw colors)
+    ink: p.ink,
+    red: p.red,
+    rule: dk ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)',
+    ruleDark: dk ? 'rgba(255,255,255,0.13)' : 'rgba(0,0,0,0.10)',
+    white: p.white,
+    black: p.black,
+    gold: p.gold,
+    goldBright: p.goldBright,
+    purple: p.purple,
+    dim: p.dim,
+
+    // Semantic roles
+    primary: p.ink,
+    primaryLight: p.paperDark,
+    accent: p.gold,
+    accentLight: p.goldBright,
+    success: p.green,
+    error: p.red,
+    warning: p.gold,
+    background: p.paper,
+    surface: p.paperDark,
+    surfaceSecondary: p.raise,
+    text: p.ink,
+    textSecondary: p.inkSecondary,
+    textTertiary: p.muted,
+    border: dk ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.08)',
+    borderLight: dk ? 'rgba(255,255,255,0.13)' : 'rgba(0,0,0,0.12)',
+    shadow: dk ? 'rgba(0, 0, 0, 0.22)' : 'rgba(0, 0, 0, 0.10)',
+    overlay: 'rgba(0, 0, 0, 0.6)',
+    inkAlpha10: dk ? 'rgba(238, 233, 226, 0.10)' : 'rgba(26, 24, 32, 0.08)',
+    playText: p.playText,
+
+    // Grade colors
+    gradeS: raw.goldBright,
+    gradeA: dk ? raw.greenBright : raw.green,
+    gradeB: raw.blue,
+    gradeC: p.muted,
+    gradeD: dk ? raw.redLight : raw.red,
+    gradeF: p.ink,
+
+    // Difficulty colors
+    diffEasy: dk ? raw.greenBright : raw.green,
+    diffMedium: raw.goldBright,
+    diffHard: dk ? raw.redLight : raw.red,
+    diffEasyBg: dk ? 'rgba(61, 191, 128, 0.12)' : 'rgba(30, 143, 86, 0.10)',
+    diffEasyBorder: dk ? 'rgba(61, 191, 128, 0.30)' : 'rgba(30, 143, 86, 0.25)',
+    diffMediumBg: 'rgba(233, 186, 76, 0.12)',
+    diffMediumBorder: dk ? 'rgba(233, 186, 76, 0.40)' : 'rgba(154, 92, 10, 0.25)',
+    diffHardBg: dk ? 'rgba(236, 102, 102, 0.12)' : 'rgba(196, 48, 48, 0.10)',
+    diffHardBorder: dk ? 'rgba(236, 102, 102, 0.30)' : 'rgba(196, 48, 48, 0.25)',
+
+    // Translucent helpers
+    whiteAlpha15: dk ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.06)',
+    whiteAlpha20: dk ? 'rgba(255,255,255,0.20)' : 'rgba(0,0,0,0.08)',
+    whiteAlpha45: dk ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.20)',
+    whiteAlpha50: dk ? 'rgba(255,255,255,0.50)' : 'rgba(0,0,0,0.25)',
+    whiteAlpha60: dk ? 'rgba(255,255,255,0.60)' : 'rgba(0,0,0,0.35)',
+    whiteAlpha70: dk ? 'rgba(255,255,255,0.70)' : 'rgba(0,0,0,0.45)',
+
+    // Surface feedback
+    darkSurface: dk ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.04)',
+    darkBorder: dk ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)',
+    successOnDark: dk ? 'rgba(61,191,128,0.15)' : 'rgba(30,143,86,0.10)',
+    successBorderOnDark: dk ? 'rgba(61,191,128,0.35)' : 'rgba(30,143,86,0.25)',
+    successTextOnDark: dk ? raw.greenBright : raw.green,
+    errorOnDark: dk ? 'rgba(236,102,102,0.15)' : 'rgba(196,48,48,0.10)',
+    errorBorderOnDark: dk ? 'rgba(236,102,102,0.35)' : 'rgba(196,48,48,0.25)',
+    errorTextOnDark: dk ? raw.redLight : raw.red,
+
+    // Feedback backgrounds
+    successBg: dk ? 'rgba(61, 191, 128, 0.12)' : 'rgba(30, 143, 86, 0.10)',
+    errorBg: dk ? 'rgba(236, 102, 102, 0.12)' : 'rgba(196, 48, 48, 0.08)',
+    warningBg: 'rgba(233, 186, 76, 0.12)',
+    accentBg: 'rgba(233, 186, 76, 0.08)',
+
+    // Badge tier colors
+    tierBronze: '#C4884A',
+    tierSilver: '#A0A0A0',
+    tierGold: raw.goldBright,
+    tierPlatinum: '#8B8DFF',
+
+    // Nav
+    navBg: dk ? 'rgba(21,20,26,0.97)' : 'rgba(245,239,230,0.97)',
+
+    // Map
+    mapBackground: p.paperDark,
+    mapZoomSurface: dk ? 'rgba(29, 28, 35, 0.92)' : 'rgba(255, 255, 255, 0.92)',
+
+    // Streak / progress
+    pipActive: raw.goldBright,
+    pipInactive: p.dim,
+
+    // Gold alpha
+    goldAlpha10: 'rgba(233, 186, 76, 0.10)',
+    goldAlpha15: 'rgba(233, 186, 76, 0.15)',
+    goldAlpha50: 'rgba(233, 186, 76, 0.50)',
+    goldGlow0: 'rgba(201, 150, 12, 0)',
+    goldGlow35: 'rgba(201, 150, 12, 0.35)',
+
+    // Mode bar colors (for game mode list)
+    modeRed: '#E05555',
+    modeGold: raw.goldBright,
+    modeBlue: raw.blue,
+    modeGreen: raw.greenBright,
+    modePurple: raw.purple,
+  };
+}
+
+export const darkColors = buildColors(darkPalette, true);
+export const lightColors = buildColors(lightPalette, false);
+
+/** Color values type — use with useTheme() hook */
+export type ThemeColors = typeof darkColors;
+
+/** Theme mode preference */
+export type ThemeMode = 'light' | 'dark' | 'system';
+
+// Default export for backward compat (dark theme)
+export const colors = darkColors;
 
 export const spacing = {
   xxs: 2,
@@ -262,57 +300,61 @@ export const typography = {
   },
 };
 
-export const buttons = {
-  primary: {
-    backgroundColor: raw.goldBright,
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    alignItems: 'center' as const,
-    borderRadius: borderRadius.lg,
-    shadowColor: raw.goldShadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 3,
-  },
-  primaryText: {
-    fontFamily: fontFamily.uiLabel,
-    fontSize: fontSize.lg,
-    letterSpacing: 0.8,
-    textTransform: 'uppercase' as const,
-    color: palette.playText,
-  },
-  secondary: {
-    backgroundColor: palette.paperDark,
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    alignItems: 'center' as const,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.07)',
-    borderRadius: borderRadius.lg,
-  },
-  secondaryText: {
-    fontFamily: fontFamily.uiLabel,
-    fontSize: fontSize.lg,
-    letterSpacing: 0.8,
-    textTransform: 'uppercase' as const,
-    color: palette.inkSecondary,
-  },
-};
+export function buildButtons(c: ThemeColors) {
+  return {
+    primary: {
+      backgroundColor: c.goldBright,
+      paddingVertical: 16,
+      paddingHorizontal: 24,
+      alignItems: 'center' as const,
+      borderRadius: borderRadius.lg,
+      shadowColor: raw.goldShadow,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 1,
+      shadowRadius: 0,
+      elevation: 3,
+    },
+    primaryText: {
+      fontFamily: fontFamily.uiLabel,
+      fontSize: fontSize.lg,
+      letterSpacing: 0.8,
+      textTransform: 'uppercase' as const,
+      color: c.playText,
+    },
+    secondary: {
+      backgroundColor: c.surface,
+      paddingVertical: 16,
+      paddingHorizontal: 24,
+      alignItems: 'center' as const,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: borderRadius.lg,
+    },
+    secondaryText: {
+      fontFamily: fontFamily.uiLabel,
+      fontSize: fontSize.lg,
+      letterSpacing: 0.8,
+      textTransform: 'uppercase' as const,
+      color: c.textSecondary,
+    },
+  };
+}
 
-export const nav = {
-  backButton: {
-    padding: 8,
-    width: 60,
-  },
-  backText: {
-    fontSize: fontSize.sm,
-    fontFamily: fontFamily.bodyMedium,
-    letterSpacing: 0.3,
-    color: colors.textTertiary,
-    textTransform: 'uppercase' as const,
-  },
-};
+export function buildNav(c: ThemeColors) {
+  return {
+    backButton: {
+      padding: 8,
+      width: 60,
+    },
+    backText: {
+      fontSize: fontSize.sm,
+      fontFamily: fontFamily.bodyMedium,
+      letterSpacing: 0.3,
+      color: c.textTertiary,
+      textTransform: 'uppercase' as const,
+    },
+  };
+}
 
 // ---- Responsive layout ----
 export const layout = {
@@ -322,12 +364,6 @@ export const layout = {
     tablet: 768,
     desktop: 1024,
   },
-};
-
-/** Shared base style for full-screen containers with the app background. */
-export const screenContainer = {
-  flex: 1 as const,
-  backgroundColor: palette.paper,
 };
 
 export const shadows = {

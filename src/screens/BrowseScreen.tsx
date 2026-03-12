@@ -13,14 +13,14 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import {
-  colors,
+  ThemeColors,
   spacing,
   typography,
   borderRadius,
   fontFamily,
   fontSize,
-  screenContainer,
 } from '../utils/theme';
+import { useTheme } from '../contexts/ThemeContext';
 import { FlagItem } from '../types';
 import { RootStackParamList } from '../types/navigation';
 import { getAllFlags } from '../data';
@@ -48,6 +48,8 @@ const PRACTICE_MORE = 'Practice More';
 const NUM_COLUMNS = 3;
 
 export default function BrowseScreen({ route, navigation }: Props) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const onNavigate = useNavTabs();
   const initialRegion = route.params?.region ?? 'All';
   const [searchQuery, setSearchQuery] = useState('');
@@ -223,8 +225,11 @@ export default function BrowseScreen({ route, navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: screenContainer,
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
   pageHeader: {
     paddingHorizontal: spacing.md,
     paddingTop: spacing.md,

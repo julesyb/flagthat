@@ -8,7 +8,8 @@ import {
   Animated,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius, screenContainer } from '../utils/theme';
+import { spacing, typography, fontFamily, fontSize, buildButtons, borderRadius, ThemeColors } from '../utils/theme';
+import { useTheme } from '../contexts/ThemeContext';
 import { hapticTap, hapticCorrect, hapticWrong, playWrongSound } from '../utils/feedback';
 import { shuffleArray } from '../utils/gameEngine';
 import { RootStackParamList } from '../types/navigation';
@@ -33,34 +34,46 @@ interface QuestionData {
 
 const flagById = new Map(countries.map((c) => [c.id, c]));
 
-function buildQuestionForFlag(flag: FlagItem): QuestionData | null {
+function buildQuestionForFlag(flag: FlagItem, difficulty?: 'easy' | 'medium' | 'hard'): QuestionData | null {
   const correctCapital = countryCapitals[flag.id];
   if (!correctCapital) return null;
 
-  const localCities = countryCities[flag.id] ?? [];
+  const wrongCount = difficulty === 'easy' ? 1 : 3;
+  const localCities = (countryCities[flag.id] ?? []).filter((c) => c !== correctCapital);
   const eligible = countries.filter((c) => countryCapitals[c.id]);
+  const otherCapitals = shuffleArray(
+    eligible.filter((c) => c.id !== flag.id).map((c) => countryCapitals[c.id])
+  );
 
   let wrongOptions: string[];
-  if (localCities.length >= 3) {
-    wrongOptions = shuffleArray(localCities.filter((c) => c !== correctCapital)).slice(0, 3);
+  if (difficulty === 'hard') {
+    // Hard: prioritize local cities as distractors (same-country cities are trickier)
+    const fromLocal = shuffleArray(localCities).slice(0, wrongCount);
+    const remaining = wrongCount - fromLocal.length;
+    wrongOptions = [...fromLocal, ...otherCapitals.slice(0, remaining)];
+  } else if (difficulty === 'easy') {
+    // Easy: only use capitals from other countries (more distinct)
+    wrongOptions = otherCapitals.slice(0, wrongCount);
   } else {
-    const otherCapitals = eligible
-      .filter((c) => c.id !== flag.id)
-      .map((c) => countryCapitals[c.id]);
-    wrongOptions = shuffleArray(otherCapitals).slice(0, 3);
+    // Medium: mix of local cities and other capitals
+    if (localCities.length >= wrongCount) {
+      wrongOptions = shuffleArray(localCities).slice(0, wrongCount);
+    } else {
+      wrongOptions = otherCapitals.slice(0, wrongCount);
+    }
   }
 
   const options = shuffleArray([correctCapital, ...wrongOptions]);
   return { flag, correctCapital, options };
 }
 
-function generateQuestions(count: number, challengeFlagIds?: string[]): QuestionData[] {
+function generateQuestions(count: number, challengeFlagIds?: string[], difficulty?: 'easy' | 'medium' | 'hard'): QuestionData[] {
   if (challengeFlagIds) {
     const questions: QuestionData[] = [];
     for (const id of challengeFlagIds) {
       const flag = flagById.get(id);
       if (!flag) continue;
-      const q = buildQuestionForFlag(flag);
+      const q = buildQuestionForFlag(flag, difficulty);
       if (q) questions.push(q);
     }
     return questions;
@@ -73,17 +86,19 @@ function generateQuestions(count: number, challengeFlagIds?: string[]): Question
 
   const questions: QuestionData[] = [];
   for (const flag of selected) {
-    const q = buildQuestionForFlag(flag);
+    const q = buildQuestionForFlag(flag, difficulty);
     if (q) questions.push(q);
   }
   return questions;
 }
 
 export default function CapitalConnectionScreen({ navigation, route }: Props) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { config, challenge, playerName } = route.params;
   const questions = useMemo(
-    () => generateQuestions(config.questionCount, challenge?.flagIds),
-    [config.questionCount, challenge],
+    () => generateQuestions(config.questionCount, challenge?.flagIds, config.difficulty),
+    [config.questionCount, challenge, config.difficulty],
   );
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
@@ -272,8 +287,8 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: screenContainer,
+const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors); return StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
   progressBar: {
     height: 3,
     backgroundColor: colors.border,
@@ -375,6 +390,6 @@ const styles = StyleSheet.create({
   emptyState: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing.xl },
   emptyTitle: { ...typography.heading, color: colors.text, marginBottom: spacing.sm },
   emptyBody: { ...typography.body, color: colors.textSecondary, textAlign: 'center', marginBottom: spacing.xl },
-  emptyButton: { ...buttons.secondary },
-  emptyButtonText: { ...buttons.secondaryText },
-});
+  emptyButton: { ...btn.secondary },
+  emptyButtonText: { ...btn.secondaryText },
+}); };

@@ -2,7 +2,6 @@ import { GameMode, FlagItem, GameQuestion, GameResult, GameConfig } from '../typ
 import { getFlagsForCategory, getAllFlags } from '../data';
 import { countryAliases, twinPairs } from '../data/countryAliases';
 import { translateName } from '../data/countryNames';
-import { colors } from './theme';
 import { APP_DOMAIN } from './config';
 
 export function shuffleArray<T>(array: T[]): T[] {
@@ -121,7 +120,7 @@ export function generateQuestions(config: GameConfig): GameQuestion[] {
   const selectedFlags = shuffledFlags.slice(0, count);
 
   return selectedFlags.map((flag) => {
-    const options = generateOptions(flag, categoryFlags, config.mode);
+    const options = generateOptions(flag, categoryFlags, config.mode, config.difficulty);
     return { flag, options };
   });
 }
@@ -142,10 +141,11 @@ export function generatePracticeQuestions(flagIds: string[]): GameQuestion[] {
   });
 }
 
-function generateOptions(correctFlag: FlagItem, pool: FlagItem[], mode: GameMode): string[] {
-  if (mode === 'hard' || mode === 'flagflash' || mode === 'flagpuzzle') return [];
+function generateOptions(correctFlag: FlagItem, pool: FlagItem[], mode: GameMode, difficulty?: 'easy' | 'medium' | 'hard'): string[] {
+  const effectiveDifficulty = difficulty || (mode === 'easy' ? 'easy' : mode === 'hard' ? 'hard' : 'medium');
+  if (effectiveDifficulty === 'hard' || mode === 'flagflash' || mode === 'flagpuzzle') return [];
 
-  const choiceCount = (mode === 'timeattack' || mode === 'medium' || mode === 'baseline') ? 4 : 2;
+  const choiceCount = effectiveDifficulty === 'easy' ? 2 : 4;
   const otherFlags = pool.filter((f) => f.id !== correctFlag.id);
 
   // Prioritize twin flags as wrong options so look-alikes appear together
@@ -220,12 +220,14 @@ export function getStreakFromResults(results: GameResult[]): number {
   return maxStreak;
 }
 
-export function getGrade(accuracy: number): { label: string; color: string } {
-  if (accuracy >= 95) return { label: 'S', color: colors.gradeS };
-  if (accuracy >= 90) return { label: 'A+', color: colors.gradeA };
-  if (accuracy >= 80) return { label: 'A', color: colors.gradeA };
-  if (accuracy >= 70) return { label: 'B', color: colors.gradeB };
-  if (accuracy >= 60) return { label: 'C', color: colors.gradeC };
-  if (accuracy >= 50) return { label: 'D', color: colors.gradeD };
-  return { label: 'F', color: colors.gradeF };
+export type GradeKey = 'gradeS' | 'gradeA' | 'gradeB' | 'gradeC' | 'gradeD' | 'gradeF';
+
+export function getGrade(accuracy: number): { label: string; colorKey: GradeKey } {
+  if (accuracy >= 95) return { label: 'S', colorKey: 'gradeS' };
+  if (accuracy >= 90) return { label: 'A+', colorKey: 'gradeA' };
+  if (accuracy >= 80) return { label: 'A', colorKey: 'gradeA' };
+  if (accuracy >= 70) return { label: 'B', colorKey: 'gradeB' };
+  if (accuracy >= 60) return { label: 'C', colorKey: 'gradeC' };
+  if (accuracy >= 50) return { label: 'D', colorKey: 'gradeD' };
+  return { label: 'F', colorKey: 'gradeF' };
 }

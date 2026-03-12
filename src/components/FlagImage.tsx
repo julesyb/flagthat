@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { StyleSheet, View, Text, ActivityIndicator, useWindowDimensions, StyleProp, ViewStyle } from 'react-native';
 import { Image } from 'expo-image';
-import { colors, fontFamily, fontSize, borderRadius } from '../utils/theme';
+import { fontFamily, fontSize, borderRadius, ThemeColors } from '../utils/theme';
+import { useTheme } from '../contexts/ThemeContext';
 import { t } from '../utils/i18n';
 
 interface FlagImageProps {
@@ -31,6 +32,8 @@ function getFlagUrl(code: string, width: number): string {
 }
 
 export default function FlagImage({ countryCode, size = 'large', fill, style, accessibilityLabel }: FlagImageProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { width: screenWidth } = useWindowDimensions();
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
@@ -108,6 +111,8 @@ export default function FlagImage({ countryCode, size = 'large', fill, style, ac
 }
 
 export function FlagImageSmall({ countryCode }: { countryCode: string }) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
 
@@ -142,7 +147,7 @@ export function FlagImageSmall({ countryCode }: { countryCode: string }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   container: {
     overflow: 'hidden',
     backgroundColor: 'transparent',
@@ -179,3 +184,4 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
 });
+
