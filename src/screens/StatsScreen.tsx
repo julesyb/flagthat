@@ -85,58 +85,6 @@ export default function StatsScreen() {
     return () => countAnim.removeListener(listenerId);
   }, [countAnim]);
 
-  // ── Run intro/snap animations after data arrives ──
-  const runAnimations = useCallback((acc: number, pct: number, animate: boolean) => {
-    if (animate) {
-      hasAnimated.current = true;
-      heroFade.setValue(0);
-      heroSlide.setValue(12);
-      countAnim.setValue(0);
-      setDisplayAcc(0);
-      progressFade.setValue(0);
-      progressBarAnim.setValue(0);
-      regionFade.setValue(0);
-      restFade.setValue(0);
-
-      Animated.parallel([
-        Animated.timing(heroFade, { toValue: 1, duration: 300, useNativeDriver: true }),
-        Animated.spring(heroSlide, { toValue: 0, friction: 8, tension: 80, useNativeDriver: true }),
-      ]).start();
-
-      Animated.timing(countAnim, {
-        toValue: acc, duration: 1000, delay: 200,
-        easing: Easing.out(Easing.cubic), useNativeDriver: false,
-      }).start();
-
-      const progressDelay = 500;
-      Animated.timing(progressFade, {
-        toValue: 1, duration: 300, delay: progressDelay, useNativeDriver: true,
-      }).start();
-      Animated.timing(progressBarAnim, {
-        toValue: pct, duration: 800, delay: progressDelay + 100,
-        easing: Easing.out(Easing.cubic), useNativeDriver: false,
-      }).start();
-
-      Animated.timing(regionFade, {
-        toValue: 1, duration: 300, delay: progressDelay + 300, useNativeDriver: true,
-      }).start();
-
-      Animated.timing(restFade, {
-        toValue: 1, duration: 400, delay: progressDelay + 500, useNativeDriver: true,
-      }).start();
-    } else {
-      heroFade.setValue(1);
-      heroSlide.setValue(0);
-      countAnim.setValue(acc);
-      setDisplayAcc(acc);
-      progressFade.setValue(1);
-      progressBarAnim.setValue(pct);
-      regionFade.setValue(1);
-      restFade.setValue(1);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- all animation refs are stable (useRef().current)
-  }, []);
-
   useFocusEffect(
     useCallback(() => {
       let cancelled = false;
@@ -152,7 +100,51 @@ export default function StatsScreen() {
         const seen = Object.values(loaded.flagStats).filter((f) => f.right > 0).length;
         const pct = totalF > 0 ? seen / totalF : 0;
 
-        runAnimations(acc, pct, shouldAnimate);
+        if (shouldAnimate) {
+          hasAnimated.current = true;
+          heroFade.setValue(0);
+          heroSlide.setValue(12);
+          countAnim.setValue(0);
+          setDisplayAcc(0);
+          progressFade.setValue(0);
+          progressBarAnim.setValue(0);
+          regionFade.setValue(0);
+          restFade.setValue(0);
+
+          Animated.parallel([
+            Animated.timing(heroFade, { toValue: 1, duration: 300, useNativeDriver: true }),
+            Animated.spring(heroSlide, { toValue: 0, friction: 8, tension: 80, useNativeDriver: true }),
+          ]).start();
+
+          Animated.timing(countAnim, {
+            toValue: acc, duration: 1000, delay: 200,
+            easing: Easing.out(Easing.cubic), useNativeDriver: false,
+          }).start();
+
+          const progressDelay = 500;
+          Animated.timing(progressFade, {
+            toValue: 1, duration: 300, delay: progressDelay, useNativeDriver: true,
+          }).start();
+          Animated.timing(progressBarAnim, {
+            toValue: pct, duration: 800, delay: progressDelay + 100,
+            easing: Easing.out(Easing.cubic), useNativeDriver: false,
+          }).start();
+          Animated.timing(regionFade, {
+            toValue: 1, duration: 300, delay: progressDelay + 300, useNativeDriver: true,
+          }).start();
+          Animated.timing(restFade, {
+            toValue: 1, duration: 400, delay: progressDelay + 500, useNativeDriver: true,
+          }).start();
+        } else {
+          heroFade.setValue(1);
+          heroSlide.setValue(0);
+          countAnim.setValue(acc);
+          setDisplayAcc(acc);
+          progressFade.setValue(1);
+          progressBarAnim.setValue(pct);
+          regionFade.setValue(1);
+          restFade.setValue(1);
+        }
       });
 
       return () => {
@@ -165,15 +157,8 @@ export default function StatsScreen() {
         regionFade.stopAnimation();
         restFade.stopAnimation();
       };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- runAnimations is stable (empty deps)
     }, []),
   );
-
-  // ── All computed values derived from `data` ──
-  // Each memo takes `data` as its single dependency. When `data` is null
-  // (still loading), they return safe empty/null defaults. This means
-  // every hook runs on every render (no conditional-hook risk) and there
-  // is exactly one loading gate (`!data`) before the JSX.
 
   const flagStats = data?.flagStats ?? EMPTY_FLAG_STATS;
 
