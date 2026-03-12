@@ -17,7 +17,7 @@ import { RootStackParamList } from '../types/navigation';
 import { ThemeColors, spacing, fontFamily, fontSize, borderRadius, typography } from '../utils/theme';
 import { useTheme } from '../contexts/ThemeContext';
 import { UserStats, CategoryId, BaselineRegionId } from '../types';
-import { getStats, getFlagStats, FlagStats, getDayStreakInfo, DayStreakInfo, getBadgeData, getMissedFlagIds, BadgeData, getGameHistory, GameHistoryEntry, getChallengeHistory, ChallengeHistoryEntry, MASTERED_STREAK, UNLOCK_THRESHOLD, getRegionScoreHistory, RegionScoreHistory } from '../utils/storage';
+import { getStats, getFlagStats, FlagStats, getDayStreakInfo, DayStreakInfo, getBadgeData, getMissedFlagIds, BadgeData, getGameHistory, GameHistoryEntry, getChallengeHistory, ChallengeHistoryEntry, MASTERED_STREAK, UNLOCK_THRESHOLD, getRegionScoreHistory, RegionScoreHistory, getPersistedLevel, persistLevel } from '../utils/storage';
 import { getAllFlags, getTotalFlagCount, getCategoryCount } from '../data';
 
 import { t } from '../utils/i18n';
@@ -26,6 +26,7 @@ import BottomNav from '../components/BottomNav';
 import ScreenContainer from '../components/ScreenContainer';
 import { useNavTabs } from '../hooks/useNavTabs';
 import { getAllEarnedBadges, buildBadgeContext, deriveFromContext, BADGES, TIER_COLORS, getBadgeProgress, Badge } from '../utils/badges';
+import { computeLevelProgress, LevelProgress, TIER_LABELS, getLevelTier } from '../utils/levels';
 import { ChevronRightIcon, BadgeIconView, UsersIcon } from '../components/Icons';
 import PageHeader from '../components/PageHeader';
 
@@ -46,15 +47,16 @@ interface StatsData {
   gameHistory: GameHistoryEntry[];
   challengeHistory: ChallengeHistoryEntry[];
   regionScoreHistory: RegionScoreHistory;
+  persistedLevel: number;
 }
 
 async function loadStatsData(): Promise<StatsData> {
-  const [stats, flagStats, dayStreakInfo, badgeData, missed, gameHistory, challengeHistory, regionScoreHistory] =
+  const [stats, flagStats, dayStreakInfo, badgeData, missed, gameHistory, challengeHistory, regionScoreHistory, persistedLevel] =
     await Promise.all([
       getStats(), getFlagStats(), getDayStreakInfo(), getBadgeData(),
-      getMissedFlagIds(), getGameHistory(), getChallengeHistory(), getRegionScoreHistory(),
+      getMissedFlagIds(), getGameHistory(), getChallengeHistory(), getRegionScoreHistory(), getPersistedLevel(),
     ]);
-  return { stats, flagStats, dayStreakInfo, badgeData, weakFlagCount: missed.length, gameHistory, challengeHistory, regionScoreHistory };
+  return { stats, flagStats, dayStreakInfo, badgeData, weakFlagCount: missed.length, gameHistory, challengeHistory, regionScoreHistory, persistedLevel };
 }
 
 export default function StatsScreen() {
@@ -104,9 +106,11 @@ export default function StatsScreen() {
 
         const acc = loaded.stats.totalAnswered > 0
           ? Math.round((loaded.stats.totalCorrect / loaded.stats.totalAnswered) * 100) : 0;
-        const totalF = getTotalFlagCount();
-        const seen = Object.values(loaded.flagStats).filter((f) => f.right >= UNLOCK_THRESHOLD).length;
-        const pct = totalF > 0 ? seen / totalF : 0;
+        const lp = computeLevelProgress(
+          { stats: loaded.stats, flagStats: loaded.flagStats, badgeData: loaded.badgeData, dayStreakInfo: loaded.dayStreakInfo },
+          loaded.persistedLevel,
+        );
+        const pct = lp.target > 0 ? Math.min(lp.progress / lp.target, 1) : 0;
 
         if (shouldAnimate) {
           hasAnimated.current = true;
@@ -215,6 +219,16 @@ export default function StatsScreen() {
     return getAllEarnedBadges(badgeCtx, data.badgeData.earnedBadgeIds);
   }, [badgeCtx, data]);
 
+  const levelProgress = React.useMemo<LevelProgress | null>(() => {
+    if (!data) return null;
+    const lp = computeLevelProgress(
+      { stats: data.stats, flagStats: data.flagStats, badgeData: data.badgeData, dayStreakInfo: data.dayStreakInfo },
+      data.persistedLevel,
+    );
+    // Persist new high-water mark (fire-and-forget)
+    persistLevel(lp.currentLevel);
+    return lp;
+  }, [data]);
 
   const activityGrid = React.useMemo(() => {
     const gh = data?.gameHistory ?? [];
@@ -361,6 +375,36 @@ export default function StatsScreen() {
           </View>
         </Animated.View>
 
+        {/* ── LEVEL PROGRESS ── */}
+        {levelProgress && (
+        <Animated.View style={[styles.tileCompact, { opacity: progressFade }]}>
+          <View style={styles.tileCompactRow}>
+            <View>
+              <Text style={styles.levelNumber}>{t('stats.level', { level: levelProgress.currentLevel })}</Text>
+              <Text style={styles.levelTier}>{TIER_LABELS[getLevelTier(levelProgress.currentLevel || 1)]}</Text>
+            </View>
+            {!levelProgress.isMaxLevel && (
+              <Text style={styles.tileCompactVal}>{levelProgress.progress} / {levelProgress.target}</Text>
+            )}
+          </View>
+          {!levelProgress.isMaxLevel && (
+            <>
+              <View style={styles.progressWrap}>
+                <Animated.View style={[styles.progressFill, { width: progressBarWidth }]} />
+              </View>
+              <View style={styles.progressLabels}>
+                <Text style={styles.progressLabelBold}>{t('stats.nextGoal')}</Text>
+                <Text style={styles.progressLabelMuted}>{t('stats.percentComplete', { pct: levelProgress.pct })}</Text>
+              </View>
+              <Text style={styles.levelGoalDesc}>{levelProgress.description}</Text>
+            </>
+          )}
+          {levelProgress.isMaxLevel && (
+            <Text style={styles.levelGoalDesc}>{t('stats.levelMaxed')}</Text>
+          )}
+        </Animated.View>
+        )}
+
         {/* ── COUNTRIES PROGRESS (compact) ── */}
         <Animated.View style={[styles.tileCompact, { opacity: progressFade }]}>
           <View style={styles.tileCompactRow}>
@@ -373,7 +417,7 @@ export default function StatsScreen() {
             <Text style={styles.tileCompactVal}>{countriesSeen} / {totalFlags}</Text>
           </View>
           <View style={styles.progressWrap}>
-            <Animated.View style={[styles.progressFill, { width: progressBarWidth }]} />
+            <View style={[styles.progressFill, { width: `${progressPct}%` }]} />
           </View>
           <View style={styles.progressLabels}>
             <Text style={styles.progressLabelBold}>{t('stats.percentComplete', { pct: progressPct })}</Text>
@@ -827,6 +871,26 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     ...typography.micro,
     color: colors.textTertiary,
     marginTop: 2,
+  },
+  levelNumber: {
+    fontFamily: fontFamily.display,
+    fontSize: fontSize.xl,
+    color: colors.goldBright,
+    letterSpacing: -0.5,
+    lineHeight: 28,
+  },
+  levelTier: {
+    ...typography.micro,
+    color: colors.textTertiary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginTop: 1,
+  },
+  levelGoalDesc: {
+    ...typography.micro,
+    color: colors.textSecondary,
+    marginTop: 6,
+    fontStyle: 'italic',
   },
 
   // ── Progress

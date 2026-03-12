@@ -17,6 +17,7 @@ const BASELINE_KEY = '@flagsareus_baseline';
 const CHALLENGE_NAME_KEY = '@flagsareus_challenge_name';
 const CHALLENGE_HISTORY_KEY = '@flagsareus_challenge_history';
 const REGION_SCORES_KEY = '@flagsareus_region_scores';
+const LEVEL_KEY = '@flagsareus_level';
 
 // ─── Challenge Name ─────────────────────────────────────────
 export async function getChallengeName(): Promise<string> {
@@ -274,6 +275,7 @@ export async function resetStats(): Promise<void> {
     await AsyncStorage.removeItem(GAME_HISTORY_KEY);
     await AsyncStorage.removeItem(BASELINE_KEY);
     await AsyncStorage.removeItem(CHALLENGE_HISTORY_KEY);
+    await AsyncStorage.removeItem(LEVEL_KEY);
   } catch {
     // Silently fail
   }
@@ -652,6 +654,28 @@ export async function recordRegionScore(
     }
 
     await AsyncStorage.setItem(REGION_SCORES_KEY, JSON.stringify(history));
+  } catch {
+    // Silently fail
+  }
+}
+
+// ─── Level Progress (one-way door) ────────────────────────────
+// Persists the highest completed level. Levels never regress.
+export async function getPersistedLevel(): Promise<number> {
+  try {
+    const val = await AsyncStorage.getItem(LEVEL_KEY);
+    return val ? parseInt(val, 10) || 0 : 0;
+  } catch {
+    return 0;
+  }
+}
+
+export async function persistLevel(level: number): Promise<void> {
+  try {
+    const current = await getPersistedLevel();
+    if (level > current) {
+      await AsyncStorage.setItem(LEVEL_KEY, String(level));
+    }
   } catch {
     // Silently fail
   }

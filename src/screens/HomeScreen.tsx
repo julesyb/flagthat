@@ -16,7 +16,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { ThemeColors } from '../utils/theme';
 import { getTotalFlagCount, getCategoryCount } from '../data';
 import { initAudio, hapticTap, hapticCorrect, hapticWrong, playWrongSound, setSoundsEnabled, setHapticsEnabled } from '../utils/feedback';
-import { getStats, getDayStreak, getSettings, getMissedFlagIds, getBaselineData, BaselineData } from '../utils/storage';
+import { getStats, getDayStreak, getSettings, getMissedFlagIds, getBaselineData, BaselineData, getFlagStats, getBadgeData, getDayStreakInfo, getPersistedLevel, persistLevel } from '../utils/storage';
 import { generateQuestions } from '../utils/gameEngine';
 import { RootStackParamList } from '../types/navigation';
 import { GameMode, UserStats, GameQuestion, CategoryId } from '../types';
@@ -27,6 +27,7 @@ import ScreenContainer from '../components/ScreenContainer';
 import SegBtn from '../components/SegBtn';
 import ConfigRow, { ConfigCard } from '../components/ConfigRow';
 import { useNavTabs } from '../hooks/useNavTabs';
+import { computeLevelProgress, LevelProgress, TIER_LABELS, getLevelTier } from '../utils/levels';
 import { t } from '../utils/i18n';
 import { translateName, flagName } from '../data/countryNames';
 
@@ -156,6 +157,7 @@ export default function HomeScreen({ navigation }: Props) {
   const [weakFlagCount, setWeakFlagCount] = useState(0);
   const [autocomplete, setAutocomplete] = useState(false);
   const [baseline, setBaseline] = useState<BaselineData | null>(null);
+  const [levelProgress, setLevelProgress] = useState<LevelProgress | null>(null);
   const playBtnScale = useRef(new Animated.Value(1)).current;
 
   const pulsePlayBtn = useCallback(() => {
@@ -182,6 +184,13 @@ export default function HomeScreen({ navigation }: Props) {
       getMissedFlagIds().then((ids) => setWeakFlagCount(ids.length));
       getBaselineData().then(setBaseline);
       setTeaserKey((k) => k + 1);
+      Promise.all([getStats(), getFlagStats(), getBadgeData(), getDayStreakInfo(), getPersistedLevel()]).then(
+        ([s, fs, bd, dsi, pl]) => {
+          const lp = computeLevelProgress({ stats: s, flagStats: fs, badgeData: bd, dayStreakInfo: dsi }, pl);
+          setLevelProgress(lp);
+          persistLevel(lp.currentLevel);
+        },
+      );
     }, []),
   );
 
@@ -210,22 +219,37 @@ export default function HomeScreen({ navigation }: Props) {
             <Text style={styles.wmFlag}>Flag</Text>
             <Text style={styles.wmThat}>That</Text>
           </Text>
-          <TouchableOpacity
-            style={styles.streakBadge}
-            onPress={() => navigation.navigate('Stats')}
-            activeOpacity={0.7}
-            accessibilityRole="button"
-            accessibilityLabel={`${dayStreak} ${t('home.dayStreak')}`}
-            accessibilityHint={t('a11y.opensStats')}
-          >
-            <FlameIcon size={16} color={dayStreak > 0 ? colors.goldBright : colors.textTertiary} />
-            <Text style={[styles.streakNum, dayStreak === 0 && styles.streakNumInactive]}>{dayStreak}</Text>
-            <View style={styles.streakPips}>
-              {Array.from({ length: 7 }).map((_, i) => (
-                <View key={i} style={[styles.pip, i < Math.min(dayStreak, 7) && styles.pipLit]} />
-              ))}
-            </View>
-          </TouchableOpacity>
+          <View style={styles.headerRight}>
+            {levelProgress && (
+              <TouchableOpacity
+                style={styles.levelBadge}
+                onPress={() => navigation.navigate('Stats')}
+                activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel={t('stats.level', { level: levelProgress.currentLevel })}
+                accessibilityHint={t('a11y.opensStats')}
+              >
+                <Text style={styles.levelBadgeLabel}>{t('stats.levelLabel')}</Text>
+                <Text style={styles.levelBadgeNum}>{levelProgress.currentLevel}</Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity
+              style={styles.streakBadge}
+              onPress={() => navigation.navigate('Stats')}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel={`${dayStreak} ${t('home.dayStreak')}`}
+              accessibilityHint={t('a11y.opensStats')}
+            >
+              <FlameIcon size={16} color={dayStreak > 0 ? colors.goldBright : colors.textTertiary} />
+              <Text style={[styles.streakNum, dayStreak === 0 && styles.streakNumInactive]}>{dayStreak}</Text>
+              <View style={styles.streakPips}>
+                {Array.from({ length: 7 }).map((_, i) => (
+                  <View key={i} style={[styles.pip, i < Math.min(dayStreak, 7) && styles.pipLit]} />
+                ))}
+              </View>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* ── FLAG TEASER ── */}
@@ -527,6 +551,35 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     fontFamily: fontFamily.displayItalic,
     fontSize: fontSize.title,
     color: colors.goldBright,
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  levelBadge: {
+    alignItems: 'center',
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm + 2,
+    borderRadius: borderRadius.full,
+    borderWidth: 1,
+    borderColor: colors.goldBright,
+    backgroundColor: colors.surface,
+  },
+  levelBadgeLabel: {
+    fontFamily: fontFamily.uiLabel,
+    fontSize: 9,
+    color: colors.textTertiary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    lineHeight: 12,
+  },
+  levelBadgeNum: {
+    fontFamily: fontFamily.display,
+    fontSize: fontSize.md,
+    color: colors.goldBright,
+    letterSpacing: -0.5,
+    lineHeight: 18,
   },
   streakBadge: {
     flexDirection: 'row',
