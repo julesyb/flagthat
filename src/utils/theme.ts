@@ -236,10 +236,10 @@ export const fontFamily = {
 };
 
 // ---- Type scale — single source of truth for every font size ----
-// 8-step ramp: 5 UI sizes + 3 display sizes. Minimum 11px for readability.
+// 8-step ramp: 5 UI sizes + 3 display sizes. Minimum 12px for readability.
 // Every fontSize in the app must reference this scale — no math adjustments.
 export const fontSize = {
-  xs: 11,         // eyebrow labels, nav tabs, small caps, badges, chips
+  xs: 12,         // eyebrow labels, nav tabs, small caps, badges, chips
   sm: 13,         // captions, subtitles, segment buttons, tags
   body: 16,       // body text, labels, options, card titles
   lg: 20,         // buttons, section titles, headings, stat values
@@ -292,14 +292,14 @@ export const typography = {
     fontSize: fontSize.body,
     fontFamily: fontFamily.bodyMedium,
   },
-  // ── Eyebrow labels (Barlow SemiBold 11px, uppercase) ──
+  // ── Eyebrow labels (Barlow SemiBold 12px, uppercase) ──
   eyebrow: {
     fontSize: fontSize.xs,
     fontFamily: fontFamily.uiLabel,
     letterSpacing: 1.2,
     textTransform: 'uppercase' as const,
   },
-  // ── Small text presets (11px) — for badges, chips, meta text ──
+  // ── Small text presets (12px) — for badges, chips, meta text ──
   micro: {
     fontSize: fontSize.xs,
     fontFamily: fontFamily.body,
@@ -317,7 +317,7 @@ export const typography = {
     fontSize: fontSize.sm,
     fontFamily: fontFamily.bodyBold,
   },
-  // ── Small bold label (11px SemiBold, no uppercase) — nav tabs, score badges ──
+  // ── Small bold label (12px SemiBold, no uppercase) — nav tabs, score badges ──
   tag: {
     fontSize: fontSize.xs,
     fontFamily: fontFamily.uiLabel,
