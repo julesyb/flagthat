@@ -402,6 +402,7 @@ export function buildNav(c: ThemeColors) {
 export const layout = {
   maxContentWidth: 600,
   maxGameWidth: 600,
+  maxFlagWidth: 420,
   breakpoints: {
     tablet: 768,
     desktop: 1024,

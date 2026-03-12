@@ -8,7 +8,7 @@ import {
   Animated,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { spacing, typography, fontFamily, fontSize, buildButtons, borderRadius, ThemeColors } from '../utils/theme';
+import { spacing, typography, fontFamily, fontSize, buildButtons, borderRadius, ThemeColors, layout } from '../utils/theme';
 import { useTheme } from '../contexts/ThemeContext';
 import { hapticTap, hapticCorrect, hapticWrong, playWrongSound } from '../utils/feedback';
 import { shuffleArray } from '../utils/gameEngine';
@@ -329,6 +329,9 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   },
   flagContainer: {
     alignItems: 'center',
+    alignSelf: 'center',
+    width: '100%',
+    maxWidth: layout.maxFlagWidth,
     marginBottom: spacing.md,
   },
   prompt: {
