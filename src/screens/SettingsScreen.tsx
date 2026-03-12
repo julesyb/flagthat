@@ -110,7 +110,7 @@ export default function SettingsScreen() {
     if (use24h) {
       return `${hour.toString().padStart(2, '0')}:${m}`;
     }
-    const period = hour >= 12 ? 'PM' : 'AM';
+    const period = hour >= 12 ? t('settings.pm') : t('settings.am');
     const h = hour % 12 || 12;
     return `${h}:${m} ${period}`;
   };
@@ -299,7 +299,7 @@ export default function SettingsScreen() {
             onPress={() => Linking.openURL(`${APP_URL}/terms`)}
             activeOpacity={0.7}
           >
-            <Text style={styles.settingLabel}>Terms of Service</Text>
+            <Text style={styles.settingLabel}>{t('settings.termsOfService')}</Text>
             <Text style={styles.settingChevron}>&rsaquo;</Text>
           </TouchableOpacity>
           <View style={styles.settingDivider} />
@@ -308,7 +308,7 @@ export default function SettingsScreen() {
             onPress={() => Linking.openURL(`mailto:support@${APP_DOMAIN}`)}
             activeOpacity={0.7}
           >
-            <Text style={styles.settingLabel}>Support</Text>
+            <Text style={styles.settingLabel}>{t('settings.support')}</Text>
             <Text style={styles.settingChevron}>&rsaquo;</Text>
           </TouchableOpacity>
         </View>

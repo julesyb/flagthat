@@ -98,8 +98,8 @@ export default function StatsScreen() {
             setChallengeHistory(ch);
 
             // ── Kick off animation sequence after data loads ──
-            const acc = s.totalAnswered > 0
-              ? Math.round((s.totalCorrect / s.totalAnswered) * 100) : 0;
+            const acc = styles.totalAnswered > 0
+              ? Math.round((styles.totalCorrect / styles.totalAnswered) * 100) : 0;
             const totalF = getTotalFlagCount();
             const seen = Object.values(fs).filter((f) => f.right > 0).length;
             const pct = totalF > 0 ? seen / totalF : 0;
@@ -161,14 +161,14 @@ export default function StatsScreen() {
 
   const top10 = React.useMemo(() => {
     return Object.entries(flagStats)
-      .filter(([, s]) => s.right > 0)
+      .filter(([, s]) => styles.right > 0)
       .sort(([, a], [, b]) => b.right - a.right)
       .slice(0, 10);
   }, [flagStats]);
 
   const bottom10 = React.useMemo(() => {
     return Object.entries(flagStats)
-      .filter(([, s]) => s.wrong > 0 && s.rightStreak < 3)
+      .filter(([, s]) => styles.wrong > 0 && styles.rightStreak < 3)
       .sort(([, a], [, b]) => b.wrong - a.wrong)
       .slice(0, 10);
   }, [flagStats]);
@@ -235,10 +235,10 @@ export default function StatsScreen() {
 
   if (!stats) {
     return (
-      <SafeAreaView style={s.container}>
-        <View style={s.loadingContainer}>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.ink} />
-          <Text style={s.loadingText}>{t('common.loading')}</Text>
+          <Text style={styles.loadingText}>{t('common.loading')}</Text>
         </View>
       </SafeAreaView>
     );
@@ -275,8 +275,8 @@ export default function StatsScreen() {
     overallAccuracy > 0 ? t('stats.keepGoing') : '';
 
   return (
-    <SafeAreaView style={s.container}>
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
+    <SafeAreaView style={styles.container}>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <ScreenContainer>
 
         {/* ══════════════════════════════════════════════════════════
@@ -285,60 +285,60 @@ export default function StatsScreen() {
         <Animated.View style={[
           { opacity: heroFade, transform: [{ translateY: heroSlide }] },
         ]}>
-          <View style={s.pageHeader}>
-            <Text style={s.pageTitle}>{t('stats.yourStats')}</Text>
-            <Text style={s.pageSub}>
+          <View style={styles.pageHeader}>
+            <Text style={styles.pageTitle}>{t('stats.yourStats')}</Text>
+            <Text style={styles.pageSub}>
               {t('stats.allTime')} - {stats.totalGamesPlayed} {t('stats.roundsPlayed')}
             </Text>
           </View>
-          <View style={s.heroCard}>
-            <View style={s.heroStatItem}>
-              <Text style={[s.heroStatValue, { color: colors.goldBright }]}>{dayStreakInfo.current}</Text>
-              <Text style={s.heroStatLabel}>{t('stats.streak')}</Text>
+          <View style={styles.heroCard}>
+            <View style={styles.heroStatItem}>
+              <Text style={[styles.heroStatValue, { color: colors.goldBright }]}>{dayStreakInfo.current}</Text>
+              <Text style={styles.heroStatLabel}>{t('stats.streak')}</Text>
             </View>
-            <View style={[s.heroStatItem, s.heroStatDivider]}>
-              <Text style={[s.heroStatValue, { color: colors.success }]}>{displayAcc}%</Text>
-              <Text style={s.heroStatLabel}>{t('stats.accuracy')}</Text>
+            <View style={[styles.heroStatItem, styles.heroStatDivider]}>
+              <Text style={[styles.heroStatValue, { color: colors.success }]}>{displayAcc}%</Text>
+              <Text style={styles.heroStatLabel}>{t('stats.accuracy')}</Text>
             </View>
-            <View style={[s.heroStatItem, s.heroStatDivider]}>
-              <Text style={s.heroStatValue}>{countriesSeen}</Text>
-              <Text style={s.heroStatLabel}>{t('stats.mastered')}</Text>
+            <View style={[styles.heroStatItem, styles.heroStatDivider]}>
+              <Text style={styles.heroStatValue}>{countriesSeen}</Text>
+              <Text style={styles.heroStatLabel}>{t('stats.mastered')}</Text>
             </View>
           </View>
         </Animated.View>
 
         {/* ── COUNTRIES PROGRESS (animated bar) ── */}
-        <Animated.View style={[s.tile, { opacity: progressFade }]}>
-          <Text style={s.tileLabel}>{t('stats.countriesUnlocked')}</Text>
-          <Text style={s.tileVal}>{countriesSeen}<Text style={s.tileUnit}> / {totalFlags}</Text></Text>
-          <View style={s.progressWrap}>
-            <Animated.View style={[s.progressFill, { width: progressBarWidth }]} />
+        <Animated.View style={[styles.tile, { opacity: progressFade }]}>
+          <Text style={styles.tileLabel}>{t('stats.countriesUnlocked')}</Text>
+          <Text style={styles.tileVal}>{countriesSeen}<Text style={styles.tileUnit}> / {totalFlags}</Text></Text>
+          <View style={styles.progressWrap}>
+            <Animated.View style={[styles.progressFill, { width: progressBarWidth }]} />
           </View>
-          <View style={s.progressLabels}>
-            <Text style={s.progressLabelBold}>{t('stats.percentComplete', { pct: progressPct })}</Text>
-            <Text style={s.progressLabelMuted}>{t('stats.toGo', { count: totalFlags - countriesSeen })}</Text>
+          <View style={styles.progressLabels}>
+            <Text style={styles.progressLabelBold}>{t('stats.percentComplete', { pct: progressPct })}</Text>
+            <Text style={styles.progressLabelMuted}>{t('stats.toGo', { count: totalFlags - countriesSeen })}</Text>
           </View>
         </Animated.View>
 
         {(stats.bestTimeAttackScore || 0) > 0 && (
-          <Animated.View style={[s.tile, { marginTop: 8, opacity: progressFade }]}>
-            <Text style={s.tileLabel}>{t('stats.bestTimedQuiz')}</Text>
-            <Text style={s.tileVal}>{stats.bestTimeAttackScore}<Text style={s.tileUnit}> {t('stats.in60s')}</Text></Text>
+          <Animated.View style={[styles.tile, { marginTop: 8, opacity: progressFade }]}>
+            <Text style={styles.tileLabel}>{t('stats.bestTimedQuiz')}</Text>
+            <Text style={styles.tileVal}>{stats.bestTimeAttackScore}<Text style={styles.tileUnit}> {t('stats.in60s')}</Text></Text>
           </Animated.View>
         )}
 
         {/* ── NEXT MILESTONE (goal proximity) ── */}
         {nextMilestone && (
-          <Animated.View style={[s.milestoneCard, { opacity: progressFade }]}>
-            <View style={[s.milestoneIconWrap, { backgroundColor: TIER_COLORS[nextMilestone.badge.tier] + '18' }]}>
+          <Animated.View style={[styles.milestoneCard, { opacity: progressFade }]}>
+            <View style={[styles.milestoneIconWrap, { backgroundColor: TIER_COLORS[nextMilestone.badge.tier] + '18' }]}>
               <BadgeIconView icon={nextMilestone.badge.icon} color={TIER_COLORS[nextMilestone.badge.tier]} />
             </View>
-            <View style={s.milestoneContent}>
-              <Text style={s.milestoneTitle}>{nextMilestone.badge.name}</Text>
-              <View style={s.milestoneBarWrap}>
-                <View style={[s.milestoneBarFill, { width: `${Math.round((nextMilestone.progress / nextMilestone.target) * 100)}%` }]} />
+            <View style={styles.milestoneContent}>
+              <Text style={styles.milestoneTitle}>{nextMilestone.badge.name}</Text>
+              <View style={styles.milestoneBarWrap}>
+                <View style={[styles.milestoneBarFill, { width: `${Math.round((nextMilestone.progress / nextMilestone.target) * 100)}%` }]} />
               </View>
-              <Text style={s.milestoneSub}>
+              <Text style={styles.milestoneSub}>
                 {nextMilestone.progress} / {nextMilestone.target} - {t('stats.moreToUnlock', { count: nextMilestone.remaining })}
               </Text>
             </View>
@@ -349,18 +349,18 @@ export default function StatsScreen() {
         {weakFlagCount > 0 && (
           <Animated.View style={{ opacity: progressFade }}>
             <TouchableOpacity
-              style={s.practiceCta}
+              style={styles.practiceCta}
               onPress={() => navigation.navigate('Game' as keyof RootStackParamList, {
                 config: { mode: 'practice', category: 'all', questionCount: weakFlagCount, displayMode: 'flag' },
               } as never)}
               activeOpacity={0.7}
             >
-              <View style={s.practiceCtaLeft}>
+              <View style={styles.practiceCtaLeft}>
                 <CrosshairIcon size={16} color={colors.accent} />
               </View>
-              <View style={s.practiceCtaContent}>
-                <Text style={s.practiceCtaTitle}>{t('stats.practiceNow')}</Text>
-                <Text style={s.practiceCtaSub}>{t('results.flagsToReview', { count: weakFlagCount })}</Text>
+              <View style={styles.practiceCtaContent}>
+                <Text style={styles.practiceCtaTitle}>{t('stats.practiceNow')}</Text>
+                <Text style={styles.practiceCtaSub}>{t('results.flagsToReview', { count: weakFlagCount })}</Text>
               </View>
               <ChevronRightIcon size={16} color={colors.accent} />
             </TouchableOpacity>
@@ -372,13 +372,13 @@ export default function StatsScreen() {
             ══════════════════════════════════════════════════════════ */}
         {regionData.length > 0 && (
           <Animated.View style={{ opacity: regionFade }}>
-            <View style={s.sectionHeader}>
-              <Text style={s.sectionTitle}>{t('categories.byRegion')}</Text>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>{t('categories.byRegion')}</Text>
             </View>
 
             {/* Dedicated region improvement cards (when baseline exists) */}
             {regionData.some(({ id }) => baseline?.regions[id as keyof typeof baseline.regions]) && (
-              <View style={s.regionCards}>
+              <View style={styles.regionCards}>
                 {regionData.map(({ id, pct }) => {
                   const baselineResult = baseline?.regions[id as keyof typeof baseline.regions];
                   if (!baselineResult) return null;
@@ -387,23 +387,23 @@ export default function StatsScreen() {
                   const isUp = diff > 0;
                   const isDown = diff < 0;
                   return (
-                    <View key={id} style={s.regionImprovCard}>
-                      <Text style={s.regionImprovName}>{t(`categories.${id}`)}</Text>
-                      <View style={s.regionImprovStats}>
-                        <View style={s.regionImprovCol}>
-                          <Text style={s.regionImprovLabel}>{t('stats.baselineLabel', { pct: baselinePct })}</Text>
+                    <View key={id} style={styles.regionImprovCard}>
+                      <Text style={styles.regionImprovName}>{t(`categories.${id}`)}</Text>
+                      <View style={styles.regionImprovStats}>
+                        <View style={styles.regionImprovCol}>
+                          <Text style={styles.regionImprovLabel}>{t('stats.baselineLabel', { pct: baselinePct })}</Text>
                         </View>
-                        <View style={s.regionImprovArrow}>
-                          <Text style={s.regionImprovArrowText}>{isUp ? '\u2192' : isDown ? '\u2192' : '='}</Text>
+                        <View style={styles.regionImprovArrow}>
+                          <Text style={styles.regionImprovArrowText}>{isUp ? '\u2192' : isDown ? '\u2192' : '='}</Text>
                         </View>
-                        <View style={s.regionImprovCol}>
-                          <Text style={[s.regionImprovNow, pct >= 70 && s.regionImprovNowGood]}>{pct}%</Text>
+                        <View style={styles.regionImprovCol}>
+                          <Text style={[styles.regionImprovNow, pct >= 70 && styles.regionImprovNowGood]}>{pct}%</Text>
                         </View>
                       </View>
                       <Text style={[
-                        s.regionImprovDiff,
-                        isUp && s.regionImprovDiffUp,
-                        isDown && s.regionImprovDiffDown,
+                        styles.regionImprovDiff,
+                        isUp && styles.regionImprovDiffUp,
+                        isDown && styles.regionImprovDiffDown,
                       ]}>
                         {isUp
                           ? t('stats.improvementUp', { pct: diff })
@@ -418,16 +418,16 @@ export default function StatsScreen() {
             )}
 
             {/* Standard bar chart */}
-            <View style={s.modeBreakdown}>
+            <View style={styles.modeBreakdown}>
               {regionData.map(({ id, pct }) => {
                 const barWidth = Math.max(pct, 2);
                 return (
-                  <View key={id} style={s.modeRow}>
-                    <Text style={s.modeLabel}>{t(`categories.${id}`)}</Text>
-                    <View style={s.modeBarWrap}>
-                      <View style={[s.modeBarFill, { width: `${barWidth}%` }, pct >= 70 && s.modeBarGood]} />
+                  <View key={id} style={styles.modeRow}>
+                    <Text style={styles.modeLabel}>{t(`categories.${id}`)}</Text>
+                    <View style={styles.modeBarWrap}>
+                      <View style={[styles.modeBarFill, { width: `${barWidth}%` }, pct >= 70 && styles.modeBarGood]} />
                     </View>
-                    <Text style={[s.modePct, pct >= 70 && s.modePctGood]}>{pct}%</Text>
+                    <Text style={[styles.modePct, pct >= 70 && styles.modePctGood]}>{pct}%</Text>
                   </View>
                 );
               })}
@@ -438,27 +438,27 @@ export default function StatsScreen() {
         {/* ── SCORE DISTRIBUTION ── */}
         {distribution && distribution.total >= 3 && (
           <Animated.View style={{ opacity: restFade }}>
-            <View style={s.sectionHeader}>
-              <Text style={s.sectionTitle}>{t('stats.scoreDistribution')}</Text>
-              <Text style={s.sectionMeta}>{t('results.gamesPlayed', { count: distribution.total })}</Text>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>{t('stats.scoreDistribution')}</Text>
+              <Text style={styles.sectionMeta}>{t('results.gamesPlayed', { count: distribution.total })}</Text>
             </View>
-            <View style={s.distCard}>
+            <View style={styles.distCard}>
               {distribution.buckets.map((bucket) => {
                 const barPct = distribution.maxCount > 0
                   ? Math.max((bucket.count / distribution.maxCount) * 100, bucket.count > 0 ? 4 : 0)
                   : 0;
                 const isGood = bucket.min >= 70;
                 return (
-                  <View key={bucket.label} style={s.distRow}>
-                    <Text style={s.distLabel}>{bucket.label}%</Text>
-                    <View style={s.distBarWrap}>
+                  <View key={bucket.label} style={styles.distRow}>
+                    <Text style={styles.distLabel}>{bucket.label}%</Text>
+                    <View style={styles.distBarWrap}>
                       <View style={[
-                        s.distBarFill,
+                        styles.distBarFill,
                         { width: `${barPct}%` },
-                        isGood && s.distBarGood,
+                        isGood && styles.distBarGood,
                       ]} />
                     </View>
-                    <Text style={[s.distCount, isGood && s.distCountGood]}>{bucket.count}</Text>
+                    <Text style={[styles.distCount, isGood && styles.distCountGood]}>{bucket.count}</Text>
                   </View>
                 );
               })}
@@ -469,11 +469,11 @@ export default function StatsScreen() {
         {/* ── RECENT CHALLENGES ── */}
         {challengeHistory.length > 0 && (
           <Animated.View style={{ opacity: restFade }}>
-            <View style={s.sectionHeader}>
-              <Text style={s.sectionTitle}>{t('challenge.recentChallenges')}</Text>
-              <Text style={s.sectionMeta}>{t('challenge.last10')}</Text>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>{t('challenge.recentChallenges')}</Text>
+              <Text style={styles.sectionMeta}>{t('challenge.last10')}</Text>
             </View>
-            <View style={s.challengeList}>
+            <View style={styles.challengeList}>
               {challengeHistory.map((ch, i) => {
                 const hasOpponent = ch.opponentName !== null && ch.opponentScore !== null;
                 const won = hasOpponent && ch.myScore > ch.opponentScore!;
@@ -481,42 +481,42 @@ export default function StatsScreen() {
                 const tied = hasOpponent && ch.myScore === ch.opponentScore;
                 const dateStr = new Date(ch.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
                 return (
-                  <View key={`${ch.shortCode}-${ch.direction}-${i}`} style={s.challengeRow}>
+                  <View key={`${ch.shortCode}-${ch.direction}-${i}`} style={styles.challengeRow}>
                     <View style={[
-                      s.challengeIconWrap,
+                      styles.challengeIconWrap,
                       won ? { backgroundColor: colors.successBg } :
                       lost ? { backgroundColor: colors.errorBg } :
                       { backgroundColor: colors.surfaceSecondary },
                     ]}>
                       <UsersIcon size={16} color={won ? colors.success : lost ? colors.error : colors.textTertiary} />
                     </View>
-                    <View style={s.challengeContent}>
-                      <View style={s.challengeTopRow}>
-                        <Text style={s.challengeCode}>{ch.shortCode}</Text>
-                        <Text style={s.challengeDate}>{dateStr}</Text>
+                    <View style={styles.challengeContent}>
+                      <View style={styles.challengeTopRow}>
+                        <Text style={styles.challengeCode}>{ch.shortCode}</Text>
+                        <Text style={styles.challengeDate}>{dateStr}</Text>
                       </View>
-                      <Text style={s.challengeMode}>{t(`modes.${ch.mode}`)}</Text>
-                      <View style={s.challengeScoreRow}>
-                        <Text style={s.challengeScoreLabel}>{t('challenge.you')}:</Text>
-                        <Text style={[s.challengeScore, won && { color: colors.success }]}>
+                      <Text style={styles.challengeMode}>{t(`modes.${ch.mode}`)}</Text>
+                      <View style={styles.challengeScoreRow}>
+                        <Text style={styles.challengeScoreLabel}>{t('challenge.you')}:</Text>
+                        <Text style={[styles.challengeScore, won && { color: colors.success }]}>
                           {ch.myScore}/{ch.totalFlags}
                         </Text>
                         {hasOpponent && (
                           <>
-                            <Text style={s.challengeVs}>vs</Text>
-                            <Text style={s.challengeScoreLabel}>{ch.opponentName}:</Text>
-                            <Text style={[s.challengeScore, lost && { color: colors.error }]}>
+                            <Text style={styles.challengeVs}>{t('common.vs')}</Text>
+                            <Text style={styles.challengeScoreLabel}>{ch.opponentName}:</Text>
+                            <Text style={[styles.challengeScore, lost && { color: colors.error }]}>
                               {ch.opponentScore}/{ch.totalFlags}
                             </Text>
                           </>
                         )}
                       </View>
-                      {won && <Text style={[s.challengeResult, { color: colors.success }]}>{t('challenge.youWin')}</Text>}
-                      {lost && <Text style={[s.challengeResult, { color: colors.error }]}>{t('challenge.theyWin', { name: ch.opponentName || '' })}</Text>}
-                      {tied && <Text style={[s.challengeResult, { color: colors.textSecondary }]}>{t('challenge.tie')}</Text>}
+                      {won && <Text style={[styles.challengeResult, { color: colors.success }]}>{t('challenge.youWin')}</Text>}
+                      {lost && <Text style={[styles.challengeResult, { color: colors.error }]}>{t('challenge.theyWin', { name: ch.opponentName || '' })}</Text>}
+                      {tied && <Text style={[styles.challengeResult, { color: colors.textSecondary }]}>{t('challenge.tie')}</Text>}
                     </View>
-                    <View style={s.challengeDirectionPill}>
-                      <Text style={s.challengeDirectionText}>
+                    <View style={styles.challengeDirectionPill}>
+                      <Text style={styles.challengeDirectionText}>
                         {ch.direction === 'sent' ? t('challenge.sent') : t('challenge.received')}
                       </Text>
                     </View>
@@ -529,29 +529,29 @@ export default function StatsScreen() {
 
         {/* ── BADGES (with progress bars on locked) ── */}
         <Animated.View style={{ opacity: restFade }}>
-          <View style={s.sectionHeader}>
-            <Text style={s.sectionTitle}>{t('stats.badges')}</Text>
-            <Text style={s.sectionMeta}>{t('stats.badgesEarned', { earned: earnedBadges.length, total: BADGES.length })}</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>{t('stats.badges')}</Text>
+            <Text style={styles.sectionMeta}>{t('stats.badgesEarned', { earned: earnedBadges.length, total: BADGES.length })}</Text>
           </View>
-          <View style={s.badgeGrid}>
+          <View style={styles.badgeGrid}>
             {BADGES.map((badge) => {
               const earned = earnedIds.has(badge.id);
               const tierColor = TIER_COLORS[badge.tier];
               const progress = !earned && badgeCtx && derived ? getBadgeProgress(badge, badgeCtx, derived) : null;
               return (
-                <View key={badge.id} style={[s.badgeCard, !earned && s.badgeCardLocked]}>
-                  <View style={[s.badgeIconWrap, { backgroundColor: earned ? tierColor + '18' : colors.surfaceSecondary }]}>
+                <View key={badge.id} style={[styles.badgeCard, !earned && styles.badgeCardLocked]}>
+                  <View style={[styles.badgeIconWrap, { backgroundColor: earned ? tierColor + '18' : colors.surfaceSecondary }]}>
                     <BadgeIconView icon={badge.icon} color={earned ? tierColor : colors.textTertiary} />
                   </View>
-                  <Text style={[s.badgeName, !earned && s.badgeNameLocked]}>{badge.name}</Text>
-                  <Text style={[s.badgeDesc, !earned && s.badgeDescLocked]}>{badge.description}</Text>
+                  <Text style={[styles.badgeName, !earned && styles.badgeNameLocked]}>{badge.name}</Text>
+                  <Text style={[styles.badgeDesc, !earned && styles.badgeDescLocked]}>{badge.description}</Text>
                   {progress && progress.progress > 0 && (
-                    <View style={s.badgeProgressWrap}>
-                      <View style={[s.badgeProgressFill, { width: `${progress.pct}%` }]} />
+                    <View style={styles.badgeProgressWrap}>
+                      <View style={[styles.badgeProgressFill, { width: `${progress.pct}%` }]} />
                     </View>
                   )}
                   {progress && progress.progress > 0 && (
-                    <Text style={s.badgeProgressText}>{progress.progress}/{progress.target}</Text>
+                    <Text style={styles.badgeProgressText}>{progress.progress}/{progress.target}</Text>
                   )}
                 </View>
               );
@@ -562,17 +562,17 @@ export default function StatsScreen() {
         {/* ── TOP 10 ── */}
         {top10.length > 0 && (
           <Animated.View style={{ opacity: restFade }}>
-            <View style={s.sectionHeader}>
-              <Text style={s.sectionTitle}>{t('stats.bestFlags')}</Text>
-              <Text style={s.sectionMeta}>{t('stats.alwaysRight')}</Text>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>{t('stats.bestFlags')}</Text>
+              <Text style={styles.sectionMeta}>{t('stats.alwaysRight')}</Text>
             </View>
             {top10.map(([id, fs], i) => (
-              <View key={id} style={s.rankRow}>
-                <Text style={[s.rank, i < 3 && { color: RANK_COLORS[i] }]}>{i + 1}</Text>
+              <View key={id} style={styles.rankRow}>
+                <Text style={[styles.rank, i < 3 && { color: RANK_COLORS[i] }]}>{i + 1}</Text>
                 <FlagImageSmall countryCode={id} />
-                <Text style={s.rankName}>{flagNameMap[id] || id}</Text>
-                <View style={s.scoreBadge}>
-                  <Text style={s.scoreBadgeText}>{fs.right}x</Text>
+                <Text style={styles.rankName}>{flagNameMap[id] || id}</Text>
+                <View style={styles.scoreBadge}>
+                  <Text style={styles.scoreBadgeText}>{fs.right}x</Text>
                 </View>
               </View>
             ))}
@@ -582,17 +582,17 @@ export default function StatsScreen() {
         {/* ── BOTTOM 10 ── */}
         {bottom10.length > 0 && (
           <Animated.View style={{ opacity: restFade }}>
-            <View style={s.sectionHeader}>
-              <Text style={s.sectionTitle}>{t('stats.weakFlags')}</Text>
-              <Text style={s.sectionMeta}>{t('stats.practiceThese')}</Text>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>{t('stats.weakFlags')}</Text>
+              <Text style={styles.sectionMeta}>{t('stats.practiceThese')}</Text>
             </View>
             {bottom10.map(([id, fs], i) => (
-              <View key={id} style={s.rankRow}>
-                <Text style={s.rank}>{i + 1}</Text>
+              <View key={id} style={styles.rankRow}>
+                <Text style={styles.rank}>{i + 1}</Text>
                 <FlagImageSmall countryCode={id} />
-                <Text style={s.rankName}>{flagNameMap[id] || id}</Text>
-                <View style={[s.scoreBadge, s.scoreBadgeWrong]}>
-                  <Text style={[s.scoreBadgeText, s.scoreBadgeTextWrong]}>{fs.wrong}x</Text>
+                <Text style={styles.rankName}>{flagNameMap[id] || id}</Text>
+                <View style={[styles.scoreBadge, styles.scoreBadgeWrong]}>
+                  <Text style={[styles.scoreBadgeText, styles.scoreBadgeTextWrong]}>{fs.wrong}x</Text>
                 </View>
               </View>
             ))}
@@ -601,11 +601,11 @@ export default function StatsScreen() {
 
         <Animated.View style={{ opacity: restFade }}>
           <TouchableOpacity
-            style={s.settingsLink}
+            style={styles.settingsLink}
             onPress={() => navigation.navigate('Settings')}
             activeOpacity={0.7}
           >
-            <Text style={s.settingsLinkText}>{t('app.settings')}</Text>
+            <Text style={styles.settingsLinkText}>{t('app.settings')}</Text>
             <ChevronRightIcon size={14} color={colors.textTertiary} />
           </TouchableOpacity>
         </Animated.View>
@@ -616,7 +616,7 @@ export default function StatsScreen() {
   );
 }
 
-const s = StyleSheet.create({
+const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   loadingText: { fontFamily: fontFamily.body, fontSize: fontSize.lg, color: colors.textSecondary },

@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, useWindowDimensions, StyleProp, ViewStyle } from 'react-native';
 import { Image } from 'expo-image';
-import { colors, fontFamily, fontSize, borderRadius } from '../utils/theme';
+import { colors, fontFamily, fontSize, borderRadius, shadows } from '../utils/theme';
 import { countryCoordinates } from '../data/countryCoordinates';
 
 interface MapImageProps {
@@ -268,11 +268,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accent,
     borderWidth: 3,
     borderColor: colors.white,
-    shadowColor: colors.ink,
-    shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 2,
+    ...shadows.small,
   },
   pinPoint: {
     width: 0,

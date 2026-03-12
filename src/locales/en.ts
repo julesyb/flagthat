@@ -21,6 +21,8 @@ const en = {
     new: 'New',
     review: 'Review',
     seeResults: 'See Results',
+    flagOf: 'Flag of {country}',
+    vs: 'vs',
   },
 
   // ─── Bottom Nav ──────────────────────────────────────────
@@ -57,6 +59,7 @@ const en = {
     gameModes: 'Game modes',
     timedQuiz: 'Timed Quiz',
     timedQuizDesc: '60 seconds - how many can you get?',
+    timedQuizTag: '60 sec',
     neighbors: 'Neighbors',
     neighborsDesc: 'Find all bordering countries',
     flagImpostor: 'Flag Impostor',
@@ -222,6 +225,10 @@ const en = {
     resetConfirmMsg: 'This will clear all stats, streaks, and progress. This cannot be undone.',
     resetConfirmWeb: 'Reset all data?\n\nThis will clear all stats, streaks, and progress. This cannot be undone.',
     reset: 'Reset',
+    termsOfService: 'Terms of Service',
+    am: 'AM',
+    pm: 'PM',
+    support: 'Support',
   },
 
   // ─── Support ───────────────────────────────────────────
@@ -297,6 +304,7 @@ const en = {
     spotImpostorDesc: 'One of these flags is fake. Tap it.',
     fake: 'FAKE',
     fakeExplanation: 'Procedurally generated, no real country uses this combination',
+    fakeFlag: 'Fake flag',
   },
 
   // ─── Flag Puzzle Screen ─────────────────────────────────

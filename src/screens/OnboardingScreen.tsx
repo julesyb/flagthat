@@ -126,32 +126,32 @@ export default function OnboardingScreen({ navigation }: Props) {
   };
 
   return (
-    <SafeAreaView style={s.container}>
+    <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
       <ScrollView
-        style={s.scroll}
-        contentContainerStyle={s.scrollContent}
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         <ScreenContainer>
           {/* Hero section with flag mosaic */}
-          <Animated.View style={[s.hero, { opacity: heroFade, transform: [{ translateY: heroSlide }] }]}>
-            <View style={s.heroInner}>
-              <Text style={s.welcomeText}>{t('onboarding.welcome')}</Text>
-              <View style={s.wordmark}>
-                <Text style={s.wmLine1}>Flag</Text>
-                <Text style={s.wmLine2}>That</Text>
+          <Animated.View style={[styles.hero, { opacity: heroFade, transform: [{ translateY: heroSlide }] }]}>
+            <View style={styles.heroInner}>
+              <Text style={styles.welcomeText}>{t('onboarding.welcome')}</Text>
+              <View style={styles.wordmark}>
+                <Text style={styles.wmLine1}>Flag</Text>
+                <Text style={styles.wmLine2}>That</Text>
               </View>
-              <Text style={s.tagline}>{t('onboarding.tagline')}</Text>
+              <Text style={styles.tagline}>{t('onboarding.tagline')}</Text>
             </View>
 
             {/* Flag mosaic - 4 small flags fanned in the corner */}
-            <View style={s.flagMosaic}>
+            <View style={styles.flagMosaic}>
               {HERO_FLAGS.map((code, i) => (
                 <Animated.View
                   key={code}
                   style={[
-                    s.flagThumb,
+                    styles.flagThumb,
                     {
                       opacity: flagAnims[i],
                       transform: [
@@ -170,35 +170,35 @@ export default function OnboardingScreen({ navigation }: Props) {
 
           {!showTests ? (
             /* ── Two-path choice ── */
-            <Animated.View style={[s.choiceWrap, { opacity: btnFade, transform: [{ translateY: btnSlide }] }]}>
+            <Animated.View style={[styles.choiceWrap, { opacity: btnFade, transform: [{ translateY: btnSlide }] }]}>
               {/* Start Playing - primary CTA */}
               <TouchableOpacity
-                style={s.primaryBtn}
+                style={styles.primaryBtn}
                 onPress={handleStartPlaying}
                 activeOpacity={0.85}
               >
-                <View style={s.primaryBtnIcon}>
+                <View style={styles.primaryBtnIcon}>
                   <PlayIcon size={16} color={colors.white} />
                 </View>
-                <View style={s.btnTextWrap}>
-                  <Text style={s.primaryBtnText}>{t('onboarding.startPlayingNow')}</Text>
-                  <Text style={s.primaryBtnSub}>{t('onboarding.startPlayingDesc')}</Text>
+                <View style={styles.btnTextWrap}>
+                  <Text style={styles.primaryBtnText}>{t('onboarding.startPlayingNow')}</Text>
+                  <Text style={styles.primaryBtnSub}>{t('onboarding.startPlayingDesc')}</Text>
                 </View>
                 <ChevronRightIcon size={18} color={colors.white} />
               </TouchableOpacity>
 
               {/* Test Your Knowledge - secondary CTA */}
               <TouchableOpacity
-                style={s.secondaryBtn}
+                style={styles.secondaryBtn}
                 onPress={handleTestKnowledge}
                 activeOpacity={0.85}
               >
-                <View style={s.secondaryBtnIcon}>
+                <View style={styles.secondaryBtnIcon}>
                   <BarChartIcon size={16} color={colors.ink} />
                 </View>
-                <View style={s.btnTextWrap}>
-                  <Text style={s.secondaryBtnText}>{t('onboarding.testKnowledge')}</Text>
-                  <Text style={s.secondaryBtnSub}>{t('onboarding.testKnowledgeDesc')}</Text>
+                <View style={styles.btnTextWrap}>
+                  <Text style={styles.secondaryBtnText}>{t('onboarding.testKnowledge')}</Text>
+                  <Text style={styles.secondaryBtnSub}>{t('onboarding.testKnowledgeDesc')}</Text>
                 </View>
                 <ChevronRightIcon size={18} color={colors.ink} />
               </TouchableOpacity>
@@ -206,32 +206,32 @@ export default function OnboardingScreen({ navigation }: Props) {
           ) : (
             /* ── Baseline test list ── */
             <Animated.View style={{ opacity: testsFade, transform: [{ translateY: testsSlide }] }}>
-              <View style={s.testHeader}>
-                <Text style={s.testTitle}>{t('onboarding.subtitle')}</Text>
+              <View style={styles.testHeader}>
+                <Text style={styles.testTitle}>{t('onboarding.subtitle')}</Text>
                 {!allDone && (
                   <TouchableOpacity onPress={handleStartPlaying} activeOpacity={0.6}>
-                    <Text style={s.skipText}>{t('onboarding.skip')}</Text>
+                    <Text style={styles.skipText}>{t('onboarding.skip')}</Text>
                   </TouchableOpacity>
                 )}
               </View>
 
               {/* Progress bar */}
-              <View style={s.progressSection}>
-                <View style={s.progressBar}>
+              <View style={styles.progressSection}>
+                <View style={styles.progressBar}>
                   <View
                     style={[
-                      s.progressFill,
+                      styles.progressFill,
                       { width: `${(completedCount / REGIONS.length) * 100}%` },
                     ]}
                   />
                 </View>
-                <Text style={s.progressText}>
+                <Text style={styles.progressText}>
                   {t('onboarding.regionsComplete', { count: completedCount, total: REGIONS.length })}
                 </Text>
               </View>
 
               {/* Region cards */}
-              <View style={s.regionList}>
+              <View style={styles.regionList}>
                 {REGIONS.map((region, index) => {
                   const result = baseline?.regions[region.id];
                   const isDone = !!result;
@@ -241,39 +241,39 @@ export default function OnboardingScreen({ navigation }: Props) {
                     <TouchableOpacity
                       key={region.id}
                       style={[
-                        s.regionCard,
-                        isDone && s.regionCardDone,
-                        !isDone && s.regionCardActive,
+                        styles.regionCard,
+                        isDone && styles.regionCardDone,
+                        !isDone && styles.regionCardActive,
                       ]}
                       activeOpacity={isDone ? 1 : 0.85}
                       onPress={() => !isDone && handleRegionPress(region.id)}
                       disabled={isDone}
                     >
-                      <View style={s.regionLeft}>
+                      <View style={styles.regionLeft}>
                         {isDone ? (
-                          <View style={s.checkCircle}>
+                          <View style={styles.checkCircle}>
                             <CheckIcon size={16} color={colors.white} />
                           </View>
                         ) : (
-                          <View style={s.regionNumberActive}>
-                            <Text style={s.regionNumberTextActive}>
+                          <View style={styles.regionNumberActive}>
+                            <Text style={styles.regionNumberTextActive}>
                               {index + 1}
                             </Text>
                           </View>
                         )}
                       </View>
-                      <View style={s.regionContent}>
-                        <Text style={[s.regionName, isDone && s.regionNameDone]}>
+                      <View style={styles.regionContent}>
+                        <Text style={[styles.regionName, isDone && styles.regionNameDone]}>
                           {t(`categories.${region.id}`)}
                         </Text>
-                        <Text style={s.regionSub}>
+                        <Text style={styles.regionSub}>
                           {isDone
                             ? `${result!.correct}/${result!.total} correct, ${result!.accuracy}%`
                             : `${t('onboarding.flagCount', { count: flagCount })}`}
                         </Text>
                       </View>
                       {isDone ? (
-                        <Text style={s.doneLabel}>{t('onboarding.completed')}</Text>
+                        <Text style={styles.doneLabel}>{t('onboarding.completed')}</Text>
                       ) : (
                         <ChevronRightIcon size={18} color={colors.ink} />
                       )}
@@ -284,14 +284,14 @@ export default function OnboardingScreen({ navigation }: Props) {
 
               {/* All done CTA */}
               {allDone && (
-                <View style={s.ctaWrap}>
-                  <Text style={s.allDoneText}>{t('onboarding.allDone')}</Text>
+                <View style={styles.ctaWrap}>
+                  <Text style={styles.allDoneText}>{t('onboarding.allDone')}</Text>
                   <TouchableOpacity
-                    style={s.startBtn}
+                    style={styles.startBtn}
                     onPress={handleAllDone}
                     activeOpacity={0.85}
                   >
-                    <Text style={s.startBtnText}>{t('onboarding.startPlaying')}</Text>
+                    <Text style={styles.startBtnText}>{t('onboarding.startPlaying')}</Text>
                   </TouchableOpacity>
                 </View>
               )}
@@ -303,7 +303,7 @@ export default function OnboardingScreen({ navigation }: Props) {
   );
 }
 
-const s = StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,

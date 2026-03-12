@@ -441,7 +441,7 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
     else { hapticWrong(); playWrongSound(); }
 
     const tappedFlag = grid[index];
-    const userLabel = tappedFlag.isFake ? 'Fake flag' : tappedFlag.flag!.name;
+    const userLabel = tappedFlag.isFake ? t('impostor.fakeFlag') : tappedFlag.flag!.name;
 
     setResults((prev) => [...prev, {
       question: { flag: round.realFlags[0], options: round.realFlags.map((f) => f.name) },

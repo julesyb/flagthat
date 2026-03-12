@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet, View, Text, ActivityIndicator, useWindowDimensions, StyleProp, ViewStyle } from 'react-native';
 import { Image } from 'expo-image';
 import { colors, fontFamily, fontSize, borderRadius } from '../utils/theme';
+import { t } from '../utils/i18n';
 
 interface FlagImageProps {
   countryCode: string;
@@ -32,7 +33,7 @@ export default function FlagImage({ countryCode, size = 'large', style, accessib
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
 
-  const a11yLabel = accessibilityLabel || `Flag of ${countryCode.toUpperCase()}`;
+  const a11yLabel = accessibilityLabel || t('common.flagOf', { country: countryCode.toUpperCase() });
 
   if (size === 'hero') {
     // Hero fills parent width — use aspectRatio instead of fixed pixels
@@ -112,7 +113,7 @@ export function FlagImageSmall({ countryCode }: { countryCode: string }) {
       style={styles.smallContainer}
       accessible
       accessibilityRole="image"
-      accessibilityLabel={`Flag of ${countryCode.toUpperCase()}`}
+      accessibilityLabel={t('common.flagOf', { country: countryCode.toUpperCase() })}
     >
       {!loaded && (
         <View style={[styles.placeholder, { width: 56, height: 37 }]}>

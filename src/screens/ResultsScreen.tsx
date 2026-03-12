@@ -486,14 +486,14 @@ export default function ResultsScreen({ route, navigation }: Props) {
   });
 
   return (
-    <SafeAreaView style={st.container}>
-      <ScrollView contentContainerStyle={st.content} showsVerticalScrollIndicator={false}>
+    <SafeAreaView style={styles.container}>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <ScreenContainer>
 
         {/* ── PERFECT BANNER ── */}
         {isPerfect && (
-          <Animated.View style={[st.celebrationBanner, { opacity: confettiOpacity }]}>
-            <Text style={st.celebrationText}>{t('results.perfectScore')}</Text>
+          <Animated.View style={[styles.celebrationBanner, { opacity: confettiOpacity }]}>
+            <Text style={styles.celebrationText}>{t('results.perfectScore')}</Text>
           </Animated.View>
         )}
 
@@ -503,54 +503,54 @@ export default function ResultsScreen({ route, navigation }: Props) {
             Phase 2: grade letter springs in
             Phase 3: "8/10 correct" fades in
             ══════════════════════════════════════════════════════════ */}
-        <Animated.View style={[st.heroCard, { borderColor: heroGlowColor, borderWidth: 2 }]}>
-          <Text style={st.heroEyebrow}>
+        <Animated.View style={[styles.heroCard, { borderColor: heroGlowColor, borderWidth: 2 }]}>
+          <Text style={styles.heroEyebrow}>
             {isDaily ? t('results.dailyTitle', { number: dailyNumber }) : `${modeLabel} / ${categoryLabel}`}
           </Text>
 
           {/* Count-up number */}
-          <Text style={st.heroAccuracy}>{displayAcc}%</Text>
+          <Text style={styles.heroAccuracy}>{displayAcc}%</Text>
 
           {/* Grade letter (springs in after count-up) */}
           <Animated.View style={[
-            st.heroGradeWrap,
+            styles.heroGradeWrap,
             { opacity: gradeOpacity, transform: [{ scale: gradeScale }] },
           ]}>
-            <Text style={[st.heroGrade, { color: grade.color }]}>{grade.label}</Text>
+            <Text style={[styles.heroGrade, { color: grade.color }]}>{grade.label}</Text>
           </Animated.View>
 
           {/* Score line */}
-          <Animated.Text style={[st.heroScoreText, { opacity: scoreFade }]}>
+          <Animated.Text style={[styles.heroScoreText, { opacity: scoreFade }]}>
             {correct}/{results.length} {t('results.correct').toLowerCase()}
           </Animated.Text>
         </Animated.View>
 
         {/* ── HEAD-TO-HEAD (challenge mode) ── */}
         {h2h && challenge && (
-          <Animated.View style={[st.h2hCard, { opacity: scoreFade }]}>
-            <Text style={st.h2hTitle}>{t('challenge.headToHead')}</Text>
-            <View style={st.h2hRow}>
-              <View style={st.h2hPlayer}>
+          <Animated.View style={[styles.h2hCard, { opacity: scoreFade }]}>
+            <Text style={styles.h2hTitle}>{t('challenge.headToHead')}</Text>
+            <View style={styles.h2hRow}>
+              <View style={styles.h2hPlayer}>
                 <Text style={[
-                  st.h2hName,
-                  h2h.winner === 'player' && st.h2hNameWinner,
+                  styles.h2hName,
+                  h2h.winner === 'player' && styles.h2hNameWinner,
                 ]}>{playerName || t('challenge.you')}</Text>
-                <Text style={st.h2hScore}>{h2h.playerCorrect}/{h2h.h2hTotal}</Text>
-                <Text style={st.h2hTime}>{h2h.playerAvg}s {t('results.avgTime').toLowerCase()}</Text>
+                <Text style={styles.h2hScore}>{h2h.playerCorrect}/{h2h.h2hTotal}</Text>
+                <Text style={styles.h2hTime}>{h2h.playerAvg}s {t('results.avgTime').toLowerCase()}</Text>
               </View>
-              <View style={st.h2hVs}>
-                <Text style={st.h2hVsText}>vs</Text>
+              <View style={styles.h2hVs}>
+                <Text style={styles.h2hVsText}>{t('common.vs')}</Text>
               </View>
-              <View style={st.h2hPlayer}>
+              <View style={styles.h2hPlayer}>
                 <Text style={[
-                  st.h2hName,
-                  h2h.winner === 'host' && st.h2hNameWinner,
+                  styles.h2hName,
+                  h2h.winner === 'host' && styles.h2hNameWinner,
                 ]}>{challenge.hostName}</Text>
-                <Text style={st.h2hScore}>{h2h.hostCorrect}/{h2h.h2hTotal}</Text>
-                <Text style={st.h2hTime}>{h2h.hostAvg}s {t('results.avgTime').toLowerCase()}</Text>
+                <Text style={styles.h2hScore}>{h2h.hostCorrect}/{h2h.h2hTotal}</Text>
+                <Text style={styles.h2hTime}>{h2h.hostAvg}s {t('results.avgTime').toLowerCase()}</Text>
               </View>
             </View>
-            <Text style={[st.h2hResult, {
+            <Text style={[styles.h2hResult, {
               color: h2h.winner === 'player' ? colors.success
                 : h2h.winner === 'host' ? colors.error
                 : colors.textSecondary,
@@ -565,14 +565,14 @@ export default function ResultsScreen({ route, navigation }: Props) {
         {/* ══════════════════════════════════════════════════════════
             STREAK TIMELINE: Dots appear one-by-one showing the flow
             ══════════════════════════════════════════════════════════ */}
-        <View style={st.timelineCard}>
-          <View style={st.timelineDots}>
+        <View style={styles.timelineCard}>
+          <View style={styles.timelineDots}>
             {results.map((r, i) => (
               <Animated.View
                 key={i}
                 style={[
-                  st.timelineDot,
-                  r.correct ? st.timelineDotCorrect : st.timelineDotWrong,
+                  styles.timelineDot,
+                  r.correct ? styles.timelineDotCorrect : styles.timelineDotWrong,
                   {
                     opacity: dotAnims[i],
                     transform: [{
@@ -585,29 +585,29 @@ export default function ResultsScreen({ route, navigation }: Props) {
               />
             ))}
           </View>
-          <Animated.View style={[st.timelineStats, { opacity: statsFade }]}>
-            <View style={st.timelineStat}>
-              <Text style={st.timelineStatValue}>{streak}</Text>
-              <Text style={st.timelineStatLabel}>{t('results.bestStreak')}</Text>
+          <Animated.View style={[styles.timelineStats, { opacity: statsFade }]}>
+            <View style={styles.timelineStat}>
+              <Text style={styles.timelineStatValue}>{streak}</Text>
+              <Text style={styles.timelineStatLabel}>{t('results.bestStreak')}</Text>
               {isNewBestStreak && (
-                <View style={st.newBestPill}>
-                  <Text style={st.newBestPillText}>{t('results.newBest')}</Text>
+                <View style={styles.newBestPill}>
+                  <Text style={styles.newBestPillText}>{t('results.newBest')}</Text>
                 </View>
               )}
             </View>
-            <View style={st.timelineDivider} />
-            <View style={st.timelineStat}>
-              <Text style={st.timelineStatValue}>{avgTime}<Text style={st.timelineStatUnit}>s</Text></Text>
-              <Text style={st.timelineStatLabel}>{t('results.avgTime')}</Text>
+            <View style={styles.timelineDivider} />
+            <View style={styles.timelineStat}>
+              <Text style={styles.timelineStatValue}>{avgTime}<Text style={styles.timelineStatUnit}>s</Text></Text>
+              <Text style={styles.timelineStatLabel}>{t('results.avgTime')}</Text>
             </View>
             {fastestCorrect && (
               <>
-                <View style={st.timelineDivider} />
-                <View style={st.timelineStat}>
-                  <Text style={st.timelineStatValue}>
-                    {Math.round(fastestCorrect.time / 100) / 10}<Text style={st.timelineStatUnit}>s</Text>
+                <View style={styles.timelineDivider} />
+                <View style={styles.timelineStat}>
+                  <Text style={styles.timelineStatValue}>
+                    {Math.round(fastestCorrect.time / 100) / 10}<Text style={styles.timelineStatUnit}>s</Text>
                   </Text>
-                  <Text style={st.timelineStatLabel}>{t('results.fastest')}</Text>
+                  <Text style={styles.timelineStatLabel}>{t('results.fastest')}</Text>
                 </View>
               </>
             )}
@@ -616,17 +616,17 @@ export default function ResultsScreen({ route, navigation }: Props) {
 
         {/* ── DAILY GRID ── */}
         {isDaily && (
-          <Animated.View style={[st.dailyGridCard, { opacity: statsFade }]}>
-            <Text style={st.dailyGridTitle}>{t('results.shareTitle', { number: dailyNumber })}</Text>
-            <View style={st.dailyGrid}>
-              <View style={st.dailyGridRow}>
+          <Animated.View style={[styles.dailyGridCard, { opacity: statsFade }]}>
+            <Text style={styles.dailyGridTitle}>{t('results.shareTitle', { number: dailyNumber })}</Text>
+            <View style={styles.dailyGrid}>
+              <View style={styles.dailyGridRow}>
                 {results.slice(0, 5).map((r, i) => (
-                  <View key={i} style={[st.dailyCell, r.correct ? st.dailyCellCorrect : st.dailyCellWrong]} />
+                  <View key={i} style={[styles.dailyCell, r.correct ? styles.dailyCellCorrect : styles.dailyCellWrong]} />
                 ))}
               </View>
-              <View style={st.dailyGridRow}>
+              <View style={styles.dailyGridRow}>
                 {results.slice(5, 10).map((r, i) => (
-                  <View key={i} style={[st.dailyCell, r.correct ? st.dailyCellCorrect : st.dailyCellWrong]} />
+                  <View key={i} style={[styles.dailyCell, r.correct ? styles.dailyCellCorrect : styles.dailyCellWrong]} />
                 ))}
               </View>
             </View>
@@ -635,27 +635,27 @@ export default function ResultsScreen({ route, navigation }: Props) {
 
         {/* ── INSIGHT CHIPS ── */}
         {!reviewOnly && (
-          <Animated.View style={[st.insightRow, { opacity: restFade }]}>
+          <Animated.View style={[styles.insightRow, { opacity: restFade }]}>
             {newCountriesCount > 0 && (
-              <View style={st.insightChip}>
+              <View style={styles.insightChip}>
                 <GlobeIcon size={13} color={colors.success} />
-                <Text style={[st.insightText, { color: colors.success }]}>
+                <Text style={[styles.insightText, { color: colors.success }]}>
                   {t('results.newCountries', { count: newCountriesCount })}
                 </Text>
               </View>
             )}
             {accInsight && (
-              <View style={st.insightChip}>
+              <View style={styles.insightChip}>
                 <BarChartIcon size={13} color={accDiff !== null && accDiff >= 0 ? colors.success : colors.textTertiary} />
-                <Text style={[st.insightText, accDiff !== null && accDiff > 0 && { color: colors.success }]}>
+                <Text style={[styles.insightText, accDiff !== null && accDiff > 0 && { color: colors.success }]}>
                   {accInsight}
                 </Text>
               </View>
             )}
             {dayStreakCount > 0 && (
-              <View style={st.insightChip}>
+              <View style={styles.insightChip}>
                 <CalendarIcon size={13} color={colors.accent} />
-                <Text style={[st.insightText, { color: colors.accent }]}>
+                <Text style={[styles.insightText, { color: colors.accent }]}>
                   {dayStreakCount} {t('stats.dayStreak').toLowerCase()}
                 </Text>
               </View>
@@ -664,18 +664,18 @@ export default function ResultsScreen({ route, navigation }: Props) {
         )}
 
         {/* ── ACTION BUTTONS ── */}
-        <Animated.View style={[st.buttonRow, { opacity: restFade }]}>
+        <Animated.View style={[styles.buttonRow, { opacity: restFade }]}>
           {!isBaseline && (
-            <TouchableOpacity style={st.secondaryButton} onPress={handleShare} activeOpacity={0.7}>
-              <Text style={st.secondaryButtonText}>{t('common.share')}</Text>
+            <TouchableOpacity style={styles.secondaryButton} onPress={handleShare} activeOpacity={0.7}>
+              <Text style={styles.secondaryButtonText}>{t('common.share')}</Text>
             </TouchableOpacity>
           )}
-          <TouchableOpacity style={st.primaryButton} onPress={playAgain} activeOpacity={0.7}>
-            <Text style={st.primaryButtonText}>{playCtaText}</Text>
+          <TouchableOpacity style={styles.primaryButton} onPress={playAgain} activeOpacity={0.7}>
+            <Text style={styles.primaryButtonText}>{playCtaText}</Text>
           </TouchableOpacity>
           {!isDaily && !isBaseline && (
-            <TouchableOpacity style={st.secondaryButton} onPress={goHome} activeOpacity={0.7}>
-              <Text style={st.secondaryButtonText}>{t('common.home')}</Text>
+            <TouchableOpacity style={styles.secondaryButton} onPress={goHome} activeOpacity={0.7}>
+              <Text style={styles.secondaryButtonText}>{t('common.home')}</Text>
             </TouchableOpacity>
           )}
         </Animated.View>
@@ -684,12 +684,12 @@ export default function ResultsScreen({ route, navigation }: Props) {
         {canChallenge && !isChallenge && !reviewOnly && (
           <Animated.View style={{ opacity: restFade }}>
             <TouchableOpacity
-              style={st.challengeButton}
+              style={styles.challengeButton}
               onPress={handleChallengeTap}
               activeOpacity={0.7}
             >
               <UsersIcon size={18} color={colors.ink} />
-              <Text style={st.challengeButtonTitle}>{t('challenge.challengeFriend')}</Text>
+              <Text style={styles.challengeButtonTitle}>{t('challenge.challengeFriend')}</Text>
             </TouchableOpacity>
           </Animated.View>
         )}
@@ -698,38 +698,38 @@ export default function ResultsScreen({ route, navigation }: Props) {
         {isChallenge && canChallenge && !reviewOnly && (
           <Animated.View style={{ opacity: restFade }}>
             <TouchableOpacity
-              style={st.challengeButton}
+              style={styles.challengeButton}
               onPress={() => { hapticTap(); navigation.replace('GameSetup', { initialMode: config.mode }); }}
               activeOpacity={0.7}
             >
               <UsersIcon size={18} color={colors.ink} />
-              <Text style={st.challengeButtonTitle}>{t('challenge.challengeBack')}</Text>
+              <Text style={styles.challengeButtonTitle}>{t('challenge.challengeBack')}</Text>
             </TouchableOpacity>
           </Animated.View>
         )}
 
         {/* ── NEWLY EARNED BADGES ── */}
         {newBadges.length > 0 && (
-          <Animated.View style={[st.badgesSection, { opacity: restFade }]}>
-            <View style={st.sectionHeader}>
-              <Text style={st.sectionTitle}>{t('results.badgesUnlocked')}</Text>
-              <Text style={st.sectionMeta}>
+          <Animated.View style={[styles.badgesSection, { opacity: restFade }]}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>{t('results.badgesUnlocked')}</Text>
+              <Text style={styles.sectionMeta}>
                 {t('stats.badgesEarned', { earned: totalBadgesEarned, total: BADGES.length })}
               </Text>
             </View>
             {newBadges.map((badge) => {
               const tierColor = TIER_COLORS[badge.tier];
               return (
-                <View key={badge.id} style={st.badgeRow}>
-                  <View style={[st.badgeIconWrap, { backgroundColor: tierColor + '18' }]}>
+                <View key={badge.id} style={styles.badgeRow}>
+                  <View style={[styles.badgeIconWrap, { backgroundColor: tierColor + '18' }]}>
                     <BadgeIconView icon={badge.icon} color={tierColor} />
                   </View>
-                  <View style={st.badgeContent}>
-                    <Text style={st.badgeName}>{badge.name}</Text>
-                    <Text style={st.badgeDesc}>{badge.description}</Text>
+                  <View style={styles.badgeContent}>
+                    <Text style={styles.badgeName}>{badge.name}</Text>
+                    <Text style={styles.badgeDesc}>{badge.description}</Text>
                   </View>
-                  <View style={[st.badgeTierPill, { backgroundColor: tierColor + '18' }]}>
-                    <Text style={[st.badgeTierText, { color: tierColor }]}>{badge.tier}</Text>
+                  <View style={[styles.badgeTierPill, { backgroundColor: tierColor + '18' }]}>
+                    <Text style={[styles.badgeTierText, { color: tierColor }]}>{badge.tier}</Text>
                   </View>
                 </View>
               );
@@ -739,47 +739,47 @@ export default function ResultsScreen({ route, navigation }: Props) {
 
         {/* ── YOUR PROGRESS (animated bar) ── */}
         {overallStats && !reviewOnly && (
-          <Animated.View style={[st.progressSection, { opacity: restFade }]}>
-            <View style={st.sectionHeader}>
-              <Text style={st.sectionTitle}>{t('results.yourProgress')}</Text>
+          <Animated.View style={[styles.progressSection, { opacity: restFade }]}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>{t('results.yourProgress')}</Text>
             </View>
-            <View style={st.progressCard}>
-              <View style={st.progressTopRow}>
-                <View style={st.progressStat}>
-                  <Text style={st.progressStatValue}>{countriesSeen}</Text>
-                  <Text style={st.progressStatLabel}>
+            <View style={styles.progressCard}>
+              <View style={styles.progressTopRow}>
+                <View style={styles.progressStat}>
+                  <Text style={styles.progressStatValue}>{countriesSeen}</Text>
+                  <Text style={styles.progressStatLabel}>
                     {t('stats.countriesOf', { seen: countriesSeen, total: totalFlags })}
                   </Text>
                 </View>
-                <View style={st.progressStat}>
-                  <Text style={st.progressStatValue}>{overallStats.totalGamesPlayed}</Text>
-                  <Text style={st.progressStatLabel}>{t('stats.gamesPlayed')}</Text>
+                <View style={styles.progressStat}>
+                  <Text style={styles.progressStatValue}>{overallStats.totalGamesPlayed}</Text>
+                  <Text style={styles.progressStatLabel}>{t('stats.gamesPlayed')}</Text>
                 </View>
               </View>
-              <View style={st.progressBarWrap}>
-                <Animated.View style={[st.progressBarFill, { width: progressBarWidth }]} />
+              <View style={styles.progressBarWrap}>
+                <Animated.View style={[styles.progressBarFill, { width: progressBarWidth }]} />
               </View>
-              <Text style={st.progressPctLabel}>{t('stats.percentComplete', { pct: progressPct })}</Text>
+              <Text style={styles.progressPctLabel}>{t('stats.percentComplete', { pct: progressPct })}</Text>
             </View>
 
             {weakFlagCount > 0 && (
               <TouchableOpacity
-                style={st.practiceButton}
+                style={styles.practiceButton}
                 onPress={() => navigation.replace('Game', {
                   config: { mode: 'practice', category: 'all', questionCount: weakFlagCount, displayMode: 'flag' },
                 })}
                 activeOpacity={0.7}
               >
                 <CrosshairIcon size={16} color={colors.accent} />
-                <Text style={st.practiceButtonText}>{t('results.practiceWeak')}</Text>
-                <Text style={st.practiceButtonMeta}>{t('results.flagsToReview', { count: weakFlagCount })}</Text>
+                <Text style={styles.practiceButtonText}>{t('results.practiceWeak')}</Text>
+                <Text style={styles.practiceButtonMeta}>{t('results.flagsToReview', { count: weakFlagCount })}</Text>
                 <ChevronRightIcon size={14} color={colors.accent} />
               </TouchableOpacity>
             )}
 
-            <TouchableOpacity style={st.viewStatsButton} onPress={() => navigation.navigate('Stats')} activeOpacity={0.7}>
+            <TouchableOpacity style={styles.viewStatsButton} onPress={() => navigation.navigate('Stats')} activeOpacity={0.7}>
               <BarChartIcon size={16} color={colors.ink} />
-              <Text style={st.viewStatsText}>{t('results.viewAllStats')}</Text>
+              <Text style={styles.viewStatsText}>{t('results.viewAllStats')}</Text>
               <ChevronRightIcon size={14} color={colors.textTertiary} />
             </TouchableOpacity>
           </Animated.View>
@@ -787,9 +787,9 @@ export default function ResultsScreen({ route, navigation }: Props) {
 
         {/* ── REVIEW ── */}
         <Animated.View style={{ opacity: restFade }}>
-          <View style={st.sectionHeader}>
-            <Text style={st.sectionTitle}>{t('common.review')}</Text>
-            <Text style={st.sectionMeta}>{correct}/{results.length} {t('results.correct').toLowerCase()}</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>{t('common.review')}</Text>
+            <Text style={styles.sectionMeta}>{correct}/{results.length} {t('results.correct').toLowerCase()}</Text>
           </View>
         </Animated.View>
         {results.map((result, index) => {
@@ -800,34 +800,34 @@ export default function ResultsScreen({ route, navigation }: Props) {
             <Animated.View
               key={index}
               style={[
-                st.reviewItem,
-                result.correct ? st.reviewCorrect : st.reviewWrong,
+                styles.reviewItem,
+                result.correct ? styles.reviewCorrect : styles.reviewWrong,
                 {
                   opacity: reviewAnims[index],
                   transform: [{ translateY: reviewAnims[index].interpolate({ inputRange: [0, 1], outputRange: [8, 0] }) }],
                 },
               ]}
             >
-              <Text style={[st.reviewIndex, result.correct ? st.reviewIndexCorrect : st.reviewIndexWrong]}>
+              <Text style={[styles.reviewIndex, result.correct ? styles.reviewIndexCorrect : styles.reviewIndexWrong]}>
                 {index + 1}
               </Text>
               <FlagImageSmall countryCode={result.question.flag.id} />
-              <View style={st.reviewContent}>
-                <Text style={st.reviewName}>{result.question.flag.name}</Text>
+              <View style={styles.reviewContent}>
+                <Text style={styles.reviewName}>{result.question.flag.name}</Text>
                 {!result.correct && result.userAnswer !== 'SKIPPED' && (
-                  <Text style={st.reviewAnswer}>{t('results.youSaid', { answer: result.userAnswer })}</Text>
+                  <Text style={styles.reviewAnswer}>{t('results.youSaid', { answer: result.userAnswer })}</Text>
                 )}
                 {result.userAnswer === 'SKIPPED' && (
-                  <Text style={st.reviewAnswer}>{t('results.skipped')}</Text>
+                  <Text style={styles.reviewAnswer}>{t('results.skipped')}</Text>
                 )}
                 {isChallenge && opponentResult && (
-                  <Text style={st.reviewOpponent}>
+                  <Text style={styles.reviewOpponent}>
                     {challenge.hostName}: {opponentResult.correct ? <CheckIcon size={12} color={colors.success} /> : <CrossIcon size={12} color={colors.error} />}
                   </Text>
                 )}
               </View>
-              <View style={st.reviewRight}>
-                <Text style={[st.reviewTime, isFastest && st.reviewTimeFastest]}>{itemTime}s</Text>
+              <View style={styles.reviewRight}>
+                <Text style={[styles.reviewTime, isFastest && styles.reviewTimeFastest]}>{itemTime}s</Text>
                 {result.correct ? <CheckIcon size={18} color={colors.success} /> : <CrossIcon size={18} color={colors.error} />}
               </View>
             </Animated.View>
@@ -847,14 +847,14 @@ export default function ResultsScreen({ route, navigation }: Props) {
         onRequestClose={() => setShowChallengeModal(false)}
       >
         <TouchableOpacity
-          style={st.modalOverlay}
+          style={styles.modalOverlay}
           activeOpacity={1}
           onPress={() => setShowChallengeModal(false)}
         >
-          <TouchableOpacity activeOpacity={1} style={st.modalCard} onPress={() => {}}>
-            <Text style={st.modalTitle}>{t('challenge.enterName')}</Text>
+          <TouchableOpacity activeOpacity={1} style={styles.modalCard} onPress={() => {}}>
+            <Text style={styles.modalTitle}>{t('challenge.enterName')}</Text>
             <TextInput
-              style={st.modalInput}
+              style={styles.modalInput}
               value={challengeName}
               onChangeText={setChallengeName}
               placeholder={t('challenge.namePlaceholder')}
@@ -867,12 +867,12 @@ export default function ResultsScreen({ route, navigation }: Props) {
               onSubmitEditing={challengeName.trim().length > 0 ? handleChallengeShare : undefined}
             />
             <TouchableOpacity
-              style={[st.modalShare, challengeName.trim().length === 0 && st.modalShareDisabled]}
+              style={[styles.modalShare, challengeName.trim().length === 0 && styles.modalShareDisabled]}
               onPress={handleChallengeShare}
               disabled={challengeName.trim().length === 0}
               activeOpacity={0.7}
             >
-              <Text style={st.modalShareText}>{t('common.share')}</Text>
+              <Text style={styles.modalShareText}>{t('common.share')}</Text>
             </TouchableOpacity>
           </TouchableOpacity>
         </TouchableOpacity>
@@ -882,7 +882,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
 }
 
 // ─── Styles ────────────────────────────────────────────────────
-const st = StyleSheet.create({
+const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.md, paddingBottom: spacing.xxl },
 
