@@ -179,7 +179,11 @@ export default function StatsScreen() {
   const bottom10 = React.useMemo(() => {
     return Object.entries(flagStats)
       .filter(([, s]) => s.wrong > 0 && s.rightStreak < 3)
-      .sort(([, a], [, b]) => b.wrong - a.wrong)
+      .sort(([, a], [, b]) => {
+        const accA = a.right / (a.right + a.wrong);
+        const accB = b.right / (b.right + b.wrong);
+        return accA - accB; // worst accuracy first
+      })
       .slice(0, 10);
   }, [flagStats]);
 
@@ -225,21 +229,30 @@ export default function StatsScreen() {
   const activityGrid = React.useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const cells: { date: string; count: number }[] = [];
+
+    // Build date-keyed count map from history (O(n))
+    const countMap = new Map<string, number>();
+    for (const entry of gameHistory) {
+      countMap.set(entry.date, (countMap.get(entry.date) || 0) + 1);
+    }
+
+    const cells: { date: string; count: number; dayLabel: string }[] = [];
+    const dayLabels = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+    let hasActivity = false;
     for (let i = 27; i >= 0; i--) {
       const d = new Date(today);
       d.setDate(d.getDate() - i);
       const yyyy = d.getFullYear();
       const mm = String(d.getMonth() + 1).padStart(2, '0');
       const dd = String(d.getDate()).padStart(2, '0');
-      cells.push({ date: `${yyyy}-${mm}-${dd}`, count: 0 });
+      const dateStr = `${yyyy}-${mm}-${dd}`;
+      const count = countMap.get(dateStr) || 0;
+      if (count > 0) hasActivity = true;
+      cells.push({ date: dateStr, count, dayLabel: dayLabels[d.getDay()] });
     }
-    for (const entry of gameHistory) {
-      const cell = cells.find((c) => c.date === entry.date);
-      if (cell) cell.count++;
-    }
+
     const maxCount = Math.max(...cells.map((c) => c.count), 1);
-    return { cells, maxCount };
+    return { cells, maxCount, hasActivity };
   }, [gameHistory]);
 
   // Score distribution: bucket accuracies into ranges
@@ -350,15 +363,21 @@ export default function StatsScreen() {
         </Animated.View>
 
         {/* ── ACTIVITY HEATMAP (last 28 days, 7x4 grid) ── */}
-        {gameHistory.length > 0 && (
+        {activityGrid.hasActivity && (
           <Animated.View style={{ opacity: progressFade }}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>{t('stats.activityTitle')}</Text>
               <Text style={styles.sectionMeta}>{t('stats.last28Days')}</Text>
             </View>
             <View style={styles.heatmapCard}>
+              {/* Day-of-week labels for the top row */}
+              <View style={styles.heatmapDayRow}>
+                {activityGrid.cells.slice(0, 7).map((cell) => (
+                  <Text key={`lbl-${cell.date}`} style={styles.heatmapDayLabel}>{cell.dayLabel}</Text>
+                ))}
+              </View>
               <View style={styles.heatmapGrid}>
-                {activityGrid.cells.map((cell, i) => {
+                {activityGrid.cells.map((cell) => {
                   const level = cell.count === 0 ? 0
                     : cell.count <= activityGrid.maxCount * 0.25 ? 1
                     : cell.count <= activityGrid.maxCount * 0.5 ? 2
@@ -1239,15 +1258,29 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     borderColor: colors.border,
     padding: 14,
   },
+  heatmapDayRow: {
+    flexDirection: 'row',
+    gap: 5,
+    marginBottom: 4,
+  },
+  heatmapDayLabel: {
+    flexGrow: 1,
+    flexBasis: '12%',
+    textAlign: 'center',
+    fontFamily: fontFamily.uiLabel,
+    fontSize: 9,
+    color: colors.textTertiary,
+    letterSpacing: 0.3,
+  },
   heatmapGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 5,
-    justifyContent: 'center',
   },
   heatmapCell: {
-    width: 36,
-    height: 36,
+    flexGrow: 1,
+    flexBasis: '12%',
+    aspectRatio: 1,
     borderRadius: 4,
     backgroundColor: colors.surfaceSecondary,
     borderWidth: 1,
