@@ -133,7 +133,7 @@ export default function OnboardingScreen({ navigation }: Props) {
         <ScreenContainer>
           {/* Hero section with flag mosaic */}
           <Animated.View style={[styles.hero, { opacity: heroFade, transform: [{ translateY: heroSlide }] }]}>
-            <View style={styles.heroInner}>
+            <View>
               <Text style={styles.welcomeText}>{t('onboarding.welcome')}</Text>
               <View style={styles.wordmark}>
                 <Text style={styles.wmLine1}>Flag</Text>
@@ -142,7 +142,7 @@ export default function OnboardingScreen({ navigation }: Props) {
               <Text style={styles.tagline}>{t('onboarding.tagline')}</Text>
             </View>
 
-            {/* Flag mosaic - 4 small flags fanned in the corner */}
+            {/* Flag mosaic - 4 small flags fanned at the bottom */}
             <View style={styles.flagMosaic}>
               {HERO_FLAGS.map((code, i) => (
                 <Animated.View
@@ -338,15 +338,11 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     overflow: 'hidden',
     ...shadows.large,
   },
-  heroInner: {
-    zIndex: 1,
-  },
   flagMosaic: {
-    position: 'absolute',
-    right: spacing.md,
-    bottom: spacing.lg,
     flexDirection: 'row',
     alignItems: 'flex-end',
+    alignSelf: 'flex-end',
+    marginTop: spacing.md,
   },
   flagThumb: {
     width: 48,

@@ -13,7 +13,7 @@ jest.mock('../gameEngine', () => ({
   shuffleArray: <T>(arr: T[]) => arr,
 }));
 
-import { encodeChallenge, decodeChallenge, generateShortCode, ChallengeData } from '../challengeCode';
+import { encodeChallenge, decodeChallenge, generateShortCode, ChallengeData, encodeResponse, decodeResponse, ChallengeResponseData } from '../challengeCode';
 
 function makeChallengeData(overrides: Partial<ChallengeData> = {}): ChallengeData {
   return {
@@ -177,6 +177,103 @@ describe('unsigned bit-packing (>>> 0)', () => {
     expect(result.status).toBe('ok');
     if (result.status !== 'ok') return;
     expect(result.data.hostResults.every((r) => r.correct)).toBe(true);
+  });
+});
+
+function makeResponseData(overrides: Partial<ChallengeResponseData> = {}): ChallengeResponseData {
+  return {
+    recipientName: 'Alice',
+    shortCode: 'Ab3xQ1',
+    recipientScore: 3,
+    totalFlags: 5,
+    resultDetails: [true, false, true, true, false],
+    ...overrides,
+  };
+}
+
+describe('encodeResponse / decodeResponse', () => {
+  it('roundtrips a response with resultDetails', () => {
+    const data = makeResponseData();
+    const encoded = encodeResponse(data);
+    expect(encoded).toContain('R~');
+
+    const result = decodeResponse(encoded);
+    expect(result.status).toBe('ok');
+    if (result.status !== 'ok') return;
+    expect(result.data.recipientName).toBe('Alice');
+    expect(result.data.shortCode).toBe('Ab3xQ1');
+    expect(result.data.recipientScore).toBe(3);
+    expect(result.data.totalFlags).toBe(5);
+    expect(result.data.resultDetails).toEqual([true, false, true, true, false]);
+  });
+
+  it('roundtrips a response without resultDetails (legacy format)', () => {
+    const data = makeResponseData({ resultDetails: undefined });
+    const encoded = encodeResponse(data);
+    // Should have exactly 4 parts after R~
+    expect(encoded.slice(2).split('~')).toHaveLength(4);
+
+    const result = decodeResponse(encoded);
+    expect(result.status).toBe('ok');
+    if (result.status !== 'ok') return;
+    expect(result.data.resultDetails).toBeUndefined();
+  });
+
+  it('skips resultDetails when length mismatches totalFlags', () => {
+    const data = makeResponseData({ totalFlags: 5, resultDetails: [true, false, true] });
+    const encoded = encodeResponse(data);
+    // Should fall back to base format (no hex suffix)
+    expect(encoded.slice(2).split('~')).toHaveLength(4);
+  });
+
+  it('handles all-correct results', () => {
+    const data = makeResponseData({
+      totalFlags: 5,
+      recipientScore: 5,
+      resultDetails: [true, true, true, true, true],
+    });
+    const encoded = encodeResponse(data);
+    const result = decodeResponse(encoded);
+    expect(result.status).toBe('ok');
+    if (result.status !== 'ok') return;
+    expect(result.data.resultDetails).toEqual([true, true, true, true, true]);
+  });
+
+  it('handles all-wrong results', () => {
+    const data = makeResponseData({
+      totalFlags: 5,
+      recipientScore: 0,
+      resultDetails: [false, false, false, false, false],
+    });
+    const encoded = encodeResponse(data);
+    const result = decodeResponse(encoded);
+    expect(result.status).toBe('ok');
+    if (result.status !== 'ok') return;
+    expect(result.data.resultDetails).toEqual([false, false, false, false, false]);
+  });
+
+  it('handles 30-flag response (max)', () => {
+    const details = Array.from({ length: 30 }, (_, i) => i % 2 === 0);
+    const data = makeResponseData({ totalFlags: 30, recipientScore: 15, resultDetails: details });
+    const encoded = encodeResponse(data);
+    const result = decodeResponse(encoded);
+    expect(result.status).toBe('ok');
+    if (result.status !== 'ok') return;
+    expect(result.data.resultDetails).toEqual(details);
+  });
+
+  it('strips URL prefix from response codes', () => {
+    const data = makeResponseData();
+    const encoded = encodeResponse(data);
+    const result = decodeResponse(`https://flagthat.app/r/${encoded}`);
+    expect(result.status).toBe('ok');
+  });
+
+  it('returns invalid for malformed codes', () => {
+    expect(decodeResponse('garbage').status).toBe('invalid');
+    expect(decodeResponse('R~').status).toBe('invalid');
+    expect(decodeResponse('R~name~short~nan~5').status).toBe('invalid');
+    expect(decodeResponse('R~name~bad~3~5').status).toBe('invalid'); // shortCode wrong length
   });
 });
 

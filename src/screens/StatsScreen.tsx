@@ -11,7 +11,7 @@ import {
   Easing,
   Modal,
 } from 'react-native';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
 import { ThemeColors, spacing, fontFamily, fontSize, borderRadius, typography } from '../utils/theme';
@@ -28,7 +28,7 @@ import ScreenContainer from '../components/ScreenContainer';
 import { useNavTabs } from '../hooks/useNavTabs';
 import { getAllEarnedBadges, buildBadgeContext, deriveFromContext, BADGES, TIER_COLORS, getBadgeProgress, Badge } from '../utils/badges';
 import { computeLevelProgress, LevelProgress, getTierLabel, getLevelTier } from '../utils/levels';
-import { ChevronRightIcon, BadgeIconView, UsersIcon } from '../components/Icons';
+import { ChevronRightIcon, BadgeIconView, UsersIcon, CheckIcon, CrossIcon } from '../components/Icons';
 import PageHeader from '../components/PageHeader';
 
 const EMPTY_FLAG_STATS: FlagStats = {};
@@ -60,6 +60,8 @@ async function loadStatsData(): Promise<StatsData> {
 
 export default function StatsScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const route = useRoute<RouteProp<RootStackParamList, 'Stats'>>();
+  const highlightChallenge = route.params?.highlightChallenge;
   const onNavigate = useNavTabs();
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
@@ -171,18 +173,27 @@ export default function StatsScreen() {
     }, []),
   );
 
+  // Auto-open challenge detail when navigated with highlightChallenge param
+  React.useEffect(() => {
+    if (highlightChallenge && data) {
+      const match = data.challengeHistory.find((ch) => ch.shortCode === highlightChallenge);
+      if (match) {
+        setSelectedChallenge(match);
+        // Clear the param so re-navigation with a different code works
+        navigation.setParams({ highlightChallenge: undefined });
+      }
+    }
+  }, [highlightChallenge, data, navigation]);
+
   const flagStats = data?.flagStats ?? EMPTY_FLAG_STATS;
 
   const top10 = React.useMemo(() => {
     return Object.entries(flagStats)
       .filter(([, s]) => s.right >= UNLOCK_THRESHOLD)
       .sort(([, a], [, b]) => {
-        const totalA = a.right + a.wrong;
-        const totalB = b.right + b.wrong;
-        if (totalA === 0 || totalB === 0) return totalB - totalA;
-        const accA = a.right / totalA;
-        const accB = b.right / totalB;
-        if (accA !== accB) return accB - accA;
+        // Primary: most correct answers first
+        if (a.right !== b.right) return b.right - a.right;
+        // Tiebreaker: fastest average response time first
         const avgA = a.totalTimeRight && a.right > 0 ? a.totalTimeRight / a.right : Infinity;
         const avgB = b.totalTimeRight && b.right > 0 ? b.totalTimeRight / b.right : Infinity;
         return avgA - avgB;
@@ -194,12 +205,12 @@ export default function StatsScreen() {
     return Object.entries(flagStats)
       .filter(([, s]) => s.wrong > 0 && s.rightStreak < MASTERED_STREAK)
       .sort(([, a], [, b]) => {
-        const totalA = a.right + a.wrong;
-        const totalB = b.right + b.wrong;
-        if (totalA === 0 || totalB === 0) return totalA - totalB;
-        const accA = a.right / totalA;
-        const accB = b.right / totalB;
-        return accA - accB; // worst accuracy first
+        // Primary: most wrong answers first
+        if (a.wrong !== b.wrong) return b.wrong - a.wrong;
+        // Tiebreaker: slowest average wrong response time first (less confident)
+        const avgA = a.totalTimeWrong && a.wrong > 0 ? a.totalTimeWrong / a.wrong : 0;
+        const avgB = b.totalTimeWrong && b.wrong > 0 ? b.totalTimeWrong / b.wrong : 0;
+        return avgB - avgA;
       })
       .slice(0, 10);
   }, [flagStats]);
@@ -725,7 +736,8 @@ export default function StatsScreen() {
           activeOpacity={1}
           onPress={() => setSelectedChallenge(null)}
         >
-          <View style={styles.modalCard} onStartShouldSetResponder={() => true}>
+          <View style={[styles.modalCard, { maxHeight: '80%' }]} onStartShouldSetResponder={() => true}>
+            <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
             {selectedChallenge && (() => {
               const ch = selectedChallenge;
               const hasOpponent = ch.opponentName !== null && ch.opponentScore !== null;
@@ -772,9 +784,53 @@ export default function StatsScreen() {
                         : `${ch.myScore}/${ch.totalFlags}`}
                     </Text>
                   </View>
+
+                  {/* Per-question result details */}
+                  {(ch.myResults || ch.opponentResults) && (
+                    <View style={styles.h2hDetailsWrap}>
+                      <View style={styles.h2hDetailsHeader}>
+                        <Text style={[styles.h2hDetailsLabel, { flex: hasOpponent ? 1 : 0 }]}>{ch.myName || t('challenge.you')}</Text>
+                        <Text style={[styles.h2hDetailsLabel, { width: 28, textAlign: 'center' }]}>#</Text>
+                        {hasOpponent && <Text style={[styles.h2hDetailsLabel, { flex: 1, textAlign: 'right' }]}>{ch.opponentName}</Text>}
+                      </View>
+                      {Array.from({ length: ch.totalFlags }).map((_, qi) => {
+                        const myOk = ch.myResults ? ch.myResults[qi] : undefined;
+                        const oppOk = ch.opponentResults ? ch.opponentResults[qi] : undefined;
+                        // Highlight the winner of each question
+                        const myWon = myOk === true && oppOk === false;
+                        const oppWon = oppOk === true && myOk === false;
+                        return (
+                          <View key={qi} style={[styles.h2hDetailsRow, qi % 2 === 0 && { backgroundColor: colors.surfaceSecondary + '40' }]}>
+                            <View style={hasOpponent ? styles.h2hDetailsSide : undefined}>
+                              {myOk === undefined ? (
+                                <View style={[styles.h2hDot, { backgroundColor: colors.surfaceSecondary }]} />
+                              ) : myOk ? (
+                                <CheckIcon size={14} color={myWon ? colors.success : colors.success + '90'} />
+                              ) : (
+                                <CrossIcon size={14} color={colors.error + (oppWon ? 'FF' : '90')} />
+                              )}
+                            </View>
+                            <Text style={styles.h2hDetailsQ}>{qi + 1}</Text>
+                            {hasOpponent && (
+                              <View style={[styles.h2hDetailsSide, { alignItems: 'flex-end' }]}>
+                                {oppOk === undefined ? (
+                                  <View style={[styles.h2hDot, { backgroundColor: colors.surfaceSecondary }]} />
+                                ) : oppOk ? (
+                                  <CheckIcon size={14} color={oppWon ? colors.success : colors.success + '90'} />
+                                ) : (
+                                  <CrossIcon size={14} color={colors.error + (myWon ? 'FF' : '90')} />
+                                )}
+                              </View>
+                            )}
+                          </View>
+                        );
+                      })}
+                    </View>
+                  )}
                 </>
               );
             })()}
+            </ScrollView>
           </View>
         </TouchableOpacity>
       </Modal>
@@ -1300,5 +1356,45 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   h2hVs: {
     ...typography.caption,
     color: colors.textTertiary,
+  },
+  h2hDetailsWrap: {
+    width: '100%',
+    marginTop: spacing.lg,
+    paddingTop: spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+  h2hDetailsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing.sm,
+    paddingHorizontal: spacing.sm,
+  },
+  h2hDetailsLabel: {
+    ...typography.caption,
+    color: colors.textTertiary,
+  },
+  h2hDetailsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 4,
+    paddingHorizontal: spacing.sm,
+    borderRadius: borderRadius.sm,
+  },
+  h2hDetailsSide: {
+    flex: 1,
+    alignItems: 'flex-start',
+  },
+  h2hDetailsQ: {
+    ...typography.caption,
+    color: colors.textTertiary,
+    textAlign: 'center',
+    width: 28,
+  },
+  h2hDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
   },
 });

@@ -404,7 +404,7 @@ async function appendDailyLog(date: string, score: number, results: GameResult[]
 // Once rightStreak reaches MASTERED_STREAK, the flag is considered "learned"
 // and drops out of Practice More. Getting it wrong again resets the streak.
 export interface FlagStats {
-  [flagId: string]: { wrong: number; right: number; rightStreak: number; totalTimeRight?: number };
+  [flagId: string]: { wrong: number; right: number; rightStreak: number; totalTimeRight?: number; totalTimeWrong?: number };
 }
 
 export async function getFlagStats(): Promise<FlagStats> {
@@ -441,6 +441,7 @@ export async function updateFlagResults(results: GameResult[]): Promise<void> {
       } else {
         stats[id].wrong += 1;
         stats[id].rightStreak = 0;
+        stats[id].totalTimeWrong = (stats[id].totalTimeWrong || 0) + r.timeTaken;
       }
     }
     await AsyncStorage.setItem(FLAG_STATS_KEY, JSON.stringify(stats));
@@ -575,6 +576,8 @@ export interface ChallengeHistoryEntry {
   opponentScore: number | null;
   direction: 'sent' | 'received';
   fullCode: string;         // Full FT2: code for resharing
+  myResults?: boolean[];    // Per-question correct/wrong for me
+  opponentResults?: boolean[]; // Per-question correct/wrong for opponent
 }
 
 export async function getChallengeHistory(): Promise<ChallengeHistoryEntry[]> {
@@ -603,6 +606,30 @@ export async function addChallengeToHistory(entry: ChallengeHistoryEntry): Promi
     await AsyncStorage.setItem(CHALLENGE_HISTORY_KEY, JSON.stringify(trimmed));
   } catch {
     // Silently fail
+  }
+}
+
+export async function updateSentChallengeWithOpponent(
+  shortCode: string,
+  opponentName: string,
+  opponentScore: number,
+  opponentResults?: boolean[],
+): Promise<boolean> {
+  try {
+    const history = await getChallengeHistory();
+    const idx = history.findIndex(
+      (h) => h.shortCode === shortCode && h.direction === 'sent',
+    );
+    if (idx < 0) return false;
+    history[idx].opponentName = opponentName;
+    history[idx].opponentScore = opponentScore;
+    if (opponentResults) {
+      history[idx].opponentResults = opponentResults;
+    }
+    await AsyncStorage.setItem(CHALLENGE_HISTORY_KEY, JSON.stringify(history));
+    return true;
+  } catch {
+    return false;
   }
 }
 

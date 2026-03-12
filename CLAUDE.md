@@ -42,15 +42,27 @@
 - Local-first: all data stored via AsyncStorage, no backend
 - Navigation: React Navigation native stack
 - State: local component state + AsyncStorage persistence
+- Theme: 3 modes (light/dark/system) via `ThemeContext` + `useTheme()` hook
+- i18n: 6 locales (en, fr, es, de, pt-BR, zh) via `t(key)` function from `src/utils/i18n.ts`
+- Responsive: `useLayout()` hook provides `contentWidth`, `gameWidth`, `isTablet`, `isDesktop`
 
 ## Key Files
-- `src/utils/theme.ts` — colors, spacing, typography, font families
+- `src/utils/theme.ts` — colors, spacing, typography, font families, `buildButtons()`, `buildNav()`, `shadows`, `layout`
 - `src/utils/storage.ts` — all AsyncStorage persistence
 - `src/utils/gameEngine.ts` — question generation, scoring, daily challenge
 - `src/utils/badges.ts` — badge definitions and evaluation engine
 - `src/utils/feedback.ts` — sound and haptics with runtime toggles
+- `src/utils/i18n.ts` — translation system, `t(key)` with interpolation
+- `src/utils/useLayout.ts` — responsive breakpoints hook
+- `src/utils/notifications.ts` — daily reminder scheduling
+- `src/utils/challengeCode.ts` — URL-safe challenge encoding/decoding
+- `src/hooks/useGameAnimations.ts` — shared game animation hook (fade, shake, streak spring)
 - `src/components/Icons.tsx` — all SVG icons (no emoji)
 - `src/components/BottomNav.tsx` — shared bottom navigation
+- `src/components/ScreenContainer.tsx` — max-width wrapper for responsive layout
+- `src/components/SegBtn.tsx` — segmented button component
+- `src/components/ConfigRow.tsx` — settings row with label + controls
+- `src/contexts/ThemeContext.tsx` — theme provider with light/dark/system support
 
 ## Conventions
 - DRY: shared components in `src/components/`, shared logic in `src/utils/`
@@ -58,3 +70,33 @@
 - All screens use SafeAreaView with `colors.background`
 - Game screens have Exit button + no bottom nav
 - TypeScript strict mode, no `any` types
+
+### Styling
+- Every screen defines a `createStyles(colors: ThemeColors)` function returning `StyleSheet.create({...})`
+- Styles are memoized in component: `const styles = useMemo(() => createStyles(colors), [colors])`
+- Buttons use `buildButtons(colors)` from theme.ts: `btn.primary`, `btn.primaryText`, `btn.secondary`, `btn.secondaryText`
+- Navigation buttons use `buildNav(colors)` from theme.ts
+
+### Layout Patterns
+- 2-column rows: `flexDirection: 'row'` + `gap: spacing.sm` container, children get `flex: 1`
+- 3-column rows: same pattern (e.g. difficulty grid, theme options)
+- Wrap grids: `flexDirection: 'row'` + `flexWrap: 'wrap'` + `gap: spacing.sm`
+
+### i18n
+- All user-facing text must use `t(key)` - never hardcode strings
+- Translation keys defined in `src/locales/en.ts`, other locales in same directory
+- Interpolation: `t('results.score', { correct: 5, total: 10 })`
+
+### Accessibility
+- All interactive elements need `accessibilityRole="button"` and `accessibilityLabel={t(...)}`
+- Selection state: `accessibilityState={{ selected: isActive }}`
+- Tab bars use `accessibilityRole="tablist"` / `"tab"`
+
+### Sound and Haptics
+- Import helpers from `src/utils/feedback.ts`: `hapticTap()`, `hapticCorrect()`, `hapticWrong()`
+- Call `hapticTap()` on button presses
+- Sound/haptic toggles are runtime-configurable via settings
+
+### Testing
+- Jest for unit tests, test files in `__tests__/` directories
+- Run with `npx jest`

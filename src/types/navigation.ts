@@ -12,8 +12,9 @@ export type RootStackParamList = {
   FlagImpostor: { config: GameConfig };
   CapitalConnection: { config: GameConfig; challenge?: ChallengeData; playerName?: string };
   Results: { results: GameResult[]; config: GameConfig; reviewOnly?: boolean; challenge?: ChallengeData; playerName?: string };
-  Stats: undefined;
+  Stats: { highlightChallenge?: string } | undefined;
   Settings: undefined;
   Browse: { region?: string } | undefined;
   JoinChallenge: { code?: string } | undefined;
+  ChallengeResponse: { code?: string } | undefined;
 };

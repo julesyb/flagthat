@@ -28,6 +28,7 @@ import FlagImpostorScreen from './src/screens/FlagImpostorScreen';
 import CapitalConnectionScreen from './src/screens/CapitalConnectionScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
 import JoinChallengeScreen from './src/screens/JoinChallengeScreen';
+import ChallengeResponseScreen from './src/screens/ChallengeResponseScreen';
 import ErrorBoundary from './src/components/ErrorBoundary';
 import { ChevronLeftIcon } from './src/components/Icons';
 import { RootStackParamList } from './src/types/navigation';
@@ -45,6 +46,10 @@ const linking = {
     screens: {
       JoinChallenge: {
         path: 'c/:code',
+        parse: { code: (code: string) => decodeURIComponent(code) },
+      },
+      ChallengeResponse: {
+        path: 'r/:code',
         parse: { code: (code: string) => decodeURIComponent(code) },
       },
     },
@@ -161,6 +166,13 @@ function AppContent() {
         <Stack.Screen
           name="JoinChallenge"
           component={JoinChallengeScreen}
+          options={({ navigation }) => ({
+            headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
+          })}
+        />
+        <Stack.Screen
+          name="ChallengeResponse"
+          component={ChallengeResponseScreen}
           options={({ navigation }) => ({
             headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
           })}
