@@ -1189,7 +1189,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   badgeName: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: 10,
+    fontSize: fontSize.xs,
     color: colors.ink,
     textAlign: 'center',
   },

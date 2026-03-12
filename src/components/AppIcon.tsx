@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { fontFamily, spacing, ThemeColors } from '../utils/theme';
+import { fontFamily, fontSize, spacing, ThemeColors } from '../utils/theme';
 import { useTheme } from '../contexts/ThemeContext';
 
 interface AppIconProps {
@@ -50,7 +50,7 @@ export default function AppIcon({ size = 120, variant = 'dark' }: AppIconProps) 
           style={[
             styles.flagText,
             {
-              fontSize: 33 * scale,
+              fontSize: fontSize.title * scale,
               lineHeight: 36 * scale,
               color: textColor,
             },
@@ -73,7 +73,7 @@ export default function AppIcon({ size = 120, variant = 'dark' }: AppIconProps) 
           style={[
             styles.thatText,
             {
-              fontSize: 33 * scale,
+              fontSize: fontSize.title * scale,
               lineHeight: 36 * scale,
             },
           ]}
