@@ -244,7 +244,7 @@ export default function JoinChallengeScreen({ route, navigation }: Props) {
                 placeholderTextColor={colors.textTertiary}
                 autoCapitalize="words"
                 autoCorrect={false}
-                maxLength={20}
+                maxLength={8}
                 autoFocus={!!initialCode}
                 returnKeyType="done"
                 onSubmitEditing={canPlay ? handlePlay : undefined}

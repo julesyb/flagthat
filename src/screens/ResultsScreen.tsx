@@ -794,8 +794,8 @@ export default function ResultsScreen({ route, navigation }: Props) {
           {isChallenge && challenge && (
             <View style={styles.reviewH2hHeader}>
               <View style={{ flex: 1 }} />
-              <Text style={[styles.reviewH2hLabel, { width: 40, textAlign: 'center' }]}>{playerName || t('challenge.you')}</Text>
-              <Text style={[styles.reviewH2hLabel, { width: 40, textAlign: 'center' }]}>{challenge.hostName}</Text>
+              <Text numberOfLines={1} style={[styles.reviewH2hLabel, { width: 40, textAlign: 'center' }]}>{playerName || t('challenge.you')}</Text>
+              <Text numberOfLines={1} style={[styles.reviewH2hLabel, { width: 40, textAlign: 'center' }]}>{challenge.hostName}</Text>
             </View>
           )}
         </Animated.View>
@@ -878,7 +878,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
               placeholderTextColor={colors.textTertiary}
               autoCapitalize="words"
               autoCorrect={false}
-              maxLength={20}
+              maxLength={8}
               autoFocus
               returnKeyType="done"
               onSubmitEditing={challengeName.trim().length > 0 ? handleChallengeShare : undefined}
