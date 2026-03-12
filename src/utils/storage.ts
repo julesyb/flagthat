@@ -16,6 +16,7 @@ const GAME_HISTORY_KEY = '@flagsareus_game_history';
 const BASELINE_KEY = '@flagsareus_baseline';
 const CHALLENGE_NAME_KEY = '@flagsareus_challenge_name';
 const CHALLENGE_HISTORY_KEY = '@flagsareus_challenge_history';
+const REGION_SCORES_KEY = '@flagsareus_region_scores';
 
 // ─── Challenge Name ─────────────────────────────────────────
 export async function getChallengeName(): Promise<string> {
@@ -598,6 +599,59 @@ export async function addChallengeToHistory(entry: ChallengeHistoryEntry): Promi
     }
     const trimmed = history.slice(0, MAX_CHALLENGE_HISTORY);
     await AsyncStorage.setItem(CHALLENGE_HISTORY_KEY, JSON.stringify(trimmed));
+  } catch {
+    // Silently fail
+  }
+}
+
+// ─── Region Score History ─────────────────────────────────
+export interface RegionScoreEntry {
+  correct: number;
+  total: number;
+  date: string;
+}
+
+export interface RegionScores {
+  first: RegionScoreEntry;
+  best: RegionScoreEntry;
+  mostRecent: RegionScoreEntry;
+}
+
+export type RegionScoreHistory = Partial<Record<BaselineRegionId, RegionScores>>;
+
+export async function getRegionScoreHistory(): Promise<RegionScoreHistory> {
+  try {
+    const json = await AsyncStorage.getItem(REGION_SCORES_KEY);
+    if (json) return JSON.parse(json);
+    return {};
+  } catch {
+    return {};
+  }
+}
+
+export async function recordRegionScore(
+  region: BaselineRegionId,
+  correct: number,
+  total: number,
+): Promise<void> {
+  try {
+    const history = await getRegionScoreHistory();
+    const date = getTodayDate();
+    const entry: RegionScoreEntry = { correct, total, date };
+    const pct = total > 0 ? correct / total : 0;
+
+    const existing = history[region];
+    if (!existing) {
+      history[region] = { first: entry, best: entry, mostRecent: entry };
+    } else {
+      const bestPct = existing.best.total > 0 ? existing.best.correct / existing.best.total : 0;
+      if (pct > bestPct || (pct === bestPct && correct > existing.best.correct)) {
+        existing.best = entry;
+      }
+      existing.mostRecent = entry;
+    }
+
+    await AsyncStorage.setItem(REGION_SCORES_KEY, JSON.stringify(history));
   } catch {
     // Silently fail
   }

@@ -19,7 +19,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { spacing, typography, fontFamily, fontSize, buildButtons, borderRadius, APP_URL, ThemeColors } from '../utils/theme';
 import { useTheme } from '../contexts/ThemeContext';
 import { getStreakFromResults, generateDailyShareGrid, generateShareGrid, getDailyNumber } from '../utils/gameEngine';
-import { updateStats, updateFlagResults, saveDailyChallenge, incrementDailyChallenges, markShared, saveBaselineResult, getStats, getFlagStats, getDayStreakInfo, getBadgeData, persistEarnedBadges, getMissedFlagIds, addGameHistoryEntry, getChallengeName, saveChallengeName, addChallengeToHistory } from '../utils/storage';
+import { updateStats, updateFlagResults, saveDailyChallenge, incrementDailyChallenges, markShared, saveBaselineResult, getStats, getFlagStats, getDayStreakInfo, getBadgeData, persistEarnedBadges, getMissedFlagIds, addGameHistoryEntry, getChallengeName, saveChallengeName, addChallengeToHistory, recordRegionScore } from '../utils/storage';
 import { BaselineRegionId, UserStats, GameMode, CategoryId } from '../types';
 import { t } from '../utils/i18n';
 import { hapticCorrect, hapticTap, playCelebrationSound } from '../utils/feedback';
@@ -234,6 +234,11 @@ export default function ResultsScreen({ route, navigation }: Props) {
         await updateStats(correct, results.length, streak, config.mode, config.category, speedData);
         await updateFlagResults(results);
         await addGameHistoryEntry(accuracy, config.mode);
+        // Record per-region score for region-based games
+        const regionIds = ['africa', 'asia', 'europe', 'americas', 'oceania'] as const;
+        if (regionIds.includes(config.category as typeof regionIds[number])) {
+          await recordRegionScore(config.category as typeof regionIds[number], correct, results.length);
+        }
         if (isDaily) {
           await saveDailyChallenge(results);
           await incrementDailyChallenges();
