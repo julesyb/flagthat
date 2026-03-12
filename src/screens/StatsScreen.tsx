@@ -175,12 +175,13 @@ export default function StatsScreen() {
       .sort(([, a], [, b]) => {
         const totalA = a.right + a.wrong;
         const totalB = b.right + b.wrong;
+        if (totalA === 0 || totalB === 0) return totalB - totalA;
         const accA = a.right / totalA;
         const accB = b.right / totalB;
         if (accA !== accB) return accB - accA;
         // Tie-break: faster avg time wins (lower is better)
-        const avgA = a.totalTimeRight ? a.totalTimeRight / a.right : Infinity;
-        const avgB = b.totalTimeRight ? b.totalTimeRight / b.right : Infinity;
+        const avgA = a.totalTimeRight && a.right > 0 ? a.totalTimeRight / a.right : Infinity;
+        const avgB = b.totalTimeRight && b.right > 0 ? b.totalTimeRight / b.right : Infinity;
         return avgA - avgB;
       })
       .slice(0, 10);
@@ -190,8 +191,11 @@ export default function StatsScreen() {
     return Object.entries(flagStats)
       .filter(([, s]) => s.wrong > 0 && s.rightStreak < 3)
       .sort(([, a], [, b]) => {
-        const accA = a.right / (a.right + a.wrong);
-        const accB = b.right / (b.right + b.wrong);
+        const totalA = a.right + a.wrong;
+        const totalB = b.right + b.wrong;
+        if (totalA === 0 || totalB === 0) return totalA - totalB;
+        const accA = a.right / totalA;
+        const accB = b.right / totalB;
         return accA - accB; // worst accuracy first
       })
       .slice(0, 10);
@@ -287,6 +291,20 @@ export default function StatsScreen() {
     return { buckets, maxCount, total: gameHistory.length };
   }, [gameHistory]);
 
+  // Sorted badges: earned first, then in-progress, then locked
+  // (must be above the early return to satisfy Rules of Hooks)
+  const sortedBadges = React.useMemo(() => {
+    const earnedIdSet = new Set(earnedBadges.map((b) => b.id));
+    return BADGES.map((badge) => {
+      const earned = earnedIdSet.has(badge.id);
+      const progress = !earned && badgeCtx && derived ? getBadgeProgress(badge, badgeCtx, derived) : null;
+      const inProgress = !earned && progress != null && progress.progress > 0;
+      // Sort key: 0 = earned, 1 = in-progress, 2 = locked
+      const order = earned ? 0 : inProgress ? 1 : 2;
+      return { badge, earned, progress, order };
+    }).sort((a, b) => a.order - b.order);
+  }, [earnedBadges, badgeCtx, derived]);
+
   if (!stats) {
     return (
       <SafeAreaView style={styles.container}>
@@ -303,19 +321,6 @@ export default function StatsScreen() {
   const overallAccuracy = stats.totalAnswered > 0
     ? Math.round((stats.totalCorrect / stats.totalAnswered) * 100) : 0;
   const progressPct = totalFlags > 0 ? Math.round((countriesSeen / totalFlags) * 100) : 0;
-  const earnedIds = new Set(earnedBadges.map((b) => b.id));
-
-  // Sorted badges: earned first, then in-progress, then locked
-  const sortedBadges = React.useMemo(() => {
-    return BADGES.map((badge) => {
-      const earned = earnedIds.has(badge.id);
-      const progress = !earned && badgeCtx && derived ? getBadgeProgress(badge, badgeCtx, derived) : null;
-      const inProgress = !earned && progress != null && progress.progress > 0;
-      // Sort key: 0 = earned, 1 = in-progress, 2 = locked
-      const order = earned ? 0 : inProgress ? 1 : 2;
-      return { badge, earned, progress, order };
-    }).sort((a, b) => a.order - b.order);
-  }, [earnedIds, badgeCtx, derived]);
 
   // Region accuracy data (only regions with games played)
   const regionData = REGIONS
@@ -438,7 +443,7 @@ export default function StatsScreen() {
             <View style={styles.milestoneContent}>
               <Text style={styles.milestoneTitle}>{nextMilestone.badge.name}</Text>
               <View style={styles.milestoneBarWrap}>
-                <View style={[styles.milestoneBarFill, { width: `${Math.round((nextMilestone.progress / nextMilestone.target) * 100)}%` }]} />
+                <View style={[styles.milestoneBarFill, { width: `${nextMilestone.target > 0 ? Math.round((nextMilestone.progress / nextMilestone.target) * 100) : 0}%` }]} />
               </View>
               <Text style={styles.milestoneSub}>
                 {nextMilestone.progress} / {nextMilestone.target} - {t('stats.moreToUnlock', { count: nextMilestone.remaining })}
@@ -667,7 +672,7 @@ export default function StatsScreen() {
             </View>
             {top10.map(([id, fs], i) => {
               const totalSeen = fs.right + fs.wrong;
-              const avgTime = fs.totalTimeRight ? (fs.totalTimeRight / fs.right).toFixed(1) : null;
+              const avgTime = fs.totalTimeRight && fs.right > 0 ? (fs.totalTimeRight / fs.right).toFixed(1) : null;
               return (
                 <View key={id} style={styles.rankRow}>
                   <Text style={[styles.rank, i < 3 && { color: RANK_COLORS[i] }]}>{i + 1}</Text>
