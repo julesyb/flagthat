@@ -7,6 +7,8 @@ import { t } from '../utils/i18n';
 interface FlagImageProps {
   countryCode: string;
   size?: 'small' | 'medium' | 'large' | 'hero';
+  /** When true, the image fills its parent container (use for grids/flexible layouts). */
+  fill?: boolean;
   style?: StyleProp<ViewStyle>;
   accessibilityLabel?: string;
 }
@@ -28,7 +30,7 @@ function getFlagUrl(code: string, width: number): string {
   return `https://flagcdn.com/w${nearestCdnWidth(width)}/${code.toLowerCase()}.png`;
 }
 
-export default function FlagImage({ countryCode, size = 'large', style, accessibilityLabel }: FlagImageProps) {
+export default function FlagImage({ countryCode, size = 'large', fill, style, accessibilityLabel }: FlagImageProps) {
   const { width: screenWidth } = useWindowDimensions();
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
@@ -72,16 +74,17 @@ export default function FlagImage({ countryCode, size = 'large', style, accessib
 
   const dimensions = SIZE_MAP[size];
   const requestWidth = dimensions.width * 2;
+  const fillStyle = fill ? { width: '100%' as const, height: '100%' as const } : dimensions;
 
   return (
     <View
-      style={[styles.container, dimensions, style]}
+      style={[styles.container, fillStyle, style]}
       accessible
       accessibilityRole="image"
       accessibilityLabel={a11yLabel}
     >
       {!loaded && (
-        <View style={[styles.placeholder, dimensions]}>
+        <View style={[styles.placeholder, fillStyle]}>
           {error ? (
             <Text style={styles.errorText}>{countryCode.toUpperCase()}</Text>
           ) : (
@@ -92,7 +95,7 @@ export default function FlagImage({ countryCode, size = 'large', style, accessib
       {!error && (
         <Image
           source={{ uri: getFlagUrl(countryCode, requestWidth) }}
-          style={[styles.image, dimensions]}
+          style={[styles.image, fillStyle]}
           contentFit="contain"
           transition={200}
           cachePolicy="memory-disk"

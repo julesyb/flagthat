@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
     fontSize: fontSize.caption,
     letterSpacing: 1,
     textTransform: 'uppercase',
-    color: colors.background,
+    color: colors.playText,
   },
   thankedText: {
     fontFamily: fontFamily.bodyBold,
@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
     fontSize: fontSize.sm,
     letterSpacing: 0.8,
     textTransform: 'uppercase',
-    color: colors.background,
+    color: colors.playText,
   },
   failedText: {
     fontFamily: fontFamily.body,

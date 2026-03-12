@@ -224,6 +224,8 @@ const ptBR: typeof en = {
   },
 
   browse: {
+    title: 'Explorar',
+    countriesLabel: 'pa\u00edses',
     searchPlaceholder: 'Buscar bandeiras...',
     all: 'Todas',
     africa: '\u00c1frica',

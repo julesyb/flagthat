@@ -76,6 +76,6 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     ...typography.bodyBold,
-    color: colors.background,
+    color: colors.playText,
   },
 });

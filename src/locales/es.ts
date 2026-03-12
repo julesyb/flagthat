@@ -224,6 +224,8 @@ const es: typeof en = {
   },
 
   browse: {
+    title: 'Explorar',
+    countriesLabel: 'pa\u00edses',
     searchPlaceholder: 'Buscar banderas...',
     all: 'Todas',
     africa: '\u00c1frica',

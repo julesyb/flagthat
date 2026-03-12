@@ -45,6 +45,6 @@ const styles = StyleSheet.create({
     color: colors.textTertiary,
   },
   segBtnTextOn: {
-    color: colors.background,
+    color: colors.playText,
   },
 });

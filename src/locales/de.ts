@@ -225,6 +225,8 @@ const de: typeof en = {
   },
 
   browse: {
+    title: 'Durchsuchen',
+    countriesLabel: 'L\u00e4nder',
     searchPlaceholder: 'Flaggen suchen...',
     all: 'Alle',
     africa: 'Afrika',

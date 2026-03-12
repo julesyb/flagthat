@@ -123,8 +123,8 @@ export default function BrowseScreen({ route, navigation }: Props) {
         <View style={[styles.flagWrap, { height: flagHeight }]}>
           <FlagImage
             countryCode={item.id}
-            size="medium"
-            style={styles.flagImg}
+            size="small"
+            fill
           />
         </View>
         <Text style={styles.countryName} numberOfLines={1}>
@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   chipLabelActive: {
-    color: colors.background,
+    color: colors.playText,
   },
   resultCount: {
     ...typography.caption,
@@ -308,10 +308,6 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  flagImg: {
-    width: '100%',
-    height: '100%',
   },
   countryName: {
     fontFamily: fontFamily.bodyMedium,

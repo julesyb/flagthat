@@ -363,7 +363,7 @@ export default function GameSetupScreen({ route, navigation }: Props) {
                 <View style={isActive ? styles.chevronDown : undefined}>
                   <ChevronRightIcon
                     size={14}
-                    color={isActive ? colors.white : colors.textTertiary}
+                    color={isActive ? colors.playText : colors.textTertiary}
                   />
                 </View>
               </TouchableOpacity>
@@ -570,7 +570,7 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   filterTypeTextActive: {
-    color: colors.background,
+    color: colors.playText,
   },
   chevronDown: {
     transform: [{ rotate: '90deg' }],
@@ -604,7 +604,7 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   categoryLabelActive: {
-    color: colors.background,
+    color: colors.playText,
   },
   categoryCount: {
     ...typography.caption,

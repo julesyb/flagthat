@@ -1166,6 +1166,6 @@ const styles = StyleSheet.create({
   modalShareDisabled: { backgroundColor: colors.textTertiary },
   modalShareText: {
     fontFamily: fontFamily.uiLabel, fontSize: fontSize.caption,
-    letterSpacing: 0.5, textTransform: 'uppercase', color: colors.background,
+    letterSpacing: 0.5, textTransform: 'uppercase', color: colors.playText,
   },
 });

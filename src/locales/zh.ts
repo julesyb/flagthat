@@ -224,6 +224,8 @@ const zh: typeof en = {
   },
 
   browse: {
+    title: '\u6d4f\u89c8',
+    countriesLabel: '\u4e2a\u56fd\u5bb6',
     searchPlaceholder: '\u641c\u7d22\u56fd\u65d7...',
     all: '\u5168\u90e8',
     africa: '\u975e\u6d32',

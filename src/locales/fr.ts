@@ -224,6 +224,8 @@ const fr: typeof en = {
   },
 
   browse: {
+    title: 'Parcourir',
+    countriesLabel: 'pays',
     searchPlaceholder: 'Rechercher des drapeaux...',
     all: 'Tous',
     africa: 'Afrique',

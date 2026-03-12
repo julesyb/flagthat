@@ -402,13 +402,13 @@ const styles = StyleSheet.create({
     fontSize: fontSize.lg,
     letterSpacing: 0.5,
     textTransform: 'uppercase',
-    color: colors.background,
+    color: colors.playText,
     marginBottom: 2,
   },
   primaryBtnSub: {
     fontFamily: fontFamily.body,
     fontSize: fontSize.caption,
-    color: colors.background,
+    color: colors.playText,
   },
   secondaryBtn: {
     flexDirection: 'row',
@@ -528,7 +528,7 @@ const styles = StyleSheet.create({
   regionNumberTextActive: {
     fontFamily: fontFamily.uiLabel,
     fontSize: fontSize.caption,
-    color: colors.background,
+    color: colors.playText,
   },
   checkCircle: {
     width: 32,
@@ -589,6 +589,6 @@ const styles = StyleSheet.create({
     fontSize: fontSize.xl,
     letterSpacing: 1.5,
     textTransform: 'uppercase',
-    color: colors.background,
+    color: colors.playText,
   },
 });

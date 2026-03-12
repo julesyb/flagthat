@@ -395,7 +395,7 @@ export default function HomeScreen({ navigation }: Props) {
                 }}
               >
                 <Text style={styles.onboardingCtaText}>{t(`categories.${nextRegion}`)}</Text>
-                <ChevronRightIcon size={14} color={colors.background} />
+                <ChevronRightIcon size={14} color={colors.playText} />
               </TouchableOpacity>
             </View>
             <View style={styles.onboardingBarRow}>
@@ -580,7 +580,7 @@ const styles = StyleSheet.create({
     fontSize: fontSize.sm,
     letterSpacing: 0.5,
     textTransform: 'uppercase',
-    color: colors.background,
+    color: colors.playText,
   },
   onboardingBarRow: {
     gap: spacing.xs,
