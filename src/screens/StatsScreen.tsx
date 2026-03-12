@@ -10,6 +10,7 @@ import {
   Animated,
   Easing,
   Modal,
+  Clipboard,
 } from 'react-native';
 import { useFocusEffect, useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -869,7 +870,7 @@ export default function StatsScreen() {
                       accessibilityRole="button"
                       accessibilityLabel={t('challenge.copyCode')}
                       onPress={async () => {
-                        await navigator.clipboard.writeText(ch.fullCode);
+                        Clipboard.setString(ch.fullCode);
                         setCodeCopied(true);
                         setTimeout(() => setCodeCopied(false), 2000);
                       }}
