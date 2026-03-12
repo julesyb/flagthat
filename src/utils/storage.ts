@@ -386,8 +386,9 @@ async function appendDailyLog(date: string, score: number, results: GameResult[]
 }
 
 // Per-flag stats: tracks wrong/right counts and consecutive-right streak.
-// Once rightStreak reaches 3, the flag is considered "learned" and drops
-// out of Practice More. Getting it wrong again resets the streak.
+// Once rightStreak reaches MASTERED_STREAK, the flag is considered "learned"
+// and drops out of Practice More. Getting it wrong again resets the streak.
+export const MASTERED_STREAK = 3;
 export interface FlagStats {
   [flagId: string]: { wrong: number; right: number; rightStreak: number; totalTimeRight?: number };
 }
@@ -437,7 +438,7 @@ export async function updateFlagResults(results: GameResult[]): Promise<void> {
 export async function getMissedFlagIds(): Promise<string[]> {
   const stats = await getFlagStats();
   return Object.entries(stats)
-    .filter(([, s]) => s.wrong > 0 && s.rightStreak < 3)
+    .filter(([, s]) => s.wrong > 0 && s.rightStreak < MASTERED_STREAK)
     .sort(([, a], [, b]) => b.wrong - a.wrong)
     .map(([id]) => id);
 }
