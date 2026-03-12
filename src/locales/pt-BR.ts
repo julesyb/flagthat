@@ -183,6 +183,9 @@ const ptBR: typeof en = {
     improvementUp: '+{pct}%, muito bem!',
     improvementSame: 'Estavel',
     improvementDown: '{pct}% para recuperar, voce consegue',
+    mastered: 'Dominados',
+    activityTitle: 'Atividade',
+    last28Days: 'Últimos 28 dias',
   },
 
   settings: {

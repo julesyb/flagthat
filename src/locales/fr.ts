@@ -183,6 +183,9 @@ const fr: typeof en = {
     improvementUp: '+{pct}%, bravo !',
     improvementSame: 'Stable',
     improvementDown: '{pct}% à rattraper, vous pouvez le faire',
+    mastered: 'Maîtrisés',
+    activityTitle: 'Activité',
+    last28Days: '28 derniers jours',
   },
 
   settings: {
