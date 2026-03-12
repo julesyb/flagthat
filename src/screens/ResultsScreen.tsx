@@ -42,15 +42,16 @@ export default function ResultsScreen({ route, navigation }: Props) {
   const isChallenge = !!challenge;
   const canChallenge = CHALLENGE_MODES.includes(config.mode);
   const correct = countCorrect(results);
-  const accuracy = calculateAccuracy(results);
+  const isDaily = config.mode === 'daily';
+  const isBaseline = config.mode === 'baseline';
+  const baselineTotal = isBaseline ? getCategoryCount(config.category as CategoryId) : results.length;
+  const accuracy = baselineTotal > 0 ? Math.round((correct / baselineTotal) * 100) : 0;
   const streak = getStreakFromResults(results);
   const grade = getGrade(accuracy);
   const avgTime = results.length > 0
     ? Math.round(results.reduce((sum, r) => sum + r.timeTaken, 0) / results.length / 1000 * 10) / 10
     : 0;
   const isPerfect = accuracy === 100 && results.length > 0;
-  const isDaily = config.mode === 'daily';
-  const isBaseline = config.mode === 'baseline';
 
   const skipAds = isDaily || isBaseline || reviewOnly;
   const interstitial = useInterstitialAdUnit();
@@ -523,7 +524,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
 
           {/* Score line */}
           <Animated.Text style={[styles.heroScoreText, { opacity: scoreFade }]}>
-            {correct}/{results.length} {t('results.correct').toLowerCase()}
+            {correct}/{baselineTotal} {t('results.correct').toLowerCase()}
           </Animated.Text>
         </Animated.View>
 
@@ -791,7 +792,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
         <Animated.View style={{ opacity: restFade }}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>{t('common.review')}</Text>
-            <Text style={styles.sectionMeta}>{correct}/{results.length} {t('results.correct').toLowerCase()}</Text>
+            <Text style={styles.sectionMeta}>{correct}/{baselineTotal} {t('results.correct').toLowerCase()}</Text>
           </View>
         </Animated.View>
         {results.map((result, index) => {
