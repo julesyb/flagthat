@@ -415,6 +415,8 @@ const ptBR: DeepPartial<TranslationStrings> = {
     last10: 'Ultimos 10',
     sent: 'Enviado',
     received: 'Jogado',
+    copyCode: 'Copiar codigo',
+    codeCopied: 'Copiado!',
   },
 };
 

@@ -29,7 +29,8 @@ import ScreenContainer from '../components/ScreenContainer';
 import { useNavTabs } from '../hooks/useNavTabs';
 import { getAllEarnedBadges, buildBadgeContext, deriveFromContext, BADGES, TIER_COLORS, getBadgeProgress, Badge } from '../utils/badges';
 import { computeLevelProgress, LevelProgress, getTierLabel, getLevelTier } from '../utils/levels';
-import { ChevronRightIcon, BadgeIconView, UsersIcon, CheckIcon, CrossIcon, FlameIcon } from '../components/Icons';
+import { ChevronRightIcon, BadgeIconView, UsersIcon, CheckIcon, CrossIcon, FlameIcon, CopyIcon } from '../components/Icons';
+import * as Clipboard from 'expo-clipboard';
 import { decodeChallenge } from '../utils/challengeCode';
 import PageHeader from '../components/PageHeader';
 
@@ -72,6 +73,7 @@ export default function StatsScreen() {
   const [data, setData] = useState<StatsData | null>(null);
   const [selectedBadge, setSelectedBadge] = useState<Badge | null>(null);
   const [selectedChallenge, setSelectedChallenge] = useState<ChallengeHistoryEntry | null>(null);
+  const [codeCopied, setCodeCopied] = useState(false);
 
   // ── Animation values ──
   const hasAnimated = useRef(false);
@@ -751,12 +753,12 @@ export default function StatsScreen() {
         visible={selectedChallenge !== null}
         transparent
         animationType="fade"
-        onRequestClose={() => setSelectedChallenge(null)}
+        onRequestClose={() => { setSelectedChallenge(null); setCodeCopied(false); }}
       >
         <TouchableOpacity
           style={styles.modalOverlay}
           activeOpacity={1}
-          onPress={() => setSelectedChallenge(null)}
+          onPress={() => { setSelectedChallenge(null); setCodeCopied(false); }}
         >
           <View style={[styles.modalCard, { maxHeight: '80%' }]} onStartShouldSetResponder={() => true}>
             <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
@@ -857,6 +859,29 @@ export default function StatsScreen() {
                       })}
                     </View>
                   )}
+
+                  {ch.fullCode ? (
+                    <TouchableOpacity
+                      style={[styles.copyCodeBtn, codeCopied && { backgroundColor: colors.successBg }]}
+                      activeOpacity={0.7}
+                      accessibilityRole="button"
+                      accessibilityLabel={t('challenge.copyCode')}
+                      onPress={async () => {
+                        await Clipboard.setStringAsync(ch.fullCode);
+                        setCodeCopied(true);
+                        setTimeout(() => setCodeCopied(false), 2000);
+                      }}
+                    >
+                      {codeCopied ? (
+                        <CheckIcon size={14} color={colors.success} />
+                      ) : (
+                        <CopyIcon size={14} color={colors.textSecondary} />
+                      )}
+                      <Text style={[styles.copyCodeText, codeCopied && { color: colors.success }]}>
+                        {codeCopied ? t('challenge.codeCopied') : t('challenge.copyCode')}
+                      </Text>
+                    </TouchableOpacity>
+                  ) : null}
                 </>
               );
             })()}
@@ -1469,5 +1494,19 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     width: 12,
     height: 12,
     borderRadius: 6,
+  },
+  copyCodeBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    marginTop: spacing.lg,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.surfaceSecondary,
+  },
+  copyCodeText: {
+    ...typography.captionStrong,
+    color: colors.textSecondary,
   },
 });
