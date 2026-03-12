@@ -2,7 +2,6 @@ import { GameMode, FlagItem, GameQuestion, GameResult, GameConfig } from '../typ
 import { getFlagsForCategory, getAllFlags } from '../data';
 import { countryAliases, twinPairs } from '../data/countryAliases';
 import { translateName } from '../data/countryNames';
-import { colors } from './theme';
 import { APP_DOMAIN } from './config';
 
 export function shuffleArray<T>(array: T[]): T[] {
@@ -221,12 +220,14 @@ export function getStreakFromResults(results: GameResult[]): number {
   return maxStreak;
 }
 
-export function getGrade(accuracy: number): { label: string; color: string } {
-  if (accuracy >= 95) return { label: 'S', color: colors.gradeS };
-  if (accuracy >= 90) return { label: 'A+', color: colors.gradeA };
-  if (accuracy >= 80) return { label: 'A', color: colors.gradeA };
-  if (accuracy >= 70) return { label: 'B', color: colors.gradeB };
-  if (accuracy >= 60) return { label: 'C', color: colors.gradeC };
-  if (accuracy >= 50) return { label: 'D', color: colors.gradeD };
-  return { label: 'F', color: colors.gradeF };
+export type GradeKey = 'gradeS' | 'gradeA' | 'gradeB' | 'gradeC' | 'gradeD' | 'gradeF';
+
+export function getGrade(accuracy: number): { label: string; colorKey: GradeKey } {
+  if (accuracy >= 95) return { label: 'S', colorKey: 'gradeS' };
+  if (accuracy >= 90) return { label: 'A+', colorKey: 'gradeA' };
+  if (accuracy >= 80) return { label: 'A', colorKey: 'gradeA' };
+  if (accuracy >= 70) return { label: 'B', colorKey: 'gradeB' };
+  if (accuracy >= 60) return { label: 'C', colorKey: 'gradeC' };
+  if (accuracy >= 50) return { label: 'D', colorKey: 'gradeD' };
+  return { label: 'F', colorKey: 'gradeF' };
 }

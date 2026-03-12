@@ -519,6 +519,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   quitText: {
     ...nav.backText,
+    color: colors.textTertiary,
   },
   centerInfo: {
     alignItems: 'center',

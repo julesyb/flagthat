@@ -389,6 +389,6 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   emptyState: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing.xl },
   emptyTitle: { ...typography.heading, color: colors.text, marginBottom: spacing.sm },
   emptyBody: { ...typography.body, color: colors.textSecondary, textAlign: 'center', marginBottom: spacing.xl },
-  emptyButton: { ...buttons.secondary },
-  emptyButtonText: { ...buttons.secondaryText },
+  emptyButton: { ...buttons.secondary, backgroundColor: colors.surface, borderColor: colors.border },
+  emptyButtonText: { ...buttons.secondaryText, color: colors.textSecondary },
 });

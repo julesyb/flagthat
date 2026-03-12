@@ -523,7 +523,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
             styles.heroGradeWrap,
             { opacity: gradeOpacity, transform: [{ scale: gradeScale }] },
           ]}>
-            <Text style={[styles.heroGrade, { color: grade.color }]}>{grade.label}</Text>
+            <Text style={[styles.heroGrade, { color: colors[grade.colorKey] }]}>{grade.label}</Text>
           </Animated.View>
 
           {/* Score line */}
@@ -1001,8 +1001,8 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
 
   // ── Buttons
   buttonRow: { gap: spacing.sm, marginBottom: spacing.md },
-  secondaryButton: { ...buttons.secondary, justifyContent: 'center', alignItems: 'center' },
-  secondaryButtonText: { ...buttons.secondaryText, textAlign: 'center' },
+  secondaryButton: { ...buttons.secondary, backgroundColor: colors.surface, borderColor: colors.border, justifyContent: 'center', alignItems: 'center' },
+  secondaryButtonText: { ...buttons.secondaryText, color: colors.textSecondary, textAlign: 'center' },
   primaryButton: { ...buttons.primary, justifyContent: 'center', alignItems: 'center' },
   primaryButtonText: { ...buttons.primaryText, textAlign: 'center' },
 

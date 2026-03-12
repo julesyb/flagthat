@@ -48,6 +48,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   exitText: {
     ...nav.backText,
+    color: colors.textTertiary,
   },
   centerSlot: {
     alignItems: 'center',
