@@ -122,7 +122,7 @@ const zh: DeepPartial<TranslationStrings> = {
 
   results: {
     perfectScore: '\u6ee1\u5206',
-    dailyTitle: '\u6bcf\u65e5 #{number}',
+    dailyTitle: '\u6bcf\u65e5\u6311\u6218',
     correct: '\u6b63\u786e',
     bestStreak: '\u6700\u4f73\u8fde\u80dc',
     avgTime: '\u5e73\u5747\u65f6\u95f4',

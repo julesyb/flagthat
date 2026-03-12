@@ -135,7 +135,7 @@ const en = {
   // ─── Results Screen ──────────────────────────────────────
   results: {
     perfectScore: 'PERFECT SCORE',
-    dailyTitle: 'Daily #{number}',
+    dailyTitle: 'Daily Challenge',
     correct: 'Correct',
     bestStreak: 'Best Streak',
     avgTime: 'Avg Time',

@@ -122,7 +122,7 @@ const de: DeepPartial<TranslationStrings> = {
 
   results: {
     perfectScore: 'PERFEKTE PUNKTZAHL',
-    dailyTitle: 'T\u00e4glich #{number}',
+    dailyTitle: 'T\u00e4gliche Herausforderung',
     correct: 'Richtig',
     bestStreak: 'Beste Serie',
     avgTime: '\u00d8 Zeit',

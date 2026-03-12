@@ -122,7 +122,7 @@ const ptBR: DeepPartial<TranslationStrings> = {
 
   results: {
     perfectScore: 'PONTUA\u00c7\u00c3O PERFEITA',
-    dailyTitle: 'Di\u00e1rio #{number}',
+    dailyTitle: 'Desafio Di\u00e1rio',
     correct: 'Corretas',
     bestStreak: 'Melhor sequ\u00eancia',
     avgTime: 'Tempo m\u00e9d.',
