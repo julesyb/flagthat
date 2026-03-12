@@ -97,13 +97,12 @@ export function generateDailyQuestions(dateStr?: string): GameQuestion[] {
 }
 
 export function generateDailyShareGrid(results: GameResult[]): string {
-  const dailyNum = getDailyNumber();
   const correct = results.filter((r) => r.correct).length;
   const grid = results.map((r) => (r.correct ? '\u2b1b' : '\u2b1c')).join('');
   // Split into rows of 5
   const row1 = grid.slice(0, SHARE_GRID_ROW_SIZE);
   const row2 = grid.slice(SHARE_GRID_ROW_SIZE, DAILY_QUESTION_COUNT);
-  return `Flag That #${dailyNum}\n${correct}/${DAILY_QUESTION_COUNT}\n\n${row1}\n${row2}\n\n${APP_DOMAIN}`;
+  return `Flag That Daily Challenge\n${correct}/${DAILY_QUESTION_COUNT}\n\n${row1}\n${row2}\n\n${APP_DOMAIN}`;
 }
 
 export function generateShareGrid(results: GameResult[], modeLabel: string): string {

@@ -18,7 +18,7 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { spacing, typography, fontFamily, fontSize, buildButtons, borderRadius, APP_URL, ThemeColors } from '../utils/theme';
 import { useTheme } from '../contexts/ThemeContext';
-import { getStreakFromResults, generateDailyShareGrid, generateShareGrid, getDailyNumber, modeLabelKey } from '../utils/gameEngine';
+import { getStreakFromResults, generateDailyShareGrid, generateShareGrid, modeLabelKey } from '../utils/gameEngine';
 import { updateStats, updateFlagResults, saveDailyChallenge, incrementDailyChallenges, markShared, saveBaselineResult, getStats, getFlagStats, getDayStreakInfo, getBadgeData, persistEarnedBadges, getMissedFlagIds, addGameHistoryEntry, getChallengeName, saveChallengeName, addChallengeToHistory, recordRegionScore, getPersistedLevel, persistLevel, UNLOCK_THRESHOLD } from '../utils/storage';
 import { BaselineRegionId, UserStats, GameMode, CategoryId, BASELINE_REGIONS } from '../types';
 import { t } from '../utils/i18n';
@@ -446,7 +446,6 @@ export default function ResultsScreen({ route, navigation }: Props) {
   }, []);
 
   const modeLabel = t(modeLabelKey(config.mode));
-  const dailyNumber = isDaily ? getDailyNumber() : 0;
 
   const handleShare = async () => {
     const message = isDaily
@@ -695,7 +694,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
         {/* ── DAILY GRID ── */}
         {isDaily && (
           <Animated.View style={[styles.dailyGridCard, { opacity: statsFade }]}>
-            <Text style={styles.dailyGridTitle}>{t('results.shareTitle', { number: dailyNumber })}</Text>
+            <Text style={styles.dailyGridTitle}>{t('results.shareTitle')}</Text>
             <View style={styles.dailyGrid}>
               <View style={styles.dailyGridRow}>
                 {results.slice(0, 5).map((r, i) => (

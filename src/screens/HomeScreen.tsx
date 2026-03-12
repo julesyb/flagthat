@@ -17,7 +17,7 @@ import { ThemeColors } from '../utils/theme';
 import { getTotalFlagCount, getCategoryCount } from '../data';
 import { initAudio, hapticTap, hapticCorrect, hapticWrong, playWrongSound, setSoundsEnabled, setHapticsEnabled } from '../utils/feedback';
 import { getStats, getSettings, getMissedFlagIds, getBaselineData, isDailyCompleteToday, BaselineData, getFlagStats, getBadgeData, getDayStreakInfo, getPersistedLevel, persistLevel } from '../utils/storage';
-import { generateQuestions, getDailyNumber } from '../utils/gameEngine';
+import { generateQuestions } from '../utils/gameEngine';
 import { RootStackParamList } from '../types/navigation';
 import { GameMode, UserStats, GameQuestion, CategoryId, BASELINE_REGIONS } from '../types';
 import { PlayIcon, ChevronRightIcon, CheckIcon, LinkIcon, CalendarIcon } from '../components/Icons';
@@ -317,14 +317,14 @@ export default function HomeScreen({ navigation }: Props) {
                 });
               }}
               accessibilityRole="button"
-              accessibilityLabel={dailyDone ? t('home.comeBackTomorrow') : t('home.daily', { number: getDailyNumber() })}
+              accessibilityLabel={dailyDone ? t('home.comeBackTomorrow') : t('home.daily')}
               accessibilityHint={dailyDone ? undefined : t('a11y.opensMode')}
               accessibilityState={{ disabled: dailyDone }}
             >
               <View style={[styles.modeBar, { backgroundColor: dailyDone ? colors.dim : colors.modeGold }]} />
               <CalendarIcon size={15} color={dailyDone ? colors.textTertiary : colors.goldBright} />
               <Text style={[styles.modeTitle, dailyDone ? styles.modeTitleDisabled : { color: colors.goldBright }]}>
-                {t('home.daily', { number: getDailyNumber() })}
+                {t('home.daily')}
               </Text>
               <Text style={styles.modeTag}>
                 {dailyDone ? t('home.comeBackTomorrow') : t('home.tenFlags')}
