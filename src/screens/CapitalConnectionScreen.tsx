@@ -325,8 +325,8 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   questionContainer: {
     flex: 1,
     padding: spacing.lg,
-    paddingTop: spacing.xl,
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
+    maxHeight: 680,
   },
   flagContainer: {
     alignItems: 'center',
