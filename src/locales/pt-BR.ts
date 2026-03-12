@@ -72,6 +72,7 @@ const ptBR: typeof en = {
 
   setup: {
     gameMode: 'Modo de jogo',
+    chooseYourGame: 'Escolha seu jogo',
     quiz: 'Quiz',
     quizDesc: 'Quiz cl\u00e1ssico de bandeiras',
     flagFlash: 'FlagFlash',

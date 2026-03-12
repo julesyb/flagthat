@@ -72,6 +72,7 @@ const es: typeof en = {
 
   setup: {
     gameMode: 'Modo de juego',
+    chooseYourGame: 'Elige tu juego',
     quiz: 'Quiz',
     quizDesc: 'Quiz cl\u00e1sico de banderas',
     flagFlash: 'FlagFlash',

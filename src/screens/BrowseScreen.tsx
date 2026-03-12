@@ -7,7 +7,6 @@ import {
   FlatList,
   SafeAreaView,
   TextInput,
-  ScrollView,
   useWindowDimensions,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -164,12 +163,7 @@ export default function BrowseScreen({ route, navigation }: Props) {
         </View>
 
         {/* Region filter chips */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.chipScroll}
-          style={styles.chipRow}
-        >
+        <View style={styles.chipWrap}>
           {filterOptions.map((filter) => {
             const active = selectedFilter === filter;
             return (
@@ -198,7 +192,7 @@ export default function BrowseScreen({ route, navigation }: Props) {
               </TouchableOpacity>
             );
           })}
-        </ScrollView>
+        </View>
 
         {/* Result count */}
         <Text style={styles.resultCount}>
@@ -269,13 +263,12 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     color: colors.text,
     paddingVertical: 0,
   },
-  chipRow: {
-    flexGrow: 0,
-    marginBottom: spacing.sm,
-  },
-  chipScroll: {
+  chipWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     paddingHorizontal: spacing.md,
     gap: spacing.sm,
+    marginBottom: spacing.sm,
   },
   chip: {
     backgroundColor: colors.surface,
@@ -316,9 +309,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   flagWrap: {
     width: '100%',
     overflow: 'hidden',
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
+    backgroundColor: 'transparent',
     justifyContent: 'center',
     alignItems: 'center',
   },

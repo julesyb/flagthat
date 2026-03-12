@@ -436,7 +436,7 @@ export default function GameScreen({ route, navigation }: Props) {
                       </Text>
                     </View>
                   ) : (
-                    <Text style={textStyle}>{translateName(option)}</Text>
+                    <Text style={textStyle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>{translateName(option)}</Text>
                   )}
                 </TouchableOpacity>
               );
@@ -582,8 +582,9 @@ const createStyles = (colors: ThemeColors) => {
   optionButton: {
     backgroundColor: colors.surface,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
+    height: 52,
     alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 2,
     borderColor: colors.border,
     borderRadius: borderRadius.md,

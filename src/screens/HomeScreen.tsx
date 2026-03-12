@@ -100,7 +100,7 @@ function FlagTeaser({ onAnswer }: { onAnswer?: () => void }) {
           accessibilityLabel={translateName(opt)}
           accessibilityState={{ disabled: picked !== null }}
         >
-          <Text style={[styles.optText, showCorrect && styles.optTextCorrect, showWrong && styles.optTextWrong]}>{translateName(opt)}</Text>
+          <Text style={[styles.optText, showCorrect && styles.optTextCorrect, showWrong && styles.optTextWrong]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{translateName(opt)}</Text>
         </TouchableOpacity>
       </Animated.View>
     );
@@ -715,9 +715,10 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     borderWidth: 1.5,
     borderColor: colors.border,
     borderRadius: borderRadius.md,
-    paddingVertical: spacing.md,
+    height: 52,
     paddingHorizontal: spacing.sm,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   optCorrect: {
     backgroundColor: colors.successBg,
