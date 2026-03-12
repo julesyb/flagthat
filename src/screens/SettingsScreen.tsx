@@ -15,7 +15,7 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
 import Constants from 'expo-constants';
-import { colors, spacing, typography, fontFamily, fontSize, borderRadius, APP_URL, APP_DOMAIN } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, fontSize, borderRadius, screenContainer, APP_URL, APP_DOMAIN } from '../utils/theme';
 import { getSettings, saveSettings, AppSettings, resetStats } from '../utils/storage';
 import {
   setSoundsEnabled,
@@ -287,7 +287,7 @@ export default function SettingsScreen() {
           <View style={styles.settingDivider} />
           <TouchableOpacity
             style={styles.settingRow}
-            onPress={() => Linking.openURL(`${APP_URL}/privacy`)}
+            onPress={() => Linking.openURL(`${APP_URL}/privacy`).catch(() => {})}
             activeOpacity={0.7}
           >
             <Text style={styles.settingLabel}>{t('settings.privacyPolicy')}</Text>
@@ -296,7 +296,7 @@ export default function SettingsScreen() {
           <View style={styles.settingDivider} />
           <TouchableOpacity
             style={styles.settingRow}
-            onPress={() => Linking.openURL(`${APP_URL}/terms`)}
+            onPress={() => Linking.openURL(`${APP_URL}/terms`).catch(() => {})}
             activeOpacity={0.7}
           >
             <Text style={styles.settingLabel}>{t('settings.termsOfService')}</Text>
@@ -305,7 +305,7 @@ export default function SettingsScreen() {
           <View style={styles.settingDivider} />
           <TouchableOpacity
             style={styles.settingRow}
-            onPress={() => Linking.openURL(`mailto:support@${APP_DOMAIN}`)}
+            onPress={() => Linking.openURL(`mailto:support@${APP_DOMAIN}`).catch(() => {})}
             activeOpacity={0.7}
           >
             <Text style={styles.settingLabel}>{t('settings.support')}</Text>
@@ -331,10 +331,7 @@ export default function SettingsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
+  container: screenContainer,
   content: {
     padding: spacing.lg,
     paddingBottom: spacing.xxl,

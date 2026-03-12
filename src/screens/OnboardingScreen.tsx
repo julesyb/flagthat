@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
-import { colors, fontFamily, fontSize, spacing, borderRadius, shadows } from '../utils/theme';
+import { colors, fontFamily, fontSize, spacing, borderRadius, shadows, screenContainer } from '../utils/theme';
 import { getBaselineData, BaselineData, skipOnboarding } from '../utils/storage';
 import { getCategoryCount, getAllFlags } from '../data';
 import { hapticTap } from '../utils/feedback';
@@ -304,10 +304,7 @@ export default function OnboardingScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
+  container: screenContainer,
   scroll: {
     flex: 1,
   },

@@ -13,7 +13,7 @@ import {
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
-import { colors, spacing, fontFamily, fontSize, borderRadius } from '../utils/theme';
+import { colors, spacing, fontFamily, fontSize, borderRadius, screenContainer } from '../utils/theme';
 import { UserStats, GameMode, CategoryId } from '../types';
 import { getStats, getFlagStats, FlagStats, getDayStreakInfo, DayStreakInfo, getBadgeData, getMissedFlagIds, BadgeData, getSupportData, getGameHistory, GameHistoryEntry, getBaselineData, BaselineData, getChallengeHistory, ChallengeHistoryEntry } from '../utils/storage';
 import { getAllFlags, getTotalFlagCount } from '../data';
@@ -250,8 +250,6 @@ export default function StatsScreen() {
     ? Math.round((stats.totalCorrect / stats.totalAnswered) * 100) : 0;
   const progressPct = totalFlags > 0 ? Math.round((countriesSeen / totalFlags) * 100) : 0;
   const earnedIds = new Set(earnedBadges.map((b) => b.id));
-
-  const playedModes = MODE_BREAKDOWN.filter(({ key }) => stats.modeStats[key].total > 0);
 
   // Region accuracy data (only regions with games played)
   const regionData = REGIONS
@@ -617,7 +615,7 @@ export default function StatsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
+  container: screenContainer,
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   loadingText: { fontFamily: fontFamily.body, fontSize: fontSize.lg, color: colors.textSecondary },
   content: { padding: spacing.md, paddingBottom: spacing.xxl },

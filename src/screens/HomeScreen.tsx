@@ -12,7 +12,7 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { colors, fontFamily, fontSize, spacing, borderRadius, shadows, buttons } from '../utils/theme';
+import { colors, fontFamily, fontSize, spacing, borderRadius, shadows, buttons, screenContainer } from '../utils/theme';
 import { getTotalFlagCount, getCategoryCount } from '../data';
 import { initAudio, hapticTap, hapticCorrect, hapticWrong, playWrongSound, setSoundsEnabled, setHapticsEnabled } from '../utils/feedback';
 import { getStats, getDayStreak, getSettings, getMissedFlagIds, getBaselineData, BaselineData } from '../utils/storage';
@@ -23,6 +23,7 @@ import { PlayIcon, ChevronRightIcon, ChevronDownIcon, ClockIcon, EyeIcon, Crossh
 import FlagImage from '../components/FlagImage';
 import BottomNav from '../components/BottomNav';
 import ScreenContainer from '../components/ScreenContainer';
+import SegBtn from '../components/SegBtn';
 import { useNavTabs } from '../hooks/useNavTabs';
 import SupportCard from '../components/SupportCard';
 import { preloadRewardedAd } from '../utils/ads';
@@ -341,22 +342,20 @@ export default function HomeScreen({ navigation }: Props) {
             <Text style={styles.configLbl}>{t('home.cards')}</Text>
             <View style={styles.segRow}>
               {QUESTION_COUNTS.map((c) => (
-                <TouchableOpacity
+                <SegBtn
                   key={c}
-                  style={[styles.segBtn, !questionCountAll && questionCount === c && styles.segBtnOn]}
-                  onPress={() => { hapticTap(); setQuestionCount(c); setQuestionCountAll(false); }}
-                  activeOpacity={0.7}
-                >
-                  <Text style={[styles.segBtnText, !questionCountAll && questionCount === c && styles.segBtnTextOn]}>{c}</Text>
-                </TouchableOpacity>
+                  label={String(c)}
+                  active={!questionCountAll && questionCount === c}
+                  onPress={() => { setQuestionCount(c); setQuestionCountAll(false); }}
+                  maxWidth={54}
+                />
               ))}
-              <TouchableOpacity
-                style={[styles.segBtn, questionCountAll && styles.segBtnOn]}
-                onPress={() => { hapticTap(); setQuestionCountAll(true); }}
-                activeOpacity={0.7}
-              >
-                <Text style={[styles.segBtnText, questionCountAll && styles.segBtnTextOn]}>{t('common.all')}</Text>
-              </TouchableOpacity>
+              <SegBtn
+                label={t('common.all')}
+                active={questionCountAll}
+                onPress={() => setQuestionCountAll(true)}
+                maxWidth={54}
+              />
             </View>
           </View>
           <View style={styles.configDivider} />
@@ -364,14 +363,13 @@ export default function HomeScreen({ navigation }: Props) {
             <Text style={styles.configLbl}>{t('home.difficulty')}</Text>
             <View style={styles.segRow}>
               {MODE_KEYS.map((m) => (
-                <TouchableOpacity
+                <SegBtn
                   key={m}
-                  style={[styles.segBtn, mode === m && styles.segBtnOn]}
-                  onPress={() => { hapticTap(); setMode(m); }}
-                  activeOpacity={0.7}
-                >
-                  <Text style={[styles.segBtnText, mode === m && styles.segBtnTextOn]}>{t(`common.${m}`)}</Text>
-                </TouchableOpacity>
+                  label={t(`common.${m}`)}
+                  active={mode === m}
+                  onPress={() => setMode(m)}
+                  maxWidth={54}
+                />
               ))}
             </View>
           </View>
@@ -381,20 +379,18 @@ export default function HomeScreen({ navigation }: Props) {
               <View style={styles.configRow}>
                 <Text style={styles.configLbl}>{t('home.hints')}</Text>
                 <View style={styles.segRow}>
-                  <TouchableOpacity
-                    style={[styles.segBtn, !autocomplete && styles.segBtnOn]}
-                    onPress={() => { hapticTap(); setAutocomplete(false); }}
-                    activeOpacity={0.7}
-                  >
-                    <Text style={[styles.segBtnText, !autocomplete && styles.segBtnTextOn]}>{t('common.off')}</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[styles.segBtn, autocomplete && styles.segBtnOn]}
-                    onPress={() => { hapticTap(); setAutocomplete(true); }}
-                    activeOpacity={0.7}
-                  >
-                    <Text style={[styles.segBtnText, autocomplete && styles.segBtnTextOn]}>{t('common.on')}</Text>
-                  </TouchableOpacity>
+                  <SegBtn
+                    label={t('common.off')}
+                    active={!autocomplete}
+                    onPress={() => setAutocomplete(false)}
+                    maxWidth={54}
+                  />
+                  <SegBtn
+                    label={t('common.on')}
+                    active={autocomplete}
+                    onPress={() => setAutocomplete(true)}
+                    maxWidth={54}
+                  />
                 </View>
               </View>
             </>
@@ -495,10 +491,7 @@ export default function HomeScreen({ navigation }: Props) {
 
 // ─── Styles ──────────────────────────────────────────────────
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
+  container: screenContainer,
   scroll: {
     flex: 1,
   },
@@ -844,29 +837,6 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: spacing.xs,
     justifyContent: 'flex-end',
-  },
-  segBtn: {
-    flex: 1,
-    maxWidth: 54,
-    paddingVertical: spacing.sm,
-    backgroundColor: colors.surfaceSecondary,
-    borderWidth: 1.5,
-    borderColor: colors.rule,
-    borderRadius: borderRadius.sm,
-    alignItems: 'center',
-  },
-  segBtnOn: {
-    backgroundColor: colors.ink,
-    borderColor: colors.ink,
-  },
-  segBtnText: {
-    fontFamily: fontFamily.uiLabel,
-    fontSize: fontSize.caption,
-    textTransform: 'uppercase',
-    color: colors.textTertiary,
-  },
-  segBtnTextOn: {
-    color: colors.white,
   },
 
   // ── Game modes

@@ -8,7 +8,7 @@ import {
   Animated,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius, screenContainer } from '../utils/theme';
 import { hapticTap, hapticCorrect, hapticWrong, playWrongSound } from '../utils/feedback';
 import { shuffleArray } from '../utils/gameEngine';
 import { RootStackParamList } from '../types/navigation';
@@ -21,6 +21,7 @@ import GameTopBar from '../components/GameTopBar';
 import ScreenContainer from '../components/ScreenContainer';
 import { t } from '../utils/i18n';
 import { flagName } from '../data/countryNames';
+import { countCorrect, countWrong, calculateProgress } from '../utils/gameHelpers';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CapitalConnection'>;
 
@@ -102,11 +103,11 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
   }, []);
 
   const guessLimit = config.guessLimit ?? 0;
-  const wrongCount = results.filter((r) => !r.correct).length;
+  const wrongCnt = countWrong(results);
 
   const question = questions[currentIndex] ?? null;
-  const correctCount = results.filter((r) => r.correct).length;
-  const progress = questions.length > 0 ? (currentIndex + 1) / questions.length : 0;
+  const correctCount = countCorrect(results);
+  const progress = calculateProgress(currentIndex, questions.length);
 
   const goToNext = useCallback(() => {
     if (autoAdvanceRef.current) {
@@ -117,7 +118,7 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
     if (!newResults) return;
     pendingResultsRef.current = null;
 
-    const isEliminated = guessLimit > 0 && newResults.filter((r) => !r.correct).length >= guessLimit;
+    const isEliminated = guessLimit > 0 && countWrong(newResults) >= guessLimit;
 
     if (currentIndex < questions.length - 1 && !isEliminated) {
       fadeAnim.setValue(1);
@@ -206,7 +207,7 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
         }
         right={
           guessLimit > 0 ? (
-            <Text style={styles.livesText}>{guessLimit - wrongCount === 1 ? t('game.life', { count: Math.max(0, guessLimit - wrongCount) }) : t('game.lives', { count: Math.max(0, guessLimit - wrongCount) })}</Text>
+            <Text style={styles.livesText}>{guessLimit - wrongCnt === 1 ? t('game.life', { count: Math.max(0, guessLimit - wrongCnt) }) : t('game.lives', { count: Math.max(0, guessLimit - wrongCnt) })}</Text>
           ) : undefined
         }
       />
@@ -271,10 +272,7 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
+  container: screenContainer,
   progressBar: {
     height: 3,
     backgroundColor: colors.border,

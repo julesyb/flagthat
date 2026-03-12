@@ -315,6 +315,12 @@ export const layout = {
   },
 };
 
+/** Shared base style for full-screen containers with the app background. */
+export const screenContainer = {
+  flex: 1 as const,
+  backgroundColor: palette.paper,
+};
+
 export const shadows = {
   small: {
     shadowColor: colors.ink,

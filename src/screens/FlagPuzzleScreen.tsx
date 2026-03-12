@@ -13,7 +13,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily, buttons, borderRadius, nav } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, buttons, borderRadius, nav, screenContainer } from '../utils/theme';
 import { GameQuestion, GameResult } from '../types';
 import { generateQuestions, checkAnswer } from '../utils/gameEngine';
 import { hapticCorrect, hapticWrong, hapticTap, playWrongSound } from '../utils/feedback';
@@ -27,6 +27,7 @@ import ScreenContainer from '../components/ScreenContainer';
 import { t } from '../utils/i18n';
 import { flagName } from '../data/countryNames';
 import { buildChallengeQuestions } from '../utils/challengeCode';
+import { countCorrect, calculateProgress } from '../utils/gameHelpers';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'FlagPuzzle'>;
 
@@ -141,7 +142,7 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
   }, [timeRemaining, showFeedback, questions.length]);
 
   const currentQuestion = questions[currentIndex];
-  const progress = questions.length > 0 ? (currentIndex + 1) / questions.length : 0;
+  const progress = calculateProgress(currentIndex, questions.length);
 
   const revealedTiles = useMemo(() => {
     const set = new Set<number>();
@@ -298,7 +299,7 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
               </Animated.Text>
             ) : (
               <Text style={styles.score}>
-                {t('game.correctCount', { count: results.filter((r) => r.correct).length })}
+                {t('game.correctCount', { count: countCorrect(results) })}
               </Text>
             )}
           </View>
@@ -429,10 +430,7 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
+  container: screenContainer,
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',

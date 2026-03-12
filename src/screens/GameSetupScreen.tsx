@@ -8,7 +8,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius, shadows } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius, shadows, screenContainer } from '../utils/theme';
 import {
   GameMode,
   DisplayMode,
@@ -24,6 +24,7 @@ import ScreenContainer from '../components/ScreenContainer';
 import { useNavTabs } from '../hooks/useNavTabs';
 import { t } from '../utils/i18n';
 import { hapticTap } from '../utils/feedback';
+import SegBtn from '../components/SegBtn';
 import {
   FlagIcon,
   LightningIcon,
@@ -73,20 +74,6 @@ function ConfigRow({ label, children }: { label: string; children: React.ReactNo
   );
 }
 
-// Small segmented button chip (matches HomeScreen segBtn)
-function SegBtn({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
-  return (
-    <TouchableOpacity
-      style={[styles.segBtn, active && styles.segBtnOn]}
-      onPress={() => { hapticTap(); onPress(); }}
-      activeOpacity={0.7}
-      accessibilityRole="button"
-      accessibilityState={{ selected: active }}
-    >
-      <Text style={[styles.segBtnText, active && styles.segBtnTextOn]}>{label}</Text>
-    </TouchableOpacity>
-  );
-}
 
 export default function GameSetupScreen({ route, navigation }: Props) {
   const onNavigate = useNavTabs();
@@ -452,10 +439,7 @@ export default function GameSetupScreen({ route, navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
+  container: screenContainer,
   scrollView: {
     flex: 1,
   },
@@ -601,29 +585,6 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: spacing.xs,
     justifyContent: 'flex-end',
-  },
-  segBtn: {
-    flex: 1,
-    maxWidth: 80,
-    paddingVertical: spacing.sm,
-    backgroundColor: colors.surfaceSecondary,
-    borderWidth: 1.5,
-    borderColor: colors.rule,
-    borderRadius: borderRadius.sm,
-    alignItems: 'center',
-  },
-  segBtnOn: {
-    backgroundColor: colors.ink,
-    borderColor: colors.ink,
-  },
-  segBtnText: {
-    fontFamily: fontFamily.uiLabel,
-    fontSize: fontSize.caption,
-    textTransform: 'uppercase',
-    color: colors.textTertiary,
-  },
-  segBtnTextOn: {
-    color: colors.white,
   },
 
   // Filter section

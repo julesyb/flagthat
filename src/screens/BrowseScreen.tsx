@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
-import { colors, spacing, typography, borderRadius } from '../utils/theme';
+import { colors, spacing, typography, borderRadius, screenContainer } from '../utils/theme';
 import { FlagItem } from '../types';
 import { RootStackParamList } from '../types/navigation';
 import { getAllFlags } from '../data';
@@ -163,10 +163,7 @@ export default function BrowseScreen({ route, navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
+  container: screenContainer,
   searchContainer: {
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.md,

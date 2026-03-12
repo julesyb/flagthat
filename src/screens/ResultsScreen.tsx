@@ -16,7 +16,7 @@ import {
   Alert,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius, APP_URL } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius, screenContainer, APP_URL } from '../utils/theme';
 import { calculateAccuracy, getStreakFromResults, getGrade, generateDailyShareGrid, generateShareGrid, getDailyNumber } from '../utils/gameEngine';
 import { updateStats, updateFlagResults, saveDailyChallenge, incrementDailyChallenges, markShared, saveBaselineResult, getStats, getFlagStats, getDayStreakInfo, getBadgeData, persistEarnedBadges, getMissedFlagIds, addGameHistoryEntry, getSupportData, getChallengeName, saveChallengeName, addChallengeToHistory } from '../utils/storage';
 import { BaselineRegionId, UserStats, GameMode } from '../types';
@@ -27,6 +27,7 @@ import { CheckIcon, CrossIcon, ChevronRightIcon, BarChartIcon, GlobeIcon, Calend
 import BottomNav from '../components/BottomNav';
 import ScreenContainer from '../components/ScreenContainer';
 import { useNavTabs } from '../hooks/useNavTabs';
+import { countCorrect } from '../utils/gameHelpers';
 import { RootStackParamList } from '../types/navigation';
 import { getAllEarnedBadges, detectPerGameBadges, buildBadgeContext, BADGES, TIER_COLORS, EarnedBadge } from '../utils/badges';
 import { getTotalFlagCount } from '../data';
@@ -40,7 +41,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
   const { results, config, reviewOnly, challenge, playerName } = route.params;
   const isChallenge = !!challenge;
   const canChallenge = CHALLENGE_MODES.includes(config.mode);
-  const correct = results.filter((r) => r.correct).length;
+  const correct = countCorrect(results);
   const accuracy = calculateAccuracy(results);
   const streak = getStreakFromResults(results);
   const grade = getGrade(accuracy);
@@ -173,8 +174,8 @@ export default function ResultsScreen({ route, navigation }: Props) {
 
   // Head-to-head comparison data
   const h2h = isChallenge && challenge ? (() => {
-    const hostCorrect = challenge.hostResults.filter((r) => r.correct).length;
-    const playerCorrect = results.filter((r) => r.correct).length;
+    const hostCorrect = countCorrect(challenge.hostResults);
+    const playerCorrect = countCorrect(results);
     const h2hTotal = challenge.flagIds.length;
     // Compute raw averages in ms for fair comparison (host times have 100ms granularity from encoding)
     const hostAvgMs = challenge.hostResults.length > 0
@@ -883,7 +884,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
 
 // ─── Styles ────────────────────────────────────────────────────
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
+  container: screenContainer,
   content: { padding: spacing.md, paddingBottom: spacing.xxl },
 
   // ── Celebration

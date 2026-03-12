@@ -12,7 +12,7 @@ import {
   Platform,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, fontFamily, fontSize, buttons, borderRadius } from '../utils/theme';
+import { colors, spacing, fontFamily, fontSize, buttons, borderRadius, screenContainer } from '../utils/theme';
 import { RootStackParamList } from '../types/navigation';
 import { decodeChallenge, buildChallengeQuestions, getScreenForMode, ChallengeData, ChallengeScreenName } from '../utils/challengeCode';
 import { hapticTap, hapticWrong } from '../utils/feedback';
@@ -169,10 +169,7 @@ export default function JoinChallengeScreen({ route, navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
+  container: screenContainer,
   content: {
     padding: spacing.lg,
     paddingTop: spacing.xxl,

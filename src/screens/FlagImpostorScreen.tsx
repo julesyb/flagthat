@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import Svg, { Rect, Path, Circle } from 'react-native-svg';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius, screenContainer } from '../utils/theme';
 import { hapticTap, hapticCorrect, hapticWrong, playWrongSound } from '../utils/feedback';
 import { updateStats, updateFlagResults } from '../utils/storage';
 import { shuffleArray, getStreakFromResults } from '../utils/gameEngine';
@@ -18,6 +18,7 @@ import { t } from '../utils/i18n';
 import { flagName } from '../data/countryNames';
 import { RootStackParamList } from '../types/navigation';
 import { FlagItem, GameResult } from '../types';
+import { countCorrect, countWrong } from '../utils/gameHelpers';
 import { countries } from '../data/countries';
 import FlagImage from '../components/FlagImage';
 import { CheckIcon, CrossIcon } from '../components/Icons';
@@ -408,11 +409,11 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
   const roundStartTime = useRef(Date.now());
 
   const guessLimit = config.guessLimit ?? 0;
-  const wrongCount = results.filter((r) => !r.correct).length;
+  const wrongCount = countWrong(results);
 
   const round = rounds[roundIndex] ?? null;
   const isLastRound = roundIndex >= rounds.length - 1;
-  const correctCount = results.filter((r) => r.correct).length;
+  const correctCount = countCorrect(results);
 
   const grid = useMemo(() => {
     if (!round) return [];
@@ -456,7 +457,7 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
   };
 
   const handleNext = () => {
-    const isEliminated = guessLimit > 0 && results.filter((r) => !r.correct).length >= guessLimit;
+    const isEliminated = guessLimit > 0 && countWrong(results) >= guessLimit;
     if (isLastRound || isEliminated) {
       finishGame([...results]);
       return;
@@ -570,7 +571,7 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
+  container: screenContainer,
   topBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',

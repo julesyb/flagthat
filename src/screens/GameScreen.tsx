@@ -12,7 +12,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily, nav, buttons, borderRadius } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, nav, buttons, borderRadius, screenContainer } from '../utils/theme';
 import { GameQuestion, GameResult } from '../types';
 import { generateQuestions, generateDailyQuestions, generatePracticeQuestions, checkAnswer } from '../utils/gameEngine';
 import { getMissedFlagIds } from '../utils/storage';
@@ -27,6 +27,7 @@ import { RootStackParamList } from '../types/navigation';
 import GameTopBar from '../components/GameTopBar';
 import ScreenContainer from '../components/ScreenContainer';
 import { buildChallengeQuestions } from '../utils/challengeCode';
+import { countCorrect, calculateProgress } from '../utils/gameHelpers';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Game'>;
 
@@ -137,7 +138,7 @@ export default function GameScreen({ route, navigation }: Props) {
       .filter((p) => p.display.toLowerCase().includes(query) || p.english.toLowerCase().includes(query))
       .slice(0, 5);
   }, [isAutocomplete, textInput, showFeedback, namePairs]);
-  const progress = questions.length > 0 ? (currentIndex + 1) / questions.length : 0;
+  const progress = calculateProgress(currentIndex, questions.length);
 
   const goToNext = useCallback(() => {
     if (autoAdvanceRef.current) {
@@ -273,7 +274,7 @@ export default function GameScreen({ route, navigation }: Props) {
           <View style={styles.centerInfo}>
             {isTimeAttack ? (
               <Text style={styles.counter}>
-                {t('game.correctCount', { count: results.filter((r) => r.correct).length })}
+                {t('game.correctCount', { count: countCorrect(results) })}
               </Text>
             ) : (
               <Text style={styles.counter}>
@@ -289,7 +290,7 @@ export default function GameScreen({ route, navigation }: Props) {
             ) : (
               !isTimeAttack && (
                 <Text style={styles.score}>
-                  {t('game.correctCount', { count: results.filter((r) => r.correct).length })}
+                  {t('game.correctCount', { count: countCorrect(results) })}
                 </Text>
               )
             )}
@@ -440,10 +441,7 @@ export default function GameScreen({ route, navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
+  container: screenContainer,
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',

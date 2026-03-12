@@ -9,7 +9,7 @@ import {
   Animated,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius } from '../utils/theme';
+import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius, screenContainer } from '../utils/theme';
 import { hapticTap, hapticCorrect, hapticWrong, playWrongSound } from '../utils/feedback';
 import { updateStats, updateFlagResults } from '../utils/storage';
 import { shuffleArray, getStreakFromResults } from '../utils/gameEngine';
@@ -18,6 +18,7 @@ import { flagName } from '../data/countryNames';
 import { RootStackParamList } from '../types/navigation';
 import { FlagItem, GameResult } from '../types';
 import { countries } from '../data/countries';
+import { countCorrect, countWrong } from '../utils/gameHelpers';
 import { countryNeighbors, getCountriesWithNeighbors } from '../data/countryNeighbors';
 import FlagImage from '../components/FlagImage';
 import { CheckIcon, CrossIcon } from '../components/Icons';
@@ -117,12 +118,12 @@ export default function NeighborsScreen({ navigation, route }: Props) {
   }
 
   const guessLimit = config.guessLimit ?? 0;
-  const wrongCount = results.filter((r) => !r.correct).length;
+  const wrongCount = countWrong(results);
 
   const round = rounds[roundIndex];
   const isLastRound = roundIndex >= rounds.length - 1;
   const neighborSet = new Set(round.neighborIds);
-  const correctCount = results.filter((r) => r.correct).length;
+  const correctCount = countCorrect(results);
 
   const toggleSelect = (id: string) => {
     if (submitted) return;
@@ -314,7 +315,7 @@ export default function NeighborsScreen({ navigation, route }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
+  container: screenContainer,
   topBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',

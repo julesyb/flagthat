@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius, nav } from '../utils/theme';
+import { countCorrect } from '../utils/gameHelpers';
 import { t } from '../utils/i18n';
 import { GameQuestion, GameResult } from '../types';
 import { generateQuestions } from '../utils/gameEngine';
@@ -264,7 +265,7 @@ export default function FlagFlashScreen({ route, navigation }: Props) {
 
   const currentQuestion = questions[currentIndex] ?? null;
   const correctCount = React.useMemo(
-    () => results.filter((r) => r.correct).length,
+    () => countCorrect(results),
     [results],
   );
 
