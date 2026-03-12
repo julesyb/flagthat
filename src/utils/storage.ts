@@ -1,9 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { UserStats, GameMode, CategoryId, GameResult, BaselineRegionId } from '../types';
-import { MS_PER_DAY, MASTERED_STREAK, MAX_GAME_HISTORY, MAX_CHALLENGE_HISTORY } from './config';
+import { MS_PER_DAY, MASTERED_STREAK, UNLOCK_THRESHOLD, MAX_GAME_HISTORY, MAX_CHALLENGE_HISTORY } from './config';
 
 // Re-export for existing consumers
-export { MASTERED_STREAK };
+export { MASTERED_STREAK, UNLOCK_THRESHOLD };
 
 const STATS_KEY = '@flagsareus_stats';
 const FLAG_STATS_KEY = '@flagsareus_flag_stats';

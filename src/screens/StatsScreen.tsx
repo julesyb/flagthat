@@ -17,7 +17,7 @@ import { RootStackParamList } from '../types/navigation';
 import { ThemeColors, spacing, fontFamily, fontSize, borderRadius, typography } from '../utils/theme';
 import { useTheme } from '../contexts/ThemeContext';
 import { UserStats, CategoryId, BaselineRegionId } from '../types';
-import { getStats, getFlagStats, FlagStats, getDayStreakInfo, DayStreakInfo, getBadgeData, getMissedFlagIds, BadgeData, getGameHistory, GameHistoryEntry, getChallengeHistory, ChallengeHistoryEntry, MASTERED_STREAK, getRegionScoreHistory, RegionScoreHistory } from '../utils/storage';
+import { getStats, getFlagStats, FlagStats, getDayStreakInfo, DayStreakInfo, getBadgeData, getMissedFlagIds, BadgeData, getGameHistory, GameHistoryEntry, getChallengeHistory, ChallengeHistoryEntry, MASTERED_STREAK, UNLOCK_THRESHOLD, getRegionScoreHistory, RegionScoreHistory } from '../utils/storage';
 import { getAllFlags, getTotalFlagCount, getCategoryCount } from '../data';
 
 import { t } from '../utils/i18n';
@@ -105,7 +105,7 @@ export default function StatsScreen() {
         const acc = loaded.stats.totalAnswered > 0
           ? Math.round((loaded.stats.totalCorrect / loaded.stats.totalAnswered) * 100) : 0;
         const totalF = getTotalFlagCount();
-        const seen = Object.values(loaded.flagStats).filter((f) => f.right > 0).length;
+        const seen = Object.values(loaded.flagStats).filter((f) => f.right >= UNLOCK_THRESHOLD).length;
         const pct = totalF > 0 ? seen / totalF : 0;
 
         if (shouldAnimate) {
@@ -172,7 +172,7 @@ export default function StatsScreen() {
 
   const top10 = React.useMemo(() => {
     return Object.entries(flagStats)
-      .filter(([, s]) => s.right > 0)
+      .filter(([, s]) => s.right >= UNLOCK_THRESHOLD)
       .sort(([, a], [, b]) => {
         const totalA = a.right + a.wrong;
         const totalB = b.right + b.wrong;
@@ -305,7 +305,7 @@ export default function StatsScreen() {
   const { stats, challengeHistory, regionScoreHistory } = data;
 
   const totalFlags = getTotalFlagCount();
-  const countriesSeen = Object.values(flagStats).filter((fs) => fs.right > 0).length;
+  const countriesSeen = Object.values(flagStats).filter((fs) => fs.right >= UNLOCK_THRESHOLD).length;
   const progressPct = totalFlags > 0 ? Math.round((countriesSeen / totalFlags) * 100) : 0;
 
   // Region data - show all regions regardless of whether played
@@ -364,7 +364,12 @@ export default function StatsScreen() {
         {/* ── COUNTRIES PROGRESS (compact) ── */}
         <Animated.View style={[styles.tileCompact, { opacity: progressFade }]}>
           <View style={styles.tileCompactRow}>
-            <Text style={styles.tileLabel}>{t('stats.countriesUnlocked')}</Text>
+            <View>
+              <Text style={styles.tileLabel}>{t('stats.countriesUnlocked')}</Text>
+              {countriesSeen < totalFlags && (
+                <Text style={styles.unlockHint}>{t('stats.unlockHint', { count: UNLOCK_THRESHOLD })}</Text>
+              )}
+            </View>
             <Text style={styles.tileCompactVal}>{countriesSeen} / {totalFlags}</Text>
           </View>
           <View style={styles.progressWrap}>
@@ -817,6 +822,11 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   tileLabel: {
     ...typography.eyebrow,
     color: colors.textTertiary,
+  },
+  unlockHint: {
+    ...typography.micro,
+    color: colors.textTertiary,
+    marginTop: 2,
   },
 
   // ── Progress
