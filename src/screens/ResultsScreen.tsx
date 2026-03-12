@@ -17,7 +17,7 @@ import {
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { colors, spacing, typography, fontFamily, fontSize, buttons, borderRadius, screenContainer, APP_URL } from '../utils/theme';
-import { calculateAccuracy, getStreakFromResults, getGrade, generateDailyShareGrid, generateShareGrid, getDailyNumber } from '../utils/gameEngine';
+import { getStreakFromResults, getGrade, generateDailyShareGrid, generateShareGrid, getDailyNumber } from '../utils/gameEngine';
 import { updateStats, updateFlagResults, saveDailyChallenge, incrementDailyChallenges, markShared, saveBaselineResult, getStats, getFlagStats, getDayStreakInfo, getBadgeData, persistEarnedBadges, getMissedFlagIds, addGameHistoryEntry, getSupportData, getChallengeName, saveChallengeName, addChallengeToHistory } from '../utils/storage';
 import { BaselineRegionId, UserStats, GameMode, CategoryId } from '../types';
 import { t } from '../utils/i18n';
@@ -44,8 +44,8 @@ export default function ResultsScreen({ route, navigation }: Props) {
   const correct = countCorrect(results);
   const isDaily = config.mode === 'daily';
   const isBaseline = config.mode === 'baseline';
-  const baselineTotal = isBaseline ? getCategoryCount(config.category as CategoryId) : results.length;
-  const accuracy = baselineTotal > 0 ? Math.round((correct / baselineTotal) * 100) : 0;
+  const questionTotal = isBaseline ? getCategoryCount(config.category as CategoryId) : results.length;
+  const accuracy = questionTotal > 0 ? Math.round((correct / questionTotal) * 100) : 0;
   const streak = getStreakFromResults(results);
   const grade = getGrade(accuracy);
   const avgTime = results.length > 0
@@ -524,7 +524,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
 
           {/* Score line */}
           <Animated.Text style={[styles.heroScoreText, { opacity: scoreFade }]}>
-            {correct}/{baselineTotal} {t('results.correct').toLowerCase()}
+            {correct}/{questionTotal} {t('results.correct').toLowerCase()}
           </Animated.Text>
         </Animated.View>
 
@@ -792,7 +792,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
         <Animated.View style={{ opacity: restFade }}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>{t('common.review')}</Text>
-            <Text style={styles.sectionMeta}>{correct}/{baselineTotal} {t('results.correct').toLowerCase()}</Text>
+            <Text style={styles.sectionMeta}>{correct}/{questionTotal} {t('results.correct').toLowerCase()}</Text>
           </View>
         </Animated.View>
         {results.map((result, index) => {
