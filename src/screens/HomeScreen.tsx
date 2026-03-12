@@ -112,17 +112,18 @@ function FlagTeaser({ onAnswer }: { onAnswer?: () => void }) {
         />
       </View>
 
-      {/* Options 2x2 */}
-      {!picked ? (
-        <View style={styles.optsGrid}>
-          <View style={styles.optsRow}>
-            {question.options.slice(0, 2).map((opt, i) => renderOption(opt, i))}
-          </View>
-          <View style={styles.optsRow}>
-            {question.options.slice(2, 4).map((opt, i) => renderOption(opt, i + 2))}
-          </View>
+      {/* Options 2x2 — stay visible after pick to show correct/wrong highlights */}
+      <View style={styles.optsGrid}>
+        <View style={styles.optsRow}>
+          {question.options.slice(0, 2).map((opt, i) => renderOption(opt, i))}
         </View>
-      ) : (
+        <View style={styles.optsRow}>
+          {question.options.slice(2, 4).map((opt, i) => renderOption(opt, i + 2))}
+        </View>
+      </View>
+
+      {/* Result label appears after pick */}
+      {picked && (
         <View style={styles.teaserResult}>
           <Text style={[styles.teaserResultText, picked === question.flag.name ? styles.teaserResultCorrect : styles.teaserResultWrong]}>
             {picked === question.flag.name ? t('common.correct') : flagName(question.flag)}
