@@ -16,11 +16,11 @@ import { useTheme } from '../contexts/ThemeContext';
 import { ThemeColors } from '../utils/theme';
 import { getTotalFlagCount, getCategoryCount } from '../data';
 import { initAudio, hapticTap, hapticCorrect, hapticWrong, playWrongSound, setSoundsEnabled, setHapticsEnabled } from '../utils/feedback';
-import { getStats, getDayStreak, getSettings, getMissedFlagIds, getBaselineData, isDailyCompleteToday, BaselineData, getFlagStats, getBadgeData, getDayStreakInfo, getPersistedLevel, persistLevel } from '../utils/storage';
+import { getStats, getSettings, getMissedFlagIds, getBaselineData, isDailyCompleteToday, BaselineData, getFlagStats, getBadgeData, getDayStreakInfo, getPersistedLevel, persistLevel } from '../utils/storage';
 import { generateQuestions, getDailyNumber } from '../utils/gameEngine';
 import { RootStackParamList } from '../types/navigation';
 import { GameMode, UserStats, GameQuestion, CategoryId, BASELINE_REGIONS } from '../types';
-import { PlayIcon, ChevronRightIcon, CheckIcon, FlameIcon, LinkIcon, CalendarIcon } from '../components/Icons';
+import { PlayIcon, ChevronRightIcon, CheckIcon, LinkIcon, CalendarIcon } from '../components/Icons';
 import FlagImage from '../components/FlagImage';
 import BottomNav from '../components/BottomNav';
 import ScreenContainer from '../components/ScreenContainer';
@@ -148,7 +148,6 @@ export default function HomeScreen({ navigation }: Props) {
   const [questionCount, setQuestionCount] = useState(10);
   const [questionCountAll, setQuestionCountAll] = useState(false);
   const [stats, setStats] = useState<UserStats | null>(null);
-  const [dayStreak, setDayStreak] = useState(0);
   const [teaserKey, setTeaserKey] = useState(0);
   const [weakFlagCount, setWeakFlagCount] = useState(0);
   const [dailyDone, setDailyDone] = useState(false);
@@ -176,7 +175,7 @@ export default function HomeScreen({ navigation }: Props) {
 
   useFocusEffect(
     useCallback(() => {
-      getDayStreak().then(setDayStreak);
+      getStats().then(setStats);
       getMissedFlagIds().then((ids) => setWeakFlagCount(ids.length));
       isDailyCompleteToday().then(setDailyDone);
       getBaselineData().then(setBaseline);
@@ -216,37 +215,19 @@ export default function HomeScreen({ navigation }: Props) {
             <Text style={styles.wmFlag}>Flag</Text>
             <Text style={styles.wmThat}>That</Text>
           </Text>
-          <View style={styles.headerRight}>
-            {levelProgress && (
-              <TouchableOpacity
-                style={styles.levelBadge}
-                onPress={() => navigation.navigate('Stats')}
-                activeOpacity={0.7}
-                accessibilityRole="button"
-                accessibilityLabel={t('stats.level', { level: levelProgress.currentLevel })}
-                accessibilityHint={t('a11y.opensStats')}
-              >
-                <Text style={styles.levelBadgeLabel}>{t('stats.levelLabel')}</Text>
-                <Text style={styles.levelBadgeNum}>{levelProgress.currentLevel}</Text>
-              </TouchableOpacity>
-            )}
+          {levelProgress && (
             <TouchableOpacity
-              style={styles.streakBadge}
+              style={styles.levelBadge}
               onPress={() => navigation.navigate('Stats')}
               activeOpacity={0.7}
               accessibilityRole="button"
-              accessibilityLabel={`${dayStreak} ${t('home.dayStreak')}`}
+              accessibilityLabel={t('stats.level', { level: levelProgress.currentLevel })}
               accessibilityHint={t('a11y.opensStats')}
             >
-              <FlameIcon size={16} color={dayStreak > 0 ? colors.goldBright : colors.textTertiary} />
-              <Text style={[styles.streakNum, dayStreak === 0 && styles.streakNumInactive]}>{dayStreak}</Text>
-              <View style={styles.streakPips}>
-                {Array.from({ length: 7 }).map((_, i) => (
-                  <View key={i} style={[styles.pip, i < Math.min(dayStreak, 7) && styles.pipLit]} />
-                ))}
-              </View>
+              <Text style={styles.levelBadgeLabel}>{t('stats.levelLabel')}</Text>
+              <Text style={styles.levelBadgeNum}>{levelProgress.currentLevel}</Text>
             </TouchableOpacity>
-          </View>
+          )}
         </View>
 
         {/* ── FLAG TEASER ── */}
@@ -575,11 +556,6 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     fontSize: fontSize.title,
     color: colors.goldBright,
   },
-  headerRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
   levelBadge: {
     alignItems: 'center',
     paddingVertical: spacing.xs,
@@ -603,42 +579,6 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     color: colors.goldBright,
     letterSpacing: -0.5,
     lineHeight: 18,
-  },
-  streakBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    paddingLeft: spacing.sm + 2,
-    borderRadius: borderRadius.full,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-  },
-  streakNum: {
-    fontFamily: fontFamily.display,
-    fontSize: fontSize.lg,
-    color: colors.goldBright,
-    letterSpacing: -0.8,
-    lineHeight: 22,
-  },
-  streakNumInactive: {
-    color: colors.textTertiary,
-  },
-  streakPips: {
-    flexDirection: 'row',
-    gap: 3,
-    marginLeft: 2,
-  },
-  pip: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: colors.pipInactive,
-  },
-  pipLit: {
-    backgroundColor: colors.pipActive,
   },
 
   // ── Onboarding progress
