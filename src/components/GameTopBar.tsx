@@ -28,7 +28,7 @@ export default function GameTopBar({ onExit, center, right }: GameTopBarProps) {
         accessibilityRole="button"
         accessibilityLabel={t('common.exit')}
       >
-        <CrossIcon size={20} color={colors.ink} />
+        <CrossIcon size={20} color={colors.textTertiary} />
       </TouchableOpacity>
       <View style={styles.centerSlot}>{center}</View>
       {right ?? <View style={styles.spacer} />}
