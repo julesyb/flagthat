@@ -43,6 +43,7 @@ export interface GameConfig {
   displayMode?: DisplayMode; // flag (default) or map
   autocomplete?: boolean; // enable autocomplete suggestions in hard mode
   guessLimit?: number; // max wrong guesses before game over (omitted or 0 = unlimited)
+  difficulty?: 'easy' | 'medium' | 'hard'; // difficulty for modes that support it (timeattack, capitalconnection)
 }
 
 export interface GameQuestion {

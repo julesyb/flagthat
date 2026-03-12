@@ -51,7 +51,7 @@ export default function GameScreen({ route, navigation }: Props) {
 
   useEffect(() => {
     if (challenge) {
-      const q = buildChallengeQuestions(challenge.flagIds, challenge.mode) || [];
+      const q = buildChallengeQuestions(challenge.flagIds, challenge.mode, challenge.difficulty) || [];
       setQuestions(q);
       setQuestionStartTime(Date.now());
     } else if (config.mode === 'daily') {
@@ -116,7 +116,7 @@ export default function GameScreen({ route, navigation }: Props) {
   }, [timeLeft]);
 
   const currentQuestion = questions[currentIndex];
-  const isHard = config.mode === 'hard';
+  const isHard = config.mode === 'hard' || config.difficulty === 'hard';
   const isMapMode = config.displayMode === 'map';
   const isAutocomplete = isHard && config.autocomplete === true;
 

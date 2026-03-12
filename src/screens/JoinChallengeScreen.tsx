@@ -69,7 +69,7 @@ export default function JoinChallengeScreen({ route, navigation }: Props) {
     }
 
     const challenge = result.data;
-    const questions = buildChallengeQuestions(challenge.flagIds, challenge.mode);
+    const questions = buildChallengeQuestions(challenge.flagIds, challenge.mode, challenge.difficulty);
     if (!questions) {
       showError(t('challenge.invalidCode'));
       return;
@@ -84,6 +84,7 @@ export default function JoinChallengeScreen({ route, navigation }: Props) {
         category: 'all' as const,
         questionCount: challenge.flagIds.length,
         timeLimit: challenge.timeLimit,
+        ...(challenge.difficulty && { difficulty: challenge.difficulty }),
       },
       challenge,
       playerName: name.trim(),

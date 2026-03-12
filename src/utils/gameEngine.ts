@@ -121,7 +121,7 @@ export function generateQuestions(config: GameConfig): GameQuestion[] {
   const selectedFlags = shuffledFlags.slice(0, count);
 
   return selectedFlags.map((flag) => {
-    const options = generateOptions(flag, categoryFlags, config.mode);
+    const options = generateOptions(flag, categoryFlags, config.mode, config.difficulty);
     return { flag, options };
   });
 }
@@ -142,10 +142,11 @@ export function generatePracticeQuestions(flagIds: string[]): GameQuestion[] {
   });
 }
 
-function generateOptions(correctFlag: FlagItem, pool: FlagItem[], mode: GameMode): string[] {
-  if (mode === 'hard' || mode === 'flagflash' || mode === 'flagpuzzle') return [];
+function generateOptions(correctFlag: FlagItem, pool: FlagItem[], mode: GameMode, difficulty?: 'easy' | 'medium' | 'hard'): string[] {
+  const effectiveDifficulty = difficulty || (mode === 'easy' ? 'easy' : mode === 'hard' ? 'hard' : 'medium');
+  if (effectiveDifficulty === 'hard' || mode === 'flagflash' || mode === 'flagpuzzle') return [];
 
-  const choiceCount = (mode === 'timeattack' || mode === 'medium' || mode === 'baseline') ? 4 : 2;
+  const choiceCount = effectiveDifficulty === 'easy' ? 2 : 4;
   const otherFlags = pool.filter((f) => f.id !== correctFlag.id);
 
   // Prioritize twin flags as wrong options so look-alikes appear together

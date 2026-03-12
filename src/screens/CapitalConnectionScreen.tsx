@@ -33,34 +33,46 @@ interface QuestionData {
 
 const flagById = new Map(countries.map((c) => [c.id, c]));
 
-function buildQuestionForFlag(flag: FlagItem): QuestionData | null {
+function buildQuestionForFlag(flag: FlagItem, difficulty?: 'easy' | 'medium' | 'hard'): QuestionData | null {
   const correctCapital = countryCapitals[flag.id];
   if (!correctCapital) return null;
 
-  const localCities = countryCities[flag.id] ?? [];
+  const wrongCount = difficulty === 'easy' ? 1 : 3;
+  const localCities = (countryCities[flag.id] ?? []).filter((c) => c !== correctCapital);
   const eligible = countries.filter((c) => countryCapitals[c.id]);
+  const otherCapitals = shuffleArray(
+    eligible.filter((c) => c.id !== flag.id).map((c) => countryCapitals[c.id])
+  );
 
   let wrongOptions: string[];
-  if (localCities.length >= 3) {
-    wrongOptions = shuffleArray(localCities.filter((c) => c !== correctCapital)).slice(0, 3);
+  if (difficulty === 'hard') {
+    // Hard: prioritize local cities as distractors (same-country cities are trickier)
+    const fromLocal = shuffleArray(localCities).slice(0, wrongCount);
+    const remaining = wrongCount - fromLocal.length;
+    wrongOptions = [...fromLocal, ...otherCapitals.slice(0, remaining)];
+  } else if (difficulty === 'easy') {
+    // Easy: only use capitals from other countries (more distinct)
+    wrongOptions = otherCapitals.slice(0, wrongCount);
   } else {
-    const otherCapitals = eligible
-      .filter((c) => c.id !== flag.id)
-      .map((c) => countryCapitals[c.id]);
-    wrongOptions = shuffleArray(otherCapitals).slice(0, 3);
+    // Medium: mix of local cities and other capitals
+    if (localCities.length >= wrongCount) {
+      wrongOptions = shuffleArray(localCities).slice(0, wrongCount);
+    } else {
+      wrongOptions = otherCapitals.slice(0, wrongCount);
+    }
   }
 
   const options = shuffleArray([correctCapital, ...wrongOptions]);
   return { flag, correctCapital, options };
 }
 
-function generateQuestions(count: number, challengeFlagIds?: string[]): QuestionData[] {
+function generateQuestions(count: number, challengeFlagIds?: string[], difficulty?: 'easy' | 'medium' | 'hard'): QuestionData[] {
   if (challengeFlagIds) {
     const questions: QuestionData[] = [];
     for (const id of challengeFlagIds) {
       const flag = flagById.get(id);
       if (!flag) continue;
-      const q = buildQuestionForFlag(flag);
+      const q = buildQuestionForFlag(flag, difficulty);
       if (q) questions.push(q);
     }
     return questions;
@@ -73,7 +85,7 @@ function generateQuestions(count: number, challengeFlagIds?: string[]): Question
 
   const questions: QuestionData[] = [];
   for (const flag of selected) {
-    const q = buildQuestionForFlag(flag);
+    const q = buildQuestionForFlag(flag, difficulty);
     if (q) questions.push(q);
   }
   return questions;
@@ -82,8 +94,8 @@ function generateQuestions(count: number, challengeFlagIds?: string[]): Question
 export default function CapitalConnectionScreen({ navigation, route }: Props) {
   const { config, challenge, playerName } = route.params;
   const questions = useMemo(
-    () => generateQuestions(config.questionCount, challenge?.flagIds),
-    [config.questionCount, challenge],
+    () => generateQuestions(config.questionCount, challenge?.flagIds, config.difficulty),
+    [config.questionCount, challenge, config.difficulty],
   );
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);

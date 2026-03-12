@@ -81,7 +81,7 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
   useEffect(() => {
     let q: GameQuestion[];
     if (challenge) {
-      q = buildChallengeQuestions(challenge.flagIds, challenge.mode) || [];
+      q = buildChallengeQuestions(challenge.flagIds, challenge.mode, challenge.difficulty) || [];
     } else {
       q = generateQuestions(config);
     }

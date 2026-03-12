@@ -67,6 +67,7 @@ const DIFFICULTIES: { key: QuizDifficulty; labelKey: string }[] = [
 export default function GameSetupScreen({ route, navigation }: Props) {
   const onNavigate = useNavTabs();
   const initialMode = route.params?.initialMode;
+  const initialDifficulty = route.params?.initialDifficulty;
 
   const [displayMode, setDisplayMode] = useState<DisplayMode>('flag');
   const [setupMode, setSetupMode] = useState<SetupMode>(() => {
@@ -81,6 +82,7 @@ export default function GameSetupScreen({ route, navigation }: Props) {
     }
   });
   const [difficulty, setDifficulty] = useState<QuizDifficulty>(() => {
+    if (initialDifficulty) return initialDifficulty;
     switch (initialMode) {
       case 'easy': return 'easy';
       case 'hard': return 'hard';
@@ -106,13 +108,24 @@ export default function GameSetupScreen({ route, navigation }: Props) {
   const resolvedMode: GameMode = isQuiz ? difficulty : (setupMode as GameMode);
 
   const showGuessLimit = setupMode !== 'timeattack' && setupMode !== 'flagpuzzle' && setupMode !== 'flagflash';
-  const showMapToggle = isQuiz || isFlagPuzzle;
+  const isCapitalConnection = setupMode === 'capitalconnection';
+  const showDifficulty = isQuiz || isTimeAttack || isCapitalConnection;
+  const showMapToggle = isQuiz;
 
-  // Set sensible default time limit when mode changes
+  // Set sensible defaults when mode changes
   useEffect(() => {
-    if (setupMode === 'flagflash') setTimeLimit(60);
-    else if (setupMode === 'flagpuzzle') setTimeLimit(15);
-    else if (setupMode === 'timeattack') setTimeLimit(60);
+    if (setupMode === 'flagflash') {
+      setTimeLimit(60);
+      setDisplayMode('flag');
+    } else if (setupMode === 'flagpuzzle') {
+      setTimeLimit(15);
+      setDisplayMode('flag');
+    } else if (setupMode === 'timeattack') {
+      setTimeLimit(60);
+      setDisplayMode('flag');
+    } else if (setupMode === 'neighbors' || setupMode === 'capitalconnection') {
+      setDisplayMode('flag');
+    }
   }, [setupMode]);
 
   const handleFilterTypeSelect = (type: CategoryType) => {
@@ -144,10 +157,11 @@ export default function GameSetupScreen({ route, navigation }: Props) {
       mode: resolvedMode,
       category: selectedCategory,
       questionCount: (isTimeAttack || isFlagFlash) ? 999 : effectiveQuestionCount,
-      displayMode,
+      ...(showMapToggle && { displayMode }),
       ...(hasTimeLimit && { timeLimit }),
       ...(difficulty === 'hard' && isQuiz && { autocomplete }),
       ...(showGuessLimit && guessLimit > 0 && { guessLimit }),
+      ...((isTimeAttack || isCapitalConnection) && { difficulty }),
     };
 
     if (isTimeAttack) {
@@ -176,9 +190,13 @@ export default function GameSetupScreen({ route, navigation }: Props) {
 
   const showQuestionCount = !isTimeAttack && !isFlagPuzzle && !isFlagFlash && filterType !== 'theme';
 
+  const diffLabel = t(DIFFICULTIES.find((d) => d.key === difficulty)?.labelKey ?? 'common.medium');
+  const modeLabel = t(SETUP_MODES.find((m) => m.key === setupMode)?.labelKey ?? 'setup.quiz');
   const startButtonLabel = isQuiz
-    ? t('setup.startQuiz', { difficulty: t(DIFFICULTIES.find((d) => d.key === difficulty)?.labelKey ?? 'common.medium') })
-    : t('setup.startMode', { mode: t(SETUP_MODES.find((m) => m.key === setupMode)?.labelKey ?? 'setup.quiz') });
+    ? t('setup.startQuiz', { difficulty: diffLabel })
+    : showDifficulty
+      ? t('setup.startMode', { mode: `${diffLabel} ${modeLabel}` })
+      : t('setup.startMode', { mode: modeLabel });
 
   return (
     <SafeAreaView style={styles.container}>
@@ -216,8 +234,8 @@ export default function GameSetupScreen({ route, navigation }: Props) {
           })}
         </View>
 
-        {/* Difficulty hero section (only for Quiz mode) */}
-        {isQuiz && (
+        {/* Difficulty hero section */}
+        {showDifficulty && (
           <View style={styles.diffSection}>
             <Text style={styles.diffLabel}>{t('home.difficulty')}</Text>
             <View style={styles.diffGrid}>
@@ -256,6 +274,7 @@ export default function GameSetupScreen({ route, navigation }: Props) {
         )}
 
         {/* Options card */}
+        {!showDifficulty && <View style={styles.configCardSpacing} />}
         <ConfigCard>
 
           {/* Autocomplete (only for Hard quiz - first row, no divider above) */}
@@ -410,8 +429,8 @@ export default function GameSetupScreen({ route, navigation }: Props) {
         <TouchableOpacity
           style={[
             styles.startButton,
-            isQuiz && difficulty === 'easy' && { backgroundColor: colors.diffEasy },
-            isQuiz && difficulty === 'hard' && { backgroundColor: colors.diffHard },
+            showDifficulty && difficulty === 'easy' && { backgroundColor: colors.diffEasy },
+            showDifficulty && difficulty === 'hard' && { backgroundColor: colors.diffHard },
           ]}
           onPress={startGame}
           activeOpacity={0.8}
@@ -443,6 +462,11 @@ const styles = StyleSheet.create({
     ...typography.heading,
     color: colors.text,
     marginBottom: spacing.md,
+  },
+
+  // Spacing for options card when difficulty section is hidden
+  configCardSpacing: {
+    marginTop: spacing.lg,
   },
 
   // Difficulty hero section
