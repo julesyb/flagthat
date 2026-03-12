@@ -32,7 +32,7 @@ import { countCorrect } from '../utils/gameHelpers';
 import { RootStackParamList } from '../types/navigation';
 import { getAllEarnedBadges, detectPerGameBadges, buildBadgeContext, BADGES, TIER_COLORS, EarnedBadge } from '../utils/badges';
 import { getCategoryCount } from '../data';
-import { computeLevelProgress, TIER_LABELS, getLevelTier } from '../utils/levels';
+import { computeLevelProgress, getTierLabel, getLevelTier } from '../utils/levels';
 import { encodeChallenge, ChallengeData, CHALLENGE_MODES, generateShortCode, generateChallengeShareCard } from '../utils/challengeCode';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Results'>;
@@ -287,8 +287,8 @@ export default function ResultsScreen({ route, navigation }: Props) {
         if (lp.currentLevel > prePersisted) {
           await persistLevel(lp.currentLevel);
           setLevelUpTo(lp.currentLevel);
-          // Only fire celebration if score-based celebration won't already play
-          if (!isPerfect && accuracy < 80) {
+          // Only fire celebration sound if perfect-score celebration won't already play it
+          if (!isPerfect) {
             hapticCorrect();
             playCelebrationSound();
           }
@@ -872,7 +872,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
           <TouchableOpacity activeOpacity={1} style={styles.levelUpCard} onPress={() => {}}>
             <Text style={styles.levelUpTitle}>{t('stats.levelUp')}</Text>
             <Text style={styles.levelUpNumber}>{levelUpTo}</Text>
-            <Text style={styles.levelUpTier}>{TIER_LABELS[getLevelTier(levelUpTo ?? 1)]}</Text>
+            <Text style={styles.levelUpTier}>{getTierLabel(getLevelTier(levelUpTo ?? 1))}</Text>
             <Text style={styles.levelUpDesc}>{t('stats.levelReached', { level: levelUpTo })}</Text>
             <TouchableOpacity
               style={styles.levelUpButton}

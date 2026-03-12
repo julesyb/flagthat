@@ -26,7 +26,7 @@ import BottomNav from '../components/BottomNav';
 import ScreenContainer from '../components/ScreenContainer';
 import { useNavTabs } from '../hooks/useNavTabs';
 import { getAllEarnedBadges, buildBadgeContext, deriveFromContext, BADGES, TIER_COLORS, getBadgeProgress, Badge } from '../utils/badges';
-import { computeLevelProgress, LevelProgress, TIER_LABELS, getLevelTier } from '../utils/levels';
+import { computeLevelProgress, LevelProgress, getTierLabel, getLevelTier } from '../utils/levels';
 import { ChevronRightIcon, BadgeIconView, UsersIcon } from '../components/Icons';
 import PageHeader from '../components/PageHeader';
 
@@ -377,7 +377,7 @@ export default function StatsScreen() {
           <View style={styles.tileCompactRow}>
             <View>
               <Text style={styles.levelNumber}>{t('stats.level', { level: levelProgress.currentLevel })}</Text>
-              <Text style={styles.levelTier}>{TIER_LABELS[getLevelTier(levelProgress.currentLevel || 1)]}</Text>
+              <Text style={styles.levelTier}>{getTierLabel(getLevelTier(levelProgress.currentLevel || 1))}</Text>
             </View>
             {!levelProgress.isMaxLevel && (
               <Text style={styles.tileCompactVal}>{levelProgress.progress} / {levelProgress.target}</Text>

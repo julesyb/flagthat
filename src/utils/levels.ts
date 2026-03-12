@@ -114,7 +114,7 @@ export function evaluateRequirement(
       return { progress: ms ? ms.correct : 0, target: req.count };
     }
     case 'modes_played': {
-      const played = PLAYABLE_MODES.filter((m) => ctx.stats.modeStats[m].total > 0).length;
+      const played = PLAYABLE_MODES.filter((m) => ctx.stats.modeStats[m]?.total > 0).length;
       return { progress: played, target: req.count };
     }
     case 'games_played': {
@@ -354,14 +354,9 @@ export function getLevelTier(level: number): LevelTier {
   return 'legend';
 }
 
-export const TIER_LABELS: Record<LevelTier, string> = {
-  starter: 'Starter',
-  explorer: 'Explorer',
-  scholar: 'Scholar',
-  expert: 'Expert',
-  master: 'Master',
-  legend: 'Legend',
-};
+export function getTierLabel(tier: LevelTier): string {
+  return t(`stats.tier${tier.charAt(0).toUpperCase() + tier.slice(1)}`);
+}
 
 // ─── Compute current level progress ──────────────────────────
 // Scans all levels sequentially. Uses persistedLevel as a floor
