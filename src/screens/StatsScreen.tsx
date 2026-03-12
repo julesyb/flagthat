@@ -57,7 +57,7 @@ export default function StatsScreen() {
   const onNavigate = useNavTabs();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const RANK_COLORS = useMemo(() => [colors.gradeS, colors.textTertiary, colors.warning], [colors]);
+  const RANK_COLORS = useMemo(() => [colors.rankGold, colors.textTertiary, colors.warning], [colors]);
 
   const [data, setData] = useState<StatsData | null>(null);
 
