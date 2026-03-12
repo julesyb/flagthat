@@ -370,7 +370,6 @@ export default function StatsScreen() {
               <Text style={styles.sectionMeta}>{t('stats.last28Days')}</Text>
             </View>
             <View style={styles.heatmapCard}>
-              {/* Day-of-week labels for the top row */}
               <View style={styles.heatmapDayRow}>
                 {activityGrid.cells.slice(0, 7).map((cell) => (
                   <Text key={`lbl-${cell.date}`} style={styles.heatmapDayLabel}>{cell.dayLabel}</Text>
@@ -387,7 +386,7 @@ export default function StatsScreen() {
                     <View
                       key={cell.date}
                       style={[
-                        styles.heatmapCell,
+                        styles.heatmapDot,
                         level === 1 && styles.heatmapL1,
                         level === 2 && styles.heatmapL2,
                         level === 3 && styles.heatmapL3,
@@ -1252,55 +1251,47 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
 
   // ── Activity Heatmap
   heatmapCard: {
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 5,
+    paddingVertical: 2,
   },
   heatmapDayRow: {
-    flexDirection: 'row',
-    gap: 5,
-    marginBottom: 4,
+    flexDirection: 'column',
+    gap: 3,
   },
   heatmapDayLabel: {
-    flexGrow: 1,
-    flexBasis: '12%',
-    textAlign: 'center',
+    height: 8,
+    textAlign: 'right',
     fontFamily: fontFamily.uiLabel,
-    fontSize: 9,
+    fontSize: 7,
+    lineHeight: 8,
     color: colors.textTertiary,
-    letterSpacing: 0.3,
   },
   heatmapGrid: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     flexWrap: 'wrap',
-    gap: 5,
+    gap: 3,
+    height: 7 * 8 + 6 * 3,  // 7 rows * dotSize + 6 gaps
   },
-  heatmapCell: {
-    flexGrow: 1,
-    flexBasis: '12%',
-    aspectRatio: 1,
+  heatmapDot: {
+    width: 8,
+    height: 8,
     borderRadius: 4,
     backgroundColor: colors.surfaceSecondary,
-    borderWidth: 1,
-    borderColor: colors.border,
   },
   heatmapL1: {
-    backgroundColor: colors.goldBright + '33',
-    borderColor: colors.goldBright + '26',
+    backgroundColor: colors.goldBright + '40',
   },
   heatmapL2: {
-    backgroundColor: colors.goldBright + '66',
-    borderColor: colors.goldBright + '4D',
+    backgroundColor: colors.goldBright + '73',
   },
   heatmapL3: {
-    backgroundColor: colors.goldBright + 'A6',
-    borderColor: colors.goldBright + '80',
+    backgroundColor: colors.goldBright + 'B3',
   },
   heatmapL4: {
     backgroundColor: colors.goldBright,
-    borderColor: colors.goldBright,
   },
 
   // ── Footer
