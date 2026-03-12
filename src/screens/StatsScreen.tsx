@@ -627,7 +627,19 @@ export default function StatsScreen() {
             <Text style={styles.sectionMeta}>{t('stats.badgesEarned', { earned: earnedBadges.length, total: BADGES.length })}</Text>
           </View>
           <View style={styles.badgeGrid}>
-            {BADGES.map((badge) => {
+            {[...BADGES].sort((a, b) => {
+              const aEarned = earnedIds.has(a.id);
+              const bEarned = earnedIds.has(b.id);
+              if (aEarned !== bEarned) return aEarned ? -1 : 1;
+              if (!aEarned && badgeCtx && derived) {
+                const aP = getBadgeProgress(a, badgeCtx, derived);
+                const bP = getBadgeProgress(b, badgeCtx, derived);
+                const aInProgress = aP && aP.progress > 0;
+                const bInProgress = bP && bP.progress > 0;
+                if (aInProgress !== bInProgress) return aInProgress ? -1 : 1;
+              }
+              return 0;
+            }).map((badge) => {
               const earned = earnedIds.has(badge.id);
               const tierColor = TIER_COLORS[badge.tier];
               const progress = !earned && badgeCtx && derived ? getBadgeProgress(badge, badgeCtx, derived) : null;
@@ -1172,6 +1184,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 6,
+    justifyContent: 'center',
   },
   badgeCard: {
     width: '23%',
