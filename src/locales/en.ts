@@ -189,7 +189,7 @@ const en = {
     overallAccuracy: 'Overall Accuracy',
     moreToUnlock: '{count} more to unlock',
     scoreDistribution: 'Score Distribution',
-    baselineLabel: 'Started at {pct}%',
+    baselineLabel: 'Your bar: {pct}%',
     improvementUp: 'Up {pct}%, way to go!',
     improvementSame: 'Holding steady',
     improvementDown: '{pct}% to recover, you got this',
