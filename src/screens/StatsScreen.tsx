@@ -366,7 +366,10 @@ export default function StatsScreen() {
         {/* ── COUNTRIES PROGRESS (compact) ── */}
         <Animated.View style={[styles.tileCompact, { opacity: progressFade }]}>
           <View style={styles.tileCompactRow}>
-            <Text style={styles.tileLabel}>{t('stats.countriesUnlocked')}</Text>
+            <View>
+              <Text style={styles.tileLabel}>{t('stats.countriesUnlocked')}</Text>
+              <Text style={styles.unlockHint}>{t('stats.unlockHint', { count: UNLOCK_THRESHOLD })}</Text>
+            </View>
             <Text style={styles.tileCompactVal}>{countriesSeen} / {totalFlags}</Text>
           </View>
           <View style={styles.progressWrap}>
@@ -833,6 +836,12 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   tileLabel: {
     ...typography.eyebrow,
     color: colors.textTertiary,
+  },
+  unlockHint: {
+    fontFamily: fontFamily.body,
+    fontSize: 11,
+    color: colors.textTertiary,
+    marginTop: 2,
   },
 
   // ── Progress
