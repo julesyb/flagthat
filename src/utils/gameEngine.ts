@@ -45,12 +45,16 @@ function dateSeed(dateStr: string): number {
 }
 
 export function getTodayDateString(): string {
-  return new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const dd = String(now.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
 }
 
 export function getDailyNumber(): number {
   const start = new Date(DAILY_CHALLENGE_EPOCH).getTime();
-  const now = new Date(getTodayDateString() + 'T00:00:00Z').getTime();
+  const now = new Date(getTodayDateString() + 'T00:00:00').getTime();
   return Math.floor((now - start) / MS_PER_DAY) + 1;
 }
 
