@@ -504,7 +504,8 @@ const createStyles = (colors: ThemeColors) => {
   questionContainer: {
     flex: 1,
     padding: spacing.lg,
-    justifyContent: 'center',
+    paddingTop: spacing.xl,
+    justifyContent: 'flex-start',
   },
   flagContainer: {
     alignItems: 'center',
