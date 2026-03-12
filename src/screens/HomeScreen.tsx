@@ -238,7 +238,7 @@ export default function HomeScreen({ navigation }: Props) {
         <View style={styles.playWrap}>
           <TouchableOpacity style={styles.playBtn} onPress={play} activeOpacity={0.85}>
             <Text style={styles.playBtnText}>{t('home.playNow')}</Text>
-            <PlayIcon size={14} color={colors.white} />
+            <PlayIcon size={14} color={colors.playText} />
           </TouchableOpacity>
         </View>
 
@@ -395,7 +395,7 @@ export default function HomeScreen({ navigation }: Props) {
                 }}
               >
                 <Text style={styles.onboardingCtaText}>{t(`categories.${nextRegion}`)}</Text>
-                <ChevronRightIcon size={14} color={colors.white} />
+                <ChevronRightIcon size={14} color={colors.background} />
               </TouchableOpacity>
             </View>
             <View style={styles.onboardingBarRow}>

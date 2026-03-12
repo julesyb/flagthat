@@ -178,13 +178,13 @@ export default function OnboardingScreen({ navigation }: Props) {
                 activeOpacity={0.85}
               >
                 <View style={styles.primaryBtnIcon}>
-                  <PlayIcon size={16} color={colors.white} />
+                  <PlayIcon size={16} color={colors.playText} />
                 </View>
                 <View style={styles.btnTextWrap}>
                   <Text style={styles.primaryBtnText}>{t('onboarding.startPlayingNow')}</Text>
                   <Text style={styles.primaryBtnSub}>{t('onboarding.startPlayingDesc')}</Text>
                 </View>
-                <ChevronRightIcon size={18} color={colors.white} />
+                <ChevronRightIcon size={18} color={colors.playText} />
               </TouchableOpacity>
 
               {/* Test Your Knowledge - secondary CTA */}
@@ -389,7 +389,7 @@ const styles = StyleSheet.create({
   primaryBtnIcon: {
     width: 44,
     height: 44,
-    backgroundColor: colors.accent,
+    backgroundColor: 'rgba(19,15,0,0.2)',
     borderRadius: borderRadius.md,
     justifyContent: 'center',
     alignItems: 'center',
