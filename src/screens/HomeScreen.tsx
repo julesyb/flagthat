@@ -149,10 +149,12 @@ export default function HomeScreen({ navigation }: Props) {
   const playBtnScale = useRef(new Animated.Value(1)).current;
 
   const pulsePlayBtn = useCallback(() => {
-    Animated.sequence([
-      Animated.timing(playBtnScale, { toValue: 1.05, duration: 200, useNativeDriver: true }),
-      Animated.spring(playBtnScale, { toValue: 1, useNativeDriver: true, tension: 200, friction: 10 }),
-    ]).start();
+    setTimeout(() => {
+      Animated.sequence([
+        Animated.timing(playBtnScale, { toValue: 1.05, duration: 200, useNativeDriver: true }),
+        Animated.spring(playBtnScale, { toValue: 1, useNativeDriver: true, tension: 200, friction: 10 }),
+      ]).start();
+    }, 600);
   }, [playBtnScale]);
 
   useEffect(() => {
