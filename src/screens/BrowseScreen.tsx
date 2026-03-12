@@ -7,7 +7,6 @@ import {
   FlatList,
   SafeAreaView,
   TextInput,
-  ScrollView,
   useWindowDimensions,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -164,12 +163,7 @@ export default function BrowseScreen({ route, navigation }: Props) {
         </View>
 
         {/* Region filter chips */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.chipScroll}
-          style={styles.chipRow}
-        >
+        <View style={styles.chipWrap}>
           {filterOptions.map((filter) => {
             const active = selectedFilter === filter;
             return (
@@ -178,6 +172,15 @@ export default function BrowseScreen({ route, navigation }: Props) {
                 style={[styles.chip, active && styles.chipActive]}
                 onPress={() => setSelectedFilter(filter)}
                 activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel={
+                  filter === PRACTICE_MORE
+                    ? t('browse.practiceMore')
+                    : REGION_KEYS[filter]
+                      ? t(REGION_KEYS[filter])
+                      : filter
+                }
+                accessibilityState={{ selected: active }}
               >
                 <Text style={[styles.chipLabel, active && styles.chipLabelActive]}>
                   {filter === PRACTICE_MORE
@@ -189,7 +192,7 @@ export default function BrowseScreen({ route, navigation }: Props) {
               </TouchableOpacity>
             );
           })}
-        </ScrollView>
+        </View>
 
         {/* Result count */}
         <Text style={styles.resultCount}>
@@ -234,7 +237,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   pageSub: {
     fontFamily: fontFamily.body,
-    fontSize: fontSize.caption,
+    fontSize: fontSize.sm,
     color: colors.textTertiary,
   },
   searchRow: {
@@ -260,13 +263,12 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     color: colors.text,
     paddingVertical: 0,
   },
-  chipRow: {
-    flexGrow: 0,
-    marginBottom: spacing.sm,
-  },
-  chipScroll: {
+  chipWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     paddingHorizontal: spacing.md,
     gap: spacing.sm,
+    marginBottom: spacing.sm,
   },
   chip: {
     backgroundColor: colors.surface,
@@ -282,7 +284,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   chipLabel: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: fontSize.sm,
+    fontSize: fontSize.xs,
     color: colors.textSecondary,
   },
   chipLabelActive: {
@@ -307,15 +309,13 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   flagWrap: {
     width: '100%',
     overflow: 'hidden',
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
+    backgroundColor: 'transparent',
     justifyContent: 'center',
     alignItems: 'center',
   },
   countryName: {
     fontFamily: fontFamily.bodyMedium,
-    fontSize: fontSize.sm,
+    fontSize: fontSize.xs,
     color: colors.text,
     textAlign: 'center',
     marginTop: spacing.xs,

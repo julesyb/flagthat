@@ -179,6 +179,9 @@ export default function OnboardingScreen({ navigation }: Props) {
                 style={styles.primaryBtn}
                 onPress={handleStartPlaying}
                 activeOpacity={0.85}
+                accessibilityRole="button"
+                accessibilityLabel={t('onboarding.startPlayingNow')}
+                accessibilityHint={t('onboarding.startPlayingDesc')}
               >
                 <View style={styles.primaryBtnIcon}>
                   <PlayIcon size={16} color={colors.playText} />
@@ -195,6 +198,9 @@ export default function OnboardingScreen({ navigation }: Props) {
                 style={styles.secondaryBtn}
                 onPress={handleTestKnowledge}
                 activeOpacity={0.85}
+                accessibilityRole="button"
+                accessibilityLabel={t('onboarding.testKnowledge')}
+                accessibilityHint={t('onboarding.testKnowledgeDesc')}
               >
                 <View style={styles.secondaryBtnIcon}>
                   <BarChartIcon size={16} color={colors.ink} />
@@ -212,7 +218,7 @@ export default function OnboardingScreen({ navigation }: Props) {
               <View style={styles.testHeader}>
                 <Text style={styles.testTitle}>{t('onboarding.subtitle')}</Text>
                 {!allDone && (
-                  <TouchableOpacity onPress={handleStartPlaying} activeOpacity={0.6}>
+                  <TouchableOpacity onPress={handleStartPlaying} activeOpacity={0.6} accessibilityRole="button" accessibilityLabel={t('onboarding.skip')} accessibilityHint="Skip baseline tests and go to the home screen">
                     <Text style={styles.skipText}>{t('onboarding.skip')}</Text>
                   </TouchableOpacity>
                 )}
@@ -251,6 +257,13 @@ export default function OnboardingScreen({ navigation }: Props) {
                       activeOpacity={isDone ? 1 : 0.85}
                       onPress={() => !isDone && handleRegionPress(region.id)}
                       disabled={isDone}
+                      accessibilityRole="button"
+                      accessibilityLabel={
+                        isDone
+                          ? `${t(`categories.${region.id}`)}, ${t('onboarding.completed')}, ${result!.correct}/${result!.total} correct`
+                          : `${t(`categories.${region.id}`)}, ${t('onboarding.flagCount', { count: flagCount })}`
+                      }
+                      accessibilityState={{ disabled: isDone }}
                     >
                       <View style={styles.regionLeft}>
                         {isDone ? (
@@ -293,6 +306,8 @@ export default function OnboardingScreen({ navigation }: Props) {
                     style={styles.startBtn}
                     onPress={handleAllDone}
                     activeOpacity={0.85}
+                    accessibilityRole="button"
+                    accessibilityLabel={t('onboarding.startPlaying')}
                   >
                     <Text style={styles.startBtnText}>{t('onboarding.startPlaying')}</Text>
                   </TouchableOpacity>
@@ -350,7 +365,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   welcomeText: {
     fontFamily: fontFamily.body,
-    fontSize: fontSize.lg,
+    fontSize: fontSize.body,
     color: colors.whiteAlpha60,
     marginBottom: spacing.xs,
   },
@@ -359,20 +374,20 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   wmLine1: {
     fontFamily: fontFamily.display,
-    fontSize: fontSize.gameTitle,
+    fontSize: fontSize.display,
     lineHeight: 44,
     color: colors.text,
     letterSpacing: -0.5,
   },
   wmLine2: {
     fontFamily: fontFamily.displayItalic,
-    fontSize: fontSize.gameTitle,
+    fontSize: fontSize.display,
     lineHeight: 44,
     color: colors.accentLight,
   },
   tagline: {
     fontFamily: fontFamily.bodyMedium,
-    fontSize: fontSize.lg,
+    fontSize: fontSize.body,
     color: colors.whiteAlpha70,
     lineHeight: 24,
   },
@@ -413,7 +428,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   primaryBtnSub: {
     fontFamily: fontFamily.body,
-    fontSize: fontSize.caption,
+    fontSize: fontSize.sm,
     color: colors.playText,
   },
   secondaryBtn: {
@@ -445,7 +460,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   secondaryBtnSub: {
     fontFamily: fontFamily.body,
-    fontSize: fontSize.caption,
+    fontSize: fontSize.sm,
     color: colors.textTertiary,
   },
 
@@ -460,12 +475,12 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   testTitle: {
     fontFamily: fontFamily.bodyBold,
-    fontSize: fontSize.xl,
+    fontSize: fontSize.lg,
     color: colors.ink,
   },
   skipText: {
     fontFamily: fontFamily.bodyMedium,
-    fontSize: fontSize.caption,
+    fontSize: fontSize.sm,
     color: colors.textTertiary,
     paddingVertical: spacing.sm,
   },
@@ -489,7 +504,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   progressText: {
     fontFamily: fontFamily.bodyMedium,
-    fontSize: fontSize.sm,
+    fontSize: fontSize.xs,
     color: colors.textTertiary,
   },
 
@@ -533,7 +548,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   regionNumberTextActive: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: fontSize.caption,
+    fontSize: fontSize.sm,
     color: colors.playText,
   },
   checkCircle: {
@@ -549,7 +564,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   regionName: {
     fontFamily: fontFamily.bodyBold,
-    fontSize: fontSize.lg,
+    fontSize: fontSize.body,
     color: colors.ink,
     marginBottom: 2,
   },
@@ -558,13 +573,13 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   regionSub: {
     fontFamily: fontFamily.body,
-    fontSize: fontSize.caption,
+    fontSize: fontSize.sm,
     color: colors.textTertiary,
     lineHeight: 18,
   },
   doneLabel: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: fontSize.xxs,
+    fontSize: fontSize.xs,
     letterSpacing: 1,
     textTransform: 'uppercase',
     color: colors.success,
@@ -578,7 +593,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   allDoneText: {
     fontFamily: fontFamily.body,
-    fontSize: fontSize.lg,
+    fontSize: fontSize.body,
     color: colors.textSecondary,
   },
   startBtn: {
@@ -592,7 +607,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   startBtnText: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: fontSize.xl,
+    fontSize: fontSize.lg,
     letterSpacing: 1.5,
     textTransform: 'uppercase',
     color: colors.playText,

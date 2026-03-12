@@ -72,6 +72,7 @@ const zh: typeof en = {
 
   setup: {
     gameMode: '\u6e38\u620f\u6a21\u5f0f',
+    chooseYourGame: '\u9009\u62e9\u4f60\u7684\u6e38\u620f',
     quiz: '\u7b54\u9898',
     quizDesc: '\u7ecf\u5178\u56fd\u65d7\u7b54\u9898',
     flashFlag: 'Flash Flag',
@@ -314,7 +315,6 @@ const zh: typeof en = {
     daily_legend: { name: '\u6bcf\u65e5\u4f20\u5947', description: '\u5b8c\u621030\u6b21\u6bcf\u65e5\u6311\u6218' },
     practice_perfect: { name: '\u7ec3\u4e60\u5b8c\u7f8e', description: '\u6ca1\u6709\u9700\u8981\u7ec3\u4e60\u7684\u56fd\u65d7' },
     shared_spirit: { name: '\u5206\u4eab\u7cbe\u795e', description: '\u5206\u4eab\u4f60\u7684\u7ed3\u679c' },
-    supporter: { name: '\u652f\u6301\u8005', description: '\u89c2\u770b\u89c6\u9891\u652f\u6301\u5f00\u53d1' },
   },
 
   onboarding: {

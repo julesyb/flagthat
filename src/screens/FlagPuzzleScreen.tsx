@@ -379,6 +379,7 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
               activeOpacity={0.7}
               accessibilityRole="button"
               accessibilityLabel={t('common.submit')}
+              accessibilityState={{ disabled: textInput.trim().length === 0 || showFeedback }}
             >
               <Text style={styles.submitButtonText}>{t('common.submit')}</Text>
             </TouchableOpacity>

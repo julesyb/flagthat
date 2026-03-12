@@ -36,7 +36,6 @@ import { ThemeProvider, useTheme } from './src/contexts/ThemeContext';
 import { configureNotificationHandler, syncNotificationSchedule } from './src/utils/notifications';
 import { initLocale, t } from './src/utils/i18n';
 import { hasCompletedOnboarding } from './src/utils/storage';
-import { initializeAds, requestConsent } from './src/utils/ads';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -106,7 +105,6 @@ function AppContent() {
         setInitialRoute(onboarded ? 'Home' : 'Onboarding');
         setLocaleReady(true);
         syncNotificationSchedule();
-        requestConsent().then(() => initializeAds());
       })
       .catch(() => {
         setLocaleReady(true);
@@ -250,7 +248,7 @@ const loadingStyles = StyleSheet.create({
     gap: 16,
   },
   text: {
-    fontSize: fontSize.caption,
+    fontSize: fontSize.sm,
     color: colors.textSecondary,
     letterSpacing: 3,
     textTransform: 'uppercase',

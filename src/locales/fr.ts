@@ -72,6 +72,7 @@ const fr: typeof en = {
 
   setup: {
     gameMode: 'Mode de jeu',
+    chooseYourGame: 'Choisissez votre jeu',
     quiz: 'Quiz',
     quizDesc: 'Quiz classique',
     flashFlag: 'Flash Flag',
@@ -314,7 +315,6 @@ const fr: typeof en = {
     daily_legend: { name: 'L\u00e9gende quotidienne', description: '30 d\u00e9fis quotidiens termin\u00e9s' },
     practice_perfect: { name: 'R\u00e9vision parfaite', description: 'Plus aucun drapeau \u00e0 r\u00e9viser' },
     shared_spirit: { name: 'Esprit de partage', description: 'Partagez vos r\u00e9sultats' },
-    supporter: { name: 'Soutien', description: 'Soutenez en regardant une vid\u00e9o' },
   },
 
   onboarding: {

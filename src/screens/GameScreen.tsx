@@ -358,6 +358,9 @@ export default function GameScreen({ route, navigation }: Props) {
                     style={styles.suggestionItem}
                     onPress={() => handleSelectSuggestion(pair.english)}
                     activeOpacity={0.7}
+                    accessibilityRole="button"
+                    accessibilityLabel={pair.display}
+                    accessibilityHint="Select this country as your answer"
                   >
                     <Text style={styles.suggestionText}>{pair.display}</Text>
                   </TouchableOpacity>
@@ -374,6 +377,7 @@ export default function GameScreen({ route, navigation }: Props) {
               activeOpacity={0.7}
               accessibilityRole="button"
               accessibilityLabel={t('common.submit')}
+              accessibilityState={{ disabled: textInput.trim().length === 0 || showFeedback }}
             >
               <Text style={styles.submitButtonText}>{t('common.submit')}</Text>
             </TouchableOpacity>
@@ -410,7 +414,8 @@ export default function GameScreen({ route, navigation }: Props) {
                   disabled={showFeedback}
                   activeOpacity={0.7}
                   accessibilityRole="button"
-                  accessibilityLabel={isMapMode && optionFlag ? optionFlag.name : option}
+                  accessibilityLabel={isMapMode && optionFlag ? optionFlag.name : translateName(option)}
+                  accessibilityState={{ disabled: showFeedback }}
                 >
                   {isMapMode && optionFlag ? (
                     <View style={styles.mapOptionContent}>
@@ -431,7 +436,7 @@ export default function GameScreen({ route, navigation }: Props) {
                       </Text>
                     </View>
                   ) : (
-                    <Text style={textStyle}>{translateName(option)}</Text>
+                    <Text style={textStyle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>{translateName(option)}</Text>
                   )}
                 </TouchableOpacity>
               );
@@ -577,8 +582,9 @@ const createStyles = (colors: ThemeColors) => {
   optionButton: {
     backgroundColor: colors.surface,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
+    height: 52,
     alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 2,
     borderColor: colors.border,
     borderRadius: borderRadius.md,

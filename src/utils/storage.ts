@@ -9,7 +9,6 @@ const DAILY_LOG_KEY = '@flagsareus_daily_log';
 const SETTINGS_KEY = '@flagsareus_settings';
 const BADGE_DATA_KEY = '@flagsareus_badge_data';
 const GAME_HISTORY_KEY = '@flagsareus_game_history';
-const SUPPORT_KEY = '@flagsareus_support';
 const BASELINE_KEY = '@flagsareus_baseline';
 const CHALLENGE_NAME_KEY = '@flagsareus_challenge_name';
 const CHALLENGE_HISTORY_KEY = '@flagsareus_challenge_history';
@@ -469,41 +468,6 @@ export async function addGameHistoryEntry(accuracy: number, mode: GameMode): Pro
     await AsyncStorage.setItem(GAME_HISTORY_KEY, JSON.stringify(trimmed));
   } catch {
     // Silently fail
-  }
-}
-
-// ─── Support (Opt-in Ad Tracking) ─────────────────────────
-export interface SupportData {
-  totalAdsWatched: number;
-  lastWatchedDate: string | null;
-}
-
-const DEFAULT_SUPPORT: SupportData = {
-  totalAdsWatched: 0,
-  lastWatchedDate: null,
-};
-
-export async function getSupportData(): Promise<SupportData> {
-  try {
-    const json = await AsyncStorage.getItem(SUPPORT_KEY);
-    if (json) return { ...DEFAULT_SUPPORT, ...JSON.parse(json) };
-    return { ...DEFAULT_SUPPORT };
-  } catch {
-    return { ...DEFAULT_SUPPORT };
-  }
-}
-
-export async function recordAdWatched(): Promise<SupportData> {
-  try {
-    const data = await getSupportData();
-    const updated: SupportData = {
-      totalAdsWatched: data.totalAdsWatched + 1,
-      lastWatchedDate: getTodayDate(),
-    };
-    await AsyncStorage.setItem(SUPPORT_KEY, JSON.stringify(updated));
-    return updated;
-  } catch {
-    return { ...DEFAULT_SUPPORT };
   }
 }
 

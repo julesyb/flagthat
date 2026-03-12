@@ -1,8 +1,9 @@
 import React, { useMemo } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { spacing, buildNav, ThemeColors } from '../utils/theme';
 import { useTheme } from '../contexts/ThemeContext';
 import { t } from '../utils/i18n';
+import { CrossIcon } from './Icons';
 
 interface GameTopBarProps {
   onExit: () => void;
@@ -12,7 +13,7 @@ interface GameTopBarProps {
 
 /**
  * Shared top bar for all game screens.
- * Provides a consistent Exit button on the left, with optional center and right slots.
+ * Provides a consistent close (X) button on the left, with optional center and right slots.
  */
 export default function GameTopBar({ onExit, center, right }: GameTopBarProps) {
   const { colors } = useTheme();
@@ -27,7 +28,7 @@ export default function GameTopBar({ onExit, center, right }: GameTopBarProps) {
         accessibilityRole="button"
         accessibilityLabel={t('common.exit')}
       >
-        <Text style={styles.exitText}>{t('common.exit')}</Text>
+        <CrossIcon size={20} color={colors.textTertiary} />
       </TouchableOpacity>
       <View style={styles.centerSlot}>{center}</View>
       {right ?? <View style={styles.spacer} />}
@@ -47,9 +48,9 @@ const createStyles = (colors: ThemeColors) => {
   },
   exitButton: {
     ...n.backButton,
-  },
-  exitText: {
-    ...n.backText,
+    marginLeft: spacing.xs,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   centerSlot: {
     alignItems: 'center',

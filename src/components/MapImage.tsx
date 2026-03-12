@@ -234,6 +234,9 @@ export default function MapImage({ countryCode, size = 'hero', style }: MapImage
           onPress={handleZoomIn}
           disabled={zoom >= MAX_ZOOM}
           activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel="Zoom in"
+          accessibilityState={{ disabled: zoom >= MAX_ZOOM }}
         >
           <Text style={[styles.zoomText, zoom >= MAX_ZOOM && styles.zoomTextDisabled]}>+</Text>
         </TouchableOpacity>
@@ -242,6 +245,9 @@ export default function MapImage({ countryCode, size = 'hero', style }: MapImage
           onPress={handleZoomOut}
           disabled={zoom <= 1}
           activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel="Zoom out"
+          accessibilityState={{ disabled: zoom <= 1 }}
         >
           <Text style={[styles.zoomText, zoom <= 1 && styles.zoomTextDisabled]}>-</Text>
         </TouchableOpacity>
@@ -267,7 +273,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     borderRadius: borderRadius.sm,
   },
   fallbackText: {
-    fontSize: fontSize.heading,
+    fontSize: fontSize.body,
     color: colors.textTertiary,
   },
   pinMarker: {
@@ -313,7 +319,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   zoomText: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: fontSize.xl,
+    fontSize: fontSize.lg,
     color: colors.ink,
     lineHeight: 22,
   },

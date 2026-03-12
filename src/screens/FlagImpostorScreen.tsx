@@ -521,6 +521,16 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
                   onPress={() => handlePick(item.index)}
                   activeOpacity={0.7}
                   disabled={picked !== null}
+                  accessibilityRole="button"
+                  accessibilityLabel={
+                    isRevealed
+                      ? item.isFake
+                        ? t('impostor.fake')
+                        : flagName(item.flag!)
+                      : `Flag option ${item.index + 1}`
+                  }
+                  accessibilityHint={picked === null ? "Tap to select as the impostor flag" : undefined}
+                  accessibilityState={{ disabled: picked !== null }}
                 >
                   {item.isFake ? (
                     <View style={styles.flagWrapper}>
@@ -563,7 +573,7 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
 
       {picked !== null && (
         <View style={styles.bottomBar}>
-          <TouchableOpacity style={styles.actionButton} onPress={handleNext} activeOpacity={0.8}>
+          <TouchableOpacity style={styles.actionButton} onPress={handleNext} activeOpacity={0.8} accessibilityRole="button" accessibilityLabel={isLastRound ? t('common.seeResults') : t('common.next')}>
             <Text style={styles.actionButtonText}>{isLastRound ? t('common.seeResults') : t('common.next')}</Text>
           </TouchableOpacity>
         </View>
@@ -583,14 +593,6 @@ const createStyles = (colors: ThemeColors) => {
     alignItems: 'center',
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
-  },
-  exitButton: { padding: spacing.sm, width: 60 },
-  exitText: {
-    fontSize: fontSize.caption,
-    fontFamily: fontFamily.uiLabelMedium,
-    letterSpacing: 0.5,
-    color: colors.textTertiary,
-    textTransform: 'uppercase',
   },
   centerInfo: { alignItems: 'center' },
   counter: { ...typography.bodyBold, color: colors.text },
@@ -622,9 +624,9 @@ const createStyles = (colors: ThemeColors) => {
     backgroundColor: 'transparent',
   },
   revealInfo: { alignItems: 'center', gap: spacing.xxs },
-  fakeLabel: { fontFamily: fontFamily.uiLabel, fontSize: fontSize.caption, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase' },
-  realName: { fontFamily: fontFamily.bodyBold, fontSize: fontSize.caption, color: colors.ink, textAlign: 'center' },
-  realRegion: { fontFamily: fontFamily.body, fontSize: fontSize.xxs, color: colors.textTertiary },
+  fakeLabel: { fontFamily: fontFamily.uiLabel, fontSize: fontSize.sm, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase' },
+  realName: { fontFamily: fontFamily.bodyBold, fontSize: fontSize.sm, color: colors.ink, textAlign: 'center' },
+  realRegion: { fontFamily: fontFamily.body, fontSize: fontSize.xs, color: colors.textTertiary },
   badge: {
     position: 'absolute',
     top: spacing.sm,

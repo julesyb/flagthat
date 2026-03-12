@@ -49,12 +49,12 @@ type SetupMode = 'quiz' | 'flashflag' | 'flagpuzzle' | 'timeattack' | 'neighbors
 type QuizDifficulty = 'easy' | 'medium' | 'hard';
 
 const SETUP_MODES: { key: SetupMode; labelKey: string; descKey: string; icon: (active: boolean, colors: ThemeColors) => React.ReactNode }[] = [
-  { key: 'quiz', labelKey: 'setup.quiz', descKey: 'setup.quizDesc', icon: (a, c) => <FlagIcon size={18} color={a ? c.goldBright : c.textTertiary} /> },
-  { key: 'flashflag', labelKey: 'setup.flashFlag', descKey: 'setup.flashFlagDesc', icon: (a, c) => <LightningIcon size={18} color={a ? c.goldBright : c.textTertiary} /> },
-  { key: 'flagpuzzle', labelKey: 'setup.flagPuzzle', descKey: 'setup.flagPuzzleDesc', icon: (a, c) => <PuzzleIcon size={18} color={a ? c.goldBright : c.textTertiary} /> },
-  { key: 'timeattack', labelKey: 'setup.timedQuiz', descKey: 'setup.timedQuizDesc', icon: (a, c) => <ClockIcon size={18} color={a ? c.goldBright : c.textTertiary} /> },
-  { key: 'neighbors', labelKey: 'setup.neighbors', descKey: 'setup.neighborsDesc', icon: (a, c) => <UsersIcon size={18} color={a ? c.goldBright : c.textTertiary} /> },
-  { key: 'capitalconnection', labelKey: 'setup.capitalQuiz', descKey: 'setup.capitalQuizDesc', icon: (a, c) => <LinkIcon size={18} color={a ? c.goldBright : c.textTertiary} /> },
+  { key: 'quiz', labelKey: 'setup.quiz', descKey: 'setup.quizDesc', icon: (a, c) => <FlagIcon size={22} color={a ? c.goldBright : c.textTertiary} filled={a} /> },
+  { key: 'flashflag', labelKey: 'setup.flashFlag', descKey: 'setup.flashFlagDesc', icon: (a, c) => <LightningIcon size={22} color={a ? c.goldBright : c.textTertiary} filled={a} /> },
+  { key: 'flagpuzzle', labelKey: 'setup.flagPuzzle', descKey: 'setup.flagPuzzleDesc', icon: (a, c) => <PuzzleIcon size={22} color={a ? c.goldBright : c.textTertiary} /> },
+  { key: 'timeattack', labelKey: 'setup.timedQuiz', descKey: 'setup.timedQuizDesc', icon: (a, c) => <ClockIcon size={22} color={a ? c.goldBright : c.textTertiary} /> },
+  { key: 'neighbors', labelKey: 'setup.neighbors', descKey: 'setup.neighborsDesc', icon: (a, c) => <UsersIcon size={22} color={a ? c.goldBright : c.textTertiary} /> },
+  { key: 'capitalconnection', labelKey: 'setup.capitalQuiz', descKey: 'setup.capitalQuizDesc', icon: (a, c) => <LinkIcon size={22} color={a ? c.goldBright : c.textTertiary} strokeWidth={a ? 2 : 1.5} /> },
 ];
 
 const DIFFICULTIES: { key: QuizDifficulty; labelKey: string }[] = [
@@ -209,6 +209,9 @@ export default function GameSetupScreen({ route, navigation }: Props) {
         showsVerticalScrollIndicator={false}
       >
         <ScreenContainer>
+        {/* Screen title */}
+        <Text style={styles.screenTitle}>{t('setup.chooseYourGame')}</Text>
+
         {/* Game Mode Grid */}
         <View style={styles.modeGrid}>
           {SETUP_MODES.map((m) => {
@@ -263,6 +266,7 @@ export default function GameSetupScreen({ route, navigation }: Props) {
                     onPress={() => { hapticTap(); setDifficulty(d.key); }}
                     activeOpacity={0.7}
                     accessibilityRole="button"
+                    accessibilityLabel={t(d.labelKey)}
                     accessibilityState={{ selected: isActive }}
                   >
                     <Text style={[
@@ -283,16 +287,16 @@ export default function GameSetupScreen({ route, navigation }: Props) {
           {/* Autocomplete (only for Hard quiz - first row, no divider above) */}
           {isQuiz && difficulty === 'hard' && (
             <ConfigRow label={t('home.hints')}>
-              <SegBtn label={t('common.off')} active={!autocomplete} onPress={() => setAutocomplete(false)} />
-              <SegBtn label={t('common.on')} active={autocomplete} onPress={() => setAutocomplete(true)} />
+              <SegBtn label={t('common.off')} active={!autocomplete} onPress={() => setAutocomplete(false)} accessibilityLabel={`${t('home.hints')}: ${t('common.off')}`} />
+              <SegBtn label={t('common.on')} active={autocomplete} onPress={() => setAutocomplete(true)} accessibilityLabel={`${t('home.hints')}: ${t('common.on')}`} />
             </ConfigRow>
           )}
 
           {/* Display Mode (flag or map) */}
           {showMapToggle && (
             <ConfigRow label={t('setup.display')}>
-              <SegBtn label={t('setup.displayFlag')} active={displayMode === 'flag'} onPress={() => setDisplayMode('flag')} />
-              <SegBtn label={t('setup.displayMap')} active={displayMode === 'map'} onPress={() => setDisplayMode('map')} />
+              <SegBtn label={t('setup.displayFlag')} active={displayMode === 'flag'} onPress={() => setDisplayMode('flag')} accessibilityLabel={`${t('setup.display')}: ${t('setup.displayFlag')}`} />
+              <SegBtn label={t('setup.displayMap')} active={displayMode === 'map'} onPress={() => setDisplayMode('map')} accessibilityLabel={`${t('setup.display')}: ${t('setup.displayMap')}`} />
             </ConfigRow>
           )}
 
@@ -305,6 +309,7 @@ export default function GameSetupScreen({ route, navigation }: Props) {
                   label={v === 0 ? t('setup.unlimited') : String(v)}
                   active={guessLimit === v}
                   onPress={() => setGuessLimit(v)}
+                  accessibilityLabel={v === 0 ? `${t('setup.lives')}: ${t('setup.unlimited')}` : `${t('setup.lives')}: ${v}`}
                 />
               ))}
             </ConfigRow>
@@ -319,6 +324,7 @@ export default function GameSetupScreen({ route, navigation }: Props) {
                   label={t('setup.timeSuffix', { t: seconds })}
                   active={timeLimit === seconds}
                   onPress={() => setTimeLimit(seconds)}
+                  accessibilityLabel={`${t('setup.timeLimit')}: ${seconds} seconds`}
                 />
               ))}
             </ConfigRow>
@@ -333,12 +339,14 @@ export default function GameSetupScreen({ route, navigation }: Props) {
                   label={String(count)}
                   active={!questionCountAll && questionCount === count}
                   onPress={() => { setQuestionCount(count); setQuestionCountAll(false); }}
+                  accessibilityLabel={`${count} questions`}
                 />
               ))}
               <SegBtn
                 label={t('common.all')}
                 active={questionCountAll}
                 onPress={() => setQuestionCountAll(true)}
+                accessibilityLabel="All questions"
               />
             </ConfigRow>
           )}
@@ -352,12 +360,14 @@ export default function GameSetupScreen({ route, navigation }: Props) {
                   label={String(count)}
                   active={!questionCountAll && questionCount === count}
                   onPress={() => { setQuestionCount(count); setQuestionCountAll(false); }}
+                  accessibilityLabel={`${count} questions`}
                 />
               ))}
               <SegBtn
                 label={t('common.all')}
                 active={questionCountAll}
                 onPress={() => setQuestionCountAll(true)}
+                accessibilityLabel="All questions"
               />
             </ConfigRow>
           )}
@@ -377,6 +387,7 @@ export default function GameSetupScreen({ route, navigation }: Props) {
                 onPress={() => handleFilterTypeSelect(type)}
                 activeOpacity={0.7}
                 accessibilityRole="button"
+                accessibilityLabel={type === 'region' ? t('setup.byRegion') : t('setup.byTheme')}
                 accessibilityState={{ selected: isActive }}
               >
                 <Text style={[styles.filterTypeText, isActive && styles.filterTypeTextActive]}>
@@ -484,7 +495,7 @@ const createStyles = (colors: ThemeColors) => {
   },
   diffLabel: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: fontSize.xxs,
+    fontSize: fontSize.xs,
     letterSpacing: 1,
     textTransform: 'uppercase',
     color: colors.textTertiary,
@@ -506,7 +517,7 @@ const createStyles = (colors: ThemeColors) => {
   },
   diffBtnText: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: fontSize.caption - 0.5,
+    fontSize: fontSize.sm,
     color: colors.textTertiary,
     letterSpacing: -0.1,
   },
@@ -546,13 +557,13 @@ const createStyles = (colors: ThemeColors) => {
     backgroundColor: colors.goldAlpha10,
   },
   modeIconBadge: {
-    width: 36,
-    height: 36,
+    width: 42,
+    height: 42,
     backgroundColor: colors.surfaceSecondary,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: spacing.xs,
-    borderRadius: borderRadius.sm,
+    marginBottom: spacing.sm,
+    borderRadius: borderRadius.lg,
   },
   modeIconBadgeActive: {
     backgroundColor: colors.goldAlpha15,
@@ -641,7 +652,7 @@ const createStyles = (colors: ThemeColors) => {
   categoryCount: {
     ...typography.caption,
     color: colors.textTertiary,
-    fontSize: fontSize.xxs,
+    fontSize: fontSize.xs,
   },
   categoryCountActive: {
     color: colors.whiteAlpha60,

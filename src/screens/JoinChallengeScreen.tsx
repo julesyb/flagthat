@@ -131,6 +131,7 @@ export default function JoinChallengeScreen({ route, navigation }: Props) {
               autoCapitalize="none"
               autoCorrect={false}
               returnKeyType="next"
+              accessibilityLabel={t('challenge.codePlaceholder')}
             />
           )}
 
@@ -147,6 +148,7 @@ export default function JoinChallengeScreen({ route, navigation }: Props) {
             autoFocus={!!initialCode}
             returnKeyType="done"
             onSubmitEditing={canPlay ? handlePlay : undefined}
+            accessibilityLabel={t('challenge.namePlaceholder')}
           />
 
           {/* Error state */}
@@ -162,6 +164,9 @@ export default function JoinChallengeScreen({ route, navigation }: Props) {
             onPress={handlePlay}
             disabled={!canPlay}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel={t('challenge.play')}
+            accessibilityState={{ disabled: !canPlay }}
           >
             <Text style={styles.playButtonText}>{t('challenge.play')}</Text>
           </TouchableOpacity>
@@ -221,7 +226,7 @@ const createStyles = (colors: ThemeColors) => {
   },
   error: {
     fontFamily: fontFamily.body,
-    fontSize: fontSize.sm,
+    fontSize: fontSize.xs,
     color: colors.error,
     marginBottom: spacing.sm,
   },

@@ -9,9 +9,10 @@ interface SegBtnProps {
   active: boolean;
   onPress: () => void;
   maxWidth?: number;
+  accessibilityLabel?: string;
 }
 
-export default function SegBtn({ label, active, onPress, maxWidth = 80 }: SegBtnProps) {
+export default function SegBtn({ label, active, onPress, maxWidth = 80, accessibilityLabel }: SegBtnProps) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
@@ -21,6 +22,7 @@ export default function SegBtn({ label, active, onPress, maxWidth = 80 }: SegBtn
       onPress={() => { hapticTap(); onPress(); }}
       activeOpacity={0.7}
       accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel ?? label}
       accessibilityState={{ selected: active }}
     >
       <Text style={[styles.segBtnText, active && styles.segBtnTextOn]}>{label}</Text>
@@ -44,7 +46,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   segBtnText: {
     fontFamily: fontFamily.uiLabel,
-    fontSize: fontSize.caption,
+    fontSize: fontSize.sm,
     textTransform: 'uppercase',
     color: colors.textTertiary,
   },

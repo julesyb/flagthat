@@ -72,6 +72,7 @@ const de: typeof en = {
 
   setup: {
     gameMode: 'Spielmodus',
+    chooseYourGame: 'Wähle dein Spiel',
     quiz: 'Quiz',
     quizDesc: 'Klassisches Flaggen-Quiz',
     flashFlag: 'Flash Flag',
@@ -315,7 +316,6 @@ const de: typeof en = {
     daily_legend: { name: 'T\u00e4gliche Legende', description: '30 t\u00e4gliche Herausforderungen' },
     practice_perfect: { name: 'Perfekt ge\u00fcbt', description: 'Keine Flaggen mehr zum \u00dcben' },
     shared_spirit: { name: 'Teilender Geist', description: 'Teile deine Ergebnisse' },
-    supporter: { name: 'Unterst\u00fctzer', description: 'Unterst\u00fctze durch ein Video' },
   },
 
   onboarding: {

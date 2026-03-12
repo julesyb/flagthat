@@ -9,10 +9,11 @@ import {
   Platform,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { spacing, typography, fontFamily, fontSize, buildButtons, borderRadius, buildNav, ThemeColors } from '../utils/theme';
+import { spacing, typography, fontFamily, fontSize, buildButtons, borderRadius, ThemeColors } from '../utils/theme';
 import { useTheme } from '../contexts/ThemeContext';
 import { countCorrect } from '../utils/gameHelpers';
 import { t } from '../utils/i18n';
+import { CrossIcon } from '../components/Icons';
 import { GameQuestion, GameResult } from '../types';
 import { generateQuestions } from '../utils/gameEngine';
 import {
@@ -377,6 +378,9 @@ export default function FlashFlagScreen({ route, navigation }: Props) {
           style={styles.readyButton}
           onPress={handleReady}
           activeOpacity={0.8}
+          accessibilityRole="button"
+          accessibilityLabel={t('flashFlag.ready')}
+          accessibilityHint="Starts the Flag Flash game"
         >
           <Text style={styles.readyButtonText}>{t('flashFlag.ready')}</Text>
         </TouchableOpacity>
@@ -385,8 +389,11 @@ export default function FlashFlagScreen({ route, navigation }: Props) {
           style={styles.exitButton}
           onPress={goHome}
           activeOpacity={0.7}
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+          accessibilityRole="button"
+          accessibilityLabel={t('common.exit')}
         >
-          <Text style={styles.exitButtonText}>{t('common.exit')}</Text>
+          <CrossIcon size={20} color={colors.whiteAlpha50} />
         </TouchableOpacity>
         </View>
         </ScreenContainer>
@@ -444,9 +451,9 @@ export default function FlashFlagScreen({ route, navigation }: Props) {
       <ScreenContainer flex game>
       <View style={styles.gameContent}>
         {tiltState === 'correct' ? (
-          <Text style={styles.feedbackText}>{t('flashFlag.correctFeedback')}</Text>
+          <Text style={styles.feedbackText} accessibilityLiveRegion="polite">{t('flashFlag.correctFeedback')}</Text>
         ) : tiltState === 'skip' ? (
-          <Text style={styles.feedbackText}>{t('flashFlag.passFeedback')}</Text>
+          <Text style={styles.feedbackText} accessibilityLiveRegion="polite">{t('flashFlag.passFeedback')}</Text>
         ) : (
           <>
             {config.displayMode === 'map' ? (
@@ -478,6 +485,9 @@ export default function FlashFlagScreen({ route, navigation }: Props) {
             style={[styles.webButton, styles.webButtonCorrect]}
             onPress={() => handleTilt('correct')}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel={t('flashFlag.correctButton')}
+            accessibilityHint="Mark the current flag as correctly guessed"
           >
             <Text style={styles.webButtonText}>{t('flashFlag.correctButton')}</Text>
           </TouchableOpacity>
@@ -485,6 +495,9 @@ export default function FlashFlagScreen({ route, navigation }: Props) {
             style={[styles.webButton, styles.webButtonSkip]}
             onPress={() => handleTilt('skip')}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel={t('flashFlag.skipButton')}
+            accessibilityHint="Skip the current flag"
           >
             <Text style={styles.webButtonText}>{t('flashFlag.skipButton')}</Text>
           </TouchableOpacity>
@@ -501,8 +514,12 @@ export default function FlashFlagScreen({ route, navigation }: Props) {
           style={styles.exitButtonPlaying}
           onPress={exitGame}
           activeOpacity={0.7}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          accessibilityRole="button"
+          accessibilityLabel={t('common.exit')}
+          accessibilityHint="Ends the game and shows results"
         >
-          <Text style={[styles.exitButtonPlayingText, !isNeutral && { color: colors.white }]}>{t('common.exit')}</Text>
+          <CrossIcon size={18} color={isNeutral ? colors.whiteAlpha70 : colors.white} />
         </TouchableOpacity>
         <Text style={[styles.scoreText, !isNeutral && { color: colors.white }]}>{t('flashFlag.correctCount', { count: correctCount })}</Text>
       </View>
@@ -512,7 +529,6 @@ export default function FlashFlagScreen({ route, navigation }: Props) {
 
 const createStyles = (colors: ThemeColors) => {
   const btn = buildButtons(colors);
-  const n = buildNav(colors);
   return StyleSheet.create({
   container: {
     flex: 1,
@@ -530,7 +546,7 @@ const createStyles = (colors: ThemeColors) => {
     alignItems: 'center',
   },
   tutorialTitle: {
-    fontSize: fontSize.gameTitle,
+    fontSize: fontSize.display,
     fontFamily: fontFamily.display,
     color: colors.text,
     marginBottom: spacing.xs,
@@ -634,7 +650,7 @@ const createStyles = (colors: ThemeColors) => {
     gap: spacing.sm,
   },
   flagName: {
-    fontSize: fontSize.gameTitle,
+    fontSize: fontSize.display,
     fontFamily: fontFamily.display,
     color: colors.text,
     textAlign: 'center',
@@ -642,7 +658,7 @@ const createStyles = (colors: ThemeColors) => {
     marginTop: spacing.md,
   },
   feedbackText: {
-    fontSize: fontSize.gameFeedback,
+    fontSize: fontSize.hero,
     fontFamily: fontFamily.display,
     color: colors.white,
     textAlign: 'center',
@@ -691,18 +707,15 @@ const createStyles = (colors: ThemeColors) => {
   exitButton: {
     marginTop: spacing.lg,
     padding: spacing.sm,
-  },
-  exitButtonText: {
-    ...n.backText,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   exitButtonPlaying: {
     padding: spacing.sm,
     backgroundColor: colors.whiteAlpha15,
     borderRadius: borderRadius.sm,
-  },
-  exitButtonPlayingText: {
-    ...n.backText,
-    color: colors.textSecondary,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   });
 };

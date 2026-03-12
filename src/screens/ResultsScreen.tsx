@@ -19,7 +19,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { spacing, typography, fontFamily, fontSize, buildButtons, borderRadius, APP_URL, ThemeColors } from '../utils/theme';
 import { useTheme } from '../contexts/ThemeContext';
 import { getStreakFromResults, getGrade, generateDailyShareGrid, generateShareGrid, getDailyNumber } from '../utils/gameEngine';
-import { updateStats, updateFlagResults, saveDailyChallenge, incrementDailyChallenges, markShared, saveBaselineResult, getStats, getFlagStats, getDayStreakInfo, getBadgeData, persistEarnedBadges, getMissedFlagIds, addGameHistoryEntry, getSupportData, getChallengeName, saveChallengeName, addChallengeToHistory } from '../utils/storage';
+import { updateStats, updateFlagResults, saveDailyChallenge, incrementDailyChallenges, markShared, saveBaselineResult, getStats, getFlagStats, getDayStreakInfo, getBadgeData, persistEarnedBadges, getMissedFlagIds, addGameHistoryEntry, getChallengeName, saveChallengeName, addChallengeToHistory } from '../utils/storage';
 import { BaselineRegionId, UserStats, GameMode, CategoryId } from '../types';
 import { t } from '../utils/i18n';
 import { hapticCorrect, hapticTap, playCelebrationSound } from '../utils/feedback';
@@ -32,7 +32,6 @@ import { countCorrect } from '../utils/gameHelpers';
 import { RootStackParamList } from '../types/navigation';
 import { getAllEarnedBadges, detectPerGameBadges, buildBadgeContext, BADGES, TIER_COLORS, EarnedBadge } from '../utils/badges';
 import { getTotalFlagCount, getCategoryCount } from '../data';
-import { useInterstitialAdUnit, shouldShowAd, recordAdImpression, incrementGameCount } from '../utils/ads';
 import { encodeChallenge, ChallengeData, CHALLENGE_MODES, generateShortCode } from '../utils/challengeCode';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Results'>;
@@ -55,11 +54,6 @@ export default function ResultsScreen({ route, navigation }: Props) {
     ? Math.round(results.reduce((sum, r) => sum + r.timeTaken, 0) / results.length / 1000 * 10) / 10
     : 0;
   const isPerfect = accuracy === 100 && results.length > 0;
-
-  const skipAds = isDaily || isBaseline || reviewOnly;
-  const interstitial = useInterstitialAdUnit();
-  const [adEligible, setAdEligible] = useState(false);
-  const pendingNavRef = useRef<(() => void) | null>(null);
 
   const fastestCorrect = results
     .filter((r) => r.correct)
@@ -201,26 +195,6 @@ export default function ResultsScreen({ route, navigation }: Props) {
     return { hostCorrect, playerCorrect, hostAvg, playerAvg, h2hTotal, winner };
   })() : null;
 
-  // Load ad if frequency cap allows (skip for daily/baseline/review)
-  useEffect(() => {
-    if (skipAds) return;
-    shouldShowAd().then((eligible) => {
-      setAdEligible(eligible);
-      if (eligible) {
-        interstitial.load();
-      }
-    });
-  }, [interstitial.load, skipAds]);
-
-  // When ad closes, execute pending navigation
-  useEffect(() => {
-    if (interstitial.isClosed && pendingNavRef.current) {
-      const nav = pendingNavRef.current;
-      pendingNavRef.current = null;
-      recordAdImpression().then(nav);
-    }
-  }, [interstitial.isClosed]);
-
   useEffect(() => {
     // Listen to count-up animation for display
     const listenerId = countAnim.addListener(({ value }) => {
@@ -233,10 +207,10 @@ export default function ResultsScreen({ route, navigation }: Props) {
     // ── Data processing ──
     async function processResults() {
       // ── Snapshot pre-game state ──
-      const [preStats, preFlagStats, preDayStreakInfo, preBadgeData, preMissed, preSupport] = await Promise.all([
-        getStats(), getFlagStats(), getDayStreakInfo(), getBadgeData(), getMissedFlagIds(), getSupportData(),
+      const [preStats, preFlagStats, preDayStreakInfo, preBadgeData, preMissed] = await Promise.all([
+        getStats(), getFlagStats(), getDayStreakInfo(), getBadgeData(), getMissedFlagIds(),
       ]);
-      const preCtx = buildBadgeContext(preStats, preFlagStats, preDayStreakInfo, preBadgeData, preMissed.length, preSupport.totalAdsWatched);
+      const preCtx = buildBadgeContext(preStats, preFlagStats, preDayStreakInfo, preBadgeData, preMissed.length);
       const preBadgeIds = new Set(getAllEarnedBadges(preCtx, preBadgeData.earnedBadgeIds).map((b) => b.id));
 
       const wasNewBestStreak = streak > preStats.bestStreak;
@@ -256,9 +230,6 @@ export default function ResultsScreen({ route, navigation }: Props) {
         await updateStats(correct, results.length, streak, config.mode, config.category);
         await updateFlagResults(results);
         await addGameHistoryEntry(accuracy, config.mode);
-        if (!skipAds) {
-          incrementGameCount();
-        }
         if (isDaily) {
           await saveDailyChallenge(results);
           await incrementDailyChallenges();
@@ -287,10 +258,10 @@ export default function ResultsScreen({ route, navigation }: Props) {
       }
 
       // ── Snapshot post-game state and evaluate badges ──
-      const [postStats, postFlagStats, postDayStreakInfo, postBadgeData, postMissed, postSupport] = await Promise.all([
-        getStats(), getFlagStats(), getDayStreakInfo(), getBadgeData(), getMissedFlagIds(), getSupportData(),
+      const [postStats, postFlagStats, postDayStreakInfo, postBadgeData, postMissed] = await Promise.all([
+        getStats(), getFlagStats(), getDayStreakInfo(), getBadgeData(), getMissedFlagIds(),
       ]);
-      const postCtx = buildBadgeContext(postStats, postFlagStats, postDayStreakInfo, postBadgeData, postMissed.length, postSupport.totalAdsWatched);
+      const postCtx = buildBadgeContext(postStats, postFlagStats, postDayStreakInfo, postBadgeData, postMissed.length);
       // Merge persisted IDs + per-game badges detected from results, then evaluate
       const perGameIds = !reviewOnly ? detectPerGameBadges(results, correct, results.length) : [];
       const allPersistedIds = [...postBadgeData.earnedBadgeIds, ...perGameIds];
@@ -439,20 +410,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
   }, [isDaily, isBaseline, config, navigation]);
 
   const playAgain = () => {
-    if (adEligible && interstitial.isLoaded) {
-      pendingNavRef.current = navigatePlayAgain;
-      interstitial.show();
-      // Safety: if ad never fires isClosed (SDK bug, network), unblock after 10s
-      setTimeout(() => {
-        if (pendingNavRef.current) {
-          const nav = pendingNavRef.current;
-          pendingNavRef.current = null;
-          recordAdImpression().then(nav);
-        }
-      }, 10000);
-    } else {
-      navigatePlayAgain();
-    }
+    navigatePlayAgain();
   };
 
   // Contextual Play CTA text
@@ -673,15 +631,15 @@ export default function ResultsScreen({ route, navigation }: Props) {
         {/* ── ACTION BUTTONS ── */}
         <Animated.View style={[styles.buttonRow, { opacity: restFade }]}>
           {!isBaseline && (
-            <TouchableOpacity style={styles.secondaryButton} onPress={handleShare} activeOpacity={0.7}>
+            <TouchableOpacity style={styles.secondaryButton} onPress={handleShare} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel={t('common.share')}>
               <Text style={styles.secondaryButtonText}>{t('common.share')}</Text>
             </TouchableOpacity>
           )}
-          <TouchableOpacity style={styles.primaryButton} onPress={playAgain} activeOpacity={0.7}>
+          <TouchableOpacity style={styles.primaryButton} onPress={playAgain} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel={playCtaText}>
             <Text style={styles.primaryButtonText}>{playCtaText}</Text>
           </TouchableOpacity>
           {!isDaily && !isBaseline && (
-            <TouchableOpacity style={styles.secondaryButton} onPress={goHome} activeOpacity={0.7}>
+            <TouchableOpacity style={styles.secondaryButton} onPress={goHome} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel={t('common.home')}>
               <Text style={styles.secondaryButtonText}>{t('common.home')}</Text>
             </TouchableOpacity>
           )}
@@ -694,6 +652,9 @@ export default function ResultsScreen({ route, navigation }: Props) {
               style={styles.challengeButton}
               onPress={handleChallengeTap}
               activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel={t('challenge.challengeFriend')}
+              accessibilityHint="Shares a challenge link so a friend can beat your score"
             >
               <UsersIcon size={18} color={colors.ink} />
               <Text style={styles.challengeButtonTitle}>{t('challenge.challengeFriend')}</Text>
@@ -708,6 +669,8 @@ export default function ResultsScreen({ route, navigation }: Props) {
               style={styles.challengeButton}
               onPress={() => { hapticTap(); navigation.replace('GameSetup', { initialMode: config.mode, ...(config.difficulty && { initialDifficulty: config.difficulty }) }); }}
               activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel={t('challenge.challengeBack')}
             >
               <UsersIcon size={18} color={colors.ink} />
               <Text style={styles.challengeButtonTitle}>{t('challenge.challengeBack')}</Text>
@@ -776,6 +739,9 @@ export default function ResultsScreen({ route, navigation }: Props) {
                   config: { mode: 'practice', category: 'all', questionCount: weakFlagCount, displayMode: 'flag' },
                 })}
                 activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel={t('results.practiceWeak')}
+                accessibilityHint={t('results.flagsToReview', { count: weakFlagCount })}
               >
                 <CrosshairIcon size={16} color={colors.accent} />
                 <Text style={styles.practiceButtonText}>{t('results.practiceWeak')}</Text>
@@ -784,7 +750,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
               </TouchableOpacity>
             )}
 
-            <TouchableOpacity style={styles.viewStatsButton} onPress={() => navigation.navigate('Stats')} activeOpacity={0.7}>
+            <TouchableOpacity style={styles.viewStatsButton} onPress={() => navigation.navigate('Stats')} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel={t('results.viewAllStats')}>
               <BarChartIcon size={16} color={colors.ink} />
               <Text style={styles.viewStatsText}>{t('results.viewAllStats')}</Text>
               <ChevronRightIcon size={14} color={colors.textTertiary} />
@@ -857,6 +823,8 @@ export default function ResultsScreen({ route, navigation }: Props) {
           style={styles.modalOverlay}
           activeOpacity={1}
           onPress={() => setShowChallengeModal(false)}
+          accessibilityRole="button"
+          accessibilityLabel="Close dialog"
         >
           <TouchableOpacity activeOpacity={1} style={styles.modalCard} onPress={() => {}}>
             <Text style={styles.modalTitle}>{t('challenge.enterName')}</Text>
@@ -872,12 +840,16 @@ export default function ResultsScreen({ route, navigation }: Props) {
               autoFocus
               returnKeyType="done"
               onSubmitEditing={challengeName.trim().length > 0 ? handleChallengeShare : undefined}
+              accessibilityLabel={t('challenge.enterName')}
             />
             <TouchableOpacity
               style={[styles.modalShare, challengeName.trim().length === 0 && styles.modalShareDisabled]}
               onPress={handleChallengeShare}
               disabled={challengeName.trim().length === 0}
               activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel={t('common.share')}
+              accessibilityState={{ disabled: challengeName.trim().length === 0 }}
             >
               <Text style={styles.modalShareText}>{t('common.share')}</Text>
             </TouchableOpacity>
@@ -911,7 +883,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     marginBottom: spacing.sm,
   },
   heroEyebrow: {
-    fontFamily: fontFamily.uiLabel, fontSize: fontSize.xxs,
+    fontFamily: fontFamily.uiLabel, fontSize: fontSize.xs,
     letterSpacing: 1.5, textTransform: 'uppercase',
     color: colors.whiteAlpha45, marginBottom: spacing.lg,
   },
@@ -928,7 +900,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   },
   heroGrade: {
     fontFamily: fontFamily.display,
-    fontSize: fontSize.gameTitle, // 42px
+    fontSize: fontSize.display, // 42px
     letterSpacing: -1,
   },
   heroScoreText: {
@@ -955,14 +927,14 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   timelineStat: { flex: 1, alignItems: 'center' },
   timelineDivider: { width: 1, height: 36, backgroundColor: colors.border },
   timelineStatValue: {
-    fontFamily: fontFamily.display, fontSize: fontSize.heading,
+    fontFamily: fontFamily.display, fontSize: fontSize.lg,
     color: colors.ink, letterSpacing: -0.5,
   },
   timelineStatUnit: {
-    fontFamily: fontFamily.bodyMedium, fontSize: fontSize.caption, color: colors.textTertiary,
+    fontFamily: fontFamily.bodyMedium, fontSize: fontSize.sm, color: colors.textTertiary,
   },
   timelineStatLabel: {
-    fontFamily: fontFamily.uiLabel, fontSize: fontSize.xxs, letterSpacing: 0.8,
+    fontFamily: fontFamily.uiLabel, fontSize: fontSize.xs, letterSpacing: 0.8,
     textTransform: 'uppercase', color: colors.textTertiary, marginTop: spacing.xxs,
   },
   newBestPill: {
@@ -970,7 +942,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     paddingVertical: 2, paddingHorizontal: 8, marginTop: spacing.xxs,
   },
   newBestPillText: {
-    fontFamily: fontFamily.uiLabel, fontSize: fontSize.xxs,
+    fontFamily: fontFamily.uiLabel, fontSize: fontSize.xs,
     letterSpacing: 0.6, textTransform: 'uppercase', color: colors.accent,
   },
 
@@ -980,7 +952,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     padding: spacing.lg, alignItems: 'center', marginBottom: spacing.sm,
   },
   dailyGridTitle: {
-    fontFamily: fontFamily.uiLabel, fontSize: fontSize.sm,
+    fontFamily: fontFamily.uiLabel, fontSize: fontSize.xs,
     letterSpacing: 1.5, textTransform: 'uppercase',
     color: colors.whiteAlpha45, marginBottom: spacing.md,
   },
@@ -997,7 +969,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
     borderRadius: borderRadius.full, paddingVertical: 6, paddingHorizontal: 12,
   },
-  insightText: { fontFamily: fontFamily.bodyMedium, fontSize: fontSize.sm, color: colors.textSecondary },
+  insightText: { fontFamily: fontFamily.bodyMedium, fontSize: fontSize.xs, color: colors.textSecondary },
 
   // ── Buttons
   buttonRow: { gap: spacing.sm, marginBottom: spacing.md },
@@ -1015,10 +987,10 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   },
   badgeIconWrap: { width: 36, height: 36, borderRadius: borderRadius.md, justifyContent: 'center', alignItems: 'center' },
   badgeContent: { flex: 1 },
-  badgeName: { fontFamily: fontFamily.bodyBold, fontSize: fontSize.caption, color: colors.ink, marginBottom: 2 },
-  badgeDesc: { fontFamily: fontFamily.body, fontSize: fontSize.sm, color: colors.textSecondary },
+  badgeName: { fontFamily: fontFamily.bodyBold, fontSize: fontSize.sm, color: colors.ink, marginBottom: 2 },
+  badgeDesc: { fontFamily: fontFamily.body, fontSize: fontSize.xs, color: colors.textSecondary },
   badgeTierPill: { borderRadius: borderRadius.full, paddingVertical: 3, paddingHorizontal: 10 },
-  badgeTierText: { fontFamily: fontFamily.uiLabel, fontSize: fontSize.xxs, letterSpacing: 0.8, textTransform: 'uppercase' },
+  badgeTierText: { fontFamily: fontFamily.uiLabel, fontSize: fontSize.xs, letterSpacing: 0.8, textTransform: 'uppercase' },
 
   // ── Progress
   progressSection: { marginBottom: spacing.md },
@@ -1028,27 +1000,27 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   },
   progressTopRow: { flexDirection: 'row', gap: spacing.lg, marginBottom: 14 },
   progressStat: { alignItems: 'center', flex: 1 },
-  progressStatValue: { fontFamily: fontFamily.display, fontSize: fontSize.heading, color: colors.ink, letterSpacing: -0.5 },
+  progressStatValue: { fontFamily: fontFamily.display, fontSize: fontSize.lg, color: colors.ink, letterSpacing: -0.5 },
   progressStatLabel: {
-    fontFamily: fontFamily.uiLabel, fontSize: fontSize.xxs, letterSpacing: 0.8,
+    fontFamily: fontFamily.uiLabel, fontSize: fontSize.xs, letterSpacing: 0.8,
     textTransform: 'uppercase', color: colors.textTertiary, marginTop: spacing.xxs, textAlign: 'center',
   },
   progressBarWrap: {
     height: 7, backgroundColor: colors.border, borderRadius: borderRadius.full, overflow: 'hidden',
   },
   progressBarFill: { height: '100%', backgroundColor: colors.accent, borderRadius: borderRadius.full },
-  progressPctLabel: { fontFamily: fontFamily.bodyBold, fontSize: fontSize.sm, color: colors.ink, marginTop: 6 },
+  progressPctLabel: { fontFamily: fontFamily.bodyBold, fontSize: fontSize.xs, color: colors.ink, marginTop: 6 },
   practiceButton: {
     flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
     backgroundColor: colors.accentBg, borderRadius: borderRadius.lg,
     borderWidth: 1.5, borderColor: colors.accent, padding: 14, marginTop: 8,
   },
   practiceButtonText: {
-    fontFamily: fontFamily.uiLabel, fontSize: fontSize.caption,
+    fontFamily: fontFamily.uiLabel, fontSize: fontSize.sm,
     letterSpacing: 0.8, textTransform: 'uppercase', color: colors.accent,
   },
   practiceButtonMeta: {
-    fontFamily: fontFamily.body, fontSize: fontSize.sm,
+    fontFamily: fontFamily.body, fontSize: fontSize.xs,
     color: colors.textTertiary, flex: 1, textAlign: 'right',
   },
   viewStatsButton: {
@@ -1058,7 +1030,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     padding: 14, marginTop: 8,
   },
   viewStatsText: {
-    fontFamily: fontFamily.uiLabel, fontSize: fontSize.caption,
+    fontFamily: fontFamily.uiLabel, fontSize: fontSize.sm,
     letterSpacing: 0.8, textTransform: 'uppercase', color: colors.ink, flex: 1,
   },
 
@@ -1068,10 +1040,10 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     marginTop: spacing.md, marginBottom: spacing.sm,
   },
   sectionTitle: {
-    fontFamily: fontFamily.uiLabel, fontSize: fontSize.xxs,
+    fontFamily: fontFamily.uiLabel, fontSize: fontSize.xs,
     letterSpacing: 1.2, textTransform: 'uppercase', color: colors.textTertiary,
   },
-  sectionMeta: { fontFamily: fontFamily.body, fontSize: fontSize.sm, color: colors.textTertiary },
+  sectionMeta: { fontFamily: fontFamily.body, fontSize: fontSize.xs, color: colors.textTertiary },
 
   // ── Review
   reviewItem: {
@@ -1081,16 +1053,16 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   },
   reviewCorrect: { borderLeftColor: colors.success },
   reviewWrong: { borderLeftColor: colors.error },
-  reviewIndex: { fontFamily: fontFamily.display, fontSize: fontSize.caption, minWidth: 18, textAlign: 'center' },
+  reviewIndex: { fontFamily: fontFamily.display, fontSize: fontSize.sm, minWidth: 18, textAlign: 'center' },
   reviewIndexCorrect: { color: colors.success },
   reviewIndexWrong: { color: colors.error },
   reviewContent: { flex: 1 },
   reviewName: { fontFamily: fontFamily.bodyBold, fontSize: fontSize.body, color: colors.text },
-  reviewAnswer: { fontFamily: fontFamily.body, fontSize: fontSize.sm, color: colors.error, marginTop: spacing.xxs },
+  reviewAnswer: { fontFamily: fontFamily.body, fontSize: fontSize.xs, color: colors.error, marginTop: spacing.xxs },
   reviewRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  reviewTime: { fontFamily: fontFamily.bodyMedium, fontSize: fontSize.sm, color: colors.textTertiary },
+  reviewTime: { fontFamily: fontFamily.bodyMedium, fontSize: fontSize.xs, color: colors.textTertiary },
   reviewTimeFastest: { color: colors.success },
-  reviewOpponent: { fontFamily: fontFamily.body, fontSize: fontSize.sm, color: colors.textTertiary, marginTop: spacing.xxs },
+  reviewOpponent: { fontFamily: fontFamily.body, fontSize: fontSize.xs, color: colors.textTertiary, marginTop: spacing.xxs },
 
   // ── Head-to-head
   h2hCard: {
@@ -1099,7 +1071,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     marginBottom: spacing.sm,
   },
   h2hTitle: {
-    fontFamily: fontFamily.uiLabel, fontSize: fontSize.xxs,
+    fontFamily: fontFamily.uiLabel, fontSize: fontSize.xs,
     letterSpacing: 1.2, textTransform: 'uppercase',
     color: colors.textTertiary, textAlign: 'center', marginBottom: spacing.md,
   },
@@ -1117,7 +1089,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     color: colors.ink, letterSpacing: -0.5,
   },
   h2hTime: {
-    fontFamily: fontFamily.body, fontSize: fontSize.sm,
+    fontFamily: fontFamily.body, fontSize: fontSize.xs,
     color: colors.textTertiary, marginTop: spacing.xxs,
   },
   h2hVs: {
@@ -1126,7 +1098,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     justifyContent: 'center', alignItems: 'center',
   },
   h2hVsText: {
-    fontFamily: fontFamily.uiLabel, fontSize: fontSize.sm,
+    fontFamily: fontFamily.uiLabel, fontSize: fontSize.xs,
     color: colors.textTertiary, textTransform: 'uppercase',
   },
   h2hResult: {
@@ -1142,7 +1114,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     borderRadius: borderRadius.lg, paddingVertical: 14, marginBottom: spacing.md,
   },
   challengeButtonTitle: {
-    fontFamily: fontFamily.uiLabel, fontSize: fontSize.caption,
+    fontFamily: fontFamily.uiLabel, fontSize: fontSize.sm,
     letterSpacing: 0.5, textTransform: 'uppercase', color: colors.ink,
   },
 
@@ -1171,7 +1143,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   },
   modalShareDisabled: { backgroundColor: colors.textTertiary },
   modalShareText: {
-    fontFamily: fontFamily.uiLabel, fontSize: fontSize.caption,
+    fontFamily: fontFamily.uiLabel, fontSize: fontSize.sm,
     letterSpacing: 0.5, textTransform: 'uppercase', color: colors.playText,
   },
 }); };

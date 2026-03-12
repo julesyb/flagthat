@@ -191,7 +191,7 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
           <Text style={styles.emptyBody}>
             {t('capital.noCountriesDesc')}
           </Text>
-          <TouchableOpacity style={styles.emptyButton} onPress={() => navigation.goBack()}>
+          <TouchableOpacity style={styles.emptyButton} onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('common.goBack')}>
             <Text style={styles.emptyButtonText}>{t('common.goBack')}</Text>
           </TouchableOpacity>
         </View>
@@ -264,6 +264,7 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
                 activeOpacity={0.7}
                 accessibilityRole="button"
                 accessibilityLabel={option}
+                accessibilityState={{ disabled: showFeedback }}
               >
                 <Text style={textStyle}>{option}</Text>
               </TouchableOpacity>
@@ -303,17 +304,6 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     alignItems: 'center',
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
-  },
-  exitButton: {
-    padding: spacing.sm,
-    width: 60,
-  },
-  exitText: {
-    fontSize: fontSize.caption,
-    fontFamily: fontFamily.uiLabelMedium,
-    letterSpacing: 0.5,
-    color: colors.textTertiary,
-    textTransform: 'uppercase',
   },
   centerInfo: {
     alignItems: 'center',

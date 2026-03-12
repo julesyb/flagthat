@@ -241,24 +241,16 @@ export const fontFamily = {
 };
 
 // ---- Type scale — single source of truth for every font size ----
-// 14-step ramp. Every fontSize in the app must reference this scale.
+// 8-step ramp: 5 UI sizes + 3 display sizes. Minimum 11px for readability.
+// Every fontSize in the app must reference this scale — no math adjustments.
 export const fontSize = {
-  micro: 9,       // streak badge label, ultra-compact text
-  xxs: 10,        // micro labels, bottom nav tabs, eyebrow, small caps
-  xs: 11,         // compact labels (uppercase done-labels)
-  sm: 12,         // chips, badge text, progress labels
-  caption: 14,    // captions, subtitles, segment buttons
-  body: 16,       // body text, labels, options
-  lg: 18,         // emphasized body, card titles, nav header
-  xl: 20,         // buttons, section titles, score displays
-  heading: 22,    // stat values, headings
-  title: 28,      // title-level display
-  wordmark: 34,   // app wordmark
-  stat: 38,       // large stat tile numbers
-  gameTitle: 42,  // gameplay large titles (Flash Flag)
-  hero: 52,       // hero display numbers
-  gameFeedback: 56, // gameplay feedback text (Flash Flag)
-  grade: 72,      // grade letter / big score display
+  xs: 11,         // eyebrow labels, nav tabs, small caps, badges, chips
+  sm: 13,         // captions, subtitles, segment buttons, tags
+  body: 16,       // body text, labels, options, card titles
+  lg: 20,         // buttons, section titles, headings, stat values
+  title: 28,      // page titles, wordmark, large headings
+  display: 42,    // gameplay titles (Flash Flag), grade letters, large stat numbers
+  hero: 72,       // hero display numbers, countdown feedback
   countdown: 120, // full-screen countdown numbers
 };
 
@@ -269,30 +261,30 @@ export const typography = {
     letterSpacing: -0.5,
   },
   heading: {
-    fontSize: fontSize.heading,
+    fontSize: fontSize.lg,
     fontFamily: fontFamily.uiLabel,
     letterSpacing: 0.3,
   },
   headingUpper: {
-    fontSize: fontSize.heading,
+    fontSize: fontSize.lg,
     fontFamily: fontFamily.uiLabel,
     letterSpacing: 0.3,
     textTransform: 'uppercase' as const,
   },
   body: {
-    fontSize: fontSize.lg,
+    fontSize: fontSize.body,
     fontFamily: fontFamily.body,
   },
   bodyBold: {
-    fontSize: fontSize.lg,
+    fontSize: fontSize.body,
     fontFamily: fontFamily.bodyBold,
   },
   caption: {
-    fontSize: fontSize.caption,
+    fontSize: fontSize.sm,
     fontFamily: fontFamily.body,
   },
   captionBold: {
-    fontSize: fontSize.caption,
+    fontSize: fontSize.sm,
     fontFamily: fontFamily.uiLabelMedium,
     letterSpacing: 0.2,
   },
@@ -301,7 +293,7 @@ export const typography = {
     fontFamily: fontFamily.bodyMedium,
   },
   eyebrow: {
-    fontSize: fontSize.xxs,
+    fontSize: fontSize.xs,
     fontFamily: fontFamily.uiLabel,
     letterSpacing: 2,
     textTransform: 'uppercase' as const,
@@ -324,7 +316,7 @@ export function buildButtons(c: ThemeColors) {
     },
     primaryText: {
       fontFamily: fontFamily.uiLabel,
-      fontSize: fontSize.xl,
+      fontSize: fontSize.lg,
       letterSpacing: 0.8,
       textTransform: 'uppercase' as const,
       color: c.playText,
@@ -340,7 +332,7 @@ export function buildButtons(c: ThemeColors) {
     },
     secondaryText: {
       fontFamily: fontFamily.uiLabel,
-      fontSize: fontSize.xl,
+      fontSize: fontSize.lg,
       letterSpacing: 0.8,
       textTransform: 'uppercase' as const,
       color: c.textSecondary,
@@ -355,7 +347,7 @@ export function buildNav(c: ThemeColors) {
       width: 60,
     },
     backText: {
-      fontSize: fontSize.caption,
+      fontSize: fontSize.sm,
       fontFamily: fontFamily.bodyMedium,
       letterSpacing: 0.3,
       color: c.textTertiary,

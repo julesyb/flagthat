@@ -126,7 +126,7 @@ export function FlagImageSmall({ countryCode }: { countryCode: string }) {
       {!loaded && (
         <View style={[styles.placeholder, { width: 56, height: 37 }]}>
           {error ? (
-            <Text style={[styles.errorText, { fontSize: fontSize.xxs }]}>{countryCode.toUpperCase()}</Text>
+            <Text style={[styles.errorText, { fontSize: fontSize.xs }]}>{countryCode.toUpperCase()}</Text>
           ) : (
             <ActivityIndicator size="small" color={colors.textTertiary} />
           )}
@@ -165,7 +165,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   errorText: {
     fontFamily: fontFamily.uiLabelMedium,
-    fontSize: fontSize.sm,
+    fontSize: fontSize.xs,
     letterSpacing: 1,
     color: colors.textTertiary,
     textAlign: 'center',

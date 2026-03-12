@@ -78,6 +78,7 @@ const en = {
   // ─── Game Setup ──────────────────────────────────────────
   setup: {
     gameMode: 'Game Mode',
+    chooseYourGame: 'Choose Your Game',
     quiz: 'Quiz',
     quizDesc: 'Classic flag quiz',
     flashFlag: 'Flash Flag',
@@ -415,7 +416,6 @@ const en = {
     daily_legend: { name: 'Daily Legend', description: 'Complete 30 daily challenges' },
     practice_perfect: { name: 'Practice Perfect', description: 'Clear all flags from practice' },
     shared_spirit: { name: 'Shared Spirit', description: 'Share your results' },
-    supporter: { name: 'Supporter', description: 'Support by watching a video' },
   },
 
   // ─── Onboarding ───────────────────────────────────────────

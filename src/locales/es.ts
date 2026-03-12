@@ -72,6 +72,7 @@ const es: typeof en = {
 
   setup: {
     gameMode: 'Modo de juego',
+    chooseYourGame: 'Elige tu juego',
     quiz: 'Quiz',
     quizDesc: 'Quiz cl\u00e1sico de banderas',
     flashFlag: 'Flash Flag',
@@ -314,7 +315,6 @@ const es: typeof en = {
     daily_legend: { name: 'Leyenda diaria', description: '30 desaf\u00edos diarios completados' },
     practice_perfect: { name: 'Pr\u00e1ctica perfecta', description: 'Sin banderas pendientes de practicar' },
     shared_spirit: { name: 'Esp\u00edritu compartido', description: 'Comparte tus resultados' },
-    supporter: { name: 'Patrocinador', description: 'Apoya viendo un video' },
   },
 
   onboarding: {

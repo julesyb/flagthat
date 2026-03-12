@@ -5,7 +5,7 @@ import { colors } from './theme';
 
 export type BadgeTier = 'bronze' | 'silver' | 'gold' | 'platinum';
 
-export type BadgeIcon = 'flag' | 'globe' | 'check' | 'play' | 'lightning' | 'calendar' | 'clock' | 'crosshair' | 'link' | 'eye' | 'heart' | 'compass';
+export type BadgeIcon = 'flag' | 'globe' | 'check' | 'play' | 'lightning' | 'calendar' | 'clock' | 'crosshair' | 'link' | 'eye' | 'compass' | 'heart';
 
 export interface Badge {
   id: string;
@@ -64,7 +64,6 @@ export const BADGES: Badge[] = [
   { id: 'explorer', name: 'Explorer', description: 'Try 5 different game modes', tier: 'bronze', category: 'fun', icon: 'compass' },
   { id: 'practice_perfect', name: 'Practice Perfect', description: 'Clear all flags from practice', tier: 'gold', category: 'fun', icon: 'crosshair' },
   { id: 'shared_spirit', name: 'Shared Spirit', description: 'Share your results', tier: 'bronze', category: 'fun', icon: 'link' },
-  { id: 'supporter', name: 'Supporter', description: 'Support by watching a video', tier: 'bronze', category: 'fun', icon: 'heart' },
 ];
 
 // ── Shared constants ──────────────────────────────────────────
@@ -80,7 +79,6 @@ export interface BadgeCheckContext {
   dailyChallengesCompleted: number;
   hasShared: boolean;
   weakFlagCount: number;
-  adsWatched: number;
 }
 
 // Build context from raw data sources (single place, no duplication)
@@ -90,7 +88,6 @@ export function buildBadgeContext(
   dayStreakInfo: DayStreakInfo,
   badgeData: BadgeData,
   weakFlagCount: number,
-  adsWatched: number,
 ): BadgeCheckContext {
   return {
     stats,
@@ -100,7 +97,6 @@ export function buildBadgeContext(
     dailyChallengesCompleted: badgeData.dailyChallengesCompleted,
     hasShared: badgeData.hasShared,
     weakFlagCount,
-    adsWatched,
   };
 }
 
@@ -155,7 +151,6 @@ const BADGE_CONDITIONS: Record<string, ConditionFn> = {
   region_ace:       (ctx) => hasRegionAce(ctx),
   practice_perfect: (ctx, d) => d.countriesSeen > 0 && ctx.weakFlagCount === 0 && ctx.stats.totalGamesPlayed >= 5,
   shared_spirit:    (ctx) => ctx.hasShared,
-  supporter:        (ctx) => ctx.adsWatched > 0,
 };
 // Per-game badges (perfect_10, s_rank, quick_draw) are not in either map.
 // They depend on individual game results and are handled by detectPerGameBadges().
