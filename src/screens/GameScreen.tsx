@@ -51,7 +51,7 @@ export default function GameScreen({ route, navigation }: Props) {
 
   useEffect(() => {
     if (challenge) {
-      const q = buildChallengeQuestions(challenge.flagIds, challenge.mode) || [];
+      const q = buildChallengeQuestions(challenge.flagIds, challenge.mode, challenge.difficulty) || [];
       setQuestions(q);
       setQuestionStartTime(Date.now());
     } else if (config.mode === 'daily') {

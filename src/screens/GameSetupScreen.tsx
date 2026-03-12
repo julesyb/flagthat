@@ -274,7 +274,7 @@ export default function GameSetupScreen({ route, navigation }: Props) {
         )}
 
         {/* Options card */}
-        <View style={showDifficulty ? undefined : styles.configCardSpacing}>
+        {!showDifficulty && <View style={styles.configCardSpacing} />}
         <ConfigCard>
 
           {/* Autocomplete (only for Hard quiz - first row, no divider above) */}
@@ -359,7 +359,6 @@ export default function GameSetupScreen({ route, navigation }: Props) {
             </ConfigRow>
           )}
         </ConfigCard>
-        </View>
 
         {/* Filter */}
         <Text style={styles.sectionLabel}>{t('setup.filter')}</Text>

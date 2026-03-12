@@ -119,6 +119,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
       timeLimit: config.timeLimit || 15,
       flagIds,
       hostResults,
+      ...(config.difficulty && { difficulty: config.difficulty }),
     };
     const code = encodeChallenge(challengeData);
     if (!code) {
