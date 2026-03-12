@@ -380,7 +380,7 @@ export default function FlashFlagScreen({ route, navigation }: Props) {
           activeOpacity={0.8}
           accessibilityRole="button"
           accessibilityLabel={t('flashFlag.ready')}
-          accessibilityHint="Starts the Flag Flash game"
+          accessibilityHint="Starts the Flash Flag game"
         >
           <Text style={styles.readyButtonText}>{t('flashFlag.ready')}</Text>
         </TouchableOpacity>
