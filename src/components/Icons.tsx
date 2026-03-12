@@ -26,6 +26,15 @@ export function HomeIcon({ size = 16, color, strokeWidth = 1.5, filled = false }
   );
 }
 
+// Flame — streak indicator
+export function FlameIcon({ size = 16, color, filled = true }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill={filled ? color : 'none'} stroke={color} strokeWidth={filled ? 0 : 1.5}>
+      <Path d="M12 2C12 2 8.5 7 8.5 11C8.5 13 9.5 14.5 10.5 15.5C9.5 14 10 12 12 10C12 13 14 15 14 17C14 19 12.5 21 10 22C14 22 18 19.5 18 15C18 9 12 2 12 2Z" />
+    </Svg>
+  );
+}
+
 // Lightning bolt — Quick Play / action icon
 export function LightningIcon({ size = 18, color, strokeWidth = 1.5, filled = false }: IconProps) {
   return (
@@ -262,6 +271,7 @@ export function BadgeIconView({ icon, size = 18, color }: BadgeIconViewProps) {
     case 'check': return <CheckIcon size={size} color={color} />;
     case 'play': return <PlayIcon size={size} color={color} />;
     case 'lightning': return <LightningIcon size={size} color={color} />;
+    case 'flame': return <FlameIcon size={size} color={color} />;
     case 'calendar': return <CalendarIcon size={size} color={color} />;
     case 'clock': return <ClockIcon size={size} color={color} />;
     case 'crosshair': return <CrosshairIcon size={size} color={color} />;
