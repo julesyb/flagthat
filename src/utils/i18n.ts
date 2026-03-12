@@ -41,7 +41,7 @@ let currentLocale: LocaleCode = 'en';
 /**
  * Detect device locale and map to supported locale.
  */
-export function getDeviceLocale(): LocaleCode {
+function getDeviceLocale(): LocaleCode {
   let deviceLang = 'en';
 
   try {
@@ -134,13 +134,4 @@ export function t(key: string, params?: Record<string, string | number>): string
   return value.replace(/\{(\w+)\}/g, (_, k) => {
     return params[k] !== undefined ? String(params[k]) : `{${k}}`;
   });
-}
-
-/**
- * Pluralize helper. Returns singular or plural form.
- */
-export function plural(count: number, singular: string, pluralForm: string): string {
-  // Chinese doesn't have plural forms
-  if (currentLocale === 'zh') return singular;
-  return count === 1 ? singular : pluralForm;
 }

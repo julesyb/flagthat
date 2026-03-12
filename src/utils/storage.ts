@@ -341,7 +341,7 @@ export interface DailyLogEntry {
 
 export type DailyLog = Record<string, DailyLogEntry>;
 
-export async function getDailyLog(): Promise<DailyLog> {
+async function getDailyLog(): Promise<DailyLog> {
   try {
     const json = await AsyncStorage.getItem(DAILY_LOG_KEY);
     if (json) return JSON.parse(json);

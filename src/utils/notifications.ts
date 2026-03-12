@@ -28,7 +28,7 @@ export function configureNotificationHandler(): void {
 /**
  * Request notification permissions. Returns true if granted.
  */
-export async function requestPermissions(): Promise<boolean> {
+async function requestPermissions(): Promise<boolean> {
   if (Platform.OS === 'web') return false;
 
   const { status: existing } = await Notifications.getPermissionsAsync();
@@ -41,7 +41,7 @@ export async function requestPermissions(): Promise<boolean> {
 /**
  * Set up the Android notification channel.
  */
-export async function setupAndroidChannel(): Promise<void> {
+async function setupAndroidChannel(): Promise<void> {
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync(DAILY_CHANNEL_ID, {
       name: t('notification.channelName'),
@@ -77,7 +77,7 @@ function pickMessage(streak: number): { title: string; body: string } {
  * Schedule (or reschedule) the daily challenge reminder.
  * Cancels any existing reminder first, then schedules a repeating daily notification.
  */
-export async function scheduleDailyReminder(hour: number, minute: number): Promise<void> {
+async function scheduleDailyReminder(hour: number, minute: number): Promise<void> {
   if (Platform.OS === 'web') return;
 
   // Cancel existing
@@ -105,7 +105,7 @@ export async function scheduleDailyReminder(hour: number, minute: number): Promi
 /**
  * Cancel the daily challenge reminder.
  */
-export async function cancelDailyReminder(): Promise<void> {
+async function cancelDailyReminder(): Promise<void> {
   if (Platform.OS === 'web') return;
   await Notifications.cancelScheduledNotificationAsync(DAILY_NOTIFICATION_ID);
 }

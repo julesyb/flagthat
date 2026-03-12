@@ -236,10 +236,6 @@ export default function MapImage({ countryCode, size = 'hero', style }: MapImage
   );
 }
 
-export function MapImageSmall({ countryCode }: { countryCode: string }) {
-  return <MapImage countryCode={countryCode} size="small" />;
-}
-
 const styles = StyleSheet.create({
   container: {
     overflow: 'hidden',
