@@ -18,7 +18,7 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { spacing, typography, fontFamily, fontSize, buildButtons, borderRadius, APP_URL, ThemeColors } from '../utils/theme';
 import { useTheme } from '../contexts/ThemeContext';
-import { getStreakFromResults, getGrade, generateDailyShareGrid, generateShareGrid, getDailyNumber } from '../utils/gameEngine';
+import { getStreakFromResults, generateDailyShareGrid, generateShareGrid, getDailyNumber } from '../utils/gameEngine';
 import { updateStats, updateFlagResults, saveDailyChallenge, incrementDailyChallenges, markShared, saveBaselineResult, getStats, getFlagStats, getDayStreakInfo, getBadgeData, persistEarnedBadges, getMissedFlagIds, addGameHistoryEntry, getChallengeName, saveChallengeName, addChallengeToHistory } from '../utils/storage';
 import { BaselineRegionId, UserStats, GameMode, CategoryId } from '../types';
 import { t } from '../utils/i18n';
@@ -49,7 +49,6 @@ export default function ResultsScreen({ route, navigation }: Props) {
   const questionTotal = isBaseline ? getCategoryCount(config.category as CategoryId) : results.length;
   const accuracy = questionTotal > 0 ? Math.round((correct / questionTotal) * 100) : 0;
   const streak = getStreakFromResults(results);
-  const grade = getGrade(accuracy);
   const avgTime = results.length > 0
     ? Math.round(results.reduce((sum, r) => sum + r.timeTaken, 0) / results.length / 1000 * 10) / 10
     : 0;
@@ -66,10 +65,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
   // Phase 1: Count-up (0 → accuracy%)
   const countAnim = useRef(new Animated.Value(0)).current;
   const [displayAcc, setDisplayAcc] = useState(0);
-  // Phase 2: Grade reveal (springs in after count-up)
-  const gradeScale = useRef(new Animated.Value(0)).current;
-  const gradeOpacity = useRef(new Animated.Value(0)).current;
-  // Phase 3: Score line fade
+  // Phase 2: Score line fade
   const scoreFade = useRef(new Animated.Value(0)).current;
   // Phase 4: Timeline dots (staggered springs)
   const dotAnims = useRef(results.map(() => new Animated.Value(0))).current;
@@ -177,7 +173,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
 
   // Head-to-head comparison data
   const h2h = isChallenge && challenge ? (() => {
-    const hostCorrect = countCorrect(challenge.hostResults);
+    const hostCorrect = challenge.hostResults.filter((r) => r.correct).length;
     const playerCorrect = countCorrect(results);
     const h2hTotal = challenge.flagIds.length;
     // Compute raw averages in ms for fair comparison (host times have 100ms granularity from encoding)
@@ -308,24 +304,14 @@ export default function ResultsScreen({ route, navigation }: Props) {
       useNativeDriver: false,
     }).start();
 
-    // Phase 2: Grade reveal (after count-up)
-    const gradeDelay = 1500;
-    Animated.parallel([
-      Animated.spring(gradeScale, {
-        toValue: 1, friction: 4, tension: 100, delay: gradeDelay, useNativeDriver: true,
-      }),
-      Animated.timing(gradeOpacity, {
-        toValue: 1, duration: 200, delay: gradeDelay, useNativeDriver: true,
-      }),
-    ]).start();
-
-    // Phase 3: Score text
+    // Phase 2: Score text (after count-up)
+    const revealDelay = 1500;
     Animated.timing(scoreFade, {
-      toValue: 1, duration: 300, delay: gradeDelay + 200, useNativeDriver: true,
+      toValue: 1, duration: 300, delay: revealDelay, useNativeDriver: true,
     }).start();
 
-    // Phase 4: Timeline dots (staggered)
-    const dotsDelay = gradeDelay + 400;
+    // Phase 3: Timeline dots (staggered)
+    const dotsDelay = revealDelay + 200;
     Animated.stagger(
       60,
       dotAnims.map((a) =>
@@ -333,12 +319,12 @@ export default function ResultsScreen({ route, navigation }: Props) {
       ),
     ).start();
 
-    // Phase 5: Stats
+    // Phase 4: Stats
     Animated.timing(statsFade, {
       toValue: 1, duration: 400, delay: dotsDelay + results.length * 60 + 100, useNativeDriver: true,
     }).start();
 
-    // Phase 6: Rest
+    // Phase 5: Rest
     const restDelay = dotsDelay + results.length * 60 + 400;
     Animated.timing(restFade, {
       toValue: 1, duration: 400, delay: restDelay, useNativeDriver: true,
@@ -358,17 +344,17 @@ export default function ResultsScreen({ route, navigation }: Props) {
       setTimeout(() => {
         hapticCorrect();
         playCelebrationSound();
-      }, gradeDelay);
+      }, revealDelay);
       const loopAnim = Animated.loop(
         Animated.sequence([
-          Animated.timing(confettiOpacity, { toValue: 1, duration: 500, delay: gradeDelay, useNativeDriver: true }),
+          Animated.timing(confettiOpacity, { toValue: 1, duration: 500, delay: revealDelay, useNativeDriver: true }),
           Animated.timing(confettiOpacity, { toValue: 0.3, duration: 500, useNativeDriver: true }),
         ]),
       );
       loopAnim.start();
       // Hero glow pulse
       Animated.sequence([
-        Animated.timing(heroGlow, { toValue: 1, duration: 400, delay: gradeDelay, useNativeDriver: false }),
+        Animated.timing(heroGlow, { toValue: 1, duration: 400, delay: revealDelay, useNativeDriver: false }),
         Animated.timing(heroGlow, { toValue: 0, duration: 600, useNativeDriver: false }),
       ]).start();
       return () => { loopAnim.stop(); };
@@ -376,14 +362,14 @@ export default function ResultsScreen({ route, navigation }: Props) {
       // Great score: haptic + hero glow flash (gold tint)
       setTimeout(() => {
         hapticCorrect();
-      }, gradeDelay);
+      }, revealDelay);
       Animated.sequence([
-        Animated.timing(heroGlow, { toValue: 0.7, duration: 350, delay: gradeDelay, useNativeDriver: false }),
+        Animated.timing(heroGlow, { toValue: 0.7, duration: 350, delay: revealDelay, useNativeDriver: false }),
         Animated.timing(heroGlow, { toValue: 0, duration: 500, useNativeDriver: false }),
       ]).start();
     } else if (accuracy >= 80) {
       // Good score: light haptic
-      setTimeout(() => hapticTap(), gradeDelay);
+      setTimeout(() => hapticTap(), revealDelay);
     }
   }, []);
 
@@ -469,8 +455,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
         {/* ══════════════════════════════════════════════════════════
             HERO: The score reveal. This IS the experience.
             Phase 1: accuracy counts up  0% → 87%
-            Phase 2: grade letter springs in
-            Phase 3: "8/10 correct" fades in
+            Phase 2: "8/10 correct" fades in
             ══════════════════════════════════════════════════════════ */}
         <Animated.View style={[styles.heroCard, { borderColor: heroGlowColor, borderWidth: 2 }]}>
           <Text style={styles.heroEyebrow}>
@@ -479,14 +464,6 @@ export default function ResultsScreen({ route, navigation }: Props) {
 
           {/* Count-up number */}
           <Text style={styles.heroAccuracy}>{displayAcc}%</Text>
-
-          {/* Grade letter (springs in after count-up) */}
-          <Animated.View style={[
-            styles.heroGradeWrap,
-            { opacity: gradeOpacity, transform: [{ scale: gradeScale }] },
-          ]}>
-            <Text style={[styles.heroGrade, { color: colors[grade.colorKey] }]}>{grade.label}</Text>
-          </Animated.View>
 
           {/* Score line */}
           <Animated.Text style={[styles.heroScoreText, { opacity: scoreFade }]}>
@@ -946,15 +923,6 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     color: colors.white,
     letterSpacing: -3,
     lineHeight: 120,
-  },
-  heroGradeWrap: {
-    marginTop: spacing.xs,
-    marginBottom: spacing.sm,
-  },
-  heroGrade: {
-    fontFamily: fontFamily.display,
-    fontSize: fontSize.display, // 42px
-    letterSpacing: -1,
   },
   heroScoreText: {
     fontFamily: fontFamily.bodyMedium, fontSize: fontSize.lg,

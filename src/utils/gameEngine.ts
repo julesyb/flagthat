@@ -99,7 +99,6 @@ export function generateDailyShareGrid(results: GameResult[]): string {
 export function generateShareGrid(results: GameResult[], modeLabel: string, categoryLabel: string): string {
   const correct = results.filter((r) => r.correct).length;
   const accuracy = calculateAccuracy(results);
-  const grade = getGrade(accuracy);
   const grid = results.map((r) => (r.correct ? '\u2b1b' : '\u2b1c')).join('');
   // Split into rows of 5
   const rows: string[] = [];
@@ -108,7 +107,7 @@ export function generateShareGrid(results: GameResult[], modeLabel: string, cate
   }
   const gridStr = rows.join('\n');
   const perfectLine = accuracy === 100 ? `\n${t('results.perfectShareNote')}` : '';
-  return `Flag That - ${modeLabel}\n${correct}/${results.length} (${grade.label})${perfectLine}\n\n${gridStr}\n\n${APP_DOMAIN}`;
+  return `Flag That - ${modeLabel}\n${correct}/${results.length} (${accuracy}%)${perfectLine}\n\n${gridStr}\n\n${APP_DOMAIN}`;
 }
 
 export function generateQuestions(config: GameConfig): GameQuestion[] {
@@ -221,14 +220,3 @@ export function getStreakFromResults(results: GameResult[]): number {
   return maxStreak;
 }
 
-export type GradeKey = 'gradeS' | 'gradeA' | 'gradeB' | 'gradeC' | 'gradeD' | 'gradeF';
-
-export function getGrade(accuracy: number): { label: string; colorKey: GradeKey } {
-  if (accuracy >= 95) return { label: 'S', colorKey: 'gradeS' };
-  if (accuracy >= 90) return { label: 'A+', colorKey: 'gradeA' };
-  if (accuracy >= 80) return { label: 'A', colorKey: 'gradeA' };
-  if (accuracy >= 70) return { label: 'B', colorKey: 'gradeB' };
-  if (accuracy >= 60) return { label: 'C', colorKey: 'gradeC' };
-  if (accuracy >= 50) return { label: 'D', colorKey: 'gradeD' };
-  return { label: 'F', colorKey: 'gradeF' };
-}
