@@ -49,6 +49,8 @@ const createStyles = (colors: ThemeColors) => {
   exitButton: {
     ...n.backButton,
     marginLeft: spacing.xs,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   centerSlot: {
     alignItems: 'center',

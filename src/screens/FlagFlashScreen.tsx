@@ -386,6 +386,7 @@ export default function FlagFlashScreen({ route, navigation }: Props) {
           style={styles.exitButton}
           onPress={goHome}
           activeOpacity={0.7}
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           accessibilityRole="button"
           accessibilityLabel={t('common.exit')}
         >
@@ -503,6 +504,7 @@ export default function FlagFlashScreen({ route, navigation }: Props) {
           style={styles.exitButtonPlaying}
           onPress={exitGame}
           activeOpacity={0.7}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           accessibilityRole="button"
           accessibilityLabel={t('common.exit')}
           accessibilityHint="Ends the game and shows results"
@@ -695,11 +697,15 @@ const createStyles = (colors: ThemeColors) => {
   exitButton: {
     marginTop: spacing.lg,
     padding: spacing.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   exitButtonPlaying: {
     padding: spacing.sm,
     backgroundColor: colors.whiteAlpha15,
     borderRadius: borderRadius.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   });
 };
