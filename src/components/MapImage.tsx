@@ -13,7 +13,7 @@ interface MapImageProps {
 // CartoDB Positron no-labels — simple country outlines
 // Use @2x tiles for better quality on retina screens
 const TILE_URL = 'https://basemaps.cartocdn.com/light_nolabels';
-const MAX_ZOOM = 3; // Cap zoom to show only country borders, no city roads or minor boundaries
+const MAX_ZOOM = 7; // Allow zooming in to see country borders clearly
 const TILE_SIZE = 256;
 
 function latLngToTile(lat: number, lng: number, zoom: number) {
@@ -95,7 +95,8 @@ export default function MapImage({ countryCode, size = 'hero', style }: MapImage
     if (size === 'small' || size === 'medium') return 3;
     if (zoom <= 2) return 11;
     if (zoom <= 4) return 9;
-    return 7;
+    if (zoom <= 6) return 7;
+    return 5;
   })();
   const totalPx = gridSize * TILE_SIZE;
 
@@ -171,7 +172,10 @@ export default function MapImage({ countryCode, size = 'hero', style }: MapImage
   };
 
   const handleZoomOut = () => {
-    setZoomDelta((d) => Math.max(d - 1, -(coord.zoom - 1)));
+    setZoomDelta((d) => {
+      const newZoom = coord.zoom + d - 1;
+      return newZoom >= 1 ? d - 1 : d;
+    });
   };
 
   // Interactive: ScrollView with pinch-to-zoom + pan
@@ -218,18 +222,20 @@ export default function MapImage({ countryCode, size = 'hero', style }: MapImage
       {/* Zoom buttons */}
       <View style={styles.zoomControls}>
         <TouchableOpacity
-          style={styles.zoomButton}
+          style={[styles.zoomButton, zoom >= MAX_ZOOM && styles.zoomButtonDisabled]}
           onPress={handleZoomIn}
+          disabled={zoom >= MAX_ZOOM}
           activeOpacity={0.7}
         >
-          <Text style={styles.zoomText}>+</Text>
+          <Text style={[styles.zoomText, zoom >= MAX_ZOOM && styles.zoomTextDisabled]}>+</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={styles.zoomButton}
+          style={[styles.zoomButton, zoom <= 1 && styles.zoomButtonDisabled]}
           onPress={handleZoomOut}
+          disabled={zoom <= 1}
           activeOpacity={0.7}
         >
-          <Text style={styles.zoomText}>-</Text>
+          <Text style={[styles.zoomText, zoom <= 1 && styles.zoomTextDisabled]}>-</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -302,5 +308,11 @@ const styles = StyleSheet.create({
     fontSize: fontSize.xl,
     color: colors.ink,
     lineHeight: 22,
+  },
+  zoomButtonDisabled: {
+    opacity: 0.3,
+  },
+  zoomTextDisabled: {
+    color: colors.textTertiary,
   },
 });
