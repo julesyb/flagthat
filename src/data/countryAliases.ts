@@ -1155,7 +1155,7 @@ export const twinPairs: Record<string, string[]> = {
   // ── Nordic crosses ──
   'Norway': ['Iceland', 'Denmark', 'Finland', 'Sweden'],
   'Iceland': ['Norway', 'Denmark', 'Finland', 'Sweden'],
-  'Denmark': ['Norway', 'Iceland', 'Finland', 'Sweden'],
+  'Denmark': ['Norway', 'Iceland', 'Finland', 'Sweden', 'Tonga', 'Georgia', 'Switzerland'],
   'Finland': ['Norway', 'Iceland', 'Denmark', 'Sweden'],
   'Sweden': ['Norway', 'Iceland', 'Denmark', 'Finland'],
 
@@ -1205,4 +1205,9 @@ export const twinPairs: Record<string, string[]> = {
   // ── Green field with white crescent ──
   'Pakistan': ['Mauritania'],
   'Mauritania': ['Pakistan'],
+
+  // ── Red cross / white cross designs ──
+  'Tonga': ['Georgia', 'Switzerland', 'Denmark'],
+  'Georgia': ['Tonga', 'Switzerland', 'Denmark'],
+  'Switzerland': ['Tonga', 'Georgia', 'Denmark'],
 };
