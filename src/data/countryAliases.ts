@@ -1086,22 +1086,25 @@ export const twinPairs: Record<string, string[]> = {
   'Andorra': ['Moldova', 'Romania', 'Chad'],
   'Moldova': ['Andorra', 'Romania', 'Chad'],
 
-  // ── Orange-white-green vertical tricolors ──
-  "Côte d'Ivoire": ['Ireland', 'Italy'],
-  'Ireland': ["Côte d'Ivoire", 'Italy'],
+  // ── Orange-white-green / green-white-red tricolors ──
+  "Côte d'Ivoire": ['Ireland', 'Italy', 'India', 'Mexico'],
+  'Ireland': ["Côte d'Ivoire", 'Italy', 'India', 'Mexico'],
   'Italy': ['Ireland', "Côte d'Ivoire", 'Hungary', 'Mexico'],
-  'Mexico': ['Italy'],
+  'Mexico': ['Italy', 'Ireland', "Côte d'Ivoire"],
 
   // ── Orange-white-green horizontal with center emblem ──
   'Niger': ['India'],
-  'India': ['Niger'],
+  'India': ['Niger', "Côte d'Ivoire", 'Ireland'],
 
   // ── Red-yellow-green tricolors (pan-African colors) ──
-  'Guinea': ['Mali', 'Senegal', 'Cameroon', 'Ghana'],
-  'Mali': ['Guinea', 'Senegal', 'Cameroon', 'Ghana'],
-  'Senegal': ['Guinea', 'Mali', 'Cameroon', 'Ghana'],
-  'Cameroon': ['Guinea', 'Mali', 'Senegal', 'Ghana'],
-  'Ghana': ['Guinea', 'Mali', 'Senegal', 'Cameroon'],
+  'Guinea': ['Mali', 'Senegal', 'Cameroon', 'Ghana', 'Guinea-Bissau', 'Ethiopia', 'Bolivia'],
+  'Mali': ['Guinea', 'Senegal', 'Cameroon', 'Ghana', 'Guinea-Bissau', 'Ethiopia', 'Bolivia'],
+  'Senegal': ['Guinea', 'Mali', 'Cameroon', 'Ghana', 'Guinea-Bissau'],
+  'Cameroon': ['Guinea', 'Mali', 'Senegal', 'Ghana', 'Guinea-Bissau'],
+  'Ghana': ['Guinea', 'Mali', 'Senegal', 'Cameroon', 'Guinea-Bissau', 'Ethiopia', 'Bolivia'],
+  'Guinea-Bissau': ['Guinea', 'Mali', 'Senegal', 'Cameroon', 'Ghana'],
+  'Ethiopia': ['Guinea', 'Mali', 'Ghana', 'Bolivia'],
+  'Bolivia': ['Guinea', 'Mali', 'Ghana', 'Ethiopia'],
 
   // ── Red-white horizontal bicolors ──
   'Indonesia': ['Monaco', 'Poland'],
@@ -1112,18 +1115,18 @@ export const twinPairs: Record<string, string[]> = {
   'France': ['Netherlands', 'Luxembourg', 'Russia'],
   'Netherlands': ['France', 'Luxembourg', 'Russia'],
   'Luxembourg': ['Netherlands', 'France', 'Russia'],
-  'Russia': ['France', 'Netherlands', 'Luxembourg', 'Serbia', 'Slovenia', 'Slovakia'],
+  'Russia': ['France', 'Netherlands', 'Luxembourg', 'Serbia', 'Slovenia', 'Slovakia', 'Croatia'],
 
   // ── Red-white-green horizontal tricolors ──
   'Hungary': ['Italy', 'Bulgaria', 'Tajikistan'],
-  'Bulgaria': ['Hungary'],
-  'Tajikistan': ['Hungary'],
+  'Bulgaria': ['Hungary', 'Tajikistan'],
+  'Tajikistan': ['Hungary', 'Bulgaria'],
 
   // ── Slavic tricolors with coat of arms (red-white-blue family) ──
   'Slovakia': ['Slovenia', 'Serbia', 'Croatia', 'Russia'],
   'Slovenia': ['Slovakia', 'Serbia', 'Croatia', 'Russia'],
   'Serbia': ['Slovakia', 'Slovenia', 'Croatia', 'Russia'],
-  'Croatia': ['Slovakia', 'Slovenia', 'Serbia'],
+  'Croatia': ['Slovakia', 'Slovenia', 'Serbia', 'Russia'],
 
   // ── Yellow-blue-red horizontal tricolors ──
   'Ecuador': ['Colombia', 'Venezuela'],
