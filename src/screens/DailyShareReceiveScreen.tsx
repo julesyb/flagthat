@@ -6,21 +6,32 @@ import { useTheme } from '../contexts/ThemeContext';
 import { spacing, typography, ThemeColors } from '../utils/theme';
 import { decodeDailyShare } from '../utils/challengeCode';
 import { addDailyLeaderboardEntry } from '../utils/storage';
+import { getTodayDateString } from '../utils/gameEngine';
 import { DAILY_QUESTION_COUNT, DAILY_LEADERBOARD_MAX_AGE_DAYS } from '../utils/config';
 import { t } from '../utils/i18n';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'DailyShareReceive'>;
 
+/** Validate date string using pure string comparison to avoid timezone issues. */
 function isDateValid(dateStr: string): boolean {
-  const today = new Date();
-  const date = new Date(dateStr + 'T00:00:00');
-  if (isNaN(date.getTime())) return false;
-  // Not in the future
-  if (date > today) return false;
-  // Within the leaderboard retention window
-  const cutoff = new Date(today);
-  cutoff.setDate(cutoff.getDate() - DAILY_LEADERBOARD_MAX_AGE_DAYS);
-  return date >= cutoff;
+  // Validate it parses as a real date
+  const parts = dateStr.split('-');
+  if (parts.length !== 3) return false;
+  const [y, m, d] = parts.map(Number);
+  const probe = new Date(Date.UTC(y, m - 1, d));
+  if (probe.getUTCFullYear() !== y || probe.getUTCMonth() !== m - 1 || probe.getUTCDate() !== d) return false;
+
+  const today = getTodayDateString(); // YYYY-MM-DD in local time
+  // Not in the future (string comparison works for YYYY-MM-DD)
+  if (dateStr > today) return false;
+  // Within retention window: compute cutoff date string
+  const now = new Date();
+  now.setDate(now.getDate() - DAILY_LEADERBOARD_MAX_AGE_DAYS);
+  const cutoffY = now.getFullYear();
+  const cutoffM = String(now.getMonth() + 1).padStart(2, '0');
+  const cutoffD = String(now.getDate()).padStart(2, '0');
+  const cutoff = `${cutoffY}-${cutoffM}-${cutoffD}`;
+  return dateStr >= cutoff;
 }
 
 export default function DailyShareReceiveScreen({ route, navigation }: Props) {

@@ -332,7 +332,7 @@ export function generateChallengeShareCard(
 
   // Build visual grid: green = correct, red = wrong
   const grid = results.map((r) => {
-    return r.correct ? '\uD83D\uDFE9' : '\uD83D\uDFE5'; // green square / red square
+    return r.correct ? '\u2b1b' : '\u2b1c'; // black square = correct, white square = wrong
   });
 
   // Split into rows of 5
@@ -468,7 +468,7 @@ export function decodeDailyShare(code: string): DecodeDailyResult {
     if (parts.length !== 4) return { status: 'invalid' };
 
     const [name, date, scoreStr, totalDeciStr] = parts;
-    if (!name || name.length > MAX_HOSTNAME_LENGTH) return { status: 'invalid' };
+    if (!name || !name.trim() || name.length > MAX_HOSTNAME_LENGTH) return { status: 'invalid' };
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return { status: 'invalid' };
 
     const score = parseInt(scoreStr, 10);

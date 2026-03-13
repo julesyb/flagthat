@@ -71,16 +71,18 @@ export type DailyVariant = {
 };
 
 const DAILY_VARIANTS: DailyVariant[] = [
-  { gameType: 'quiz', difficulty: 'medium', displayMode: 'flag' },
   { gameType: 'quiz', difficulty: 'easy', displayMode: 'flag' },
+  { gameType: 'quiz', difficulty: 'medium', displayMode: 'flag' },
   { gameType: 'quiz', difficulty: 'hard', displayMode: 'flag' },
-  { gameType: 'quiz', difficulty: 'medium', displayMode: 'map' },
   { gameType: 'quiz', difficulty: 'easy', displayMode: 'map' },
+  { gameType: 'quiz', difficulty: 'medium', displayMode: 'map' },
   { gameType: 'quiz', difficulty: 'hard', displayMode: 'map' },
   { gameType: 'flagpuzzle', difficulty: 'medium', displayMode: 'flag' },
+  { gameType: 'flagpuzzle', difficulty: 'hard', displayMode: 'flag' },
   { gameType: 'capitalconnection', difficulty: 'easy', displayMode: 'flag' },
   { gameType: 'capitalconnection', difficulty: 'medium', displayMode: 'flag' },
   { gameType: 'capitalconnection', difficulty: 'hard', displayMode: 'flag' },
+  { gameType: 'capitalconnection', difficulty: 'easy', displayMode: 'map' },
 ];
 
 /** Get the daily challenge variant for a given date. Deterministic per day. */
@@ -131,7 +133,7 @@ export function generateDailyQuestions(dateStr?: string): GameQuestion[] {
   const shuffled = seededShuffle(allFlags, seed);
   const selected = shuffled.slice(0, DAILY_QUESTION_COUNT);
 
-  const rng = seededRandom(seed + 1000);
+  let optionSeed = seed + 1000;
 
   // Hard mode: no options (user types answer)
   if (variant.difficulty === 'hard') {
@@ -140,24 +142,24 @@ export function generateDailyQuestions(dateStr?: string): GameQuestion[] {
 
   const choiceCount = variant.difficulty === 'easy' ? EASY_CHOICE_COUNT : STANDARD_CHOICE_COUNT;
 
-  return selected.map((flag) => {
+  return selected.map((flag, qi) => {
     const otherFlags = allFlags.filter((f) => f.id !== flag.id);
     const twinNames = twinPairs[flag.name] || [];
     const twins = otherFlags.filter((f) => twinNames.includes(f.name));
     const nonTwins = otherFlags.filter((f) => !twinNames.includes(f.name));
 
-    // Pick wrong answers, prioritizing twins
+    // Pick wrong answers, prioritizing twins (Fisher-Yates via seededShuffle)
     const wrongCount = choiceCount - 1;
-    const seededShuffleTwins = [...twins].sort(() => rng() - 0.5);
-    const selectedTwins = seededShuffleTwins.slice(0, wrongCount);
+    const shuffledTwins = seededShuffle(twins, optionSeed + qi * 3);
+    const selectedTwins = shuffledTwins.slice(0, wrongCount);
     const remaining = wrongCount - selectedTwins.length;
-    const seededShuffleOthers = [...nonTwins].sort(() => rng() - 0.5);
-    const selectedOthers = seededShuffleOthers.slice(0, remaining);
+    const shuffledOthers = seededShuffle(nonTwins, optionSeed + qi * 3 + 1);
+    const selectedOthers = shuffledOthers.slice(0, remaining);
 
     const wrongOptions = [...selectedTwins, ...selectedOthers].map((f) => f.name);
     const allOptions = [flag.name, ...wrongOptions];
-    // Deterministic shuffle of options
-    const options = allOptions.sort(() => rng() - 0.5);
+    // Deterministic shuffle of options (Fisher-Yates)
+    const options = seededShuffle(allOptions, optionSeed + qi * 3 + 2);
 
     return { flag, options };
   });
