@@ -24,7 +24,7 @@ import BottomNav from '../components/BottomNav';
 import { useNavTabs } from '../hooks/useNavTabs';
 import { t } from '../utils/i18n';
 import { getChallengeName, saveChallengeName, getChallengeHistory, ChallengeHistoryEntry } from '../utils/storage';
-import { LinkIcon, PlayIcon, CheckIcon, CrossIcon } from '../components/Icons';
+import { LinkIcon, PlayIcon, CheckIcon } from '../components/Icons';
 import { GameMode } from '../types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'JoinChallenge'>;
@@ -164,10 +164,9 @@ export default function JoinChallengeScreen({ route, navigation }: Props) {
   const handleResendResults = async () => {
     if (!preview || !previousAttempt) return;
     hapticTap();
-    const shortCode = generateShortCode(preview);
     const responseCode = encodeResponse({
       recipientName: previousAttempt.myName,
-      shortCode,
+      shortCode: previousAttempt.shortCode,
       recipientScore: previousAttempt.myScore,
       totalFlags: previousAttempt.totalFlags,
       resultDetails: previousAttempt.myResults,
