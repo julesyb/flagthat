@@ -176,8 +176,6 @@ const ptBR: DeepPartial<TranslationStrings> = {
     byMode: 'Por modo',
     modeCorrect: '{correct}/{total} corretas - {pct}%',
     notPlayedYet: 'Ainda n\u00e3o jogado',
-    bestFlags: 'Melhores bandeiras',
-    alwaysRight: 'Sempre corretas',
     weakFlags: 'Bandeiras dif\u00edceis',
     practiceThese: 'Pratique estas',
     practiceNow: 'Praticar agora',

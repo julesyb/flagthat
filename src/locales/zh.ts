@@ -176,8 +176,6 @@ const zh: DeepPartial<TranslationStrings> = {
     byMode: '\u6309\u6a21\u5f0f',
     modeCorrect: '{correct}/{total}\u6b63\u786e - {pct}%',
     notPlayedYet: '\u5c1a\u672a\u73a9\u8fc7',
-    bestFlags: '\u6700\u719f\u7ec3\u56fd\u65d7',
-    alwaysRight: '\u603b\u662f\u6b63\u786e',
     weakFlags: '\u5f31\u9879\u56fd\u65d7',
     practiceThese: '\u7ec3\u4e60\u8fd9\u4e9b',
     practiceNow: '\u7acb\u5373\u7ec3\u4e60',
