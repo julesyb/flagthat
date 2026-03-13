@@ -5,7 +5,6 @@ export const APP_URL = `https://${APP_DOMAIN}`;
 // ---- Game constants ----
 export const MS_PER_DAY = 86400000;
 export const DAILY_QUESTION_COUNT = 10;
-export const DAILY_CHALLENGE_EPOCH = '2026-03-11T00:00:00';
 export const DAILY_LEADERBOARD_MAX_AGE_DAYS = 7;
 export const SHARE_GRID_ROW_SIZE = 5;
 export const EASY_CHOICE_COUNT = 2;

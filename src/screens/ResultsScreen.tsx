@@ -615,7 +615,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
                 ]}>{playerName || t('challenge.you')}</Text>
                 <Text style={[styles.h2hScoreBig, h2h.winner === 'player' && { color: colors.success }]}>{h2h.playerCorrect}</Text>
                 <Text style={styles.h2hScoreSub}>/{h2h.h2hTotal}</Text>
-                <Text style={styles.h2hTime}>{h2h.playerAvg}s avg</Text>
+                <Text style={styles.h2hTime}>{t('challenge.shareCardAvg', { time: h2h.playerAvg })}</Text>
               </View>
 
               {/* VS circle */}
@@ -631,7 +631,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
                 ]}>{challenge.hostName}</Text>
                 <Text style={[styles.h2hScoreBig, h2h.winner === 'host' && { color: colors.success }]}>{h2h.hostCorrect}</Text>
                 <Text style={styles.h2hScoreSub}>/{h2h.h2hTotal}</Text>
-                <Text style={styles.h2hTime}>{h2h.hostAvg}s avg</Text>
+                <Text style={styles.h2hTime}>{t('challenge.shareCardAvg', { time: h2h.hostAvg })}</Text>
               </View>
             </View>
 
