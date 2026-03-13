@@ -198,7 +198,7 @@ export const countries: FlagItem[] = [
   { id: 've', name: 'Venezuela', emoji: '🇻🇪', region: 'Americas', tags: ['americas', 'tricky_twins'] },
 
   // ============ OCEANIA ============
-  { id: 'au', name: 'Australia', emoji: '🇦🇺', region: 'Oceania', tags: ['oceania', 'easy_flags', 'top_travel', 'island_nations'] },
+  { id: 'au', name: 'Australia', emoji: '🇦🇺', region: 'Oceania', tags: ['oceania', 'easy_flags', 'top_travel', 'island_nations', 'tricky_twins'] },
   { id: 'fj', name: 'Fiji', emoji: '🇫🇯', region: 'Oceania', tags: ['oceania', 'island_nations', 'top_travel', 'short_names'] },
   { id: 'ki', name: 'Kiribati', emoji: '🇰🇮', region: 'Oceania', tags: ['oceania', 'island_nations'] },
   { id: 'mh', name: 'Marshall Islands', emoji: '🇲🇭', region: 'Oceania', tags: ['oceania', 'island_nations'] },
