@@ -13,24 +13,38 @@
     width: 1290px;
     height: 2796px;
     overflow: hidden;
-    background: radial-gradient(ellipse at 50% 60%, #2A2735 0%, #1A1820 70%);
+    background: #1A1820;
     font-family: 'Barlow', sans-serif;
     display: flex;
     flex-direction: column;
     align-items: center;
+    position: relative;
+  }
+
+  body::before {
+    content: '';
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 1400px;
+    height: 1400px;
+    background: radial-gradient(circle, rgba(233,186,76,0.06) 0%, transparent 65%);
+    pointer-events: none;
   }
 
   .headline {
     text-align: center;
-    padding: 130px 80px 54px;
+    padding: 160px 100px 20px;
     flex-shrink: 0;
+    z-index: 2;
   }
   .headline h1 {
     font-family: 'Barlow', sans-serif;
-    font-size: 96px;
+    font-size: 108px;
     font-weight: 900;
     color: #FFFFFF;
-    line-height: 1.04;
+    line-height: 1.0;
     letter-spacing: -3px;
   }
   .headline h1 em {
@@ -39,56 +53,37 @@
     font-style: italic;
     color: #E9BA4C;
   }
+  .headline .sub {
+    font-size: 36px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.40);
+    margin-top: 16px;
+  }
 
-  /* Phone Container */
+  /* ── Phone ── */
   .phone-wrap {
     position: relative;
     flex-shrink: 0;
-  }
-  .phone-wrap::before {
-    content: '';
-    position: absolute;
-    top: 120px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 900px;
-    height: 900px;
-    background: radial-gradient(circle, rgba(233,186,76,0.06) 0%, transparent 70%);
-    border-radius: 50%;
-    z-index: 0;
-  }
-
-  .phone-shadow {
-    position: absolute;
-    bottom: -40px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 960px;
-    height: 120px;
-    background: radial-gradient(ellipse, rgba(0,0,0,0.35) 0%, transparent 70%);
-    z-index: 0;
+    z-index: 1;
+    margin-top: 60px;
   }
 
   .phone {
     width: 1080px;
-    height: 2500px;
-    position: relative;
-    z-index: 1;
-    background: linear-gradient(180deg, #8A8690 0%, #6E6A74 50%, #8A8690 100%);
+    height: 2400px;
+    background: linear-gradient(180deg, #7A7680 0%, #5E5A64 50%, #7A7680 100%);
     border-radius: 58px;
     padding: 2px;
+    position: relative;
   }
 
-  .phone::after {
+  .phone::before {
     content: '';
     position: absolute;
-    left: -3px;
-    top: 340px;
-    width: 3px;
-    height: 66px;
-    background: linear-gradient(180deg, #8A8690, #6E6A74, #8A8690);
-    border-radius: 2px 0 0 2px;
-    box-shadow: 0 50px 0 0 #7A7680;
+    right: -3px; top: 280px;
+    width: 3px; height: 80px;
+    background: linear-gradient(180deg, #7A7680, #5E5A64, #7A7680);
+    border-radius: 0 2px 2px 0;
   }
 
   .phone-inner {
@@ -96,46 +91,42 @@
     height: 100%;
     background: #000;
     border-radius: 56px;
-    padding: 6px;
+    padding: 5px;
     position: relative;
   }
 
   .phone-inner::before {
     content: '';
     position: absolute;
-    top: 16px;
-    left: 50%;
+    top: 14px; left: 50%;
     transform: translateX(-50%);
-    width: 126px;
-    height: 37px;
-    background: #000;
-    border-radius: 20px;
-    z-index: 10;
+    width: 126px; height: 36px;
+    background: #000; border-radius: 20px; z-index: 10;
   }
 
   .screen {
     width: 100%;
     height: 100%;
     background: #F5EFE6;
-    border-radius: 51px;
+    border-radius: 52px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
   }
 
   .status-bar {
-    padding: 20px 46px 14px;
+    padding: 18px 44px 10px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 20px;
+    font-size: 19px;
     font-weight: 600;
     color: #1A1820;
   }
 
-  .app-content {
+  .screen-content {
     flex: 1;
-    padding: 6px 42px 0;
+    padding: 16px 44px 0;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -143,96 +134,78 @@
 
   .page-title {
     font-family: 'Libre Baskerville', serif;
-    font-size: 42px; font-weight: 700; color: #1A1820;
-    letter-spacing: -0.5px; padding: 14px 0 22px;
+    font-size: 48px; font-weight: 700; color: #1A1820;
+    letter-spacing: -1px; padding: 8px 0 24px;
   }
 
-  /* Hero card */
+  /* Hero stats */
   .hero-card {
-    background: #FFFFFF; border-radius: 20px; padding: 26px;
-    display: flex; margin-bottom: 22px;
+    background: #FFFFFF; border-radius: 22px; padding: 28px;
+    display: flex; margin-bottom: 24px;
   }
   .hero-col { flex: 1; text-align: center; position: relative; }
   .hero-col + .hero-col { border-left: 1px solid rgba(0,0,0,0.08); }
   .hero-val {
     font-family: 'Libre Baskerville', serif;
-    font-size: 38px; font-weight: 700; letter-spacing: -0.5px;
+    font-size: 42px; font-weight: 700;
   }
   .hero-label {
-    font-size: 16px; font-weight: 600; color: #8A8494;
-    text-transform: uppercase; letter-spacing: 1.2px; margin-top: 4px;
+    font-size: 17px; font-weight: 600; color: #8A8494;
+    text-transform: uppercase; letter-spacing: 1.5px; margin-top: 4px;
   }
-  .streak-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; }
-  .streak-pips { display: flex; gap: 5px; margin-top: 6px; justify-content: center; }
-  .pip { width: 9px; height: 9px; border-radius: 50%; }
+  .streak-flex { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 6px; }
+  .pips { display: flex; gap: 6px; margin-top: 6px; justify-content: center; }
+  .pip { width: 10px; height: 10px; border-radius: 50%; }
   .pip.on { background: #E9BA4C; }
   .pip.off { background: #D5CFC6; }
 
   /* Level */
-  .level-tile {
-    background: #FFFFFF; border-radius: 20px; padding: 22px 26px; margin-bottom: 22px;
+  .level-card {
+    background: #FFFFFF; border-radius: 22px; padding: 24px 28px; margin-bottom: 24px;
   }
-  .level-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-  .level-num {
+  .level-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .level-title {
     font-family: 'Libre Baskerville', serif;
-    font-size: 38px; font-weight: 700; color: #1A1820; letter-spacing: -0.5px;
+    font-size: 40px; font-weight: 700; color: #1A1820;
   }
-  .level-num span { color: #E9BA4C; }
-  .level-meta { font-size: 18px; font-weight: 600; color: #8A8494; }
-  .level-bar { height: 10px; background: rgba(0,0,0,0.08); border-radius: 999px; overflow: hidden; }
+  .level-title span { color: #E9BA4C; }
+  .level-xp { font-size: 20px; font-weight: 600; color: #8A8494; }
+  .level-bar { height: 10px; background: rgba(0,0,0,0.06); border-radius: 999px; overflow: hidden; }
   .level-fill { height: 100%; background: #E9BA4C; border-radius: 999px; width: 65%; }
-  .level-labels { display: flex; justify-content: space-between; margin-top: 12px; }
-  .level-label-text { font-size: 18px; font-weight: 600; color: #8A8494; }
-  .level-label-text.current { color: #E9BA4C; font-weight: 700; }
 
-  /* Sections */
-  .section-label {
-    font-size: 28px; font-weight: 700; color: #1A1820;
-    letter-spacing: 0.3px; margin: 12px 0 16px;
+  /* Section */
+  .section-head {
+    font-size: 30px; font-weight: 700; color: #1A1820;
+    margin: 8px 0 16px;
   }
 
-  /* Regions */
-  .region-card {
-    background: #FFFFFF; border-radius: 20px; padding: 22px;
-    display: flex; margin-bottom: 14px;
-  }
-  .region-col { flex: 1; text-align: center; position: relative; }
-  .region-col + .region-col { border-left: 1px solid rgba(0,0,0,0.08); }
-  .region-col-name {
-    font-size: 18px; font-weight: 600; color: #8A8494;
-    text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;
-  }
-  .region-col-val {
-    font-family: 'Libre Baskerville', serif;
-    font-size: 30px; font-weight: 700; letter-spacing: -0.5px;
-  }
-
-  /* Badges */
+  /* Badges - bigger, 2 columns */
   .badge-grid {
-    display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-bottom: 18px;
+    display: flex; flex-wrap: wrap; gap: 14px;
   }
   .badge-item {
-    width: 23%; background: #FFFFFF; border-radius: 16px;
-    padding: 16px 10px 12px; text-align: center;
+    width: calc(50% - 7px);
+    background: #FFFFFF; border-radius: 18px;
+    padding: 20px; display: flex; align-items: center; gap: 16px;
   }
   .badge-icon {
-    width: 44px; height: 44px; border-radius: 12px;
+    width: 56px; height: 56px; border-radius: 16px;
     display: flex; align-items: center; justify-content: center;
-    margin: 0 auto 10px;
+    flex-shrink: 0;
   }
-  .badge-name { font-size: 17px; font-weight: 600; color: #1A1820; line-height: 1.2; }
-  .badge-progress {
-    height: 5px; background: rgba(0,0,0,0.06); border-radius: 3px;
-    margin-top: 8px; overflow: hidden;
-  }
-  .badge-progress-fill { height: 100%; background: #E9BA4C; border-radius: 3px; }
-  .badge-item.locked { opacity: 0.3; }
+  .badge-info { flex: 1; }
+  .badge-name { font-size: 22px; font-weight: 700; color: #1A1820; }
+  .badge-desc { font-size: 16px; font-weight: 500; color: #8A8494; margin-top: 2px; }
+  .badge-item.locked { opacity: 0.25; }
+  .badge-item.locked .badge-name { color: #8A8494; }
+  .badge-bar { height: 5px; background: rgba(0,0,0,0.06); border-radius: 3px; margin-top: 6px; overflow: hidden; }
+  .badge-bar-fill { height: 100%; background: #E9BA4C; border-radius: 3px; }
 
-  /* Bottom Nav */
+  /* Bottom nav */
   .bottom-nav {
     border-top: 1px solid rgba(0,0,0,0.06);
     background: rgba(245,239,230,0.97);
-    padding: 12px 0 42px;
+    padding: 12px 0 44px;
     display: flex; justify-content: space-around;
   }
   .nav-tab {
@@ -243,7 +216,7 @@
     content: ''; position: absolute; top: 0; width: 30px; height: 3px;
     background: #E9BA4C; border-radius: 2px;
   }
-  .nav-label { font-size: 15px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #8A8494; }
+  .nav-label { font-size: 16px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #8A8494; }
   .nav-tab.active .nav-label { color: #1A1820; }
 </style>
 </head>
@@ -251,28 +224,28 @@
 
 <div class="headline">
   <h1>Collect all <em>31 badges</em></h1>
+  <div class="sub">Level up as you master flags.</div>
 </div>
 
 <div class="phone-wrap">
-  <div class="phone-shadow"></div>
   <div class="phone">
     <div class="phone-inner">
       <div class="screen">
         <div class="status-bar">
           <span>9:41</span>
-          <svg width="18" height="14" viewBox="0 0 20 14" fill="#1A1820"><rect x="0" y="8" width="3" height="6" rx="0.5"/><rect x="5" y="5" width="3" height="9" rx="0.5"/><rect x="10" y="2" width="3" height="12" rx="0.5"/><rect x="15" y="0" width="3" height="14" rx="0.5"/></svg>
+          <svg width="18" height="12" viewBox="0 0 20 14" fill="#1A1820"><rect x="0" y="8" width="3" height="6" rx="0.5"/><rect x="5" y="5" width="3" height="9" rx="0.5"/><rect x="10" y="2" width="3" height="12" rx="0.5"/><rect x="15" y="0" width="3" height="14" rx="0.5"/></svg>
         </div>
-        <div class="app-content">
+        <div class="screen-content">
           <div class="page-title">Stats</div>
 
           <div class="hero-card">
             <div class="hero-col">
-              <div class="streak-row">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="#E9BA4C"><path d="M13.5 0.67C13.5 0.67 14.24 3.32 14.24 5.47C14.24 7.53 12.89 9.2 10.83 9.2C8.76 9.2 7.2 7.53 7.2 5.47L7.23 5.11C5.21 7.51 4 10.62 4 14C4 18.42 7.58 22 12 22C16.42 22 20 18.42 20 14C20 8.61 17.41 3.8 13.5 0.67Z"/></svg>
+              <div class="streak-flex">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="#E9BA4C"><path d="M13.5 0.67C13.5 0.67 14.24 3.32 14.24 5.47C14.24 7.53 12.89 9.2 10.83 9.2C8.76 9.2 7.2 7.53 7.2 5.47L7.23 5.11C5.21 7.51 4 10.62 4 14C4 18.42 7.58 22 12 22C16.42 22 20 18.42 20 14C20 8.61 17.41 3.8 13.5 0.67Z"/></svg>
                 <span class="hero-val" style="color:#E9BA4C">12</span>
               </div>
               <div class="hero-label">Day Streak</div>
-              <div class="streak-pips">
+              <div class="pips">
                 <div class="pip on"></div><div class="pip on"></div><div class="pip on"></div><div class="pip on"></div><div class="pip on"></div><div class="pip off"></div><div class="pip off"></div>
               </div>
             </div>
@@ -282,86 +255,61 @@
             </div>
             <div class="hero-col">
               <div class="hero-val" style="color:#1A1820">847</div>
-              <div class="hero-label">Games Played</div>
+              <div class="hero-label">Played</div>
             </div>
           </div>
 
-          <div class="level-tile">
-            <div class="level-header">
-              <div class="level-num">Level <span>14</span></div>
-              <div class="level-meta">2,450 / 3,800 XP</div>
+          <div class="level-card">
+            <div class="level-top">
+              <div class="level-title">Level <span>14</span></div>
+              <div class="level-xp">2,450 / 3,800 XP</div>
             </div>
             <div class="level-bar"><div class="level-fill"></div></div>
-            <div class="level-labels">
-              <span class="level-label-text">Novice</span>
-              <span class="level-label-text current">Expert</span>
-              <span class="level-label-text">Master</span>
-            </div>
           </div>
 
-          <div class="section-label">Accuracy by Region</div>
-          <div class="region-card">
-            <div class="region-col">
-              <div class="region-col-name">Europe</div>
-              <div class="region-col-val" style="color:#1E8F56">92%</div>
-            </div>
-            <div class="region-col">
-              <div class="region-col-name">Americas</div>
-              <div class="region-col-val" style="color:#1E8F56">85%</div>
-            </div>
-            <div class="region-col">
-              <div class="region-col-name">Asia</div>
-              <div class="region-col-val" style="color:#9A5C0A">74%</div>
-            </div>
-          </div>
-          <div class="region-card">
-            <div class="region-col">
-              <div class="region-col-name">Africa</div>
-              <div class="region-col-val" style="color:#4DA8E8">61%</div>
-            </div>
-            <div class="region-col">
-              <div class="region-col-name">Oceania</div>
-              <div class="region-col-val" style="color:#C43030">43%</div>
-            </div>
-            <div class="region-col"></div>
-          </div>
-
-          <div class="section-label">Badges</div>
+          <div class="section-head">Badges</div>
           <div class="badge-grid">
             <div class="badge-item">
-              <div class="badge-icon" style="background:rgba(233,186,76,0.18)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E9BA4C" stroke-width="1.5"><polyline points="4 12 10 18 20 6"/><circle cx="12" cy="12" r="10"/></svg></div>
-              <div class="badge-name">Perfect 10</div>
+              <div class="badge-icon" style="background:rgba(233,186,76,0.15)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#E9BA4C" stroke-width="1.5"><polyline points="4 12 10 18 20 6"/><circle cx="12" cy="12" r="10"/></svg></div>
+              <div class="badge-info">
+                <div class="badge-name">Perfect 10</div>
+                <div class="badge-desc">10/10 in a quiz</div>
+              </div>
             </div>
             <div class="badge-item">
-              <div class="badge-icon" style="background:rgba(139,141,255,0.18)"><svg width="22" height="22" viewBox="0 0 24 24" fill="#8B8DFF"><path d="M13.5 0.67C13.5 0.67 14.24 3.32 14.24 5.47C14.24 7.53 12.89 9.2 10.83 9.2C8.76 9.2 7.2 7.53 7.2 5.47L7.23 5.11C5.21 7.51 4 10.62 4 14C4 18.42 7.58 22 12 22C16.42 22 20 18.42 20 14C20 8.61 17.41 3.8 13.5 0.67Z"/></svg></div>
-              <div class="badge-name">Hot Streak</div>
+              <div class="badge-icon" style="background:rgba(139,141,255,0.15)"><svg width="26" height="26" viewBox="0 0 24 24" fill="#8B8DFF"><path d="M13.5 0.67C13.5 0.67 14.24 3.32 14.24 5.47C14.24 7.53 12.89 9.2 10.83 9.2C8.76 9.2 7.2 7.53 7.2 5.47L7.23 5.11C5.21 7.51 4 10.62 4 14C4 18.42 7.58 22 12 22C16.42 22 20 18.42 20 14C20 8.61 17.41 3.8 13.5 0.67Z"/></svg></div>
+              <div class="badge-info">
+                <div class="badge-name">Hot Streak</div>
+                <div class="badge-desc">7-day streak</div>
+              </div>
             </div>
             <div class="badge-item">
-              <div class="badge-icon" style="background:rgba(196,136,74,0.18)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C4884A" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="21" y2="12"/><path d="M12 3 C8 7 8 17 12 21 C16 17 16 7 12 3Z"/></svg></div>
-              <div class="badge-name">Globe Trotter</div>
+              <div class="badge-icon" style="background:rgba(196,136,74,0.15)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#C4884A" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="21" y2="12"/><path d="M12 3 C8 7 8 17 12 21 C16 17 16 7 12 3Z"/></svg></div>
+              <div class="badge-info">
+                <div class="badge-name">Globe Trotter</div>
+                <div class="badge-desc">All regions tried</div>
+              </div>
             </div>
             <div class="badge-item">
-              <div class="badge-icon" style="background:rgba(160,160,160,0.18)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#A0A0A0" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg></div>
-              <div class="badge-name">Speed Demon</div>
+              <div class="badge-icon" style="background:rgba(77,168,232,0.15)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#4DA8E8" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg></div>
+              <div class="badge-info">
+                <div class="badge-name">Speed Demon</div>
+                <div class="badge-desc">Under 2s avg</div>
+              </div>
             </div>
             <div class="badge-item">
-              <div class="badge-icon" style="background:rgba(233,186,76,0.18)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E9BA4C" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
-              <div class="badge-name">Daily Legend</div>
+              <div class="badge-icon" style="background:rgba(233,186,76,0.15)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#E9BA4C" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+              <div class="badge-info">
+                <div class="badge-name">Daily Legend</div>
+                <div class="badge-desc">30-day streak</div>
+              </div>
             </div>
             <div class="badge-item locked">
-              <div class="badge-icon" style="background:rgba(0,0,0,0.04)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8A8494" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
-              <div class="badge-name">???</div>
-              <div class="badge-progress"><div class="badge-progress-fill" style="width:60%"></div></div>
-            </div>
-            <div class="badge-item locked">
-              <div class="badge-icon" style="background:rgba(0,0,0,0.04)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8A8494" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
-              <div class="badge-name">???</div>
-              <div class="badge-progress"><div class="badge-progress-fill" style="width:30%"></div></div>
-            </div>
-            <div class="badge-item locked">
-              <div class="badge-icon" style="background:rgba(0,0,0,0.04)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8A8494" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
-              <div class="badge-name">???</div>
-              <div class="badge-progress"><div class="badge-progress-fill" style="width:15%"></div></div>
+              <div class="badge-icon" style="background:rgba(0,0,0,0.04)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#8A8494" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+              <div class="badge-info">
+                <div class="badge-name">???</div>
+                <div class="badge-bar"><div class="badge-bar-fill" style="width:60%"></div></div>
+              </div>
             </div>
           </div>
         </div>
@@ -372,7 +320,7 @@
             <span class="nav-label">Home</span>
           </div>
           <div class="nav-tab">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8A8494" stroke-width="1.5"><circle cx="12" cy="12" r="7"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="2" fill="#8A8494" stroke="none"/></svg>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8A8494" stroke-width="1.5"><circle cx="12" cy="12" r="7"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>
             <span class="nav-label">Modes</span>
           </div>
           <div class="nav-tab active">
