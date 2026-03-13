@@ -57,7 +57,7 @@
 - `src/utils/notifications.ts` — daily reminder scheduling
 - `src/utils/challengeCode.ts` — URL-safe challenge encoding/decoding
 - `src/utils/config.ts` — app domain, game constants, challenge limits
-- `src/utils/levels.ts` — 100-level progression system with requirement types and evaluation
+- `src/utils/levels.ts` — 10-level progression system with requirement types and evaluation
 - `src/utils/gameHelpers.ts` — helper functions (countCorrect, countWrong, calculateProgress)
 - `src/hooks/useGameAnimations.ts` — shared game animation hook (fade, shake, streak spring)
 - `src/hooks/useCountdown.ts` — countdown timer hook for timed game modes

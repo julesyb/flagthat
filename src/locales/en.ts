@@ -193,11 +193,8 @@ const en = {
     levelUp: 'Level Up',
     levelReached: 'You reached Level {level}',
     tierStarter: 'Starter',
-    tierExplorer: 'Explorer',
-    tierScholar: 'Scholar',
     tierExpert: 'Expert',
     tierMaster: 'Master',
-    tierLegend: 'Legend',
     // Level requirement descriptions
     reqFlagsOnce: 'Identify {count} unique flags correctly',
     reqFlagsN: 'Get {count} flags right at least {times} times each',

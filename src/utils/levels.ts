@@ -43,7 +43,7 @@ export interface LevelProgress {
   target: number;            // Target for next level
   pct: number;               // 0-100 percentage
   description: string;       // Human-readable description of next goal
-  isMaxLevel: boolean;       // True if all 100 levels complete
+  isMaxLevel: boolean;       // True if all 10 levels complete
 }
 
 // ─── Playable modes (excludes hidden modes) ───────────────────
@@ -218,147 +218,36 @@ export function describeRequirement(req: LevelRequirement): string {
   }
 }
 
-// ─── 100 Level definitions ────────────────────────────────────
-// Progression arc:
-//   1-10:   Getting started - basic flag identification, first games
-//   11-20:  Building breadth - see more flags, try modes
-//   21-35:  Deepening mastery - repeat accuracy, regions
-//   36-50:  Speed and skill - faster answers, harder modes
-//   51-65:  Completionist - all flags, all modes, categories
-//   66-80:  Expert challenges - high accuracy, streaks, speed
-//   81-95:  Master tier - per-flag mastery, combo requirements
-//   96-100: Legend tier - ultimate achievements
+// ─── 10 Level definitions ─────────────────────────────────────
+// Simple, hard-to-skip progression:
+//   1-3:   Mode mastery - get all flags right in easy, medium, hard
+//   4-10:  Depth mastery - get every flag right N times (scaling)
 
 export const LEVELS: LevelDef[] = [
-  // ── Getting Started (1-10) ──
-  { level: 1, requirement: { type: 'flags_correct_once', count: 1 } },
-  { level: 2, requirement: { type: 'games_played', count: 3 } },
-  { level: 3, requirement: { type: 'flags_correct_once', count: 10 } },
-  { level: 4, requirement: { type: 'total_correct', count: 20 } },
-  { level: 5, requirement: { type: 'flags_correct_once', count: 25 } },
-  { level: 6, requirement: { type: 'games_played', count: 5 } },
-  { level: 7, requirement: { type: 'flags_correct_once', count: 40 } },
-  { level: 8, requirement: { type: 'modes_played', count: 2 } },
-  { level: 9, requirement: { type: 'total_correct', count: 50 } },
-  { level: 10, requirement: { type: 'flags_correct_once', count: 50 } },
+  // ── Mode Mastery (1-3) ──
+  { level: 1, requirement: { type: 'mode_correct', mode: 'easy', count: 197 } },
+  { level: 2, requirement: { type: 'mode_correct', mode: 'medium', count: 197 } },
+  { level: 3, requirement: { type: 'mode_correct', mode: 'hard', count: 197 } },
 
-  // ── Building Breadth (11-20) ──
-  { level: 11, requirement: { type: 'games_played', count: 10 } },
-  { level: 12, requirement: { type: 'flags_correct_once', count: 75 } },
-  { level: 13, requirement: { type: 'day_streak', days: 2 } },
-  { level: 14, requirement: { type: 'total_correct', count: 100 } },
-  { level: 15, requirement: { type: 'flags_correct_once', count: 100 } },
-  { level: 16, requirement: { type: 'modes_played', count: 3 } },
-  { level: 17, requirement: { type: 'flags_correct_n', count: 50, times: 2 } },
-  { level: 18, requirement: { type: 'category_correct', category: 'europe', count: 20 } },
-  { level: 19, requirement: { type: 'total_correct', count: 200 } },
-  { level: 20, requirement: { type: 'flags_correct_once', count: 130 } },
-
-  // ── Deepening Mastery (21-35) ──
-  { level: 21, requirement: { type: 'flags_correct_all', times: 1 } },
-  { level: 22, requirement: { type: 'games_played', count: 25 } },
-  { level: 23, requirement: { type: 'day_streak', days: 3 } },
-  { level: 24, requirement: { type: 'category_correct', category: 'africa', count: 25 } },
-  { level: 25, requirement: { type: 'flags_correct_n', count: 100, times: 2 } },
-  { level: 26, requirement: { type: 'modes_played', count: 4 } },
-  { level: 27, requirement: { type: 'category_correct', category: 'asia', count: 25 } },
-  { level: 28, requirement: { type: 'total_correct', count: 400 } },
-  { level: 29, requirement: { type: 'flags_correct_n', count: 50, times: 3 } },
-  { level: 30, requirement: { type: 'badges_earned', count: 5 } },
-  { level: 31, requirement: { type: 'category_correct', category: 'americas', count: 20 } },
-  { level: 32, requirement: { type: 'flags_correct_all', times: 2 } },
-  { level: 33, requirement: { type: 'best_time_attack', score: 8 } },
-  { level: 34, requirement: { type: 'category_correct', category: 'oceania', count: 10 } },
-  { level: 35, requirement: { type: 'flags_correct_n', count: 100, times: 3 } },
-
-  // ── Speed and Skill (36-50) ──
-  { level: 36, requirement: { type: 'mode_correct', mode: 'hard', count: 25 } },
-  { level: 37, requirement: { type: 'games_played', count: 50 } },
-  { level: 38, requirement: { type: 'flags_fast', seconds: 10, count: 50 } },
-  { level: 39, requirement: { type: 'day_streak', days: 5 } },
-  { level: 40, requirement: { type: 'flags_correct_all', times: 3 } },
-  { level: 41, requirement: { type: 'modes_played', count: 5 } },
-  { level: 42, requirement: { type: 'total_correct', count: 750 } },
-  { level: 43, requirement: { type: 'mode_correct', mode: 'capitalconnection', count: 25 } },
-  { level: 44, requirement: { type: 'best_time_attack', score: 12 } },
-  { level: 45, requirement: { type: 'flags_fast', seconds: 8, count: 75 } },
-  { level: 46, requirement: { type: 'category_accuracy', category: 'europe', pct: 75, minTotal: 30 } },
-  { level: 47, requirement: { type: 'mode_correct', mode: 'neighbors', count: 30 } },
-  { level: 48, requirement: { type: 'flags_correct_n', count: 150, times: 3 } },
-  { level: 49, requirement: { type: 'badges_earned', count: 8 } },
-  { level: 50, requirement: { type: 'flags_correct_all', times: 4 } },
-
-  // ── Completionist (51-65) ──
-  { level: 51, requirement: { type: 'total_correct', count: 1000 } },
-  { level: 52, requirement: { type: 'modes_played', count: 6 } },
-  { level: 53, requirement: { type: 'mode_correct', mode: 'impostor', count: 30 } },
-  { level: 54, requirement: { type: 'category_accuracy', category: 'africa', pct: 70, minTotal: 30 } },
-  { level: 55, requirement: { type: 'flags_correct_all', times: 5 } },
-  { level: 56, requirement: { type: 'day_streak', days: 7 } },
-  { level: 57, requirement: { type: 'flags_fast', seconds: 7, count: 100 } },
-  { level: 58, requirement: { type: 'games_played', count: 75 } },
-  { level: 59, requirement: { type: 'mode_correct', mode: 'hard', count: 50 } },
-  { level: 60, requirement: { type: 'best_time_attack', score: 15 } },
-  { level: 61, requirement: { type: 'category_accuracy', category: 'asia', pct: 75, minTotal: 30 } },
-  { level: 62, requirement: { type: 'flags_streak', streak: 3, count: 100 } },
-  { level: 63, requirement: { type: 'mode_correct', mode: 'flagpuzzle', count: 30 } },
-  { level: 64, requirement: { type: 'total_correct', count: 1500 } },
-  { level: 65, requirement: { type: 'modes_played', count: 7 } },
-
-  // ── Expert Challenges (66-80) ──
-  { level: 66, requirement: { type: 'flags_correct_all', times: 7 } },
-  { level: 67, requirement: { type: 'category_accuracy', category: 'americas', pct: 80, minTotal: 25 } },
-  { level: 68, requirement: { type: 'best_time_attack', score: 18 } },
-  { level: 69, requirement: { type: 'flags_fast', seconds: 6, count: 100 } },
-  { level: 70, requirement: { type: 'games_played', count: 100 } },
-  { level: 71, requirement: { type: 'mode_correct', mode: 'hard', count: 100 } },
-  { level: 72, requirement: { type: 'badges_earned', count: 12 } },
-  { level: 73, requirement: { type: 'category_accuracy', category: 'oceania', pct: 85, minTotal: 12 } },
-  { level: 74, requirement: { type: 'flags_streak', streak: 3, count: 150 } },
-  { level: 75, requirement: { type: 'total_correct', count: 2000 } },
-  { level: 76, requirement: { type: 'day_streak', days: 10 } },
-  { level: 77, requirement: { type: 'flags_fast', seconds: 5, count: 100 } },
-  { level: 78, requirement: { type: 'mode_correct', mode: 'capitalconnection', count: 75 } },
-  { level: 79, requirement: { type: 'category_accuracy', category: 'europe', pct: 85, minTotal: 35 } },
-  { level: 80, requirement: { type: 'flags_correct_all', times: 10 } },
-
-  // ── Master Tier (81-95) ──
-  { level: 81, requirement: { type: 'modes_played', count: 8 } },
-  { level: 82, requirement: { type: 'total_correct', count: 2500 } },
-  { level: 83, requirement: { type: 'best_time_attack', score: 20 } },
-  { level: 84, requirement: { type: 'flags_fast', seconds: 5, count: 150 } },
-  { level: 85, requirement: { type: 'category_accuracy', category: 'africa', pct: 85, minTotal: 40 } },
-  { level: 86, requirement: { type: 'flags_streak', streak: 5, count: 100 } },
-  { level: 87, requirement: { type: 'day_streak', days: 14 } },
-  { level: 88, requirement: { type: 'mode_correct', mode: 'neighbors', count: 75 } },
-  { level: 89, requirement: { type: 'badges_earned', count: 15 } },
-  { level: 90, requirement: { type: 'flags_correct_all', times: 15 } },
-  { level: 91, requirement: { type: 'total_correct', count: 3500 } },
-  { level: 92, requirement: { type: 'flags_fast', seconds: 4, count: 100 } },
-  { level: 93, requirement: { type: 'category_accuracy', category: 'asia', pct: 90, minTotal: 40 } },
-  { level: 94, requirement: { type: 'modes_played', count: 9 } },
-  { level: 95, requirement: { type: 'flags_streak', streak: 5, count: 150 } },
-
-  // ── Legend Tier (96-100) ──
-  { level: 96, requirement: { type: 'day_streak', days: 21 } },
-  { level: 97, requirement: { type: 'best_time_attack', score: 25 } },
-  { level: 98, requirement: { type: 'total_correct', count: 5000 } },
-  { level: 99, requirement: { type: 'badges_earned', count: 20 } },
-  { level: 100, requirement: { type: 'flags_streak_all', streak: 5 } },
+  // ── Depth Mastery (4-10) ──
+  { level: 4, requirement: { type: 'flags_correct_all', times: 2 } },
+  { level: 5, requirement: { type: 'flags_correct_all', times: 3 } },
+  { level: 6, requirement: { type: 'flags_correct_all', times: 5 } },
+  { level: 7, requirement: { type: 'flags_correct_all', times: 7 } },
+  { level: 8, requirement: { type: 'flags_correct_all', times: 10 } },
+  { level: 9, requirement: { type: 'flags_correct_all', times: 15 } },
+  { level: 10, requirement: { type: 'flags_correct_all', times: 20 } },
 ];
 
 export const MAX_LEVEL = LEVELS.length;
 
 // ─── Tier labels for UI grouping ──────────────────────────────
-export type LevelTier = 'starter' | 'explorer' | 'scholar' | 'expert' | 'master' | 'legend';
+export type LevelTier = 'starter' | 'expert' | 'master';
 
 export function getLevelTier(level: number): LevelTier {
-  if (level <= 10) return 'starter';
-  if (level <= 20) return 'explorer';
-  if (level <= 40) return 'scholar';
-  if (level <= 65) return 'expert';
-  if (level <= 95) return 'master';
-  return 'legend';
+  if (level <= 3) return 'starter';
+  if (level <= 7) return 'expert';
+  return 'master';
 }
 
 export function getTierLabel(tier: LevelTier): string {
@@ -396,7 +285,7 @@ export function computeLevelProgress(ctx: LevelContext, persistedLevel: number =
     }
   }
 
-  // All 100 levels complete
+  // All 10 levels complete
   return {
     currentLevel: MAX_LEVEL,
     nextLevel: MAX_LEVEL,
