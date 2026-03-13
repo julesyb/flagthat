@@ -829,10 +829,10 @@ export async function addDailyLeaderboardEntry(
     if (!lb[date]) lb[date] = [];
 
     // For "me" entries, replace any existing isMe entry (user may have changed name).
-    // For friend entries, upsert by name (case-insensitive).
+    // For friend entries, upsert by name (case-insensitive), but never overwrite isMe entry.
     const existingIdx = entry.isMe
       ? lb[date].findIndex((e) => e.isMe)
-      : lb[date].findIndex((e) => e.name.toLowerCase() === entry.name.toLowerCase());
+      : lb[date].findIndex((e) => !e.isMe && e.name.toLowerCase() === entry.name.toLowerCase());
     if (existingIdx >= 0) {
       lb[date][existingIdx] = entry;
     } else {
