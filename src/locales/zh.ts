@@ -457,7 +457,7 @@ const zh: DeepPartial<TranslationStrings> = {
 
   challenge: {
     joinTitle: '\u6311\u6218',
-    joinSubtitle: '\u7c98\u8d34\u670b\u53cb\u7684\u6311\u6218\u7801\uff0c\u5c1d\u8bd5\u5728\u76f8\u540c\u7684\u56fd\u65d7\u4e0a\u8d85\u8d8a\u4ed6\u4eec\u7684\u5206\u6570\u3002',
+    joinSubtitle: '\u7c98\u8d34\u6311\u6218\u7801\uff0c\u73a9\u76f8\u540c\u7684\u56fd\u65d7\u3002',
     homeDesc: '\u4e0e\u670b\u53cb\u7ade\u8d5b\u8ba4\u65d7',
     yourName: '\u4f60\u7684\u540d\u5b57',
     namePlaceholder: '\u8f93\u5165\u4f60\u7684\u540d\u5b57',
@@ -473,7 +473,7 @@ const zh: DeepPartial<TranslationStrings> = {
     challengeDesc: '\u5206\u4eab\u4f60\u7684\u6e38\u620f\uff0c\u8ba9\u670b\u53cb\u5c1d\u8bd5\u76f8\u540c\u7684\u56fd\u65d7',
     enterName: '\u4f60\u7684\u540d\u5b57',
     enterNameDesc: '\u6b64\u540d\u5b57\u5c06\u663e\u793a\u7ed9\u4f60\u7684\u5bf9\u624b\u3002',
-    shareMessage: 'Flag That {correct}/{total} - \u8d85\u8d87\u6211\uff1f',
+    shareMessage: '\u6211\u5728 Flag That \u7b54\u5bf9\u4e86 {correct}/{total}\u3002\u4f60\u80fd\u505a\u5f97\u66f4\u597d\u5417\uff1f',
     headToHead: '\u5bf9\u51b3',
     you: '\u4f60',
     youWin: '\u4f60\u8d62\u4e86\uff01',
@@ -485,7 +485,7 @@ const zh: DeepPartial<TranslationStrings> = {
     previewTimeLimit: '{seconds}\u79d2/\u9762\u56fd\u65d7',
     previewValid: '\u6709\u6548\u4ee3\u7801',
     previewHostScore: '{name} \u7b54\u5bf9\u4e86 {correct}/{total}',
-    beatName: '\u51fb\u8d25 {name}',
+    playName: '\u6311\u6218 {name}',
     challengeBack: '\u53cd\u51fb\u6311\u6218',
     challengeBackDesc: '\u73a9\u4e00\u5c40\u65b0\u7684\u5e76\u53d1\u56de\u53bb',
     recentChallenges: '最近的挑战',

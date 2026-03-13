@@ -111,7 +111,7 @@ export default function JoinChallengeScreen({ route, navigation }: Props) {
         ]),
       ]).start();
     }
-  }, [preview !== null]);
+  }, [preview]);
 
   const showError = (msg: string) => {
     hapticWrong();
@@ -248,7 +248,7 @@ export default function JoinChallengeScreen({ route, navigation }: Props) {
               {/* Divider with "vs" */}
               <View style={styles.vsDivider}>
                 <View style={styles.vsLine} />
-                <Text style={styles.vsText}>VS</Text>
+                <Text style={styles.vsText}>{t('common.vs').toUpperCase()}</Text>
                 <View style={styles.vsLine} />
               </View>
 
@@ -354,7 +354,7 @@ export default function JoinChallengeScreen({ route, navigation }: Props) {
                 accessibilityState={{ disabled: !canPlay }}
               >
                 <PlayIcon size={16} color={colors.playText} />
-                <Text style={styles.playButtonText}>{t('challenge.beatName', { name: preview.hostName })}</Text>
+                <Text style={styles.playButtonText}>{t('challenge.playName', { name: preview.hostName })}</Text>
               </TouchableOpacity>
             </Animated.View>
           )}

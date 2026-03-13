@@ -325,24 +325,10 @@ export default function StatsScreen() {
     }).sort((a, b) => a.order - b.order);
   }, [earnedBadges, badgeCtx, derived]);
 
-  // ── Loading gate: single check, all hooks above ──
-  if (!data) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.ink} />
-          <Text style={styles.loadingText}>{t('common.loading')}</Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
-
-  // ── Destructure for render (data is guaranteed non-null below) ──
-  const { stats, challengeHistory, regionScoreHistory, dayStreakInfo } = data;
-
   // Expand multi-opponent sent challenges into separate 1v1 display rows.
   // Each opponent becomes its own row; sent challenges with no responses yet
   // fall through to the else branch and show a single "awaiting" row.
+  const challengeHistory = data?.challengeHistory ?? [];
   const displayChallenges = useMemo(() => {
     const rows: ChallengeDisplayRow[] = [];
     for (const ch of challengeHistory) {
@@ -357,6 +343,21 @@ export default function StatsScreen() {
     }
     return rows;
   }, [challengeHistory]);
+
+  // ── Loading gate: single check, all hooks above ──
+  if (!data) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={colors.ink} />
+          <Text style={styles.loadingText}>{t('common.loading')}</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // ── Destructure for render (data is guaranteed non-null below) ──
+  const { stats, regionScoreHistory, dayStreakInfo } = data;
 
   // Region data - show all regions regardless of whether played
   const regionData = BASELINE_REGIONS.map((regionId) => {

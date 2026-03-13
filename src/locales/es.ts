@@ -457,7 +457,7 @@ const es: DeepPartial<TranslationStrings> = {
 
   challenge: {
     joinTitle: 'Desaf\u00edo',
-    joinSubtitle: 'Pega un c\u00f3digo de desaf\u00edo de un amigo e intenta superar su puntuaci\u00f3n con las mismas banderas.',
+    joinSubtitle: 'Pega un c\u00f3digo de desaf\u00edo y juega las mismas banderas.',
     homeDesc: 'Compite contra un amigo con las mismas banderas',
     yourName: 'Tu nombre',
     namePlaceholder: 'Ingresa tu nombre',
@@ -473,7 +473,7 @@ const es: DeepPartial<TranslationStrings> = {
     challengeDesc: 'Comparte tu partida para que un amigo pruebe las mismas banderas',
     enterName: 'Tu nombre',
     enterNameDesc: 'Este nombre se mostrar\u00e1 a tu oponente.',
-    shareMessage: '{correct}/{total} en Flag That - supera eso!',
+    shareMessage: 'Hice {correct}/{total} en Flag That. Puedes hacerlo mejor?',
     headToHead: 'Cara a cara',
     you: 'T\u00fa',
     youWin: '\u00a1Ganaste!',
@@ -485,7 +485,7 @@ const es: DeepPartial<TranslationStrings> = {
     previewTimeLimit: '{seconds}s por bandera',
     previewValid: 'C\u00f3digo v\u00e1lido',
     previewHostScore: '{name} obtuvo {correct}/{total}',
-    beatName: 'Vencer a {name}',
+    playName: 'Jugar contra {name}',
     challengeBack: 'Contradesaf\u00edo',
     challengeBackDesc: 'Juega una nueva ronda y env\u00edala de vuelta',
     recentChallenges: 'Desafios recientes',

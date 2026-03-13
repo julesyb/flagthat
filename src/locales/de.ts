@@ -457,7 +457,7 @@ const de: DeepPartial<TranslationStrings> = {
 
   challenge: {
     joinTitle: 'Herausforderung',
-    joinSubtitle: 'F\u00fcge einen Challenge-Code eines Freundes ein und versuche, seinen Score mit denselben Flaggen zu schlagen.',
+    joinSubtitle: 'F\u00fcge einen Challenge-Code ein und spiele dieselben Flaggen.',
     homeDesc: 'Tritt gegen einen Freund mit denselben Flaggen an',
     yourName: 'Dein Name',
     namePlaceholder: 'Gib deinen Namen ein',
@@ -473,7 +473,7 @@ const de: DeepPartial<TranslationStrings> = {
     challengeDesc: 'Teile dein Spiel, damit ein Freund dieselben Flaggen probieren kann',
     enterName: 'Dein Name',
     enterNameDesc: 'Dieser Name wird deinem Gegner angezeigt.',
-    shareMessage: '{correct}/{total} bei Flag That - schaffst du mehr?',
+    shareMessage: 'Ich habe {correct}/{total} bei Flag That geschafft. Kannst du mehr?',
     headToHead: 'Kopf an Kopf',
     you: 'Du',
     youWin: 'Du gewinnst!',
@@ -485,7 +485,7 @@ const de: DeepPartial<TranslationStrings> = {
     previewTimeLimit: '{seconds}s pro Flagge',
     previewValid: 'G\u00fcltiger Code',
     previewHostScore: '{name} hat {correct}/{total} richtig',
-    beatName: '{name} schlagen',
+    playName: 'Gegen {name} spielen',
     challengeBack: 'Zur\u00fcckfordern',
     challengeBackDesc: 'Spiel eine neue Runde und sende sie zur\u00fcck',
     recentChallenges: 'Letzte Herausforderungen',
