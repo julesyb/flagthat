@@ -35,6 +35,12 @@ import { hapticTap } from '../utils/feedback';
 import { decodeChallenge } from '../utils/challengeCode';
 import PageHeader from '../components/PageHeader';
 
+type ChallengeDisplayRow = ChallengeHistoryEntry & {
+  displayOpponentName: string | null;
+  displayOpponentScore: number | null;
+  displayOpponentResults?: boolean[];
+};
+
 const EMPTY_FLAG_STATS: FlagStats = {};
 const toPct = (e: { correct: number; total: number } | undefined) =>
   e && e.total > 0 ? Math.round((e.correct / e.total) * 100) : null;
@@ -77,7 +83,7 @@ export default function StatsScreen() {
 
   const [data, setData] = useState<StatsData | null>(null);
   const [selectedBadge, setSelectedBadge] = useState<Badge | null>(null);
-  const [selectedChallenge, setSelectedChallenge] = useState<(ChallengeHistoryEntry & { displayOpponentName: string | null; displayOpponentScore: number | null; displayOpponentResults?: boolean[] }) | null>(null);
+  const [selectedChallenge, setSelectedChallenge] = useState<ChallengeDisplayRow | null>(null);
   const [codeCopied, setCodeCopied] = useState(false);
 
   // ── Animation values ──
@@ -334,20 +340,18 @@ export default function StatsScreen() {
   // ── Destructure for render (data is guaranteed non-null below) ──
   const { stats, challengeHistory, regionScoreHistory, dayStreakInfo } = data;
 
-  // Expand multi-opponent sent challenges into separate 1v1 display rows
-  type ChallengeDisplayRow = ChallengeHistoryEntry & { displayOpponentName: string | null; displayOpponentScore: number | null; displayOpponentResults?: boolean[] };
+  // Expand multi-opponent sent challenges into separate 1v1 display rows.
+  // Each opponent becomes its own row; sent challenges with no responses yet
+  // fall through to the else branch and show a single "awaiting" row.
   const displayChallenges = useMemo(() => {
     const rows: ChallengeDisplayRow[] = [];
     for (const ch of challengeHistory) {
-      const opponents = ch.opponents && ch.opponents.length > 0 ? ch.opponents : [];
-      if (ch.direction === 'sent' && opponents.length > 0) {
-        // One row per opponent
-        for (const opp of opponents) {
+      const opps = ch.opponents && ch.opponents.length > 0 ? ch.opponents : [];
+      if (ch.direction === 'sent' && opps.length > 0) {
+        for (const opp of opps) {
           rows.push({ ...ch, displayOpponentName: opp.name, displayOpponentScore: opp.score, displayOpponentResults: opp.results });
         }
-        // If no opponents responded yet, we'd still have opponents.length > 0 so this case is covered
       } else {
-        // Received challenges or sent with no opponents: single row using legacy fields
         rows.push({ ...ch, displayOpponentName: ch.opponentName, displayOpponentScore: ch.opponentScore, displayOpponentResults: ch.opponentResults });
       }
     }
