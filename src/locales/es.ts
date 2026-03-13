@@ -176,8 +176,6 @@ const es: DeepPartial<TranslationStrings> = {
     byMode: 'Por modo',
     modeCorrect: '{correct}/{total} correctas - {pct}%',
     notPlayedYet: 'A\u00fan no jugado',
-    bestFlags: 'Mejores banderas',
-    alwaysRight: 'Siempre correctas',
     weakFlags: 'Banderas dif\u00edciles',
     practiceThese: 'Practica estas',
     practiceNow: 'Practicar ahora',

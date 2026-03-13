@@ -224,8 +224,6 @@ const en = {
     byMode: 'By Mode',
     modeCorrect: '{correct}/{total} correct - {pct}%',
     notPlayedYet: 'Not played yet',
-    bestFlags: 'Best Flags',
-    alwaysRight: 'Always right',
     weakFlags: 'Weak Flags',
     practiceThese: 'Practice these',
     practiceNow: 'Practice Now',

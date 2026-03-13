@@ -276,8 +276,10 @@ export async function resetStats(): Promise<void> {
     await AsyncStorage.removeItem(GAME_HISTORY_KEY);
     await AsyncStorage.removeItem(BASELINE_KEY);
     await AsyncStorage.removeItem(CHALLENGE_HISTORY_KEY);
+    await AsyncStorage.removeItem(REGION_SCORES_KEY);
     await AsyncStorage.removeItem(LEVEL_KEY);
     await AsyncStorage.removeItem(DAILY_LEADERBOARD_KEY);
+    await AsyncStorage.removeItem(CHALLENGE_NAME_KEY);
   } catch {
     // Silently fail
   }

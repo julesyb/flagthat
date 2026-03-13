@@ -176,8 +176,6 @@ const fr: DeepPartial<TranslationStrings> = {
     byMode: 'Par mode',
     modeCorrect: '{correct}/{total} correct - {pct}%',
     notPlayedYet: 'Pas encore jou\u00e9',
-    bestFlags: 'Meilleurs drapeaux',
-    alwaysRight: 'Toujours correct',
     weakFlags: 'Drapeaux difficiles',
     practiceThese: 'R\u00e9visez',
     practiceNow: 'R\u00e9viser maintenant',

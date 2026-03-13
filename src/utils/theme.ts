@@ -119,9 +119,6 @@ function buildColors(p: typeof darkPalette, isDark: boolean) {
     inkAlpha10: dk ? 'rgba(238, 233, 226, 0.10)' : 'rgba(26, 24, 32, 0.08)',
     playText: p.playText,
 
-    // Rank colors
-    rankGold: raw.goldBright,
-
     // Difficulty colors
     diffEasy: dk ? raw.greenBright : raw.green,
     diffMedium: raw.goldBright,

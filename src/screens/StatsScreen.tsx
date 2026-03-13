@@ -18,8 +18,8 @@ import { RootStackParamList } from '../types/navigation';
 import { ThemeColors, spacing, fontFamily, fontSize, borderRadius, typography } from '../utils/theme';
 import { useTheme } from '../contexts/ThemeContext';
 import { UserStats, CategoryId, BaselineRegionId, BASELINE_REGIONS } from '../types';
-import { getStats, getFlagStats, FlagStats, getDayStreakInfo, DayStreakInfo, getBadgeData, getMissedFlagIds, BadgeData, getGameHistory, GameHistoryEntry, getChallengeHistory, ChallengeHistoryEntry, MASTERED_STREAK, UNLOCK_THRESHOLD, getRegionScoreHistory, RegionScoreHistory, getPersistedLevel, persistLevel } from '../utils/storage';
-import { GOOD_ACCURACY_PCT, UNLIMITED_QUESTIONS, TIMEATTACK_DEFAULT_TIME } from '../utils/config';
+import { getStats, getFlagStats, FlagStats, getDayStreakInfo, DayStreakInfo, getBadgeData, getMissedFlagIds, BadgeData, getGameHistory, GameHistoryEntry, getChallengeHistory, ChallengeHistoryEntry, MASTERED_STREAK, getRegionScoreHistory, RegionScoreHistory, getPersistedLevel, persistLevel } from '../utils/storage';
+import { GOOD_ACCURACY_PCT, UNLIMITED_QUESTIONS, TIMEATTACK_DEFAULT_TIME, STATS_WEAK_FLAGS_LIMIT } from '../utils/config';
 import { getAllFlags, getCategoryCount } from '../data';
 import { modeLabelKey } from '../utils/gameEngine';
 
@@ -79,7 +79,6 @@ export default function StatsScreen() {
   const onNavigate = useNavTabs();
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
-  const RANK_COLORS = React.useMemo(() => [colors.rankGold, colors.textTertiary, colors.warning], [colors]);
 
   const [data, setData] = useState<StatsData | null>(null);
   const [selectedBadge, setSelectedBadge] = useState<Badge | null>(null);
@@ -205,21 +204,7 @@ export default function StatsScreen() {
 
   const flagStats = data?.flagStats ?? EMPTY_FLAG_STATS;
 
-  const top10 = React.useMemo(() => {
-    return Object.entries(flagStats)
-      .filter(([, s]) => s.right >= UNLOCK_THRESHOLD)
-      .sort(([, a], [, b]) => {
-        // Primary: most correct answers first
-        if (a.right !== b.right) return b.right - a.right;
-        // Tiebreaker: fastest average response time first
-        const avgA = a.totalTimeRight && a.right > 0 ? a.totalTimeRight / a.right : Infinity;
-        const avgB = b.totalTimeRight && b.right > 0 ? b.totalTimeRight / b.right : Infinity;
-        return avgA - avgB;
-      })
-      .slice(0, 10);
-  }, [flagStats]);
-
-  const bottom10 = React.useMemo(() => {
+  const weakFlags = React.useMemo(() => {
     return Object.entries(flagStats)
       .filter(([, s]) => s.wrong > 0 && s.rightStreak < MASTERED_STREAK)
       .sort(([, a], [, b]) => {
@@ -230,7 +215,7 @@ export default function StatsScreen() {
         const avgB = b.totalTimeWrong && b.wrong > 0 ? b.totalTimeWrong / b.wrong : 0;
         return avgB - avgA;
       })
-      .slice(0, 10);
+      .slice(0, STATS_WEAK_FLAGS_LIMIT);
   }, [flagStats]);
 
   const badgeCtx = React.useMemo(() => {
@@ -491,8 +476,6 @@ export default function StatsScreen() {
           </Animated.View>
         )}
 
-        {/* Best Timed Quiz, Next Milestone, and Practice Now removed */}
-
         {/* ══════════════════════════════════════════════════════════
             REGION SCORES: first / best / most recent per region
             ══════════════════════════════════════════════════════════ */}
@@ -651,33 +634,8 @@ export default function StatsScreen() {
           </View>
         </Animated.View>
 
-        {/* ── TOP 10 ── */}
-        {top10.length > 0 && (
-          <Animated.View style={{ opacity: restFade }}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>{t('stats.bestFlags')}</Text>
-              <Text style={styles.sectionMeta}>{t('stats.alwaysRight')}</Text>
-            </View>
-            {top10.map(([id, fs], i) => {
-              const totalSeen = fs.right + fs.wrong;
-              const avgTime = fs.totalTimeRight && fs.right > 0 ? (fs.totalTimeRight / fs.right / 1000).toFixed(1) : null;
-              return (
-                <View key={id} style={styles.rankRow}>
-                  <Text style={[styles.rank, i < 3 && { color: RANK_COLORS[i] }]}>{i + 1}</Text>
-                  <FlagImageSmall countryCode={id} />
-                  <Text style={styles.rankName}>{flagNameMap[id] || id}</Text>
-                  {avgTime && <Text style={styles.rankSpeed}>{avgTime}s</Text>}
-                  <View style={styles.scoreBadge}>
-                    <Text style={styles.scoreBadgeText}>{fs.right}/{totalSeen}</Text>
-                  </View>
-                </View>
-              );
-            })}
-          </Animated.View>
-        )}
-
-        {/* ── BOTTOM 10 ── */}
-        {bottom10.length > 0 && (
+        {/* ── WEAK FLAGS ── */}
+        {weakFlags.length > 0 && (
           <Animated.View style={{ opacity: restFade }}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>{t('stats.weakFlags')}</Text>
@@ -692,15 +650,15 @@ export default function StatsScreen() {
                 <Text style={[styles.sectionMeta, { color: colors.accent, textDecorationLine: 'underline' }]}>{t('stats.practiceThese')}</Text>
               </TouchableOpacity>
             </View>
-            {bottom10.map(([id, fs], i) => {
+            {weakFlags.map(([id, fs], i) => {
               const totalSeen = fs.right + fs.wrong;
               return (
                 <View key={id} style={styles.rankRow}>
                   <Text style={styles.rank}>{i + 1}</Text>
                   <FlagImageSmall countryCode={id} />
                   <Text style={styles.rankName}>{flagNameMap[id] || id}</Text>
-                  <View style={[styles.scoreBadge, styles.scoreBadgeWrong]}>
-                    <Text style={[styles.scoreBadgeText, styles.scoreBadgeTextWrong]}>{fs.right}/{totalSeen}</Text>
+                  <View style={styles.scoreBadge}>
+                    <Text style={styles.scoreBadgeText}>{fs.right}/{totalSeen}</Text>
                   </View>
                 </View>
               );
@@ -1116,22 +1074,16 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     color: colors.ink,
     flex: 1,
   },
-  rankSpeed: {
-    ...typography.micro,
-    color: colors.textTertiary,
-  },
   scoreBadge: {
-    backgroundColor: colors.successBg,
+    backgroundColor: colors.errorBg,
     borderRadius: borderRadius.full,
     paddingVertical: 3,
     paddingHorizontal: 10,
   },
   scoreBadgeText: {
     ...typography.tag,
-    color: colors.success,
+    color: colors.error,
   },
-  scoreBadgeWrong: { backgroundColor: colors.errorBg },
-  scoreBadgeTextWrong: { color: colors.error },
 
   // ── Score Distribution
   distCard: {
