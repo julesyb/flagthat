@@ -38,3 +38,4 @@ export const TIMEATTACK_DEFAULT_TIME = 60;
 
 // ---- UI thresholds ----
 export const GOOD_ACCURACY_PCT = 70;
+export const STATS_WEAK_FLAGS_LIMIT = 10;

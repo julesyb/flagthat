@@ -19,7 +19,7 @@ import { ThemeColors, spacing, fontFamily, fontSize, borderRadius, typography } 
 import { useTheme } from '../contexts/ThemeContext';
 import { UserStats, CategoryId, BaselineRegionId, BASELINE_REGIONS } from '../types';
 import { getStats, getFlagStats, FlagStats, getDayStreakInfo, DayStreakInfo, getBadgeData, getMissedFlagIds, BadgeData, getGameHistory, GameHistoryEntry, getChallengeHistory, ChallengeHistoryEntry, MASTERED_STREAK, getRegionScoreHistory, RegionScoreHistory, getPersistedLevel, persistLevel } from '../utils/storage';
-import { GOOD_ACCURACY_PCT, UNLIMITED_QUESTIONS, TIMEATTACK_DEFAULT_TIME } from '../utils/config';
+import { GOOD_ACCURACY_PCT, UNLIMITED_QUESTIONS, TIMEATTACK_DEFAULT_TIME, STATS_WEAK_FLAGS_LIMIT } from '../utils/config';
 import { getAllFlags, getCategoryCount } from '../data';
 import { modeLabelKey } from '../utils/gameEngine';
 
@@ -204,7 +204,7 @@ export default function StatsScreen() {
 
   const flagStats = data?.flagStats ?? EMPTY_FLAG_STATS;
 
-  const bottom10 = React.useMemo(() => {
+  const weakFlags = React.useMemo(() => {
     return Object.entries(flagStats)
       .filter(([, s]) => s.wrong > 0 && s.rightStreak < MASTERED_STREAK)
       .sort(([, a], [, b]) => {
@@ -215,7 +215,7 @@ export default function StatsScreen() {
         const avgB = b.totalTimeWrong && b.wrong > 0 ? b.totalTimeWrong / b.wrong : 0;
         return avgB - avgA;
       })
-      .slice(0, 10);
+      .slice(0, STATS_WEAK_FLAGS_LIMIT);
   }, [flagStats]);
 
   const badgeCtx = React.useMemo(() => {
@@ -634,8 +634,8 @@ export default function StatsScreen() {
           </View>
         </Animated.View>
 
-        {/* ── BOTTOM 10 ── */}
-        {bottom10.length > 0 && (
+        {/* ── WEAK FLAGS ── */}
+        {weakFlags.length > 0 && (
           <Animated.View style={{ opacity: restFade }}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>{t('stats.weakFlags')}</Text>
@@ -650,7 +650,7 @@ export default function StatsScreen() {
                 <Text style={[styles.sectionMeta, { color: colors.accent, textDecorationLine: 'underline' }]}>{t('stats.practiceThese')}</Text>
               </TouchableOpacity>
             </View>
-            {bottom10.map(([id, fs], i) => {
+            {weakFlags.map(([id, fs], i) => {
               const totalSeen = fs.right + fs.wrong;
               return (
                 <View key={id} style={styles.rankRow}>
