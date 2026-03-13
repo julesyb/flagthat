@@ -29,7 +29,7 @@ export default function DailyLeaderboard({ entries }: Props) {
   if (sorted.length === 0) return null;
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} accessibilityRole="list">
       <View style={styles.header}>
         <Text style={styles.title} accessibilityRole="header">{t('daily.leaderboard')}</Text>
         <Text style={styles.meta}>
