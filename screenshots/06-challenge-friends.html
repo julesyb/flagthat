@@ -68,49 +68,49 @@
 
   /* ── SCREEN CONTENT: Browse Flags ── */
   .screen-content {
-    flex: 1; padding: 10px 50px 0;
+    flex: 1; padding: 20px 60px 0;
     display: flex; flex-direction: column; overflow: hidden;
   }
 
   .page-title {
     font-family: 'Libre Baskerville', serif;
-    font-size: 56px; font-weight: 700; color: #1A1820;
-    letter-spacing: -1px; padding: 6px 0 8px;
+    font-size: 72px; font-weight: 700; color: #1A1820;
+    letter-spacing: -1px; padding: 10px 0 10px;
   }
   .page-sub {
-    font-size: 26px; font-weight: 500; color: #8A8494; margin-bottom: 20px;
+    font-size: 32px; font-weight: 500; color: #8A8494; margin-bottom: 28px;
   }
 
   .search {
-    display: flex; align-items: center; gap: 16px;
-    background: #FFFFFF; border-radius: 999px; padding: 22px 30px;
-    border: 2.5px solid rgba(0,0,0,0.06); margin-bottom: 20px;
+    display: flex; align-items: center; gap: 18px;
+    background: #FFFFFF; border-radius: 999px; padding: 26px 34px;
+    border: 3px solid rgba(0,0,0,0.06); margin-bottom: 24px;
   }
-  .search-text { font-size: 28px; font-weight: 400; color: #8A8494; }
+  .search-text { font-size: 32px; font-weight: 400; color: #8A8494; }
 
-  .chips { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 20px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; }
   .chip {
-    padding: 14px 28px; border-radius: 999px; background: #FFFFFF;
-    border: 2.5px solid rgba(0,0,0,0.06);
-    font-size: 24px; font-weight: 600; text-transform: uppercase;
+    padding: 16px 32px; border-radius: 999px; background: #FFFFFF;
+    border: 3px solid rgba(0,0,0,0.06);
+    font-size: 28px; font-weight: 600; text-transform: uppercase;
     letter-spacing: 1px; color: #5C5764;
   }
   .chip.active { background: #E9BA4C; border-color: #E9BA4C; color: #130F00; }
 
-  .count { font-size: 24px; color: #8A8494; font-weight: 500; margin-bottom: 20px; }
+  .count { font-size: 28px; color: #8A8494; font-weight: 500; margin-bottom: 24px; }
 
   .flag-grid {
     display: grid; grid-template-columns: repeat(3, 1fr);
-    gap: 18px; flex: 1; overflow: hidden;
+    gap: 20px; flex: 1; overflow: hidden;
   }
   .flag-card { text-align: center; }
   .flag-wrap {
-    width: 100%; aspect-ratio: 3/2; border-radius: 16px;
+    width: 100%; aspect-ratio: 3/2; border-radius: 18px;
     overflow: hidden;
   }
   .flag-wrap img { width: 100%; height: 100%; object-fit: cover; }
   .flag-name {
-    font-size: 24px; font-weight: 600; color: #1A1820; margin-top: 10px;
+    font-size: 28px; font-weight: 600; color: #1A1820; margin-top: 12px;
     overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
   }
 </style>
@@ -135,7 +135,7 @@
           <div class="page-sub">197 flags from around the world</div>
 
           <div class="search">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#8A8494" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#8A8494" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             <span class="search-text">Search flags...</span>
           </div>
 
@@ -198,18 +198,6 @@
             <div class="flag-card">
               <div class="flag-wrap"><img src="https://flagcdn.com/w320/bs.png" alt=""></div>
               <div class="flag-name">Bahamas</div>
-            </div>
-            <div class="flag-card">
-              <div class="flag-wrap"><img src="https://flagcdn.com/w320/bh.png" alt=""></div>
-              <div class="flag-name">Bahrain</div>
-            </div>
-            <div class="flag-card">
-              <div class="flag-wrap"><img src="https://flagcdn.com/w320/bd.png" alt=""></div>
-              <div class="flag-name">Bangladesh</div>
-            </div>
-            <div class="flag-card">
-              <div class="flag-wrap"><img src="https://flagcdn.com/w320/bb.png" alt=""></div>
-              <div class="flag-name">Barbados</div>
             </div>
           </div>
         </div>

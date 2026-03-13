@@ -68,93 +68,93 @@
 
   /* ── SCREEN CONTENT: Results ── */
   .screen-content {
-    flex: 1; padding: 20px 50px 0;
+    flex: 1; padding: 28px 60px 0;
     display: flex; flex-direction: column; align-items: center; overflow: hidden;
   }
 
   .score-card {
-    background: #FFFFFF; border-radius: 26px;
-    padding: 44px 36px 36px; text-align: center; width: 100%;
-    border: 2.5px solid rgba(233,186,76,0.25); margin-bottom: 28px;
+    background: #FFFFFF; border-radius: 32px;
+    padding: 56px 40px 44px; text-align: center; width: 100%;
+    border: 3px solid rgba(233,186,76,0.25); margin-bottom: 36px;
   }
   .score-eyebrow {
-    font-size: 24px; font-weight: 700; color: #8A8494;
-    text-transform: uppercase; letter-spacing: 3px; margin-bottom: 8px;
+    font-size: 30px; font-weight: 700; color: #8A8494;
+    text-transform: uppercase; letter-spacing: 4px; margin-bottom: 12px;
   }
   .score-huge {
     font-family: 'Libre Baskerville', serif;
-    font-size: 200px; font-weight: 700; color: #1A1820;
-    line-height: 1; letter-spacing: -10px;
+    font-size: 240px; font-weight: 700; color: #1A1820;
+    line-height: 1; letter-spacing: -12px;
   }
-  .score-sub { font-size: 32px; font-weight: 500; color: #5C5764; margin-top: 8px; }
+  .score-sub { font-size: 38px; font-weight: 500; color: #5C5764; margin-top: 12px; }
 
   .stats-card {
-    background: #FFFFFF; border-radius: 26px;
-    border: 2.5px solid rgba(0,0,0,0.06);
-    padding: 32px; width: 100%; margin-bottom: 28px;
+    background: #FFFFFF; border-radius: 32px;
+    border: 3px solid rgba(0,0,0,0.06);
+    padding: 40px; width: 100%; margin-bottom: 36px;
   }
-  .dots { display: flex; gap: 12px; margin-bottom: 28px; justify-content: center; }
-  .dot { width: 32px; height: 32px; border-radius: 8px; }
+  .dots { display: flex; gap: 16px; margin-bottom: 36px; justify-content: center; }
+  .dot { width: 40px; height: 40px; border-radius: 10px; }
   .dot.g { background: #1E8F56; }
   .dot.r { background: #C43030; }
-  .stats-divider { height: 1px; background: rgba(0,0,0,0.06); margin-bottom: 24px; }
+  .stats-divider { height: 1.5px; background: rgba(0,0,0,0.06); margin-bottom: 32px; }
   .stats-cols { display: flex; }
   .stat { flex: 1; text-align: center; position: relative; }
   .stat + .stat::before {
     content: ''; position: absolute; left: 0; top: 4px;
-    height: 56px; width: 1px; background: rgba(0,0,0,0.06);
+    height: 72px; width: 1.5px; background: rgba(0,0,0,0.06);
   }
   .stat-num {
     font-family: 'Libre Baskerville', serif;
-    font-size: 42px; font-weight: 700; color: #1A1820;
+    font-size: 56px; font-weight: 700; color: #1A1820;
   }
-  .stat-unit { font-size: 24px; color: #5C5764; font-weight: 500; }
+  .stat-unit { font-size: 30px; color: #5C5764; font-weight: 500; }
   .stat-label {
-    font-size: 20px; font-weight: 700; color: #8A8494;
-    text-transform: uppercase; letter-spacing: 2px; margin-top: 4px;
+    font-size: 24px; font-weight: 700; color: #8A8494;
+    text-transform: uppercase; letter-spacing: 2px; margin-top: 6px;
   }
   .new-best {
     display: inline-block; background: rgba(233,186,76,0.12);
-    border-radius: 999px; padding: 6px 16px; margin-top: 8px;
-    font-size: 18px; font-weight: 700; color: #9A5C0A;
+    border-radius: 999px; padding: 8px 20px; margin-top: 10px;
+    font-size: 22px; font-weight: 700; color: #9A5C0A;
     text-transform: uppercase; letter-spacing: 1px;
   }
 
-  .btn-row { display: flex; gap: 16px; width: 100%; margin-bottom: 28px; }
+  .btn-row { display: flex; gap: 20px; width: 100%; margin-bottom: 36px; }
   .btn-gold {
-    flex: 1; background: #E9BA4C; border-radius: 22px; padding: 28px;
-    text-align: center; box-shadow: 0 6px 0 #5C3506;
+    flex: 1; background: #E9BA4C; border-radius: 26px; padding: 36px;
+    text-align: center; box-shadow: 0 8px 0 #5C3506;
   }
-  .btn-gold-text { font-size: 32px; font-weight: 700; color: #130F00; text-transform: uppercase; letter-spacing: 2px; }
+  .btn-gold-text { font-size: 40px; font-weight: 700; color: #130F00; text-transform: uppercase; letter-spacing: 2px; }
   .btn-outline {
-    flex: 1; background: #FFFFFF; border: 2.5px solid rgba(0,0,0,0.08);
-    border-radius: 22px; padding: 28px; text-align: center;
+    flex: 1; background: #FFFFFF; border: 3px solid rgba(0,0,0,0.08);
+    border-radius: 26px; padding: 36px; text-align: center;
   }
-  .btn-outline-text { font-size: 32px; font-weight: 700; color: #5C5764; text-transform: uppercase; letter-spacing: 2px; }
+  .btn-outline-text { font-size: 40px; font-weight: 700; color: #5C5764; text-transform: uppercase; letter-spacing: 2px; }
 
   .review-title {
-    font-size: 36px; font-weight: 700; color: #1A1820;
-    margin-bottom: 18px; align-self: flex-start;
+    font-size: 44px; font-weight: 700; color: #1A1820;
+    margin-bottom: 22px; align-self: flex-start;
   }
   .review-list { width: 100%; }
   .review-item {
     display: flex; align-items: center; background: #FFFFFF;
-    border-radius: 20px; padding: 22px 24px; margin-bottom: 14px;
-    gap: 18px; position: relative; overflow: hidden;
+    border-radius: 24px; padding: 28px 30px; margin-bottom: 18px;
+    gap: 22px; position: relative; overflow: hidden;
   }
-  .ri-bar { position: absolute; left: 0; top: 0; bottom: 0; width: 6px; }
+  .ri-bar { position: absolute; left: 0; top: 0; bottom: 0; width: 8px; }
   .ri-num {
     font-family: 'Libre Baskerville', serif;
-    font-size: 26px; font-weight: 700; min-width: 30px;
-    text-align: center; margin-left: 12px;
+    font-size: 32px; font-weight: 700; min-width: 36px;
+    text-align: center; margin-left: 16px;
   }
   .ri-flag {
-    width: 64px; height: 44px; border-radius: 8px;
+    width: 80px; height: 56px; border-radius: 10px;
     overflow: hidden; flex-shrink: 0;
   }
   .ri-flag img { width: 100%; height: 100%; object-fit: cover; }
-  .ri-name { flex: 1; font-size: 30px; font-weight: 600; color: #1A1820; }
-  .ri-time { font-size: 24px; font-weight: 500; color: #8A8494; }
+  .ri-name { flex: 1; font-size: 36px; font-weight: 600; color: #1A1820; }
+  .ri-time { font-size: 30px; font-weight: 500; color: #8A8494; }
 </style>
 </head>
 <body>
@@ -212,7 +212,7 @@
               <div class="ri-flag"><img src="https://flagcdn.com/w160/br.png" alt=""></div>
               <span class="ri-name">Brazil</span>
               <span class="ri-time">1.8s</span>
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1E8F56" stroke-width="2.5"><polyline points="4 12 10 18 20 6"/></svg>
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#1E8F56" stroke-width="2.5"><polyline points="4 12 10 18 20 6"/></svg>
             </div>
             <div class="review-item">
               <div class="ri-bar" style="background:#1E8F56"></div>
@@ -220,7 +220,7 @@
               <div class="ri-flag"><img src="https://flagcdn.com/w160/jp.png" alt=""></div>
               <span class="ri-name">Japan</span>
               <span class="ri-time">1.2s</span>
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1E8F56" stroke-width="2.5"><polyline points="4 12 10 18 20 6"/></svg>
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#1E8F56" stroke-width="2.5"><polyline points="4 12 10 18 20 6"/></svg>
             </div>
             <div class="review-item">
               <div class="ri-bar" style="background:#C43030"></div>
@@ -228,7 +228,7 @@
               <div class="ri-flag"><img src="https://flagcdn.com/w160/td.png" alt=""></div>
               <span class="ri-name">Chad</span>
               <span class="ri-time">4.1s</span>
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#C43030" stroke-width="2.5"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#C43030" stroke-width="2.5"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
             </div>
             <div class="review-item">
               <div class="ri-bar" style="background:#1E8F56"></div>
@@ -236,7 +236,7 @@
               <div class="ri-flag"><img src="https://flagcdn.com/w160/ke.png" alt=""></div>
               <span class="ri-name">Kenya</span>
               <span class="ri-time">1.5s</span>
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1E8F56" stroke-width="2.5"><polyline points="4 12 10 18 20 6"/></svg>
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#1E8F56" stroke-width="2.5"><polyline points="4 12 10 18 20 6"/></svg>
             </div>
           </div>
         </div>
