@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -34,6 +34,12 @@ import { ChevronRightIcon, BadgeIconView, UsersIcon, CheckIcon, CrossIcon, Flame
 import { hapticTap } from '../utils/feedback';
 import { decodeChallenge } from '../utils/challengeCode';
 import PageHeader from '../components/PageHeader';
+
+type ChallengeDisplayRow = ChallengeHistoryEntry & {
+  displayOpponentName: string | null;
+  displayOpponentScore: number | null;
+  displayOpponentResults?: boolean[];
+};
 
 const EMPTY_FLAG_STATS: FlagStats = {};
 const toPct = (e: { correct: number; total: number } | undefined) =>
@@ -77,7 +83,7 @@ export default function StatsScreen() {
 
   const [data, setData] = useState<StatsData | null>(null);
   const [selectedBadge, setSelectedBadge] = useState<Badge | null>(null);
-  const [selectedChallenge, setSelectedChallenge] = useState<ChallengeHistoryEntry | null>(null);
+  const [selectedChallenge, setSelectedChallenge] = useState<ChallengeDisplayRow | null>(null);
   const [codeCopied, setCodeCopied] = useState(false);
 
   // ── Animation values ──
@@ -183,7 +189,14 @@ export default function StatsScreen() {
     if (highlightChallenge && data) {
       const match = data.challengeHistory.find((ch) => ch.shortCode === highlightChallenge);
       if (match) {
-        setSelectedChallenge(match);
+        // Show the most recently added opponent (last in opponents array)
+        const lastOpp = match.opponents && match.opponents.length > 0 ? match.opponents[match.opponents.length - 1] : null;
+        setSelectedChallenge({
+          ...match,
+          displayOpponentName: lastOpp?.name ?? match.opponentName,
+          displayOpponentScore: lastOpp?.score ?? match.opponentScore,
+          displayOpponentResults: lastOpp?.results ?? match.opponentResults,
+        });
         // Clear the param so re-navigation with a different code works
         navigation.setParams({ highlightChallenge: undefined });
       }
@@ -312,6 +325,25 @@ export default function StatsScreen() {
     }).sort((a, b) => a.order - b.order);
   }, [earnedBadges, badgeCtx, derived]);
 
+  // Expand multi-opponent sent challenges into separate 1v1 display rows.
+  // Each opponent becomes its own row; sent challenges with no responses yet
+  // fall through to the else branch and show a single "awaiting" row.
+  const challengeHistory = data?.challengeHistory ?? [];
+  const displayChallenges = useMemo(() => {
+    const rows: ChallengeDisplayRow[] = [];
+    for (const ch of challengeHistory) {
+      const opps = ch.opponents && ch.opponents.length > 0 ? ch.opponents : [];
+      if (ch.direction === 'sent' && opps.length > 0) {
+        for (const opp of opps) {
+          rows.push({ ...ch, displayOpponentName: opp.name, displayOpponentScore: opp.score, displayOpponentResults: opp.results });
+        }
+      } else {
+        rows.push({ ...ch, displayOpponentName: ch.opponentName, displayOpponentScore: ch.opponentScore, displayOpponentResults: ch.opponentResults });
+      }
+    }
+    return rows;
+  }, [data]);
+
   // ── Loading gate: single check, all hooks above ──
   if (!data) {
     return (
@@ -325,7 +357,7 @@ export default function StatsScreen() {
   }
 
   // ── Destructure for render (data is guaranteed non-null below) ──
-  const { stats, challengeHistory, regionScoreHistory, dayStreakInfo } = data;
+  const { stats, regionScoreHistory, dayStreakInfo } = data;
 
   // Region data - show all regions regardless of whether played
   const regionData = BASELINE_REGIONS.map((regionId) => {
@@ -540,21 +572,21 @@ export default function StatsScreen() {
         )}
 
         {/* ── RECENT CHALLENGES (clickable for detail) ── */}
-        {challengeHistory.length > 0 && (
+        {displayChallenges.length > 0 && (
           <Animated.View style={{ opacity: restFade }}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>{t('challenge.recentChallenges')}</Text>
               <Text style={styles.sectionMeta}>{t('challenge.last10')}</Text>
             </View>
             <View style={styles.challengeList}>
-              {challengeHistory.map((ch, i) => {
-                const hasOpponent = ch.opponentName !== null && ch.opponentScore !== null;
-                const won = hasOpponent && ch.myScore > ch.opponentScore!;
-                const lost = hasOpponent && ch.myScore < ch.opponentScore!;
+              {displayChallenges.map((ch, i) => {
+                const hasOpponent = ch.displayOpponentName !== null && ch.displayOpponentScore !== null;
+                const won = hasOpponent && ch.myScore > ch.displayOpponentScore!;
+                const lost = hasOpponent && ch.myScore < ch.displayOpponentScore!;
                 const dateStr = new Date(ch.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
                 return (
                   <TouchableOpacity
-                    key={`${ch.shortCode}-${ch.direction}-${i}`}
+                    key={`${ch.shortCode}-${ch.direction}-${ch.displayOpponentName ?? 'awaiting'}-${i}`}
                     style={styles.challengeRow}
                     activeOpacity={0.7}
                     onPress={() => setSelectedChallenge(ch)}
@@ -572,7 +604,7 @@ export default function StatsScreen() {
                         <Text style={styles.challengeCode}>{ch.shortCode}</Text>
                         <Text style={styles.challengeDate}>{dateStr}</Text>
                       </View>
-                      <Text style={styles.challengeMode}>{t(modeLabelKey(ch.mode))}</Text>
+                      <Text style={styles.challengeMode}>{t(modeLabelKey(ch.mode))}{hasOpponent ? ` - ${t('common.vs')} ${ch.displayOpponentName}` : ''}</Text>
                       <View style={styles.challengeScoreRow}>
                         <Text style={styles.challengeScoreLabel}>{t('challenge.you')}:</Text>
                         <Text style={[styles.challengeScore, won && { color: colors.success }]}>
@@ -767,10 +799,10 @@ export default function StatsScreen() {
                   myResults = decoded.data.hostResults.map((r) => r.correct);
                 }
               }
-              const hasOpponent = ch.opponentName !== null && ch.opponentScore !== null;
-              const won = hasOpponent && ch.myScore > ch.opponentScore!;
-              const lost = hasOpponent && ch.myScore < ch.opponentScore!;
-              const tied = hasOpponent && ch.myScore === ch.opponentScore;
+              const hasOpponent = ch.displayOpponentName !== null && ch.displayOpponentScore !== null;
+              const won = hasOpponent && ch.myScore > ch.displayOpponentScore!;
+              const lost = hasOpponent && ch.myScore < ch.displayOpponentScore!;
+              const tied = hasOpponent && ch.myScore === ch.displayOpponentScore!;
               const dateStr = new Date(ch.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
               return (
                 <>
@@ -785,8 +817,8 @@ export default function StatsScreen() {
                       </View>
                       <Text style={styles.h2hVs}>{t('common.vs')}</Text>
                       <View style={styles.h2hColumn}>
-                        <Text style={styles.h2hName}>{ch.opponentName}</Text>
-                        <Text style={[styles.h2hScore, lost && { color: colors.error }]}>{ch.opponentScore}/{ch.totalFlags}</Text>
+                        <Text style={styles.h2hName}>{ch.displayOpponentName}</Text>
+                        <Text style={[styles.h2hScore, lost && { color: colors.error }]}>{ch.displayOpponentScore}/{ch.totalFlags}</Text>
                       </View>
                     </View>
                   ) : (
@@ -806,24 +838,23 @@ export default function StatsScreen() {
                       color: won ? colors.success : lost ? colors.error : colors.textTertiary,
                     }]}>
                       {won ? t('challenge.youWin')
-                        : lost ? t('challenge.theyWin', { name: ch.opponentName || '' })
+                        : lost ? t('challenge.theyWin', { name: ch.displayOpponentName || '' })
                         : tied ? t('challenge.tie')
                         : `${ch.myScore}/${ch.totalFlags}`}
                     </Text>
                   </View>
 
                   {/* Per-question result details */}
-                  {(myResults || ch.opponentResults) && (
+                  {(myResults || ch.displayOpponentResults) && (
                     <View style={styles.h2hDetailsWrap}>
                       <View style={styles.h2hDetailsHeader}>
                         <Text style={[styles.h2hDetailsLabel, { flex: hasOpponent ? 1 : 0 }]}>{ch.myName || t('challenge.you')}</Text>
                         <Text style={[styles.h2hDetailsLabel, { width: 28, textAlign: 'center' }]}>#</Text>
-                        {hasOpponent && <Text style={[styles.h2hDetailsLabel, { flex: 1, textAlign: 'right' }]}>{ch.opponentName}</Text>}
+                        {hasOpponent && <Text style={[styles.h2hDetailsLabel, { flex: 1, textAlign: 'right' }]}>{ch.displayOpponentName}</Text>}
                       </View>
                       {Array.from({ length: ch.totalFlags }).map((_, qi) => {
                         const myOk = myResults ? myResults[qi] : undefined;
-                        const oppOk = ch.opponentResults ? ch.opponentResults[qi] : undefined;
-                        // Highlight the winner of each question
+                        const oppOk = ch.displayOpponentResults ? ch.displayOpponentResults[qi] : undefined;
                         const myWon = myOk === true && oppOk === false;
                         const oppWon = oppOk === true && myOk === false;
                         return (

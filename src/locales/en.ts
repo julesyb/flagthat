@@ -404,7 +404,7 @@ const en = {
   // ─── Challenge Mode ────────────────────────────────────
   challenge: {
     joinTitle: 'Challenge',
-    joinSubtitle: 'Paste a challenge code from a friend and race to beat their score on the same flags.',
+    joinSubtitle: 'Paste a challenge code and play the same flags.',
     homeDesc: 'Race a friend on the same flags',
     yourName: 'Your name',
     namePlaceholder: 'Enter your name',
@@ -420,10 +420,10 @@ const en = {
     challengeDesc: 'Share your game so a friend can try the same flags',
     enterName: 'Your name',
     enterNameDesc: 'This will be shown to your opponent.',
-    shareMessage: '{correct}/{total} on Flag That - beat me?',
+    shareMessage: 'I got {correct}/{total} on Flag That. Can you do better?',
     shareCardHeader: 'Flag That {correct}/{total}',
     shareCardAvg: '{time}s avg',
-    shareCardCta: 'Think you can beat {name}?',
+    shareCardCta: 'Can you play {name}?',
     headToHead: 'Head to head',
     you: 'You',
     youWin: 'You win!',
@@ -435,7 +435,7 @@ const en = {
     previewTimeLimit: '{seconds}s per flag',
     previewValid: 'Valid code',
     previewHostScore: '{name} got {correct}/{total}',
-    beatName: 'Beat {name}',
+    playName: 'Play {name}',
     challengeBack: 'Challenge Back',
     challengeBackDesc: 'Play a new round and send it back',
     sendResultsBack: 'Send Results Back',
@@ -450,6 +450,8 @@ const en = {
     received: 'Played',
     copyCode: 'Copy Code',
     codeCopied: 'Copied!',
+    alreadyPlayed: 'Already played',
+    yourPreviousScore: 'You scored {correct}/{total}',
   },
 
   // ─── Notifications ─────────────────────────────────────

@@ -2,7 +2,7 @@ import { getAllFlags } from '../data';
 import { FlagItem, GameQuestion, GameMode } from '../types';
 import { shuffleArray } from './gameEngine';
 import { twinPairs } from '../data/countryAliases';
-import { APP_DOMAIN, MAX_CHALLENGE_FLAGS, MAX_CHALLENGE_NAME_LENGTH, MAX_HOSTNAME_LENGTH, SHORT_CODE_LENGTH, SPEED_FAST_MS, SPEED_MEDIUM_MS, SHARE_GRID_ROW_SIZE, EASY_CHOICE_COUNT, STANDARD_CHOICE_COUNT } from './config';
+import { APP_DOMAIN, MAX_CHALLENGE_FLAGS, MAX_CHALLENGE_NAME_LENGTH, MAX_HOSTNAME_LENGTH, SHORT_CODE_LENGTH, SHARE_GRID_ROW_SIZE, EASY_CHOICE_COUNT, STANDARD_CHOICE_COUNT } from './config';
 import { t } from './i18n';
 
 /** Modes that support the challenge feature */
@@ -330,13 +330,9 @@ export function generateChallengeShareCard(
   const correct = results.filter((r) => r.correct).length;
   const total = results.length;
 
-  // Build visual grid: correct with speed tiers, wrong = red
-  // Fast (<2s) = gold, Medium (<5s) = green, Slow (5s+) = white, Wrong = red
+  // Build visual grid: green = correct, red = wrong
   const grid = results.map((r) => {
-    if (!r.correct) return '\uD83D\uDFE5'; // red square
-    if (r.timeMs < SPEED_FAST_MS) return '\uD83D\uDFE8'; // yellow square (lightning fast)
-    if (r.timeMs < SPEED_MEDIUM_MS) return '\uD83D\uDFE9'; // green square (solid)
-    return '\u2B1C'; // white square (slow but correct)
+    return r.correct ? '\uD83D\uDFE9' : '\uD83D\uDFE5'; // green square / red square
   });
 
   // Split into rows of 5
