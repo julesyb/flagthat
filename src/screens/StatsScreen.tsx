@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -77,7 +77,7 @@ export default function StatsScreen() {
 
   const [data, setData] = useState<StatsData | null>(null);
   const [selectedBadge, setSelectedBadge] = useState<Badge | null>(null);
-  const [selectedChallenge, setSelectedChallenge] = useState<ChallengeHistoryEntry | null>(null);
+  const [selectedChallenge, setSelectedChallenge] = useState<(ChallengeHistoryEntry & { displayOpponentName: string | null; displayOpponentScore: number | null; displayOpponentResults?: boolean[] }) | null>(null);
   const [codeCopied, setCodeCopied] = useState(false);
 
   // ── Animation values ──
@@ -183,7 +183,14 @@ export default function StatsScreen() {
     if (highlightChallenge && data) {
       const match = data.challengeHistory.find((ch) => ch.shortCode === highlightChallenge);
       if (match) {
-        setSelectedChallenge(match);
+        // Show the most recently added opponent (last in opponents array)
+        const lastOpp = match.opponents && match.opponents.length > 0 ? match.opponents[match.opponents.length - 1] : null;
+        setSelectedChallenge({
+          ...match,
+          displayOpponentName: lastOpp?.name ?? match.opponentName,
+          displayOpponentScore: lastOpp?.score ?? match.opponentScore,
+          displayOpponentResults: lastOpp?.results ?? match.opponentResults,
+        });
         // Clear the param so re-navigation with a different code works
         navigation.setParams({ highlightChallenge: undefined });
       }
@@ -326,6 +333,26 @@ export default function StatsScreen() {
 
   // ── Destructure for render (data is guaranteed non-null below) ──
   const { stats, challengeHistory, regionScoreHistory, dayStreakInfo } = data;
+
+  // Expand multi-opponent sent challenges into separate 1v1 display rows
+  type ChallengeDisplayRow = ChallengeHistoryEntry & { displayOpponentName: string | null; displayOpponentScore: number | null; displayOpponentResults?: boolean[] };
+  const displayChallenges = useMemo(() => {
+    const rows: ChallengeDisplayRow[] = [];
+    for (const ch of challengeHistory) {
+      const opponents = ch.opponents && ch.opponents.length > 0 ? ch.opponents : [];
+      if (ch.direction === 'sent' && opponents.length > 0) {
+        // One row per opponent
+        for (const opp of opponents) {
+          rows.push({ ...ch, displayOpponentName: opp.name, displayOpponentScore: opp.score, displayOpponentResults: opp.results });
+        }
+        // If no opponents responded yet, we'd still have opponents.length > 0 so this case is covered
+      } else {
+        // Received challenges or sent with no opponents: single row using legacy fields
+        rows.push({ ...ch, displayOpponentName: ch.opponentName, displayOpponentScore: ch.opponentScore, displayOpponentResults: ch.opponentResults });
+      }
+    }
+    return rows;
+  }, [challengeHistory]);
 
   // Region data - show all regions regardless of whether played
   const regionData = BASELINE_REGIONS.map((regionId) => {
@@ -540,23 +567,21 @@ export default function StatsScreen() {
         )}
 
         {/* ── RECENT CHALLENGES (clickable for detail) ── */}
-        {challengeHistory.length > 0 && (
+        {displayChallenges.length > 0 && (
           <Animated.View style={{ opacity: restFade }}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>{t('challenge.recentChallenges')}</Text>
               <Text style={styles.sectionMeta}>{t('challenge.last10')}</Text>
             </View>
             <View style={styles.challengeList}>
-              {challengeHistory.map((ch, i) => {
-                const oppCount = ch.opponents?.length ?? (ch.opponentName !== null && ch.opponentScore !== null ? 1 : 0);
-                const hasOpponent = oppCount > 0;
-                const isSingleOpponent = oppCount === 1;
-                const won = isSingleOpponent && ch.myScore > ch.opponentScore!;
-                const lost = isSingleOpponent && ch.myScore < ch.opponentScore!;
+              {displayChallenges.map((ch, i) => {
+                const hasOpponent = ch.displayOpponentName !== null && ch.displayOpponentScore !== null;
+                const won = hasOpponent && ch.myScore > ch.displayOpponentScore!;
+                const lost = hasOpponent && ch.myScore < ch.displayOpponentScore!;
                 const dateStr = new Date(ch.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
                 return (
                   <TouchableOpacity
-                    key={`${ch.shortCode}-${ch.direction}-${i}`}
+                    key={`${ch.shortCode}-${ch.direction}-${ch.displayOpponentName ?? 'awaiting'}-${i}`}
                     style={styles.challengeRow}
                     activeOpacity={0.7}
                     onPress={() => setSelectedChallenge(ch)}
@@ -574,17 +599,12 @@ export default function StatsScreen() {
                         <Text style={styles.challengeCode}>{ch.shortCode}</Text>
                         <Text style={styles.challengeDate}>{dateStr}</Text>
                       </View>
-                      <Text style={styles.challengeMode}>{t(modeLabelKey(ch.mode))}</Text>
+                      <Text style={styles.challengeMode}>{t(modeLabelKey(ch.mode))}{hasOpponent ? ` - ${t('common.vs')} ${ch.displayOpponentName}` : ''}</Text>
                       <View style={styles.challengeScoreRow}>
                         <Text style={styles.challengeScoreLabel}>{t('challenge.you')}:</Text>
                         <Text style={[styles.challengeScore, won && { color: colors.success }]}>
                           {ch.myScore}/{ch.totalFlags}
                         </Text>
-                        {oppCount > 1 && ch.direction === 'sent' && (
-                          <Text style={styles.challengeOpponentCount}>
-                            {t('challenge.opponentCount', { count: oppCount })}
-                          </Text>
-                        )}
                       </View>
                     </View>
                     <ChevronRightIcon size={14} color={colors.textTertiary} />
@@ -774,55 +794,17 @@ export default function StatsScreen() {
                   myResults = decoded.data.hostResults.map((r) => r.correct);
                 }
               }
-              // Build opponents list: prefer opponents array, fall back to legacy fields
-              const opponents = ch.opponents && ch.opponents.length > 0
-                ? ch.opponents
-                : ch.opponentName !== null && ch.opponentScore !== null
-                  ? [{ name: ch.opponentName!, score: ch.opponentScore!, results: ch.opponentResults, date: ch.date }]
-                  : [];
-              const hasOpponent = opponents.length > 0;
-              const isMulti = opponents.length > 1;
-              // For single-opponent: use legacy win/lose logic
-              const won = hasOpponent && !isMulti && ch.myScore > opponents[0].score;
-              const lost = hasOpponent && !isMulti && ch.myScore < opponents[0].score;
-              const tied = hasOpponent && !isMulti && ch.myScore === opponents[0].score;
+              const hasOpponent = ch.displayOpponentName !== null && ch.displayOpponentScore !== null;
+              const won = hasOpponent && ch.myScore > ch.displayOpponentScore!;
+              const lost = hasOpponent && ch.myScore < ch.displayOpponentScore!;
+              const tied = hasOpponent && ch.myScore === ch.displayOpponentScore!;
               const dateStr = new Date(ch.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
               return (
                 <>
                   <Text style={styles.modalTitle}>{t('challenge.headToHead')}</Text>
                   <Text style={[styles.modalSubtitle, { marginBottom: spacing.md }]}>{t(modeLabelKey(ch.mode))} - {dateStr}</Text>
 
-                  {isMulti ? (() => {
-                    const sorted = [
-                      { name: ch.myName || t('challenge.you'), score: ch.myScore, isMe: true },
-                      ...opponents.map((o) => ({ name: o.name, score: o.score, isMe: false })),
-                    ].sort((a, b) => b.score - a.score);
-                    return (
-                      <View style={styles.multiOpponentList}>
-                        {sorted.map((entry, idx) => {
-                          // Tied scores share the same rank
-                          const rank = idx === 0 || sorted[idx - 1].score !== entry.score ? idx + 1 : 0;
-                          return (
-                            <View key={`${entry.name}-${idx}`} style={[
-                              styles.multiOpponentRow,
-                              idx % 2 === 0 && { backgroundColor: colors.surfaceSecondary + '40' },
-                            ]}>
-                              <Text style={styles.multiOpponentRank}>{rank > 0 ? rank : ''}</Text>
-                              <Text style={[styles.multiOpponentName, { flex: 1 }]} numberOfLines={1}>
-                                {entry.name}
-                              </Text>
-                              <Text style={[
-                                styles.multiOpponentScore,
-                                entry.isMe && { color: colors.goldBright },
-                              ]}>
-                                {entry.score}/{ch.totalFlags}
-                              </Text>
-                            </View>
-                          );
-                        })}
-                      </View>
-                    );
-                  })() : hasOpponent ? (
+                  {hasOpponent ? (
                     <View style={styles.h2hContainer}>
                       <View style={styles.h2hColumn}>
                         <Text style={styles.h2hName}>{ch.myName || t('challenge.you')}</Text>
@@ -830,8 +812,8 @@ export default function StatsScreen() {
                       </View>
                       <Text style={styles.h2hVs}>{t('common.vs')}</Text>
                       <View style={styles.h2hColumn}>
-                        <Text style={styles.h2hName}>{opponents[0].name}</Text>
-                        <Text style={[styles.h2hScore, lost && { color: colors.error }]}>{opponents[0].score}/{ch.totalFlags}</Text>
+                        <Text style={styles.h2hName}>{ch.displayOpponentName}</Text>
+                        <Text style={[styles.h2hScore, lost && { color: colors.error }]}>{ch.displayOpponentScore}/{ch.totalFlags}</Text>
                       </View>
                     </View>
                   ) : (
@@ -843,34 +825,31 @@ export default function StatsScreen() {
                     </View>
                   )}
 
-                  {!isMulti && (
-                    <View style={[styles.modalStatusPill, {
-                      backgroundColor: won ? colors.successBg : lost ? colors.errorBg : colors.surfaceSecondary,
-                      marginTop: spacing.md,
+                  <View style={[styles.modalStatusPill, {
+                    backgroundColor: won ? colors.successBg : lost ? colors.errorBg : colors.surfaceSecondary,
+                    marginTop: spacing.md,
+                  }]}>
+                    <Text style={[styles.modalStatusText, {
+                      color: won ? colors.success : lost ? colors.error : colors.textTertiary,
                     }]}>
-                      <Text style={[styles.modalStatusText, {
-                        color: won ? colors.success : lost ? colors.error : colors.textTertiary,
-                      }]}>
-                        {won ? t('challenge.youWin')
-                          : lost ? t('challenge.theyWin', { name: opponents[0]?.name || '' })
-                          : tied ? t('challenge.tie')
-                          : `${ch.myScore}/${ch.totalFlags}`}
-                      </Text>
-                    </View>
-                  )}
+                      {won ? t('challenge.youWin')
+                        : lost ? t('challenge.theyWin', { name: ch.displayOpponentName || '' })
+                        : tied ? t('challenge.tie')
+                        : `${ch.myScore}/${ch.totalFlags}`}
+                    </Text>
+                  </View>
 
-                  {/* Per-question result details (single opponent only) */}
-                  {!isMulti && (myResults || ch.opponentResults) && (
+                  {/* Per-question result details */}
+                  {(myResults || ch.displayOpponentResults) && (
                     <View style={styles.h2hDetailsWrap}>
                       <View style={styles.h2hDetailsHeader}>
                         <Text style={[styles.h2hDetailsLabel, { flex: hasOpponent ? 1 : 0 }]}>{ch.myName || t('challenge.you')}</Text>
                         <Text style={[styles.h2hDetailsLabel, { width: 28, textAlign: 'center' }]}>#</Text>
-                        {hasOpponent && <Text style={[styles.h2hDetailsLabel, { flex: 1, textAlign: 'right' }]}>{opponents[0].name}</Text>}
+                        {hasOpponent && <Text style={[styles.h2hDetailsLabel, { flex: 1, textAlign: 'right' }]}>{ch.displayOpponentName}</Text>}
                       </View>
                       {Array.from({ length: ch.totalFlags }).map((_, qi) => {
                         const myOk = myResults ? myResults[qi] : undefined;
-                        const oppResults = opponents[0]?.results;
-                        const oppOk = oppResults ? oppResults[qi] : undefined;
+                        const oppOk = ch.displayOpponentResults ? ch.displayOpponentResults[qi] : undefined;
                         const myWon = myOk === true && oppOk === false;
                         const oppWon = oppOk === true && myOk === false;
                         return (
@@ -1251,41 +1230,6 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   challengeScore: {
     ...typography.microBold,
-    color: colors.ink,
-  },
-  challengeOpponentCount: {
-    ...typography.micro,
-    color: colors.goldBright,
-    marginLeft: spacing.xs,
-  },
-
-  // ── Multi-opponent leaderboard
-  multiOpponentList: {
-    gap: spacing.xxs,
-  },
-  multiOpponentRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.sm,
-    borderRadius: borderRadius.sm,
-    gap: spacing.sm,
-  },
-  multiOpponentRank: {
-    fontFamily: fontFamily.uiLabel,
-    fontSize: fontSize.sm,
-    color: colors.textTertiary,
-    width: 20,
-    textAlign: 'center',
-  },
-  multiOpponentName: {
-    fontFamily: fontFamily.bodyMedium,
-    fontSize: fontSize.sm,
-    color: colors.ink,
-  },
-  multiOpponentScore: {
-    fontFamily: fontFamily.bodyBold,
-    fontSize: fontSize.sm,
     color: colors.ink,
   },
 
