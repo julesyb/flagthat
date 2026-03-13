@@ -10,7 +10,7 @@
 
 The FlagThat codebase is well-structured and in good shape overall. The audit identified **no critical blockers** for App Store or Play Store submission. Key findings:
 
-- **5 unused exports** to clean up (3 icons, 2 utility functions)
+- **4 unused exports** to clean up (2 icons, 2 utility functions)
 - **~15 hardcoded theme values** across 7 files (colors, spacing, font sizes)
 - **1 bug**: `fontSize.md` reference that does not exist in theme
 - **0 security vulnerabilities**
@@ -58,7 +58,7 @@ All colors, spacing, and typography should use constants from `src/utils/theme.t
 
 ## 2. Unused Code
 
-Only 5 unused exports found across the entire codebase (96.4% utilization rate).
+Only 4 unused exports found across the entire codebase (97% utilization rate).
 
 ### Unused Functions
 
@@ -73,7 +73,6 @@ Only 5 unused exports found across the entire codebase (96.4% utilization rate).
 |------|--------|--------|
 | `src/components/Icons.tsx:205` | `BellIcon` | Never imported in any screen or component |
 | `src/components/Icons.tsx:223` | `MapPinIcon` | Never imported in any screen or component |
-| `src/components/Icons.tsx:174` | `ChevronLeftIcon` | Never imported (app uses ChevronRightIcon) |
 
 ### Clean Areas
 - Zero unused imports in any screen file
@@ -252,7 +251,7 @@ The codebase follows DRY principles well overall, but the deep analysis identifi
 ### Should Fix (Code Quality)
 3. Move `IMPOSTOR_COLORS` array from FlagImpostorScreen.tsx to theme.ts
 4. Replace hardcoded spacing values in HomeScreen.tsx (gap:12, paddingVertical:11, etc.)
-5. Remove 5 unused exports (getDailyNumber, getTwins, BellIcon, MapPinIcon, ChevronLeftIcon)
+5. Remove 4 unused exports (getDailyNumber, getTwins, BellIcon, MapPinIcon)
 6. Replace color alpha string concatenation in ChallengeResponseScreen.tsx with theme constants
 
 ### Nice to Have
