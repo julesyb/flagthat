@@ -22,15 +22,16 @@
 
   .headline {
     text-align: center;
-    padding: 100px 80px 36px;
+    padding: 120px 100px 50px;
+    flex-shrink: 0;
   }
   .headline h1 {
     font-family: 'Barlow', sans-serif;
-    font-size: 78px;
+    font-size: 88px;
     font-weight: 800;
     color: #FFFFFF;
-    line-height: 1.12;
-    letter-spacing: -1px;
+    line-height: 1.08;
+    letter-spacing: -2px;
   }
   .headline h1 em {
     font-style: italic;
@@ -39,48 +40,48 @@
 
   /* Phone */
   .phone {
-    width: 980px;
-    height: 2200px;
+    width: 1100px;
+    height: 2500px;
     background: #000000;
-    border-radius: 72px;
-    padding: 14px;
+    border-radius: 56px;
+    padding: 8px;
     position: relative;
     flex-shrink: 0;
   }
   .phone::before {
     content: '';
     position: absolute;
-    top: 24px;
+    top: 18px;
     left: 50%;
     transform: translateX(-50%);
-    width: 140px;
-    height: 40px;
+    width: 126px;
+    height: 36px;
     background: #000000;
-    border-radius: 20px;
+    border-radius: 18px;
     z-index: 10;
   }
   .screen {
     width: 100%;
     height: 100%;
     background: #F5EFE6;
-    border-radius: 60px;
+    border-radius: 50px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
   }
 
   .status-bar {
-    padding: 22px 40px 12px;
+    padding: 20px 44px 14px;
     display: flex;
     justify-content: space-between;
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 600;
     color: #1A1820;
   }
 
   .app {
     flex: 1;
-    padding: 4px 32px 0;
+    padding: 6px 40px 0;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -88,42 +89,42 @@
 
   .page-title {
     font-family: 'Libre Baskerville', serif;
-    font-size: 34px; font-weight: 700; color: #1A1820;
-    letter-spacing: -0.5px; padding: 12px 0 16px;
+    font-size: 40px; font-weight: 700; color: #1A1820;
+    letter-spacing: -0.5px; padding: 14px 0 20px;
   }
 
   /* Mode grid */
   .mode-grid {
-    display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;
+    display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 24px;
   }
   .mode-card {
-    width: calc(50% - 5px); background: #FFFFFF;
-    border: 2px solid rgba(0,0,0,0.08); border-radius: 10px;
-    padding: 18px; text-align: center;
+    width: calc(50% - 6px); background: #FFFFFF;
+    border: 2px solid rgba(0,0,0,0.08); border-radius: 14px;
+    padding: 22px; text-align: center;
   }
   .mode-card.active {
     border-color: rgba(233,186,76,0.50); background: rgba(233,186,76,0.10);
   }
   .mode-icon {
-    width: 46px; height: 46px; background: #EDE7DE; border-radius: 14px;
+    width: 54px; height: 54px; background: #EDE7DE; border-radius: 16px;
     display: flex; align-items: center; justify-content: center;
-    margin: 0 auto 10px;
+    margin: 0 auto 12px;
   }
   .mode-card.active .mode-icon { background: rgba(233,186,76,0.15); }
-  .mc-name { font-size: 17px; font-weight: 600; color: #1A1820; }
+  .mc-name { font-size: 22px; font-weight: 600; color: #1A1820; }
   .mode-card.active .mc-name { color: #E9BA4C; }
-  .mc-desc { font-size: 14px; color: #5C5764; margin-top: 2px; }
+  .mc-desc { font-size: 17px; color: #5C5764; margin-top: 3px; }
 
   /* Difficulty */
   .section-label {
-    font-size: 14px; font-weight: 600; color: #8A8494;
-    text-transform: uppercase; letter-spacing: 1.2px; margin: 16px 0 10px;
+    font-size: 17px; font-weight: 600; color: #8A8494;
+    text-transform: uppercase; letter-spacing: 1.5px; margin: 20px 0 12px;
   }
-  .diff-grid { display: flex; gap: 7px; margin-bottom: 16px; }
+  .diff-grid { display: flex; gap: 10px; margin-bottom: 20px; }
   .diff-btn {
-    flex: 1; padding: 14px 8px; border-radius: 10px;
-    border: 1px solid rgba(0,0,0,0.08); background: #FFFFFF;
-    text-align: center; font-size: 14px; font-weight: 600; color: #8A8494;
+    flex: 1; padding: 18px 10px; border-radius: 14px;
+    border: 1.5px solid rgba(0,0,0,0.08); background: #FFFFFF;
+    text-align: center; font-size: 18px; font-weight: 600; color: #8A8494;
   }
   .diff-btn.medium-on {
     background: rgba(233,186,76,0.12); border-color: rgba(154,92,10,0.25); color: #E9BA4C;
@@ -131,52 +132,52 @@
 
   /* Config */
   .config-card {
-    background: #FFFFFF; border-radius: 14px;
-    border: 1px solid rgba(0,0,0,0.08); padding: 14px 16px; margin-bottom: 16px;
+    background: #FFFFFF; border-radius: 18px;
+    border: 1.5px solid rgba(0,0,0,0.08); padding: 18px 22px; margin-bottom: 20px;
   }
   .config-row {
-    display: flex; align-items: center; justify-content: space-between; padding: 8px 0;
+    display: flex; align-items: center; justify-content: space-between; padding: 10px 0;
   }
   .config-row + .config-row {
-    border-top: 1px solid rgba(0,0,0,0.06); padding-top: 10px; margin-top: 4px;
+    border-top: 1px solid rgba(0,0,0,0.06); padding-top: 14px; margin-top: 6px;
   }
-  .config-label { font-size: 17px; font-weight: 500; color: #5C5764; }
-  .seg-btns { display: flex; gap: 6px; }
+  .config-label { font-size: 22px; font-weight: 500; color: #5C5764; }
+  .seg-btns { display: flex; gap: 8px; }
   .seg {
-    padding: 7px 13px; border-radius: 8px; font-size: 14px; font-weight: 600;
-    background: #FFF; border: 1px solid rgba(0,0,0,0.08); color: #5C5764;
-    min-width: 42px; text-align: center;
+    padding: 10px 18px; border-radius: 10px; font-size: 18px; font-weight: 600;
+    background: #FFF; border: 1.5px solid rgba(0,0,0,0.08); color: #5C5764;
+    min-width: 52px; text-align: center;
   }
   .seg.on { background: #E9BA4C; border-color: #E9BA4C; color: #130F00; }
 
   /* Filters */
-  .filter-row { display: flex; gap: 10px; margin-bottom: 12px; }
+  .filter-row { display: flex; gap: 12px; margin-bottom: 14px; }
   .filter-chip {
-    flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
-    padding: 10px 16px; border: 1.5px solid rgba(0,0,0,0.08);
-    border-radius: 10px; background: #FFF; font-size: 17px; font-weight: 500; color: #1A1820;
+    flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 14px 20px; border: 2px solid rgba(0,0,0,0.08);
+    border-radius: 14px; background: #FFF; font-size: 22px; font-weight: 500; color: #1A1820;
   }
   .filter-chip.active { background: #E9BA4C; border-color: #E9BA4C; color: #130F00; }
 
-  .cat-row { display: flex; flex-wrap: wrap; gap: 10px; }
+  .cat-row { display: flex; flex-wrap: wrap; gap: 12px; }
   .cat {
-    padding: 10px 18px; border: 1.5px solid rgba(0,0,0,0.08);
-    border-radius: 10px; background: #FFF; font-size: 17px; font-weight: 500; color: #1A1820;
+    padding: 14px 22px; border: 2px solid rgba(0,0,0,0.08);
+    border-radius: 14px; background: #FFF; font-size: 22px; font-weight: 500; color: #1A1820;
   }
   .cat.active { background: #E9BA4C; border-color: #E9BA4C; color: #130F00; }
-  .cat-count { font-size: 13px; color: #8A8494; margin-left: 2px; }
+  .cat-count { font-size: 16px; color: #8A8494; margin-left: 4px; }
   .cat.active .cat-count { color: #130F00; }
 
   /* Start btn */
   .start-wrap {
     border-top: 1px solid rgba(0,0,0,0.06); background: #F5EFE6;
-    padding: 12px 32px 32px; margin-top: auto;
+    padding: 16px 40px 40px; margin-top: auto;
   }
   .start-btn {
-    background: #E9BA4C; border-radius: 14px; padding: 17px 0;
-    text-align: center; box-shadow: 0 4px 0 #5C3506;
-    font-size: 22px; font-weight: 600; color: #130F00;
-    text-transform: uppercase; letter-spacing: 0.8px;
+    background: #E9BA4C; border-radius: 18px; padding: 22px 0;
+    text-align: center; box-shadow: 0 5px 0 #5C3506;
+    font-size: 26px; font-weight: 700; color: #130F00;
+    text-transform: uppercase; letter-spacing: 1px;
   }
 </style>
 </head>
@@ -190,38 +191,38 @@
   <div class="screen">
     <div class="status-bar">
       <span>9:41</span>
-      <svg width="16" height="12" viewBox="0 0 20 14" fill="#1A1820"><rect x="0" y="8" width="3" height="6" rx="0.5"/><rect x="5" y="5" width="3" height="9" rx="0.5"/><rect x="10" y="2" width="3" height="12" rx="0.5"/><rect x="15" y="0" width="3" height="14" rx="0.5"/></svg>
+      <svg width="18" height="14" viewBox="0 0 20 14" fill="#1A1820"><rect x="0" y="8" width="3" height="6" rx="0.5"/><rect x="5" y="5" width="3" height="9" rx="0.5"/><rect x="10" y="2" width="3" height="12" rx="0.5"/><rect x="15" y="0" width="3" height="14" rx="0.5"/></svg>
     </div>
     <div class="app">
       <div class="page-title">Game Setup</div>
       <div class="mode-grid">
         <div class="mode-card active">
-          <div class="mode-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E9BA4C" stroke-width="1.5"><path d="M4 21V4"/><path d="M4 4 C4 4 7 2 10 4 C13 6 16 4 20 4 L20 15 C20 15 17 17 14 15 C11 13 8 15 4 15"/></svg></div>
+          <div class="mode-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E9BA4C" stroke-width="1.5"><path d="M4 21V4"/><path d="M4 4 C4 4 7 2 10 4 C13 6 16 4 20 4 L20 15 C20 15 17 17 14 15 C11 13 8 15 4 15"/></svg></div>
           <div class="mc-name">Quiz</div>
           <div class="mc-desc">Classic flag quiz</div>
         </div>
         <div class="mode-card">
-          <div class="mode-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8A8494" stroke-width="1.5"><path d="M13 2L4.5 13.5H11L10 22L19.5 10H13L13 2Z"/></svg></div>
+          <div class="mode-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8A8494" stroke-width="1.5"><path d="M13 2L4.5 13.5H11L10 22L19.5 10H13L13 2Z"/></svg></div>
           <div class="mc-name">Flash Flag</div>
           <div class="mc-desc">Tilt to answer</div>
         </div>
         <div class="mode-card">
-          <div class="mode-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8A8494" stroke-width="1.5"><path d="M4 7h3a2 2 0 0 0 2-2 2 2 0 0 1 4 0 2 2 0 0 0 2 2h3v3a2 2 0 0 0 2 2 2 2 0 0 1 0 4 2 2 0 0 0-2 2v3H4v-3a2 2 0 0 1 0-4 2 2 0 0 0 0-4V7Z"/></svg></div>
+          <div class="mode-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8A8494" stroke-width="1.5"><path d="M4 7h3a2 2 0 0 0 2-2 2 2 0 0 1 4 0 2 2 0 0 0 2 2h3v3a2 2 0 0 0 2 2 2 2 0 0 1 0 4 2 2 0 0 0-2 2v3H4v-3a2 2 0 0 1 0-4 2 2 0 0 0 0-4V7Z"/></svg></div>
           <div class="mc-name">Flag Puzzle</div>
           <div class="mc-desc">Progressive reveal</div>
         </div>
         <div class="mode-card">
-          <div class="mode-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8A8494" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg></div>
+          <div class="mode-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8A8494" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg></div>
           <div class="mc-name">Time Attack</div>
           <div class="mc-desc">60 seconds</div>
         </div>
         <div class="mode-card">
-          <div class="mode-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8A8494" stroke-width="1.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
+          <div class="mode-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8A8494" stroke-width="1.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
           <div class="mc-name">Impostor</div>
           <div class="mc-desc">Spot the fake</div>
         </div>
         <div class="mode-card">
-          <div class="mode-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8A8494" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="21" y2="12"/><path d="M12 3 C8 7 8 17 12 21 C16 17 16 7 12 3Z"/></svg></div>
+          <div class="mode-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8A8494" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="21" y2="12"/><path d="M12 3 C8 7 8 17 12 21 C16 17 16 7 12 3Z"/></svg></div>
           <div class="mc-name">Neighbors</div>
           <div class="mc-desc">Border countries</div>
         </div>
@@ -251,7 +252,7 @@
         <div class="filter-chip">By Theme</div>
       </div>
       <div class="cat-row">
-        <div class="cat active">All<span class="cat-count">195</span></div>
+        <div class="cat active">All<span class="cat-count">197</span></div>
         <div class="cat">Africa<span class="cat-count">54</span></div>
         <div class="cat">Americas<span class="cat-count">35</span></div>
         <div class="cat">Europe<span class="cat-count">44</span></div>

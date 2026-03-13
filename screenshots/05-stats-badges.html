@@ -22,15 +22,16 @@
 
   .headline {
     text-align: center;
-    padding: 100px 80px 36px;
+    padding: 120px 100px 50px;
+    flex-shrink: 0;
   }
   .headline h1 {
     font-family: 'Barlow', sans-serif;
-    font-size: 78px;
+    font-size: 88px;
     font-weight: 800;
     color: #FFFFFF;
-    line-height: 1.12;
-    letter-spacing: -1px;
+    line-height: 1.08;
+    letter-spacing: -2px;
   }
   .headline h1 em {
     font-style: italic;
@@ -39,49 +40,49 @@
 
   /* Phone */
   .phone {
-    width: 980px;
-    height: 2200px;
+    width: 1100px;
+    height: 2500px;
     background: #000000;
-    border-radius: 72px;
-    padding: 14px;
+    border-radius: 56px;
+    padding: 8px;
     position: relative;
     flex-shrink: 0;
   }
   .phone::before {
     content: '';
     position: absolute;
-    top: 24px;
+    top: 18px;
     left: 50%;
     transform: translateX(-50%);
-    width: 140px;
-    height: 40px;
+    width: 126px;
+    height: 36px;
     background: #000000;
-    border-radius: 20px;
+    border-radius: 18px;
     z-index: 10;
   }
   .screen {
     width: 100%;
     height: 100%;
     background: #F5EFE6;
-    border-radius: 60px;
+    border-radius: 50px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
   }
 
   .status-bar {
-    padding: 22px 40px 12px;
+    padding: 20px 44px 14px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 600;
     color: #1A1820;
   }
 
   .app-content {
     flex: 1;
-    padding: 4px 32px 0;
+    padding: 6px 40px 0;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -89,87 +90,87 @@
 
   .page-title {
     font-family: 'Libre Baskerville', serif;
-    font-size: 34px; font-weight: 700; color: #1A1820;
-    letter-spacing: -0.5px; padding: 12px 0 16px;
+    font-size: 40px; font-weight: 700; color: #1A1820;
+    letter-spacing: -0.5px; padding: 14px 0 20px;
   }
 
   /* Hero card */
   .hero-card {
-    background: #FFFFFF; border-radius: 14px; padding: 20px;
-    display: flex; margin-bottom: 16px;
+    background: #FFFFFF; border-radius: 18px; padding: 24px;
+    display: flex; margin-bottom: 20px;
   }
   .hero-col { flex: 1; text-align: center; position: relative; }
   .hero-col + .hero-col { border-left: 1px solid rgba(0,0,0,0.08); }
   .hero-val {
     font-family: 'Libre Baskerville', serif;
-    font-size: 28px; font-weight: 700; letter-spacing: -0.5px;
+    font-size: 34px; font-weight: 700; letter-spacing: -0.5px;
   }
   .hero-label {
-    font-size: 13px; font-weight: 600; color: #8A8494;
-    text-transform: uppercase; letter-spacing: 1.2px; margin-top: 2px;
+    font-size: 15px; font-weight: 600; color: #8A8494;
+    text-transform: uppercase; letter-spacing: 1.2px; margin-top: 3px;
   }
-  .streak-row { display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 6px; }
-  .streak-pips { display: flex; gap: 3px; margin-top: 4px; justify-content: center; }
-  .pip { width: 6px; height: 6px; border-radius: 50%; }
+  .streak-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; }
+  .streak-pips { display: flex; gap: 4px; margin-top: 5px; justify-content: center; }
+  .pip { width: 8px; height: 8px; border-radius: 50%; }
   .pip.on { background: #E9BA4C; }
   .pip.off { background: #D5CFC6; }
 
   /* Level */
   .level-tile {
-    background: #FFFFFF; border-radius: 14px; padding: 16px 20px; margin-bottom: 16px;
+    background: #FFFFFF; border-radius: 18px; padding: 20px 24px; margin-bottom: 20px;
   }
-  .level-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .level-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
   .level-num {
     font-family: 'Libre Baskerville', serif;
-    font-size: 28px; font-weight: 700; color: #1A1820; letter-spacing: -0.5px;
+    font-size: 34px; font-weight: 700; color: #1A1820; letter-spacing: -0.5px;
   }
   .level-num span { color: #E9BA4C; }
-  .level-meta { font-size: 14px; font-weight: 600; color: #8A8494; }
-  .level-bar { height: 7px; background: rgba(0,0,0,0.08); border-radius: 999px; overflow: hidden; }
+  .level-meta { font-size: 17px; font-weight: 600; color: #8A8494; }
+  .level-bar { height: 8px; background: rgba(0,0,0,0.08); border-radius: 999px; overflow: hidden; }
   .level-fill { height: 100%; background: #E9BA4C; border-radius: 999px; width: 65%; }
-  .level-labels { display: flex; justify-content: space-between; margin-top: 8px; }
-  .level-label-text { font-size: 14px; font-weight: 600; color: #8A8494; }
+  .level-labels { display: flex; justify-content: space-between; margin-top: 10px; }
+  .level-label-text { font-size: 17px; font-weight: 600; color: #8A8494; }
   .level-label-text.current { color: #E9BA4C; font-weight: 700; }
 
   /* Sections */
   .section-label {
-    font-size: 22px; font-weight: 600; color: #1A1820;
-    letter-spacing: 0.3px; margin: 8px 0 12px;
+    font-size: 26px; font-weight: 700; color: #1A1820;
+    letter-spacing: 0.3px; margin: 10px 0 14px;
   }
 
   /* Regions */
   .region-card {
-    background: #FFFFFF; border-radius: 14px; padding: 16px;
-    display: flex; margin-bottom: 10px;
+    background: #FFFFFF; border-radius: 18px; padding: 20px;
+    display: flex; margin-bottom: 12px;
   }
   .region-col { flex: 1; text-align: center; position: relative; }
   .region-col + .region-col { border-left: 1px solid rgba(0,0,0,0.08); }
   .region-col-name {
-    font-size: 14px; font-weight: 600; color: #8A8494;
-    text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;
+    font-size: 17px; font-weight: 600; color: #8A8494;
+    text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;
   }
   .region-col-val {
     font-family: 'Libre Baskerville', serif;
-    font-size: 22px; font-weight: 700; letter-spacing: -0.5px;
+    font-size: 28px; font-weight: 700; letter-spacing: -0.5px;
   }
 
   /* Badges */
   .badge-grid {
-    display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 14px;
+    display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 16px;
   }
   .badge-item {
-    width: 23%; background: #FFFFFF; border-radius: 10px;
-    padding: 10px 6px 8px; text-align: center;
+    width: 23%; background: #FFFFFF; border-radius: 14px;
+    padding: 14px 8px 10px; text-align: center;
   }
   .badge-icon {
-    width: 32px; height: 32px; border-radius: 8px;
+    width: 40px; height: 40px; border-radius: 10px;
     display: flex; align-items: center; justify-content: center;
-    margin: 0 auto 6px;
+    margin: 0 auto 8px;
   }
-  .badge-name { font-size: 13px; font-weight: 600; color: #1A1820; line-height: 1.2; }
+  .badge-name { font-size: 16px; font-weight: 600; color: #1A1820; line-height: 1.2; }
   .badge-progress {
-    height: 3px; background: rgba(0,0,0,0.06); border-radius: 2px;
-    margin-top: 6px; overflow: hidden;
+    height: 4px; background: rgba(0,0,0,0.06); border-radius: 2px;
+    margin-top: 8px; overflow: hidden;
   }
   .badge-progress-fill { height: 100%; background: #E9BA4C; border-radius: 2px; }
   .badge-item.locked { opacity: 0.3; }
@@ -178,18 +179,18 @@
   .bottom-nav {
     border-top: 1px solid rgba(0,0,0,0.06);
     background: rgba(245,239,230,0.97);
-    padding: 8px 0 32px;
+    padding: 10px 0 40px;
     display: flex; justify-content: space-around;
   }
   .nav-tab {
     display: flex; flex-direction: column; align-items: center;
-    gap: 3px; padding-top: 10px; position: relative; min-width: 64px;
+    gap: 4px; padding-top: 12px; position: relative; min-width: 80px;
   }
   .nav-tab.active::before {
-    content: ''; position: absolute; top: 0; width: 24px; height: 2px;
-    background: #E9BA4C; border-radius: 1px;
+    content: ''; position: absolute; top: 0; width: 28px; height: 3px;
+    background: #E9BA4C; border-radius: 2px;
   }
-  .nav-label { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #8A8494; }
+  .nav-label { font-size: 15px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #8A8494; }
   .nav-tab.active .nav-label { color: #1A1820; }
 </style>
 </head>
@@ -203,7 +204,7 @@
   <div class="screen">
     <div class="status-bar">
       <span>9:41</span>
-      <svg width="16" height="12" viewBox="0 0 20 14" fill="#1A1820"><rect x="0" y="8" width="3" height="6" rx="0.5"/><rect x="5" y="5" width="3" height="9" rx="0.5"/><rect x="10" y="2" width="3" height="12" rx="0.5"/><rect x="15" y="0" width="3" height="14" rx="0.5"/></svg>
+      <svg width="18" height="14" viewBox="0 0 20 14" fill="#1A1820"><rect x="0" y="8" width="3" height="6" rx="0.5"/><rect x="5" y="5" width="3" height="9" rx="0.5"/><rect x="10" y="2" width="3" height="12" rx="0.5"/><rect x="15" y="0" width="3" height="14" rx="0.5"/></svg>
     </div>
     <div class="app-content">
       <div class="page-title">Stats</div>
@@ -211,7 +212,7 @@
       <div class="hero-card">
         <div class="hero-col">
           <div class="streak-row">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="#E9BA4C"><path d="M13.5 0.67C13.5 0.67 14.24 3.32 14.24 5.47C14.24 7.53 12.89 9.2 10.83 9.2C8.76 9.2 7.2 7.53 7.2 5.47L7.23 5.11C5.21 7.51 4 10.62 4 14C4 18.42 7.58 22 12 22C16.42 22 20 18.42 20 14C20 8.61 17.41 3.8 13.5 0.67Z"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="#E9BA4C"><path d="M13.5 0.67C13.5 0.67 14.24 3.32 14.24 5.47C14.24 7.53 12.89 9.2 10.83 9.2C8.76 9.2 7.2 7.53 7.2 5.47L7.23 5.11C5.21 7.51 4 10.62 4 14C4 18.42 7.58 22 12 22C16.42 22 20 18.42 20 14C20 8.61 17.41 3.8 13.5 0.67Z"/></svg>
             <span class="hero-val" style="color:#E9BA4C">12</span>
           </div>
           <div class="hero-label">Day Streak</div>
@@ -272,37 +273,37 @@
       <div class="section-label">Badges</div>
       <div class="badge-grid">
         <div class="badge-item">
-          <div class="badge-icon" style="background:rgba(233,186,76,0.18)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E9BA4C" stroke-width="1.5"><polyline points="4 12 10 18 20 6"/><circle cx="12" cy="12" r="10"/></svg></div>
+          <div class="badge-icon" style="background:rgba(233,186,76,0.18)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E9BA4C" stroke-width="1.5"><polyline points="4 12 10 18 20 6"/><circle cx="12" cy="12" r="10"/></svg></div>
           <div class="badge-name">Perfect 10</div>
         </div>
         <div class="badge-item">
-          <div class="badge-icon" style="background:rgba(139,141,255,0.18)"><svg width="18" height="18" viewBox="0 0 24 24" fill="#8B8DFF"><path d="M13.5 0.67C13.5 0.67 14.24 3.32 14.24 5.47C14.24 7.53 12.89 9.2 10.83 9.2C8.76 9.2 7.2 7.53 7.2 5.47L7.23 5.11C5.21 7.51 4 10.62 4 14C4 18.42 7.58 22 12 22C16.42 22 20 18.42 20 14C20 8.61 17.41 3.8 13.5 0.67Z"/></svg></div>
+          <div class="badge-icon" style="background:rgba(139,141,255,0.18)"><svg width="20" height="20" viewBox="0 0 24 24" fill="#8B8DFF"><path d="M13.5 0.67C13.5 0.67 14.24 3.32 14.24 5.47C14.24 7.53 12.89 9.2 10.83 9.2C8.76 9.2 7.2 7.53 7.2 5.47L7.23 5.11C5.21 7.51 4 10.62 4 14C4 18.42 7.58 22 12 22C16.42 22 20 18.42 20 14C20 8.61 17.41 3.8 13.5 0.67Z"/></svg></div>
           <div class="badge-name">Hot Streak</div>
         </div>
         <div class="badge-item">
-          <div class="badge-icon" style="background:rgba(196,136,74,0.18)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C4884A" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="21" y2="12"/><path d="M12 3 C8 7 8 17 12 21 C16 17 16 7 12 3Z"/></svg></div>
+          <div class="badge-icon" style="background:rgba(196,136,74,0.18)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C4884A" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="21" y2="12"/><path d="M12 3 C8 7 8 17 12 21 C16 17 16 7 12 3Z"/></svg></div>
           <div class="badge-name">Globe Trotter</div>
         </div>
         <div class="badge-item">
-          <div class="badge-icon" style="background:rgba(160,160,160,0.18)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A0A0A0" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg></div>
+          <div class="badge-icon" style="background:rgba(160,160,160,0.18)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#A0A0A0" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg></div>
           <div class="badge-name">Speed Demon</div>
         </div>
         <div class="badge-item">
-          <div class="badge-icon" style="background:rgba(233,186,76,0.18)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E9BA4C" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+          <div class="badge-icon" style="background:rgba(233,186,76,0.18)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E9BA4C" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
           <div class="badge-name">Daily Legend</div>
         </div>
         <div class="badge-item locked">
-          <div class="badge-icon" style="background:rgba(0,0,0,0.04)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8A8494" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+          <div class="badge-icon" style="background:rgba(0,0,0,0.04)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8A8494" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
           <div class="badge-name">???</div>
           <div class="badge-progress"><div class="badge-progress-fill" style="width:60%"></div></div>
         </div>
         <div class="badge-item locked">
-          <div class="badge-icon" style="background:rgba(0,0,0,0.04)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8A8494" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+          <div class="badge-icon" style="background:rgba(0,0,0,0.04)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8A8494" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
           <div class="badge-name">???</div>
           <div class="badge-progress"><div class="badge-progress-fill" style="width:30%"></div></div>
         </div>
         <div class="badge-item locked">
-          <div class="badge-icon" style="background:rgba(0,0,0,0.04)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8A8494" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+          <div class="badge-icon" style="background:rgba(0,0,0,0.04)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8A8494" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
           <div class="badge-name">???</div>
           <div class="badge-progress"><div class="badge-progress-fill" style="width:15%"></div></div>
         </div>
@@ -311,23 +312,23 @@
 
     <div class="bottom-nav">
       <div class="nav-tab">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8A8494" stroke-width="1.5"><path d="M3 10.5L12 3L21 10.5V20C21 20.55 20.55 21 20 21H4C3.45 21 3 20.55 3 20V10.5Z"/><polyline points="9 21 9 14 15 14 15 21"/></svg>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8A8494" stroke-width="1.5"><path d="M3 10.5L12 3L21 10.5V20C21 20.55 20.55 21 20 21H4C3.45 21 3 20.55 3 20V10.5Z"/><polyline points="9 21 9 14 15 14 15 21"/></svg>
         <span class="nav-label">Home</span>
       </div>
       <div class="nav-tab">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8A8494" stroke-width="1.5"><circle cx="12" cy="12" r="7"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="2" fill="#8A8494" stroke="none"/></svg>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8A8494" stroke-width="1.5"><circle cx="12" cy="12" r="7"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="2" fill="#8A8494" stroke="none"/></svg>
         <span class="nav-label">Modes</span>
       </div>
       <div class="nav-tab active">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1A1820" stroke-width="1.5"><rect x="3" y="13" width="4" height="8"/><rect x="10" y="8" width="4" height="13"/><rect x="17" y="3" width="4" height="18"/></svg>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1A1820" stroke-width="1.5"><rect x="3" y="13" width="4" height="8"/><rect x="10" y="8" width="4" height="13"/><rect x="17" y="3" width="4" height="18"/></svg>
         <span class="nav-label">Stats</span>
       </div>
       <div class="nav-tab">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8A8494" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="21" y2="12"/><path d="M12 3 C8 7 8 17 12 21 C16 17 16 7 12 3Z"/></svg>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8A8494" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="21" y2="12"/><path d="M12 3 C8 7 8 17 12 21 C16 17 16 7 12 3Z"/></svg>
         <span class="nav-label">Browse</span>
       </div>
       <div class="nav-tab">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8A8494" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8A8494" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         <span class="nav-label">Settings</span>
       </div>
     </div>

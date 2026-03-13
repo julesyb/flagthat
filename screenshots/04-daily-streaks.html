@@ -22,15 +22,16 @@
 
   .headline {
     text-align: center;
-    padding: 100px 80px 36px;
+    padding: 120px 100px 50px;
+    flex-shrink: 0;
   }
   .headline h1 {
     font-family: 'Barlow', sans-serif;
-    font-size: 78px;
+    font-size: 88px;
     font-weight: 800;
     color: #1A1820;
-    line-height: 1.12;
-    letter-spacing: -1px;
+    line-height: 1.08;
+    letter-spacing: -2px;
   }
   .headline h1 em {
     font-style: italic;
@@ -39,49 +40,49 @@
 
   /* Phone */
   .phone {
-    width: 980px;
-    height: 2200px;
+    width: 1100px;
+    height: 2500px;
     background: #000000;
-    border-radius: 72px;
-    padding: 14px;
+    border-radius: 56px;
+    padding: 8px;
     position: relative;
     flex-shrink: 0;
   }
   .phone::before {
     content: '';
     position: absolute;
-    top: 24px;
+    top: 18px;
     left: 50%;
     transform: translateX(-50%);
-    width: 140px;
-    height: 40px;
+    width: 126px;
+    height: 36px;
     background: #000000;
-    border-radius: 20px;
+    border-radius: 18px;
     z-index: 10;
   }
   .screen {
     width: 100%;
     height: 100%;
     background: #F5EFE6;
-    border-radius: 60px;
+    border-radius: 50px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
   }
 
   .status-bar {
-    padding: 22px 40px 12px;
+    padding: 20px 44px 14px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 600;
     color: #1A1820;
   }
 
   .app-content {
     flex: 1;
-    padding: 8px 32px 0;
+    padding: 10px 40px 0;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -91,118 +92,118 @@
   /* Hero score */
   .hero-card {
     background: #FFFFFF;
-    border-radius: 18px;
-    padding: 28px 24px 24px;
+    border-radius: 22px;
+    padding: 34px 28px 28px;
     text-align: center;
     width: 100%;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
     border: 2px solid rgba(201,150,12,0.35);
   }
   .hero-eyebrow {
-    font-size: 14px; font-weight: 600; color: #5C5764;
-    text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 8px;
+    font-size: 17px; font-weight: 600; color: #5C5764;
+    text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px;
   }
   .hero-pct {
     font-family: 'Libre Baskerville', serif;
-    font-size: 120px; font-weight: 700; color: #1A1820;
-    line-height: 120px; letter-spacing: -3px; margin-bottom: 4px;
+    font-size: 140px; font-weight: 700; color: #1A1820;
+    line-height: 140px; letter-spacing: -4px; margin-bottom: 6px;
   }
-  .hero-score-text { font-size: 20px; font-weight: 500; color: #5C5764; }
+  .hero-score-text { font-size: 24px; font-weight: 500; color: #5C5764; }
 
   /* Timeline */
   .timeline-card {
-    background: #FFFFFF; border-radius: 18px;
-    border: 1px solid rgba(0,0,0,0.08); padding: 20px;
-    width: 100%; margin-bottom: 16px;
+    background: #FFFFFF; border-radius: 22px;
+    border: 1.5px solid rgba(0,0,0,0.08); padding: 24px;
+    width: 100%; margin-bottom: 20px;
   }
-  .dots-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; }
-  .dot { width: 18px; height: 18px; border-radius: 4px; }
+  .dots-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
+  .dot { width: 22px; height: 22px; border-radius: 5px; }
   .dot.g { background: #1E8F56; }
   .dot.r { background: #C43030; }
 
   .stats-row {
-    display: flex; border-top: 1px solid rgba(0,0,0,0.06); padding-top: 14px;
+    display: flex; border-top: 1px solid rgba(0,0,0,0.06); padding-top: 18px;
   }
   .stat-col { flex: 1; text-align: center; position: relative; }
   .stat-col + .stat-col::before {
     content: ''; position: absolute; left: 0; top: 4px;
-    height: 36px; width: 1px; background: rgba(0,0,0,0.08);
+    height: 44px; width: 1px; background: rgba(0,0,0,0.08);
   }
   .stat-val {
     font-family: 'Libre Baskerville', serif;
-    font-size: 22px; font-weight: 700; color: #1A1820; letter-spacing: -0.5px;
+    font-size: 28px; font-weight: 700; color: #1A1820; letter-spacing: -0.5px;
   }
-  .stat-unit { font-size: 14px; font-weight: 600; color: #5C5764; }
+  .stat-unit { font-size: 17px; font-weight: 600; color: #5C5764; }
   .stat-label {
-    font-size: 13px; font-weight: 600; color: #8A8494;
-    text-transform: uppercase; letter-spacing: 1.2px; margin-top: 2px;
+    font-size: 15px; font-weight: 600; color: #8A8494;
+    text-transform: uppercase; letter-spacing: 1.2px; margin-top: 3px;
   }
   .new-best {
     display: inline-block; background: rgba(233,186,76,0.12);
-    border-radius: 999px; padding: 2px 8px;
-    font-size: 12px; font-weight: 600; color: #9A5C0A;
-    text-transform: uppercase; letter-spacing: 1px; margin-top: 4px;
+    border-radius: 999px; padding: 3px 10px;
+    font-size: 14px; font-weight: 600; color: #9A5C0A;
+    text-transform: uppercase; letter-spacing: 1px; margin-top: 5px;
   }
 
   /* Share */
   .share-card {
-    background: #FFFFFF; border-radius: 18px; padding: 18px 20px;
-    text-align: center; width: 100%; margin-bottom: 16px;
+    background: #FFFFFF; border-radius: 22px; padding: 22px 24px;
+    text-align: center; width: 100%; margin-bottom: 20px;
   }
   .share-title {
-    font-size: 14px; font-weight: 600; color: #5C5764;
-    text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 12px;
+    font-size: 17px; font-weight: 600; color: #5C5764;
+    text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 14px;
   }
-  .share-grid { display: flex; flex-direction: column; gap: 6px; align-items: center; margin-bottom: 12px; }
-  .share-row { display: flex; gap: 6px; }
-  .share-cell { width: 46px; height: 46px; border-radius: 8px; }
+  .share-grid { display: flex; flex-direction: column; gap: 8px; align-items: center; margin-bottom: 14px; }
+  .share-row { display: flex; gap: 8px; }
+  .share-cell { width: 54px; height: 54px; border-radius: 10px; }
   .sc-g { background: #1E8F56; }
   .sc-d { background: #D5CFC6; }
 
   /* Buttons */
-  .action-row { display: flex; gap: 10px; width: 100%; margin-top: 8px; margin-bottom: 12px; }
+  .action-row { display: flex; gap: 12px; width: 100%; margin-top: 10px; margin-bottom: 16px; }
   .btn-primary {
-    flex: 1; background: #E9BA4C; border-radius: 14px; padding: 14px 18px;
-    text-align: center; box-shadow: 0 4px 0 #5C3506;
+    flex: 1; background: #E9BA4C; border-radius: 18px; padding: 18px 22px;
+    text-align: center; box-shadow: 0 5px 0 #5C3506;
   }
   .btn-primary-text {
-    font-size: 17px; font-weight: 600; color: #130F00;
-    text-transform: uppercase; letter-spacing: 0.8px;
+    font-size: 22px; font-weight: 700; color: #130F00;
+    text-transform: uppercase; letter-spacing: 1px;
   }
   .btn-secondary {
-    flex: 1; background: #FFFFFF; border: 1px solid rgba(0,0,0,0.08);
-    border-radius: 14px; padding: 14px 18px; text-align: center;
+    flex: 1; background: #FFFFFF; border: 1.5px solid rgba(0,0,0,0.08);
+    border-radius: 18px; padding: 18px 22px; text-align: center;
   }
   .btn-secondary-text {
-    font-size: 17px; font-weight: 600; color: #5C5764;
-    text-transform: uppercase; letter-spacing: 0.8px;
+    font-size: 22px; font-weight: 700; color: #5C5764;
+    text-transform: uppercase; letter-spacing: 1px;
   }
 
   /* Review */
   .review-section { width: 100%; }
-  .review-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
-  .review-title { font-size: 22px; font-weight: 600; color: #1A1820; }
+  .review-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
+  .review-title { font-size: 26px; font-weight: 700; color: #1A1820; }
   .review-item {
     display: flex; align-items: center; background: #FFFFFF;
-    border-radius: 10px; padding: 12px 14px; margin-bottom: 6px;
-    gap: 12px; position: relative; overflow: hidden;
+    border-radius: 14px; padding: 16px 18px; margin-bottom: 8px;
+    gap: 14px; position: relative; overflow: hidden;
   }
   .review-item .bar {
-    position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
-    border-radius: 10px 0 0 10px;
+    position: absolute; left: 0; top: 0; bottom: 0; width: 5px;
+    border-radius: 14px 0 0 14px;
   }
   .review-idx {
     font-family: 'Libre Baskerville', serif;
-    font-size: 14px; font-weight: 700; min-width: 20px;
-    text-align: center; margin-left: 6px;
+    font-size: 17px; font-weight: 700; min-width: 24px;
+    text-align: center; margin-left: 8px;
   }
   .review-flag {
-    width: 40px; height: 27px; border-radius: 4px;
+    width: 48px; height: 32px; border-radius: 5px;
     overflow: hidden; background: #EDE7DE; flex-shrink: 0;
   }
   .review-flag img { width: 100%; height: 100%; object-fit: cover; }
-  .review-name { flex: 1; font-size: 17px; font-weight: 600; color: #1A1820; }
-  .review-time { font-size: 13px; font-weight: 500; color: #8A8494; }
+  .review-name { flex: 1; font-size: 22px; font-weight: 600; color: #1A1820; }
+  .review-time { font-size: 16px; font-weight: 500; color: #8A8494; }
 </style>
 </head>
 <body>
@@ -215,7 +216,7 @@
   <div class="screen">
     <div class="status-bar">
       <span>9:41</span>
-      <svg width="16" height="12" viewBox="0 0 20 14" fill="#1A1820"><rect x="0" y="8" width="3" height="6" rx="0.5"/><rect x="5" y="5" width="3" height="9" rx="0.5"/><rect x="10" y="2" width="3" height="12" rx="0.5"/><rect x="15" y="0" width="3" height="14" rx="0.5"/></svg>
+      <svg width="18" height="14" viewBox="0 0 20 14" fill="#1A1820"><rect x="0" y="8" width="3" height="6" rx="0.5"/><rect x="5" y="5" width="3" height="9" rx="0.5"/><rect x="10" y="2" width="3" height="12" rx="0.5"/><rect x="15" y="0" width="3" height="14" rx="0.5"/></svg>
     </div>
 
     <div class="app-content">
@@ -272,7 +273,7 @@
           <div class="review-flag"><img src="https://flagcdn.com/w160/lc.png" alt=""></div>
           <span class="review-name">Saint Lucia</span>
           <span class="review-time">1.8s</span>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E8F56" stroke-width="2.5"><polyline points="4 12 10 18 20 6"/></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1E8F56" stroke-width="2.5"><polyline points="4 12 10 18 20 6"/></svg>
         </div>
         <div class="review-item">
           <div class="bar" style="background:#1E8F56"></div>
@@ -280,7 +281,7 @@
           <div class="review-flag"><img src="https://flagcdn.com/w160/dj.png" alt=""></div>
           <span class="review-name">Djibouti</span>
           <span class="review-time">1.2s</span>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E8F56" stroke-width="2.5"><polyline points="4 12 10 18 20 6"/></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1E8F56" stroke-width="2.5"><polyline points="4 12 10 18 20 6"/></svg>
         </div>
         <div class="review-item">
           <div class="bar" style="background:#1E8F56"></div>
@@ -288,7 +289,7 @@
           <div class="review-flag"><img src="https://flagcdn.com/w160/de.png" alt=""></div>
           <span class="review-name">Germany</span>
           <span class="review-time">2.4s</span>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E8F56" stroke-width="2.5"><polyline points="4 12 10 18 20 6"/></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1E8F56" stroke-width="2.5"><polyline points="4 12 10 18 20 6"/></svg>
         </div>
         <div class="review-item">
           <div class="bar" style="background:#C43030"></div>
@@ -296,7 +297,7 @@
           <div class="review-flag"><img src="https://flagcdn.com/w160/td.png" alt=""></div>
           <span class="review-name">Chad</span>
           <span class="review-time">4.1s</span>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C43030" stroke-width="2.5"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C43030" stroke-width="2.5"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
         </div>
         <div class="review-item">
           <div class="bar" style="background:#1E8F56"></div>
@@ -304,7 +305,7 @@
           <div class="review-flag"><img src="https://flagcdn.com/w160/jp.png" alt=""></div>
           <span class="review-name">Japan</span>
           <span class="review-time">1.5s</span>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E8F56" stroke-width="2.5"><polyline points="4 12 10 18 20 6"/></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1E8F56" stroke-width="2.5"><polyline points="4 12 10 18 20 6"/></svg>
         </div>
       </div>
     </div>
