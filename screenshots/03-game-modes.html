@@ -22,45 +22,55 @@
 
   .headline {
     text-align: center;
-    padding: 160px 60px 0;
+    padding: 110px 80px 44px;
   }
-  .hook {
+  .headline h1 {
     font-family: 'Barlow', sans-serif;
-    font-size: 60px;
-    font-weight: 700;
-    color: #EEE9E2;
-    line-height: 1.15;
-    max-width: 1000px;
-    margin: 0 auto 16px;
+    font-size: 72px;
+    font-weight: 800;
+    color: #FFFFFF;
+    line-height: 1.12;
+    letter-spacing: -1px;
   }
-  .hook em { font-style: normal; color: #E9BA4C; }
-  .subhook {
-    font-size: 38px;
-    font-weight: 500;
-    color: #B8B2A8;
-    margin-bottom: 50px;
+  .headline h1 em {
+    font-style: italic;
+    color: #E9BA4C;
   }
 
   /* Phone */
   .phone {
-    width: 740px;
-    flex: 1;
-    background: #2A2930;
-    border-radius: 72px 72px 0 0;
-    padding: 20px 20px 0;
+    width: 700px;
+    height: 2280px;
+    background: #000000;
+    border-radius: 64px;
+    padding: 12px;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .phone::before {
+    content: '';
+    position: absolute;
+    top: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 36px;
+    background: #000000;
+    border-radius: 20px;
+    z-index: 10;
   }
   .screen {
     width: 100%;
     height: 100%;
     background: #F5EFE6;
-    border-radius: 54px 54px 0 0;
+    border-radius: 54px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
   }
 
   .status-bar {
-    padding: 18px 36px 10px;
+    padding: 22px 40px 12px;
     display: flex;
     justify-content: space-between;
     font-size: 18px;
@@ -160,7 +170,7 @@
   /* Start btn */
   .start-wrap {
     border-top: 1px solid rgba(0,0,0,0.06); background: #F5EFE6;
-    padding: 12px 32px 20px; margin-top: auto;
+    padding: 12px 32px 32px; margin-top: auto;
   }
   .start-btn {
     background: #E9BA4C; border-radius: 14px; padding: 17px 0;
@@ -173,8 +183,7 @@
 <body>
 
 <div class="headline">
-  <div class="hook"><em>12 ways</em> to play.<br/>Zero ways to get bored.</div>
-  <div class="subhook">Tilt, type, race the clock, or spot the fake</div>
+  <h1><em>12 ways</em> to play.<br>Zero ways to<br>get bored.</h1>
 </div>
 
 <div class="phone">

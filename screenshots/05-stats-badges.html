@@ -22,45 +22,55 @@
 
   .headline {
     text-align: center;
-    padding: 160px 60px 0;
+    padding: 110px 80px 44px;
   }
-  .hook {
+  .headline h1 {
     font-family: 'Barlow', sans-serif;
-    font-size: 60px;
-    font-weight: 700;
-    color: #EEE9E2;
-    line-height: 1.15;
-    max-width: 1000px;
-    margin: 0 auto 16px;
+    font-size: 72px;
+    font-weight: 800;
+    color: #FFFFFF;
+    line-height: 1.12;
+    letter-spacing: -1px;
   }
-  .hook em { font-style: normal; color: #E9BA4C; }
-  .subhook {
-    font-size: 38px;
-    font-weight: 500;
-    color: #B8B2A8;
-    margin-bottom: 50px;
+  .headline h1 em {
+    font-style: italic;
+    color: #E9BA4C;
   }
 
   /* Phone */
   .phone {
-    width: 740px;
-    flex: 1;
-    background: #2A2930;
-    border-radius: 72px 72px 0 0;
-    padding: 20px 20px 0;
+    width: 700px;
+    height: 2280px;
+    background: #000000;
+    border-radius: 64px;
+    padding: 12px;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .phone::before {
+    content: '';
+    position: absolute;
+    top: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 36px;
+    background: #000000;
+    border-radius: 20px;
+    z-index: 10;
   }
   .screen {
     width: 100%;
     height: 100%;
     background: #F5EFE6;
-    border-radius: 54px 54px 0 0;
+    border-radius: 54px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
   }
 
   .status-bar {
-    padding: 18px 36px 10px;
+    padding: 22px 40px 12px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -79,235 +89,114 @@
 
   .page-title {
     font-family: 'Libre Baskerville', serif;
-    font-size: 34px;
-    font-weight: 700;
-    color: #1A1820;
-    letter-spacing: -0.5px;
-    padding: 12px 0 16px;
+    font-size: 34px; font-weight: 700; color: #1A1820;
+    letter-spacing: -0.5px; padding: 12px 0 16px;
   }
 
-  /* Hero stats card (3-col) */
+  /* Hero card */
   .hero-card {
-    background: #FFFFFF;
-    border-radius: 14px;
-    padding: 20px;
-    display: flex;
-    margin-bottom: 16px;
+    background: #FFFFFF; border-radius: 14px; padding: 20px;
+    display: flex; margin-bottom: 16px;
   }
-  .hero-col {
-    flex: 1;
-    text-align: center;
-    position: relative;
-  }
-  .hero-col + .hero-col {
-    border-left: 1px solid rgba(0,0,0,0.08);
-  }
+  .hero-col { flex: 1; text-align: center; position: relative; }
+  .hero-col + .hero-col { border-left: 1px solid rgba(0,0,0,0.08); }
   .hero-val {
     font-family: 'Libre Baskerville', serif;
-    font-size: 28px;
-    font-weight: 700;
-    letter-spacing: -0.5px;
+    font-size: 28px; font-weight: 700; letter-spacing: -0.5px;
   }
   .hero-label {
-    font-size: 13px;
-    font-weight: 600;
-    color: #8A8494;
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-    margin-top: 2px;
+    font-size: 13px; font-weight: 600; color: #8A8494;
+    text-transform: uppercase; letter-spacing: 1.2px; margin-top: 2px;
   }
-  .streak-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    margin-bottom: 6px;
-  }
-  .streak-pips {
-    display: flex;
-    gap: 3px;
-    margin-top: 4px;
-    justify-content: center;
-  }
+  .streak-row { display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 6px; }
+  .streak-pips { display: flex; gap: 3px; margin-top: 4px; justify-content: center; }
   .pip { width: 6px; height: 6px; border-radius: 50%; }
   .pip.on { background: #E9BA4C; }
   .pip.off { background: #D5CFC6; }
 
-  /* Level progress */
+  /* Level */
   .level-tile {
-    background: #FFFFFF;
-    border-radius: 14px;
-    padding: 16px 20px;
-    margin-bottom: 16px;
+    background: #FFFFFF; border-radius: 14px; padding: 16px 20px; margin-bottom: 16px;
   }
-  .level-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-  }
+  .level-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
   .level-num {
     font-family: 'Libre Baskerville', serif;
-    font-size: 28px;
-    font-weight: 700;
-    color: #1A1820;
-    letter-spacing: -0.5px;
+    font-size: 28px; font-weight: 700; color: #1A1820; letter-spacing: -0.5px;
   }
   .level-num span { color: #E9BA4C; }
-  .level-meta {
-    font-size: 14px;
-    font-weight: 600;
-    color: #8A8494;
-  }
-  .level-bar {
-    height: 7px;
-    background: rgba(0,0,0,0.08);
-    border-radius: 999px;
-    overflow: hidden;
-  }
-  .level-fill {
-    height: 100%;
-    background: #E9BA4C;
-    border-radius: 999px;
-    width: 65%;
-  }
-  .level-labels {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 8px;
-  }
-  .level-label-text {
-    font-size: 14px;
-    font-weight: 600;
-    color: #8A8494;
-  }
+  .level-meta { font-size: 14px; font-weight: 600; color: #8A8494; }
+  .level-bar { height: 7px; background: rgba(0,0,0,0.08); border-radius: 999px; overflow: hidden; }
+  .level-fill { height: 100%; background: #E9BA4C; border-radius: 999px; width: 65%; }
+  .level-labels { display: flex; justify-content: space-between; margin-top: 8px; }
+  .level-label-text { font-size: 14px; font-weight: 600; color: #8A8494; }
   .level-label-text.current { color: #E9BA4C; font-weight: 700; }
 
-  /* Section label */
+  /* Sections */
   .section-label {
-    font-size: 22px;
-    font-weight: 600;
-    color: #1A1820;
-    letter-spacing: 0.3px;
-    margin: 8px 0 12px;
+    font-size: 22px; font-weight: 600; color: #1A1820;
+    letter-spacing: 0.3px; margin: 8px 0 12px;
   }
 
-  /* Region accuracy */
+  /* Regions */
   .region-card {
-    background: #FFFFFF;
-    border-radius: 14px;
-    padding: 16px;
-    display: flex;
-    margin-bottom: 10px;
+    background: #FFFFFF; border-radius: 14px; padding: 16px;
+    display: flex; margin-bottom: 10px;
   }
-  .region-col {
-    flex: 1;
-    text-align: center;
-    position: relative;
-  }
-  .region-col + .region-col {
-    border-left: 1px solid rgba(0,0,0,0.08);
-  }
+  .region-col { flex: 1; text-align: center; position: relative; }
+  .region-col + .region-col { border-left: 1px solid rgba(0,0,0,0.08); }
   .region-col-name {
-    font-size: 14px;
-    font-weight: 600;
-    color: #8A8494;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 4px;
+    font-size: 14px; font-weight: 600; color: #8A8494;
+    text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;
   }
   .region-col-val {
     font-family: 'Libre Baskerville', serif;
-    font-size: 22px;
-    font-weight: 700;
-    letter-spacing: -0.5px;
+    font-size: 22px; font-weight: 700; letter-spacing: -0.5px;
   }
 
-  /* Badge grid */
+  /* Badges */
   .badge-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    justify-content: center;
-    margin-bottom: 14px;
+    display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 14px;
   }
   .badge-item {
-    width: 23%;
-    background: #FFFFFF;
-    border-radius: 10px;
-    padding: 10px 6px 8px;
-    text-align: center;
+    width: 23%; background: #FFFFFF; border-radius: 10px;
+    padding: 10px 6px 8px; text-align: center;
   }
   .badge-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
     margin: 0 auto 6px;
   }
-  .badge-name {
-    font-size: 13px;
-    font-weight: 600;
-    color: #1A1820;
-    line-height: 1.2;
-  }
+  .badge-name { font-size: 13px; font-weight: 600; color: #1A1820; line-height: 1.2; }
   .badge-progress {
-    height: 3px;
-    background: rgba(0,0,0,0.06);
-    border-radius: 2px;
-    margin-top: 6px;
-    overflow: hidden;
+    height: 3px; background: rgba(0,0,0,0.06); border-radius: 2px;
+    margin-top: 6px; overflow: hidden;
   }
-  .badge-progress-fill {
-    height: 100%;
-    background: #E9BA4C;
-    border-radius: 2px;
-  }
+  .badge-progress-fill { height: 100%; background: #E9BA4C; border-radius: 2px; }
   .badge-item.locked { opacity: 0.3; }
 
   /* Bottom Nav */
   .bottom-nav {
     border-top: 1px solid rgba(0,0,0,0.06);
     background: rgba(245,239,230,0.97);
-    padding: 8px 0 24px;
-    display: flex;
-    justify-content: space-around;
+    padding: 8px 0 32px;
+    display: flex; justify-content: space-around;
   }
   .nav-tab {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 3px;
-    padding-top: 10px;
-    position: relative;
-    min-width: 64px;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 3px; padding-top: 10px; position: relative; min-width: 64px;
   }
   .nav-tab.active::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    width: 24px;
-    height: 2px;
-    background: #E9BA4C;
-    border-radius: 1px;
+    content: ''; position: absolute; top: 0; width: 24px; height: 2px;
+    background: #E9BA4C; border-radius: 1px;
   }
-  .nav-label {
-    font-size: 13px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: #8A8494;
-  }
+  .nav-label { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #8A8494; }
   .nav-tab.active .nav-label { color: #1A1820; }
 </style>
 </head>
 <body>
 
 <div class="headline">
-  <div class="hook"><em>31 badges</em> to unlock.<br/>How far can you go?</div>
-  <div class="subhook">Streaks, levels, and region accuracy</div>
+  <h1>Collect all<br><em>31 badges.</em></h1>
 </div>
 
 <div class="phone">
@@ -319,7 +208,6 @@
     <div class="app-content">
       <div class="page-title">Stats</div>
 
-      <!-- Hero stats card -->
       <div class="hero-card">
         <div class="hero-col">
           <div class="streak-row">
@@ -341,7 +229,6 @@
         </div>
       </div>
 
-      <!-- Level Progress -->
       <div class="level-tile">
         <div class="level-header">
           <div class="level-num">Level <span>14</span></div>
@@ -355,7 +242,6 @@
         </div>
       </div>
 
-      <!-- Region Accuracy -->
       <div class="section-label">Accuracy by Region</div>
       <div class="region-card">
         <div class="region-col">
@@ -380,13 +266,9 @@
           <div class="region-col-name">Oceania</div>
           <div class="region-col-val" style="color:#C43030">43%</div>
         </div>
-        <div class="region-col">
-          <div class="region-col-name"></div>
-          <div class="region-col-val"></div>
-        </div>
+        <div class="region-col"></div>
       </div>
 
-      <!-- Badges -->
       <div class="section-label">Badges</div>
       <div class="badge-grid">
         <div class="badge-item">
@@ -427,7 +309,6 @@
       </div>
     </div>
 
-    <!-- Bottom Nav -->
     <div class="bottom-nav">
       <div class="nav-tab">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8A8494" stroke-width="1.5"><path d="M3 10.5L12 3L21 10.5V20C21 20.55 20.55 21 20 21H4C3.45 21 3 20.55 3 20V10.5Z"/><polyline points="9 21 9 14 15 14 15 21"/></svg>
