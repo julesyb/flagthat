@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flag That - Screenshot Preview Gallery</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Barlow:wght@400;500;600;700;800&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #1A1820;
+    font-family: 'Barlow', sans-serif;
+    color: #EEE9E2;
+    padding: 40px 20px;
+  }
+
+  h1 {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 36px;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+
+  h1 .gold { color: #E9BA4C; font-style: italic; }
+
+  .subtitle {
+    text-align: center;
+    color: #B8B2A8;
+    font-size: 16px;
+    margin-bottom: 40px;
+  }
+
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .card {
+    background: #25242D;
+    border-radius: 16px;
+    overflow: hidden;
+    transition: transform 0.2s;
+  }
+
+  .card:hover {
+    transform: translateY(-4px);
+  }
+
+  .card iframe {
+    width: 100%;
+    aspect-ratio: 1290 / 2796;
+    border: none;
+    display: block;
+    pointer-events: none;
+  }
+
+  .card-info {
+    padding: 16px 20px;
+    border-top: 1px solid rgba(255,255,255,0.07);
+  }
+
+  .card-num {
+    font-size: 12px;
+    font-weight: 700;
+    color: #E9BA4C;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+  }
+
+  .card-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .card-desc {
+    font-size: 14px;
+    color: #B8B2A8;
+    line-height: 1.4;
+  }
+
+  .footer {
+    text-align: center;
+    margin-top: 40px;
+    padding: 20px;
+    color: #6E6878;
+    font-size: 14px;
+  }
+
+  .footer code {
+    background: #25242D;
+    padding: 2px 8px;
+    border-radius: 4px;
+    color: #E9BA4C;
+  }
+</style>
+</head>
+<body>
+
+<h1>Flag<span class="gold">That</span> Screenshots</h1>
+<p class="subtitle">App Store marketing screenshots - iPhone 6.7" (1290 x 2796)</p>
+
+<div class="gallery">
+  <div class="card">
+    <iframe src="01-hero.html" loading="lazy"></iframe>
+    <div class="card-info">
+      <div class="card-num">Screenshot 1</div>
+      <div class="card-title">Hero</div>
+      <div class="card-desc">Brand identity, flag mosaic, home screen preview with daily challenge</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <iframe src="02-gameplay.html" loading="lazy"></iframe>
+    <div class="card-info">
+      <div class="card-num">Screenshot 2</div>
+      <div class="card-title">Gameplay</div>
+      <div class="card-desc">Quiz in action - flag recognition with multiple choice answers</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <iframe src="03-game-modes.html" loading="lazy"></iframe>
+    <div class="card-info">
+      <div class="card-num">Screenshot 3</div>
+      <div class="card-title">Game Modes</div>
+      <div class="card-desc">12 unique ways to play - Time Attack, Flash Flag, Impostor & more</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <iframe src="04-daily-streaks.html" loading="lazy"></iframe>
+    <div class="card-info">
+      <div class="card-num">Screenshot 4</div>
+      <div class="card-title">Daily & Streaks</div>
+      <div class="card-desc">Daily challenge with streak tracking and shareable results grid</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <iframe src="05-stats-badges.html" loading="lazy"></iframe>
+    <div class="card-info">
+      <div class="card-num">Screenshot 5</div>
+      <div class="card-title">Stats & Badges</div>
+      <div class="card-desc">31 collectible badges, level progression, regional accuracy breakdown</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <iframe src="06-challenge-friends.html" loading="lazy"></iframe>
+    <div class="card-info">
+      <div class="card-num">Screenshot 6</div>
+      <div class="card-title">Challenge Friends</div>
+      <div class="card-desc">Share codes, compete head-to-head, 6 languages, fully offline</div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  To export as PNG: <code>./convert-to-png.sh</code> (requires Chrome/Chromium)
+</div>
+
+</body>
+</html>
