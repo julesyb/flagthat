@@ -64,6 +64,7 @@ async function persistGameData(
   correct: number,
   streak: number,
   accuracy: number,
+  questionTotal: number,
   isDaily: boolean,
   isChallenge: boolean,
   challenge: ChallengeData | undefined,
@@ -78,7 +79,7 @@ async function persistGameData(
   await addGameHistoryEntry(accuracy, config.mode);
 
   if ((BASELINE_REGIONS as readonly string[]).includes(config.category)) {
-    await recordRegionScore(config.category as BaselineRegionId, correct, results.length);
+    await recordRegionScore(config.category as BaselineRegionId, correct, questionTotal);
   }
   if (isDaily) {
     await saveDailyChallenge(results);
@@ -115,13 +116,14 @@ interface PostGameResult {
 async function evaluatePostGameProgression(
   results: import('../types').GameResult[],
   correct: number,
+  questionTotal: number,
   reviewOnly: boolean,
 ): Promise<PostGameResult> {
   const [postStats, postFlagStats, postDayStreakInfo, postBadgeData, postMissed] = await Promise.all([
     getStats(), getFlagStats(), getDayStreakInfo(), getBadgeData(), getMissedFlagIds(),
   ]);
   const postCtx = buildBadgeContext(postStats, postFlagStats, postDayStreakInfo, postBadgeData, postMissed.length);
-  const perGameIds = !reviewOnly ? detectPerGameBadges(results, correct, results.length) : [];
+  const perGameIds = !reviewOnly ? detectPerGameBadges(results, correct, questionTotal) : [];
   const allPersistedIds = [...postBadgeData.earnedBadgeIds, ...perGameIds];
   const postBadges = getAllEarnedBadges(postCtx, allPersistedIds);
   await persistEarnedBadges(postBadges.map((b) => b.id));
@@ -162,7 +164,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
   const correct = countCorrect(results);
   const isDaily = config.mode === 'daily';
   const isBaseline = config.mode === 'baseline';
-  const questionTotal = config.questionCount < UNLIMITED_QUESTIONS ? config.questionCount : results.length;
+  const questionTotal = config.questionCount === UNLIMITED_QUESTIONS ? results.length : config.questionCount;
   const accuracy = questionTotal > 0 ? Math.round((correct / questionTotal) * 100) : 0;
   const streak = getStreakFromResults(results);
   const avgTime = results.length > 0
@@ -295,7 +297,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
     const message = t('challenge.responseShareCard', {
       name: playerName,
       correct: String(correct),
-      total: String(results.length),
+      total: String(questionTotal),
       opponent: challenge.hostName,
       link,
     });
@@ -344,7 +346,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
 
       if (!reviewOnly) {
         await persistGameData(
-          results, config, correct, streak, accuracy,
+          results, config, correct, streak, accuracy, questionTotal,
           isDaily, isChallenge, challenge, playerName,
         );
       }
@@ -354,7 +356,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
       }
 
       const { postStats, postFlagStats, postDayStreakCount, postBadges, levelUp } =
-        await evaluatePostGameProgression(results, correct, !!reviewOnly);
+        await evaluatePostGameProgression(results, correct, questionTotal, !!reviewOnly);
 
       // ── Update component state ──
       setOverallStats(postStats);
