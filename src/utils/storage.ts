@@ -620,14 +620,17 @@ export async function addChallengeToHistory(entry: ChallengeHistoryEntry): Promi
       // Preserve accumulated opponents when re-saving a sent challenge
       const existing = history[existingIdx];
       if (existing.opponents && existing.opponents.length > 0 && !entry.opponents) {
-        entry.opponents = existing.opponents;
-        // Keep legacy fields from last opponent
         const lastOpp = existing.opponents[existing.opponents.length - 1];
-        entry.opponentName = lastOpp.name;
-        entry.opponentScore = lastOpp.score;
-        entry.opponentResults = lastOpp.results;
+        history[existingIdx] = {
+          ...entry,
+          opponents: existing.opponents,
+          opponentName: lastOpp.name,
+          opponentScore: lastOpp.score,
+          opponentResults: lastOpp.results,
+        };
+      } else {
+        history[existingIdx] = entry;
       }
-      history[existingIdx] = entry;
     } else {
       history.unshift(entry); // newest first
     }

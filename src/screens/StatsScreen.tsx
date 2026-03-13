@@ -342,7 +342,7 @@ export default function StatsScreen() {
       }
     }
     return rows;
-  }, [challengeHistory]);
+  }, [data]);
 
   // ── Loading gate: single check, all hooks above ──
   if (!data) {
