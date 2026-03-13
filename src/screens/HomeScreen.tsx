@@ -17,7 +17,7 @@ import { ThemeColors } from '../utils/theme';
 import { getTotalFlagCount, getCategoryCount } from '../data';
 import { initAudio, hapticTap, hapticCorrect, hapticWrong, playWrongSound, setSoundsEnabled, setHapticsEnabled } from '../utils/feedback';
 import { getStats, getSettings, getMissedFlagIds, getBaselineData, isDailyCompleteToday, BaselineData, getFlagStats, getBadgeData, getDayStreakInfo, getPersistedLevel, persistLevel } from '../utils/storage';
-import { generateQuestions } from '../utils/gameEngine';
+import { generateQuestions, getDailyConfig, getDailyVariant } from '../utils/gameEngine';
 import { RootStackParamList } from '../types/navigation';
 import { GameMode, UserStats, GameQuestion, CategoryId, BASELINE_REGIONS } from '../types';
 import { PlayIcon, ChevronRightIcon, CheckIcon, LinkIcon, CalendarIcon } from '../components/Icons';
@@ -151,6 +151,20 @@ export default function HomeScreen({ navigation }: Props) {
   const [teaserKey, setTeaserKey] = useState(0);
   const [weakFlagCount, setWeakFlagCount] = useState(0);
   const [dailyDone, setDailyDone] = useState(false);
+  const dailyVariant = useMemo(() => getDailyVariant(), []);
+  const dailyTagText = useMemo(() => {
+    const diffLabel = t(`common.${dailyVariant.difficulty}`).toLowerCase();
+    if (dailyVariant.gameType === 'flagpuzzle') {
+      return t('home.dailyVariant', { mode: t('setup.flagPuzzle').toLowerCase() });
+    }
+    if (dailyVariant.gameType === 'capitalconnection') {
+      return t('home.dailyVariant', { mode: `${t('setup.capitalQuiz').toLowerCase()} - ${diffLabel}` });
+    }
+    const modeStr = dailyVariant.displayMode === 'map'
+      ? `${diffLabel} ${t('setup.displayMap').toLowerCase()}`
+      : diffLabel;
+    return t('home.dailyVariant', { mode: modeStr });
+  }, [dailyVariant]);
   const [autocomplete, setAutocomplete] = useState(false);
   const [baseline, setBaseline] = useState<BaselineData | null>(null);
   const [levelProgress, setLevelProgress] = useState<LevelProgress | null>(null);
@@ -312,9 +326,14 @@ export default function HomeScreen({ navigation }: Props) {
               disabled={dailyDone}
               onPress={() => {
                 hapticTap();
-                navigation.navigate('Game', {
-                  config: { mode: 'daily', category: 'all', questionCount: 10, displayMode: 'flag' },
-                });
+                const config = getDailyConfig();
+                if (dailyVariant.gameType === 'flagpuzzle') {
+                  navigation.navigate('FlagPuzzle', { config });
+                } else if (dailyVariant.gameType === 'capitalconnection') {
+                  navigation.navigate('CapitalConnection', { config });
+                } else {
+                  navigation.navigate('Game', { config });
+                }
               }}
               accessibilityRole="button"
               accessibilityLabel={dailyDone ? t('home.comeBackTomorrow') : t('home.daily')}
@@ -327,7 +346,7 @@ export default function HomeScreen({ navigation }: Props) {
                 {t('home.daily')}
               </Text>
               <Text style={styles.modeTag}>
-                {dailyDone ? t('home.comeBackTomorrow') : t('home.tenFlags')}
+                {dailyDone ? t('home.comeBackTomorrow') : dailyTagText}
               </Text>
               {dailyDone ? <CheckIcon size={14} color={colors.success} /> : <ChevronRightIcon size={14} color={colors.dim} />}
             </TouchableOpacity>

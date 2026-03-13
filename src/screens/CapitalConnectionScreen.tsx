@@ -96,9 +96,10 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { config, challenge, playerName } = route.params;
+  const flagIds = challenge?.flagIds ?? config.dailyFlagIds;
   const questions = useMemo(
-    () => generateQuestions(config.questionCount, challenge?.flagIds, config.difficulty),
-    [config.questionCount, challenge, config.difficulty],
+    () => generateQuestions(config.questionCount, flagIds, config.difficulty),
+    [config.questionCount, flagIds, config.difficulty],
   );
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);

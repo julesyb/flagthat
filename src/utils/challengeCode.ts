@@ -332,7 +332,7 @@ export function generateChallengeShareCard(
 
   // Build visual grid: green = correct, red = wrong
   const grid = results.map((r) => {
-    return r.correct ? '\uD83D\uDFE9' : '\uD83D\uDFE5'; // green square / red square
+    return r.correct ? '\u2b1b' : '\u2b1c'; // black square = correct, white square = wrong
   });
 
   // Split into rows of 5
@@ -428,6 +428,54 @@ export function decodeResponse(code: string): DecodeResponseResult {
     }
 
     return { status: 'ok', data: { recipientName, shortCode, recipientScore, totalFlags, resultDetails } };
+  } catch {
+    return { status: 'invalid' };
+  }
+}
+
+// ── Daily challenge share code ──
+// Format: D~name~date~score~totalDeci
+// Since every player gets the same daily questions, we only need name + date + score + speed.
+// The date identifies which daily challenge, score is correct count, totalDeci is total time in deciseconds.
+
+export interface DailyShareData {
+  name: string;
+  date: string;       // YYYY-MM-DD
+  score: number;       // correct count (0-10)
+  totalTimeMs: number; // total completion time in ms
+}
+
+export function encodeDailyShare(data: DailyShareData): string {
+  const name = sanitizeName(data.name);
+  const totalDeci = Math.round(data.totalTimeMs / 100);
+  return `D~${name}~${data.date}~${data.score}~${totalDeci}`;
+}
+
+export type DecodeDailyResult =
+  | { status: 'ok'; data: DailyShareData }
+  | { status: 'invalid' };
+
+export function decodeDailyShare(code: string): DecodeDailyResult {
+  try {
+    const escaped = APP_DOMAIN.replace(/\./g, '\\.');
+    const trimmed = code.trim()
+      .replace(new RegExp(`^https?://${escaped}/d/`, 'i'), '')
+      .replace(new RegExp(`^${escaped}/d/`, 'i'), '')
+      .replace(/^flagthat:\/\/d\//i, '');
+
+    if (!trimmed.startsWith('D~')) return { status: 'invalid' };
+    const parts = trimmed.slice(2).split('~');
+    if (parts.length !== 4) return { status: 'invalid' };
+
+    const [name, date, scoreStr, totalDeciStr] = parts;
+    if (!name || !name.trim() || name.length > MAX_HOSTNAME_LENGTH) return { status: 'invalid' };
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return { status: 'invalid' };
+
+    const score = parseInt(scoreStr, 10);
+    const totalDeci = parseInt(totalDeciStr, 10);
+    if (isNaN(score) || isNaN(totalDeci) || score < 0 || totalDeci < 0) return { status: 'invalid' };
+
+    return { status: 'ok', data: { name, date, score, totalTimeMs: totalDeci * 100 } };
   } catch {
     return { status: 'invalid' };
   }

@@ -53,6 +53,7 @@ const zh: DeepPartial<TranslationStrings> = {
     daily: '\u6bcf\u65e5\u6311\u6218',
     comeBackTomorrow: '\u660e\u5929\u518d\u6765',
     tenFlags: '10\u9762\u56fd\u65d7\uff0c\u5168\u7403\u540c\u9898',
+    dailyVariant: '10\u9762\u56fd\u65d7 - {mode}',
     playNow: '\u5f00\u59cb\u6e38\u620f',
     cards: '\u5361\u7247',
     difficulty: '\u96be\u5ea6',
@@ -363,6 +364,18 @@ const zh: DeepPartial<TranslationStrings> = {
     streakTitle: '\u522b\u65ad\u8fde\u7eed\u7eaa\u5f55',
     streakBody: '\u4f60\u5df2\u8fde\u7eed{streak}\u5929\uff0c\u7ee7\u7eed\u52a0\u6cb9\uff01',
     channelName: '\u6bcf\u65e5\u6311\u6218',
+  },
+
+  // ─── Daily Challenge ───────────────────────────────────
+  daily: {
+    leaderboard: '\u6392\u884c\u699c',
+    leaderboardCount: '{count} \u4f4d\u73a9\u5bb6',
+    enterName: '\u4f60\u7684\u6392\u884c\u699c\u6635\u79f0',
+    shareInvite: '\u4f60\u80fd\u8d85\u8d8a{name}\u5417\uff1f',
+    leaderboardCountSingle: '{count} \u4f4d\u73a9\u5bb6',
+    leaderboardEntry: '\u7b2c{rank}\u540d\uff1a{name}\uff0c{score}/{total}\uff0c{time}',
+    invalidShareCode: '\u94fe\u63a5\u65e0\u6548',
+    invalidShareCodeDesc: '\u6b64\u6bcf\u65e5\u6311\u6218\u94fe\u63a5\u65e0\u6548\u6216\u5df2\u8fc7\u671f\u3002',
   },
 
   error: {

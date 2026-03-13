@@ -2,7 +2,8 @@ import { GameMode, FlagItem, GameQuestion, GameResult, GameConfig } from '../typ
 import { getFlagsForCategory, getAllFlags } from '../data';
 import { countryAliases, twinPairs } from '../data/countryAliases';
 import { translateName } from '../data/countryNames';
-import { APP_DOMAIN, MS_PER_DAY, DAILY_QUESTION_COUNT, DAILY_CHALLENGE_EPOCH, SHARE_GRID_ROW_SIZE, EASY_CHOICE_COUNT, STANDARD_CHOICE_COUNT } from './config';
+import { countryCapitals } from '../data/countryCapitals';
+import { APP_DOMAIN, DAILY_QUESTION_COUNT, SHARE_GRID_ROW_SIZE, EASY_CHOICE_COUNT, STANDARD_CHOICE_COUNT } from './config';
 import { t } from './i18n';
 
 /** Maps a GameMode to its display-label i18n key. Quiz difficulty modes (easy/medium/hard) all display as "Quiz". */
@@ -58,33 +59,107 @@ export function getTodayDateString(): string {
   return `${yyyy}-${mm}-${dd}`;
 }
 
+// Daily challenge mode variants — deterministic per day.
+// Each day rotates through difficulty, display mode, and game type combinations.
+// Excludes neighbors and flash flag for daily challenges.
+export type DailyGameType = 'quiz' | 'flagpuzzle' | 'capitalconnection';
+
+export type DailyVariant = {
+  gameType: DailyGameType;
+  difficulty: 'easy' | 'medium' | 'hard';
+  displayMode: 'flag' | 'map';
+};
+
+const DAILY_VARIANTS: DailyVariant[] = [
+  { gameType: 'quiz', difficulty: 'easy', displayMode: 'flag' },
+  { gameType: 'quiz', difficulty: 'medium', displayMode: 'flag' },
+  { gameType: 'quiz', difficulty: 'hard', displayMode: 'flag' },
+  { gameType: 'quiz', difficulty: 'easy', displayMode: 'map' },
+  { gameType: 'quiz', difficulty: 'medium', displayMode: 'map' },
+  { gameType: 'quiz', difficulty: 'hard', displayMode: 'map' },
+  { gameType: 'flagpuzzle', difficulty: 'medium', displayMode: 'flag' },
+  { gameType: 'flagpuzzle', difficulty: 'hard', displayMode: 'flag' },
+  { gameType: 'capitalconnection', difficulty: 'easy', displayMode: 'flag' },
+  { gameType: 'capitalconnection', difficulty: 'medium', displayMode: 'flag' },
+  { gameType: 'capitalconnection', difficulty: 'hard', displayMode: 'flag' },
+  { gameType: 'capitalconnection', difficulty: 'easy', displayMode: 'map' },
+];
+
+/** Get the daily challenge variant for a given date. Deterministic per day. */
+export function getDailyVariant(dateStr?: string): DailyVariant {
+  const date = dateStr || getTodayDateString();
+  const seed = dateSeed(date);
+  // Use absolute value and mod to pick a variant
+  const idx = Math.abs(seed) % DAILY_VARIANTS.length;
+  return DAILY_VARIANTS[idx];
+}
+
+/** Build the GameConfig for today's daily challenge. */
+export function getDailyConfig(dateStr?: string): GameConfig {
+  const date = dateStr || getTodayDateString();
+  const variant = getDailyVariant(date);
+  const config: GameConfig = {
+    mode: 'daily',
+    category: 'all',
+    questionCount: DAILY_QUESTION_COUNT,
+    displayMode: variant.displayMode,
+    difficulty: variant.difficulty,
+  };
+
+  // For flagpuzzle/capitalconnection, pre-generate deterministic flag IDs
+  // so every player gets the same flags on the same day.
+  if (variant.gameType !== 'quiz') {
+    const seed = dateSeed(date);
+    let pool = getAllFlags();
+    // Capital connection needs flags with known capitals
+    if (variant.gameType === 'capitalconnection') {
+      pool = pool.filter((f) => countryCapitals[f.id]);
+    }
+    const shuffled = seededShuffle(pool, seed);
+    config.dailyFlagIds = shuffled.slice(0, DAILY_QUESTION_COUNT).map((f) => f.id);
+    if (variant.gameType === 'flagpuzzle') {
+      config.timeLimit = 15;
+    }
+  }
+
+  return config;
+}
+
 export function generateDailyQuestions(dateStr?: string): GameQuestion[] {
   const date = dateStr || getTodayDateString();
   const seed = dateSeed(date);
+  const variant = getDailyVariant(date);
   const allFlags = getAllFlags();
   const shuffled = seededShuffle(allFlags, seed);
   const selected = shuffled.slice(0, DAILY_QUESTION_COUNT);
 
-  const rng = seededRandom(seed + 1000);
+  const optionSeed = seed + 1000;
 
-  return selected.map((flag) => {
+  // Hard mode: no options (user types answer)
+  if (variant.difficulty === 'hard') {
+    return selected.map((flag) => ({ flag, options: [] }));
+  }
+
+  const choiceCount = variant.difficulty === 'easy' ? EASY_CHOICE_COUNT : STANDARD_CHOICE_COUNT;
+
+  return selected.map((flag, qi) => {
     const otherFlags = allFlags.filter((f) => f.id !== flag.id);
     const twinNames = twinPairs[flag.name] || [];
     const twins = otherFlags.filter((f) => twinNames.includes(f.name));
     const nonTwins = otherFlags.filter((f) => !twinNames.includes(f.name));
 
-    // Pick wrong answers, prioritizing twins
-    const wrongCount = STANDARD_CHOICE_COUNT - 1;
-    const seededShuffleTwins = [...twins].sort(() => rng() - 0.5);
-    const selectedTwins = seededShuffleTwins.slice(0, wrongCount);
+    // Pick wrong answers, prioritizing twins (Fisher-Yates via seededShuffle)
+    const wrongCount = choiceCount - 1;
+    const shuffledTwins = seededShuffle(twins, optionSeed + qi * 3);
+    const selectedTwins = shuffledTwins.slice(0, wrongCount);
     const remaining = wrongCount - selectedTwins.length;
-    const seededShuffleOthers = [...nonTwins].sort(() => rng() - 0.5);
-    const selectedOthers = seededShuffleOthers.slice(0, remaining);
+    const shuffledOthers = seededShuffle(nonTwins, optionSeed + qi * 3 + 1);
+    const selectedOthers = shuffledOthers.slice(0, remaining);
 
     const wrongOptions = [...selectedTwins, ...selectedOthers].map((f) => f.name);
     const allOptions = [flag.name, ...wrongOptions];
-    // Deterministic shuffle of options
-    const options = allOptions.sort(() => rng() - 0.5);
+    // Deterministic shuffle of options (Fisher-Yates)
+    const options = seededShuffle(allOptions, optionSeed + qi * 3 + 2);
 
     return { flag, options };
   });
@@ -96,7 +171,7 @@ export function generateDailyShareGrid(results: GameResult[]): string {
   // Split into rows of 5
   const row1 = grid.slice(0, SHARE_GRID_ROW_SIZE);
   const row2 = grid.slice(SHARE_GRID_ROW_SIZE, DAILY_QUESTION_COUNT);
-  return `Flag That Daily Challenge\n${correct}/${DAILY_QUESTION_COUNT}\n\n${row1}\n${row2}\n\n${APP_DOMAIN}`;
+  return `${t('results.shareTitle')}\n${t('results.shareScore', { correct })}\n\n${row1}\n${row2}`;
 }
 
 export function generateShareGrid(results: GameResult[], modeLabel: string): string {
@@ -118,9 +193,18 @@ export function generateQuestions(config: GameConfig): GameQuestion[] {
 
   if (categoryFlags.length === 0) return [];
 
-  const shuffledFlags = shuffleArray(categoryFlags);
-  const count = Math.min(config.questionCount, categoryFlags.length);
-  const selectedFlags = shuffledFlags.slice(0, count);
+  let selectedFlags: FlagItem[];
+  if (config.dailyFlagIds) {
+    // Daily variants with pre-selected flags (flagpuzzle, capitalconnection)
+    const flagMap = new Map(categoryFlags.map((f) => [f.id, f]));
+    selectedFlags = config.dailyFlagIds
+      .map((id) => flagMap.get(id))
+      .filter((f): f is FlagItem => f !== undefined);
+  } else {
+    const shuffledFlags = shuffleArray(categoryFlags);
+    const count = Math.min(config.questionCount, categoryFlags.length);
+    selectedFlags = shuffledFlags.slice(0, count);
+  }
 
   return selectedFlags.map((flag) => {
     const options = generateOptions(flag, categoryFlags, config.mode, config.difficulty);

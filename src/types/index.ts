@@ -47,6 +47,7 @@ export interface GameConfig {
   autocomplete?: boolean; // enable autocomplete suggestions in hard mode
   guessLimit?: number; // max wrong guesses before game over (omitted or 0 = unlimited)
   difficulty?: 'easy' | 'medium' | 'hard'; // difficulty for modes that support it (timeattack, capitalconnection)
+  dailyFlagIds?: string[]; // pre-selected flag IDs for daily flagpuzzle/capitalconnection variants
 }
 
 export interface GameQuestion {

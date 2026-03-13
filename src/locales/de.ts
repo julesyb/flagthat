@@ -53,6 +53,7 @@ const de: DeepPartial<TranslationStrings> = {
     daily: 'T\u00e4gliche Herausforderung',
     comeBackTomorrow: 'Komm morgen wieder',
     tenFlags: '10 Flaggen, f\u00fcr alle gleich',
+    dailyVariant: '10 Flaggen - {mode}',
     playNow: 'Spielen',
     cards: 'Karten',
     difficulty: 'Schwierigkeit',
@@ -365,6 +366,19 @@ const de: DeepPartial<TranslationStrings> = {
     channelName: 'T\u00e4gliche Herausforderung',
   },
 
+  // ─── Daily Challenge ───────────────────────────────────
+  daily: {
+    leaderboard: 'Bestenliste',
+    leaderboardCount: '{count} Spieler',
+    enterName: 'Dein Name f\u00fcr die Bestenliste',
+    shareInvite: 'Kannst du {name} schlagen?',
+    leaderboardCountSingle: '{count} Spieler',
+    leaderboardEntry: 'Rang {rank}: {name}, {score} von {total}, {time}',
+    invalidShareCode: 'Ung\u00fcltiger Link',
+    invalidShareCodeDesc: 'Dieser Link zur t\u00e4glichen Herausforderung ist ung\u00fcltig oder abgelaufen.',
+  },
+
+  // ─── Error Boundary ─────────────────────────────────────
   error: {
     title: 'Etwas ist schiefgelaufen',
     message: 'Die App ist auf einen unerwarteten Fehler gesto\u00dfen.',

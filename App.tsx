@@ -29,6 +29,7 @@ import CapitalConnectionScreen from './src/screens/CapitalConnectionScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
 import JoinChallengeScreen from './src/screens/JoinChallengeScreen';
 import ChallengeResponseScreen from './src/screens/ChallengeResponseScreen';
+import DailyShareReceiveScreen from './src/screens/DailyShareReceiveScreen';
 import ErrorBoundary from './src/components/ErrorBoundary';
 import { ChevronLeftIcon } from './src/components/Icons';
 import { RootStackParamList } from './src/types/navigation';
@@ -50,6 +51,10 @@ const linking = {
       },
       ChallengeResponse: {
         path: 'r/:code',
+        parse: { code: (code: string) => decodeURIComponent(code) },
+      },
+      DailyShareReceive: {
+        path: 'd/:code',
         parse: { code: (code: string) => decodeURIComponent(code) },
       },
     },
@@ -176,6 +181,11 @@ function AppContent() {
           options={({ navigation }) => ({
             headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
           })}
+        />
+        <Stack.Screen
+          name="DailyShareReceive"
+          component={DailyShareReceiveScreen}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="Results"

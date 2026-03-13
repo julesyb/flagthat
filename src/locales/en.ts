@@ -62,6 +62,7 @@ const en = {
     daily: 'Daily Challenge',
     comeBackTomorrow: 'Come back tomorrow',
     tenFlags: '10 flags, same for everyone',
+    dailyVariant: '10 flags - {mode}',
     playNow: 'Play Now',
     cards: 'Cards',
     difficulty: 'Difficulty',
@@ -466,6 +467,18 @@ const en = {
     streakTitle: "Don't break the streak",
     streakBody: "You're on a {streak}-day streak. Keep it going!",
     channelName: 'Daily Challenge',
+  },
+
+  // ─── Daily Challenge ───────────────────────────────────
+  daily: {
+    leaderboard: 'Leaderboard',
+    leaderboardCount: '{count} players',
+    enterName: 'Your name for the leaderboard',
+    shareInvite: 'Can you beat {name}?',
+    leaderboardCountSingle: '{count} player',
+    leaderboardEntry: 'Rank {rank}: {name}, {score} out of {total}, {time}',
+    invalidShareCode: 'Invalid Link',
+    invalidShareCodeDesc: 'This daily challenge link is invalid or has expired.',
   },
 
   // ─── Error Boundary ─────────────────────────────────────

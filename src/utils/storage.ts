@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { UserStats, GameMode, CategoryId, GameResult, BaselineRegionId, BASELINE_REGIONS } from '../types';
-import { MS_PER_DAY, MASTERED_STREAK, UNLOCK_THRESHOLD, MAX_GAME_HISTORY, MAX_CHALLENGE_HISTORY } from './config';
+import { MS_PER_DAY, MASTERED_STREAK, UNLOCK_THRESHOLD, MAX_GAME_HISTORY, MAX_CHALLENGE_HISTORY, DAILY_LEADERBOARD_MAX_AGE_DAYS } from './config';
 
 // Re-export for existing consumers
 export { MASTERED_STREAK, UNLOCK_THRESHOLD };
@@ -18,6 +18,7 @@ const CHALLENGE_NAME_KEY = '@flagsareus_challenge_name';
 const CHALLENGE_HISTORY_KEY = '@flagsareus_challenge_history';
 const REGION_SCORES_KEY = '@flagsareus_region_scores';
 const LEVEL_KEY = '@flagsareus_level';
+const DAILY_LEADERBOARD_KEY = '@flagsareus_daily_leaderboard';
 
 // ─── Challenge Name ─────────────────────────────────────────
 export async function getChallengeName(): Promise<string> {
@@ -276,6 +277,7 @@ export async function resetStats(): Promise<void> {
     await AsyncStorage.removeItem(BASELINE_KEY);
     await AsyncStorage.removeItem(CHALLENGE_HISTORY_KEY);
     await AsyncStorage.removeItem(LEVEL_KEY);
+    await AsyncStorage.removeItem(DAILY_LEADERBOARD_KEY);
   } catch {
     // Silently fail
   }
@@ -767,5 +769,73 @@ export async function persistLevel(level: number): Promise<void> {
     }
   } catch {
     // Silently fail
+  }
+}
+
+// ─── Daily Leaderboard ────────────────────────────────────
+// Per-date leaderboard tracking friends who shared their daily challenge results.
+// Each entry has: name, score (correct count), totalTimeMs (total completion time).
+// Sorted by most correct first, then fastest time as tiebreaker.
+
+export interface DailyLeaderboardEntry {
+  name: string;
+  score: number;
+  totalTimeMs: number;
+  isMe: boolean;
+}
+
+export type DailyLeaderboard = Record<string, DailyLeaderboardEntry[]>;
+
+export async function getDailyLeaderboard(): Promise<DailyLeaderboard> {
+  try {
+    const json = await AsyncStorage.getItem(DAILY_LEADERBOARD_KEY);
+    if (json) return JSON.parse(json);
+    return {};
+  } catch {
+    return {};
+  }
+}
+
+export async function getDailyLeaderboardForDate(date: string): Promise<DailyLeaderboardEntry[]> {
+  const lb = await getDailyLeaderboard();
+  return sortLeaderboard(lb[date] || []);
+}
+
+export function sortLeaderboard(entries: DailyLeaderboardEntry[]): DailyLeaderboardEntry[] {
+  return [...entries].sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    return a.totalTimeMs - b.totalTimeMs;
+  });
+}
+
+export async function addDailyLeaderboardEntry(
+  date: string,
+  entry: DailyLeaderboardEntry,
+): Promise<DailyLeaderboardEntry[]> {
+  try {
+    const lb = await getDailyLeaderboard();
+    if (!lb[date]) lb[date] = [];
+
+    // Check if this person already exists (by name, case-insensitive) - update if so
+    const existingIdx = lb[date].findIndex(
+      (e) => e.name.toLowerCase() === entry.name.toLowerCase(),
+    );
+    if (existingIdx >= 0) {
+      lb[date][existingIdx] = entry;
+    } else {
+      lb[date].push(entry);
+    }
+
+    // Prune old dates
+    const dates = Object.keys(lb).sort();
+    while (dates.length > DAILY_LEADERBOARD_MAX_AGE_DAYS) {
+      const oldest = dates.shift()!;
+      delete lb[oldest];
+    }
+
+    await AsyncStorage.setItem(DAILY_LEADERBOARD_KEY, JSON.stringify(lb));
+    return sortLeaderboard(lb[date]);
+  } catch {
+    return sortLeaderboard([entry]);
   }
 }
