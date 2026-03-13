@@ -246,6 +246,10 @@ const zh: DeepPartial<TranslationStrings> = {
     dayWed: '三',
     dayThu: '四',
     dayFri: '五',
+    dailyLeaderboards: '每日挑战',
+    dailyToday: '今天',
+    playDailyChallenge: '玩今天的挑战',
+    viewDailyResults: '查看结果',
     unlockHint: '正确回答{count}次解锁',
   },
 

@@ -5,8 +5,8 @@ import { RootStackParamList } from '../types/navigation';
 import { useTheme } from '../contexts/ThemeContext';
 import { spacing, typography, ThemeColors } from '../utils/theme';
 import { decodeDailyShare } from '../utils/challengeCode';
-import { addDailyLeaderboardEntry } from '../utils/storage';
-import { getTodayDateString } from '../utils/gameEngine';
+import { addDailyLeaderboardEntry, isDailyCompleteToday, getDailyChallengeData } from '../utils/storage';
+import { getTodayDateString, getDailyConfig, getDailyVariant } from '../utils/gameEngine';
 import { DAILY_QUESTION_COUNT, DAILY_LEADERBOARD_MAX_AGE_DAYS } from '../utils/config';
 import { t } from '../utils/i18n';
 
@@ -42,6 +42,7 @@ export default function DailyShareReceiveScreen({ route, navigation }: Props) {
   useEffect(() => {
     async function process() {
       let valid = false;
+      let shareDate: string | null = null;
       if (code) {
         const result = decodeDailyShare(code);
         if (result.status === 'ok') {
@@ -54,12 +55,48 @@ export default function DailyShareReceiveScreen({ route, navigation }: Props) {
               isMe: false,
             });
             valid = true;
+            shareDate = date;
           }
         }
       }
       if (!valid && code) {
         Alert.alert(t('daily.invalidShareCode'), t('daily.invalidShareCodeDesc'));
+        navigation.replace('Home');
+        return;
       }
+
+      // If the share is for today's challenge, route to quiz or results
+      const today = getTodayDateString();
+      if (shareDate === today) {
+        const alreadyDone = await isDailyCompleteToday();
+        if (alreadyDone) {
+          // Already completed - show results
+          const saved = await getDailyChallengeData();
+          if (saved && saved.results && saved.results.length > 0) {
+            const config = getDailyConfig(today);
+            navigation.replace('Results', {
+              results: saved.results,
+              config,
+              reviewOnly: true,
+            });
+            return;
+          }
+        } else {
+          // Not yet completed - go straight to the daily quiz
+          const config = getDailyConfig(today);
+          const variant = getDailyVariant(today);
+          if (variant.gameType === 'flagpuzzle') {
+            navigation.replace('FlagPuzzle', { config });
+          } else if (variant.gameType === 'capitalconnection') {
+            navigation.replace('CapitalConnection', { config });
+          } else {
+            navigation.replace('Game', { config });
+          }
+          return;
+        }
+      }
+
+      // Fallback: go home
       navigation.replace('Home');
     }
     process();

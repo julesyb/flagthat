@@ -353,6 +353,16 @@ export async function isDailyCompleteToday(): Promise<boolean> {
   }
 }
 
+export async function getDailyChallengeData(): Promise<DailyChallengeData | null> {
+  try {
+    const json = await AsyncStorage.getItem(DAILY_CHALLENGE_KEY);
+    if (!json) return null;
+    return JSON.parse(json);
+  } catch {
+    return null;
+  }
+}
+
 export async function saveDailyChallenge(results: GameResult[]): Promise<void> {
   try {
     const score = results.filter((r) => r.correct).length;
@@ -818,10 +828,11 @@ export async function addDailyLeaderboardEntry(
     const lb = await getDailyLeaderboard();
     if (!lb[date]) lb[date] = [];
 
-    // Check if this person already exists (by name, case-insensitive) - update if so
-    const existingIdx = lb[date].findIndex(
-      (e) => e.name.toLowerCase() === entry.name.toLowerCase(),
-    );
+    // For "me" entries, replace any existing isMe entry (user may have changed name).
+    // For friend entries, upsert by name (case-insensitive), but never overwrite isMe entry.
+    const existingIdx = entry.isMe
+      ? lb[date].findIndex((e) => e.isMe)
+      : lb[date].findIndex((e) => !e.isMe && e.name.toLowerCase() === entry.name.toLowerCase());
     if (existingIdx >= 0) {
       lb[date][existingIdx] = entry;
     } else {

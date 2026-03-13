@@ -246,6 +246,10 @@ const ptBR: DeepPartial<TranslationStrings> = {
     dayWed: 'Q',
     dayThu: 'Q',
     dayFri: 'S',
+    dailyLeaderboards: 'Desafio diário',
+    dailyToday: 'Hoje',
+    playDailyChallenge: 'Jogar o desafio de hoje',
+    viewDailyResults: 'Ver resultados',
     unlockHint: 'Acerte {count} vezes para desbloquear',
   },
 

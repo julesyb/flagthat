@@ -18,7 +18,7 @@ import { RootStackParamList } from '../types/navigation';
 import { ThemeColors, spacing, fontFamily, fontSize, borderRadius, typography } from '../utils/theme';
 import { useTheme } from '../contexts/ThemeContext';
 import { UserStats, CategoryId, BaselineRegionId, BASELINE_REGIONS } from '../types';
-import { getStats, getFlagStats, FlagStats, getDayStreakInfo, DayStreakInfo, getBadgeData, getMissedFlagIds, BadgeData, getGameHistory, GameHistoryEntry, getChallengeHistory, ChallengeHistoryEntry, MASTERED_STREAK, getRegionScoreHistory, RegionScoreHistory, getPersistedLevel, persistLevel } from '../utils/storage';
+import { getStats, getFlagStats, FlagStats, getDayStreakInfo, DayStreakInfo, getBadgeData, getMissedFlagIds, BadgeData, getGameHistory, GameHistoryEntry, getChallengeHistory, ChallengeHistoryEntry, MASTERED_STREAK, getRegionScoreHistory, RegionScoreHistory, getPersistedLevel, persistLevel, getDailyLeaderboard, DailyLeaderboardEntry, DailyChallengeData, getDailyChallengeData, isDailyCompleteToday, getChallengeName, addDailyLeaderboardEntry } from '../utils/storage';
 import { GOOD_ACCURACY_PCT, UNLIMITED_QUESTIONS, TIMEATTACK_DEFAULT_TIME, STATS_WEAK_FLAGS_LIMIT } from '../utils/config';
 import { getAllFlags, getCategoryCount } from '../data';
 import { modeLabelKey } from '../utils/gameEngine';
@@ -34,6 +34,8 @@ import { ChevronRightIcon, BadgeIconView, UsersIcon, CheckIcon, CrossIcon, Flame
 import { hapticTap } from '../utils/feedback';
 import { decodeChallenge } from '../utils/challengeCode';
 import PageHeader from '../components/PageHeader';
+import DailyLeaderboard from '../components/DailyLeaderboard';
+import { getDailyConfig, getDailyVariant, getTodayDateString } from '../utils/gameEngine';
 
 type ChallengeDisplayRow = ChallengeHistoryEntry & {
   displayOpponentName: string | null;
@@ -58,18 +60,36 @@ interface StatsData {
   regionScoreHistory: RegionScoreHistory;
   persistedLevel: number;
   levelProgress: LevelProgress;
+  dailyLeaderboard: Record<string, DailyLeaderboardEntry[]>;
+  dailyCompleteToday: boolean;
+  dailyChallengeData: DailyChallengeData | null;
 }
 
 async function loadStatsData(): Promise<StatsData> {
-  const [stats, flagStats, dayStreakInfo, badgeData, missed, gameHistory, challengeHistory, regionScoreHistory, persistedLevel] =
+  const [stats, flagStats, dayStreakInfo, badgeData, missed, gameHistory, challengeHistory, regionScoreHistory, persistedLevel, dailyLeaderboard, dailyCompleteToday, dailyChallengeData, challengeName] =
     await Promise.all([
       getStats(), getFlagStats(), getDayStreakInfo(), getBadgeData(),
-      getMissedFlagIds(), getGameHistory(), getChallengeHistory(), getRegionScoreHistory(), getPersistedLevel(),
+      getMissedFlagIds(), getGameHistory(), getChallengeHistory(), getRegionScoreHistory(), getPersistedLevel(), getDailyLeaderboard(), isDailyCompleteToday(), getDailyChallengeData(), getChallengeName(),
     ]);
   const lp = computeLevelProgress({ stats, flagStats, badgeData, dayStreakInfo }, persistedLevel);
   // Persist new high-water mark (fire-and-forget)
   persistLevel(lp.currentLevel);
-  return { stats, flagStats, dayStreakInfo, badgeData, weakFlagCount: missed.length, gameHistory, challengeHistory, regionScoreHistory, persistedLevel, levelProgress: lp };
+
+  // Ensure user's own daily score appears in the leaderboard if they completed today
+  const today = getTodayDateString();
+  if (dailyCompleteToday && dailyChallengeData && dailyChallengeData.date === today) {
+    const todayEntries = dailyLeaderboard[today] || [];
+    const hasMyEntry = todayEntries.some((e) => e.isMe);
+    if (!hasMyEntry) {
+      const name = challengeName || t('challenge.you');
+      const totalTimeMs = dailyChallengeData.results.reduce((sum, r) => sum + r.timeTaken, 0);
+      const entry: DailyLeaderboardEntry = { name, score: dailyChallengeData.score, totalTimeMs, isMe: true };
+      // Persist so it stays; use returned sorted array
+      dailyLeaderboard[today] = await addDailyLeaderboardEntry(today, entry);
+    }
+  }
+
+  return { stats, flagStats, dayStreakInfo, badgeData, weakFlagCount: missed.length, gameHistory, challengeHistory, regionScoreHistory, persistedLevel, levelProgress: lp, dailyLeaderboard, dailyCompleteToday, dailyChallengeData };
 }
 
 export default function StatsScreen() {
@@ -233,6 +253,15 @@ export default function StatsScreen() {
   }, [badgeCtx, data]);
 
   const levelProgress = data?.levelProgress ?? null;
+
+  const today = getTodayDateString();
+  const dailyLeaderboardDates = React.useMemo(() => {
+    if (!data) return [];
+    return Object.keys(data.dailyLeaderboard)
+      .filter((d) => data.dailyLeaderboard[d].length > 0)
+      .sort()
+      .reverse();
+  }, [data]);
 
   const activityGrid = React.useMemo(() => {
     const gh = data?.gameHistory ?? [];
@@ -660,6 +689,67 @@ export default function StatsScreen() {
                   <View style={styles.scoreBadge}>
                     <Text style={styles.scoreBadgeText}>{fs.right}/{totalSeen}</Text>
                   </View>
+                </View>
+              );
+            })}
+          </Animated.View>
+        )}
+
+        {/* ── Daily Challenge Leaderboard ── */}
+        {data && dailyLeaderboardDates.length > 0 && (
+          <Animated.View style={{ opacity: restFade }}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>{t('stats.dailyLeaderboards')}</Text>
+            </View>
+            {dailyLeaderboardDates.map((date) => {
+              const entries = data.dailyLeaderboard[date];
+              const isToday = date === today;
+              const label = isToday ? t('stats.dailyToday') : new Date(date + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+              return (
+                <View key={date} style={styles.dailyDateGroup}>
+                  <Text style={styles.dailyDateLabel}>{label}</Text>
+                  <DailyLeaderboard entries={entries} />
+                  {isToday && !data.dailyCompleteToday && (
+                    <TouchableOpacity
+                      style={styles.dailyPlayBtn}
+                      activeOpacity={0.85}
+                      onPress={() => {
+                        hapticTap();
+                        const config = getDailyConfig(today);
+                        const variant = getDailyVariant(today);
+                        if (variant.gameType === 'flagpuzzle') {
+                          navigation.navigate('FlagPuzzle', { config });
+                        } else if (variant.gameType === 'capitalconnection') {
+                          navigation.navigate('CapitalConnection', { config });
+                        } else {
+                          navigation.navigate('Game', { config });
+                        }
+                      }}
+                      accessibilityRole="button"
+                      accessibilityLabel={t('stats.playDailyChallenge')}
+                    >
+                      <Text style={styles.dailyPlayBtnText}>{t('stats.playDailyChallenge')}</Text>
+                    </TouchableOpacity>
+                  )}
+                  {isToday && data.dailyCompleteToday && data.dailyChallengeData && data.dailyChallengeData.results.length > 0 && (
+                    <TouchableOpacity
+                      style={styles.dailyViewBtn}
+                      activeOpacity={0.85}
+                      onPress={() => {
+                        hapticTap();
+                        const config = getDailyConfig(today);
+                        navigation.navigate('Results', {
+                          results: data.dailyChallengeData!.results,
+                          config,
+                          reviewOnly: true,
+                        });
+                      }}
+                      accessibilityRole="button"
+                      accessibilityLabel={t('stats.viewDailyResults')}
+                    >
+                      <Text style={styles.dailyViewBtnText}>{t('stats.viewDailyResults')}</Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
               );
             })}
@@ -1274,6 +1364,40 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   heatmapL4: {
     backgroundColor: colors.goldBright,
+  },
+
+  // ── Daily Leaderboard
+  dailyDateGroup: {
+    marginBottom: spacing.md,
+  },
+  dailyDateLabel: {
+    ...typography.captionStrong,
+    color: colors.text,
+    marginBottom: spacing.xs,
+  },
+  dailyPlayBtn: {
+    backgroundColor: colors.gold,
+    borderRadius: borderRadius.md,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    alignItems: 'center',
+    marginTop: spacing.xs,
+  },
+  dailyPlayBtnText: {
+    ...typography.bodyBold,
+    color: '#FFFFFF',
+  },
+  dailyViewBtn: {
+    backgroundColor: colors.surfaceSecondary,
+    borderRadius: borderRadius.md,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    alignItems: 'center',
+    marginTop: spacing.xs,
+  },
+  dailyViewBtnText: {
+    ...typography.body,
+    color: colors.textSecondary,
   },
 
   // ── Footer

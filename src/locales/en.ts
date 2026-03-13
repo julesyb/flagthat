@@ -262,6 +262,10 @@ const en = {
     dayWed: 'W',
     dayThu: 'T',
     dayFri: 'F',
+    dailyLeaderboards: 'Daily Challenge',
+    dailyToday: 'Today',
+    playDailyChallenge: 'Play Today\'s Challenge',
+    viewDailyResults: 'View Results',
   },
 
   // ─── Settings Screen ────────────────────────────────────
