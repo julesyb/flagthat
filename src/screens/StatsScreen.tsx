@@ -84,10 +84,8 @@ async function loadStatsData(): Promise<StatsData> {
       const name = challengeName || t('challenge.you');
       const totalTimeMs = dailyChallengeData.results.reduce((sum, r) => sum + r.timeTaken, 0);
       const entry: DailyLeaderboardEntry = { name, score: dailyChallengeData.score, totalTimeMs, isMe: true };
-      // Persist so it stays
-      await addDailyLeaderboardEntry(today, entry);
-      if (!dailyLeaderboard[today]) dailyLeaderboard[today] = [];
-      dailyLeaderboard[today].push(entry);
+      // Persist so it stays; use returned sorted array
+      dailyLeaderboard[today] = await addDailyLeaderboardEntry(today, entry);
     }
   }
 
