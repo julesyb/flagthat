@@ -683,9 +683,7 @@ export async function updateSentChallengeWithOpponent(
     // Keep legacy fields in sync with the most recent opponent for backward compat
     history[idx].opponentName = opponentName;
     history[idx].opponentScore = opponentScore;
-    if (opponentResults) {
-      history[idx].opponentResults = opponentResults;
-    }
+    history[idx].opponentResults = opponentResults;
 
     await AsyncStorage.setItem(CHALLENGE_HISTORY_KEY, JSON.stringify(history));
     return true;

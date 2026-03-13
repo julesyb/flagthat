@@ -792,29 +792,37 @@ export default function StatsScreen() {
                   <Text style={styles.modalTitle}>{t('challenge.headToHead')}</Text>
                   <Text style={[styles.modalSubtitle, { marginBottom: spacing.md }]}>{t(modeLabelKey(ch.mode))} - {dateStr}</Text>
 
-                  {isMulti ? (
-                    <View style={styles.multiOpponentList}>
-                      {[
-                        { name: ch.myName || t('challenge.you'), score: ch.myScore, isMe: true },
-                        ...opponents.map((o) => ({ name: o.name, score: o.score, isMe: false })),
-                      ]
-                        .sort((a, b) => b.score - a.score)
-                        .map((entry, rank) => (
-                          <View key={`${entry.name}-${rank}`} style={styles.multiOpponentRow}>
-                            <Text style={styles.multiOpponentRank}>{rank + 1}</Text>
-                            <Text style={[styles.multiOpponentName, { flex: 1 }]} numberOfLines={1}>
-                              {entry.name}
-                            </Text>
-                            <Text style={[
-                              styles.multiOpponentScore,
-                              entry.isMe && { color: colors.goldBright },
+                  {isMulti ? (() => {
+                    const sorted = [
+                      { name: ch.myName || t('challenge.you'), score: ch.myScore, isMe: true },
+                      ...opponents.map((o) => ({ name: o.name, score: o.score, isMe: false })),
+                    ].sort((a, b) => b.score - a.score);
+                    return (
+                      <View style={styles.multiOpponentList}>
+                        {sorted.map((entry, idx) => {
+                          // Tied scores share the same rank
+                          const rank = idx === 0 || sorted[idx - 1].score !== entry.score ? idx + 1 : 0;
+                          return (
+                            <View key={`${entry.name}-${idx}`} style={[
+                              styles.multiOpponentRow,
+                              idx % 2 === 0 && { backgroundColor: colors.surfaceSecondary + '40' },
                             ]}>
-                              {entry.score}/{ch.totalFlags}
-                            </Text>
-                          </View>
-                        ))}
-                    </View>
-                  ) : hasOpponent ? (
+                              <Text style={styles.multiOpponentRank}>{rank > 0 ? rank : ''}</Text>
+                              <Text style={[styles.multiOpponentName, { flex: 1 }]} numberOfLines={1}>
+                                {entry.name}
+                              </Text>
+                              <Text style={[
+                                styles.multiOpponentScore,
+                                entry.isMe && { color: colors.goldBright },
+                              ]}>
+                                {entry.score}/{ch.totalFlags}
+                              </Text>
+                            </View>
+                          );
+                        })}
+                      </View>
+                    );
+                  })() : hasOpponent ? (
                     <View style={styles.h2hContainer}>
                       <View style={styles.h2hColumn}>
                         <Text style={styles.h2hName}>{ch.myName || t('challenge.you')}</Text>
@@ -1253,12 +1261,12 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
 
   // ── Multi-opponent leaderboard
   multiOpponentList: {
-    gap: 2,
+    gap: spacing.xxs,
   },
   multiOpponentRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: spacing.sm,
     paddingHorizontal: spacing.sm,
     borderRadius: borderRadius.sm,
     gap: spacing.sm,
