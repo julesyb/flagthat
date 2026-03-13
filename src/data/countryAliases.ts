@@ -1078,57 +1078,139 @@ export const countryAliases: Record<string, string> = {
 // Flag look-alike pairs ("tricky twins").
 // Each entry maps a country name to its twin(s) — flags that are commonly
 // confused with each other due to similar colors, layout, or design.
+// All entries are bidirectional: if A lists B, B must list A.
 export const twinPairs: Record<string, string[]> = {
-  // Blue-yellow-red vertical tricolors (nearly identical)
-  'Chad': ['Romania'],
-  'Romania': ['Chad'],
-
-  // Same tricolor with coat of arms variations
+  // ── Blue-yellow-red vertical tricolors (nearly identical) ──
+  'Chad': ['Romania', 'Andorra', 'Moldova'],
+  'Romania': ['Chad', 'Andorra', 'Moldova'],
   'Andorra': ['Moldova', 'Romania', 'Chad'],
   'Moldova': ['Andorra', 'Romania', 'Chad'],
 
-  // Orange-white-green reversed
-  "Côte d'Ivoire": ['Ireland'],
-  'Ireland': ["Côte d'Ivoire"],
+  // ── Orange-white-green / green-white-red tricolors ──
+  "Côte d'Ivoire": ['Ireland', 'Italy', 'India', 'Mexico'],
+  'Ireland': ["Côte d'Ivoire", 'Italy', 'India', 'Mexico'],
+  'Italy': ['Ireland', "Côte d'Ivoire", 'Hungary', 'Mexico'],
+  'Mexico': ['Italy', 'Ireland', "Côte d'Ivoire"],
 
-  // Green-white-orange/red vertical tricolors
-  'Italy': ['Ireland'],
-
-  // Red-yellow-green vertical tricolors (reversed / star)
-  'Guinea': ['Mali', 'Senegal'],
-  'Mali': ['Guinea', 'Senegal'],
-  'Senegal': ['Guinea', 'Mali'],
-
-  // Orange-white-green with center roundel
+  // ── Orange-white-green horizontal with center emblem ──
   'Niger': ['India'],
+  'India': ['Niger', "Côte d'Ivoire", 'Ireland'],
 
-  // Red-white horizontal bicolors
+  // ── Red-yellow-green tricolors (pan-African colors) ──
+  'Guinea': ['Mali', 'Senegal', 'Cameroon', 'Ghana', 'Guinea-Bissau', 'Ethiopia', 'Bolivia'],
+  'Mali': ['Guinea', 'Senegal', 'Cameroon', 'Ghana', 'Guinea-Bissau', 'Ethiopia', 'Bolivia'],
+  'Senegal': ['Guinea', 'Mali', 'Cameroon', 'Ghana', 'Guinea-Bissau'],
+  'Cameroon': ['Guinea', 'Mali', 'Senegal', 'Ghana', 'Guinea-Bissau'],
+  'Ghana': ['Guinea', 'Mali', 'Senegal', 'Cameroon', 'Guinea-Bissau', 'Ethiopia', 'Bolivia'],
+  'Guinea-Bissau': ['Guinea', 'Mali', 'Senegal', 'Cameroon', 'Ghana'],
+  'Ethiopia': ['Guinea', 'Mali', 'Ghana', 'Bolivia'],
+  'Bolivia': ['Guinea', 'Mali', 'Ghana', 'Ethiopia'],
+
+  // ── Red-white horizontal bicolors ──
   'Indonesia': ['Monaco', 'Poland'],
   'Monaco': ['Indonesia', 'Poland'],
   'Poland': ['Indonesia', 'Monaco'],
 
-  // Red-white-blue horizontal tricolors
-  'France': ['Netherlands', 'Luxembourg'],
-  'Netherlands': ['France', 'Luxembourg'],
-  'Luxembourg': ['Netherlands', 'France'],
+  // ── Red-white-blue vertical/horizontal tricolors ──
+  'France': ['Netherlands', 'Luxembourg', 'Russia'],
+  'Netherlands': ['France', 'Luxembourg', 'Russia'],
+  'Luxembourg': ['Netherlands', 'France', 'Russia'],
+  'Russia': ['France', 'Netherlands', 'Luxembourg', 'Serbia', 'Slovenia', 'Slovakia', 'Croatia'],
 
-  // Red-white-green horizontal tricolors
-  'Hungary': ['Italy'],
+  // ── Red-white-green horizontal tricolors ──
+  'Hungary': ['Italy', 'Bulgaria', 'Tajikistan'],
+  'Bulgaria': ['Hungary', 'Tajikistan'],
+  'Tajikistan': ['Hungary', 'Bulgaria'],
 
-  // Similar tricolors with coat of arms
-  'Slovakia': ['Slovenia'],
-  'Slovenia': ['Slovakia'],
+  // ── Slavic tricolors with coat of arms (red-white-blue family) ──
+  'Slovakia': ['Slovenia', 'Serbia', 'Croatia', 'Russia'],
+  'Slovenia': ['Slovakia', 'Serbia', 'Croatia', 'Russia'],
+  'Serbia': ['Slovakia', 'Slovenia', 'Croatia', 'Russia'],
+  'Croatia': ['Slovakia', 'Slovenia', 'Serbia', 'Russia'],
 
-  // Yellow-blue-red horizontal tricolors
-  'Ecuador': ['Colombia'],
-  'Colombia': ['Ecuador'],
+  // ── Yellow-blue-red horizontal tricolors ──
+  'Ecuador': ['Colombia', 'Venezuela'],
+  'Colombia': ['Ecuador', 'Venezuela'],
+  'Venezuela': ['Ecuador', 'Colombia'],
 
-  // Stars-and-stripes designs
-  'Liberia': ['Malaysia'],
-  'Malaysia': ['Liberia'],
+  // ── Stars-and-stripes designs ──
+  'Liberia': ['Malaysia', 'United States'],
+  'Malaysia': ['Liberia', 'United States'],
+  'United States': ['Liberia', 'Malaysia'],
 
-  // Red-white-blue with union jack + southern cross
+  // ── Union Jack + southern cross ──
   'New Zealand': ['Australia'],
   'Australia': ['New Zealand'],
 
+  // ── Pan-Arab chevron flags (black-white-green + red triangle) ──
+  'Palestine': ['Jordan', 'Sudan', 'Kuwait', 'South Sudan'],
+  'Jordan': ['Palestine', 'Sudan', 'Kuwait', 'South Sudan'],
+  'Sudan': ['Palestine', 'Jordan', 'Kuwait', 'South Sudan'],
+  'Kuwait': ['Palestine', 'Jordan', 'Sudan', 'South Sudan'],
+  'South Sudan': ['Palestine', 'Jordan', 'Sudan', 'Kuwait'],
+
+  // ── Pan-Arab horizontal tricolors (red-white-black with eagles/stars) ──
+  'Egypt': ['Syria', 'Iraq', 'Yemen'],
+  'Syria': ['Egypt', 'Iraq', 'Yemen'],
+  'Iraq': ['Egypt', 'Syria', 'Yemen'],
+  'Yemen': ['Egypt', 'Syria', 'Iraq'],
+
+  // ── Nordic crosses ──
+  'Norway': ['Iceland', 'Denmark', 'Finland', 'Sweden'],
+  'Iceland': ['Norway', 'Denmark', 'Finland', 'Sweden'],
+  'Denmark': ['Norway', 'Iceland', 'Finland', 'Sweden', 'Tonga', 'Georgia', 'Switzerland'],
+  'Finland': ['Norway', 'Iceland', 'Denmark', 'Sweden'],
+  'Sweden': ['Norway', 'Iceland', 'Denmark', 'Finland'],
+
+  // ── Serrated-edge red/maroon and white ──
+  'Qatar': ['Bahrain'],
+  'Bahrain': ['Qatar'],
+
+  // ── Red field with white crescent and star ──
+  'Turkey': ['Tunisia'],
+  'Tunisia': ['Turkey'],
+
+  // ── Disc on solid background ──
+  'Japan': ['Bangladesh'],
+  'Bangladesh': ['Japan'],
+
+  // ── Red-white-red horizontal stripes ──
+  'Austria': ['Latvia'],
+  'Latvia': ['Austria'],
+
+  // ── Blue-white horizontal stripes ──
+  'Argentina': ['Uruguay', 'El Salvador', 'Honduras', 'Nicaragua'],
+  'Uruguay': ['Argentina', 'El Salvador', 'Honduras', 'Nicaragua'],
+  'El Salvador': ['Argentina', 'Uruguay', 'Honduras', 'Nicaragua'],
+  'Honduras': ['Argentina', 'Uruguay', 'El Salvador', 'Nicaragua'],
+  'Nicaragua': ['Argentina', 'Uruguay', 'El Salvador', 'Honduras'],
+
+  // ── Red-white-blue horizontal mirror stripes ──
+  'Costa Rica': ['Thailand'],
+  'Thailand': ['Costa Rica'],
+
+  // ── Black-red-gold tricolors (vertical vs horizontal) ──
+  'Belgium': ['Germany'],
+  'Germany': ['Belgium'],
+
+  // ── Blue-red horizontal bicolor ──
+  'Liechtenstein': ['Haiti'],
+  'Haiti': ['Liechtenstein'],
+
+  // ── Red field with yellow star ──
+  'China': ['Vietnam'],
+  'Vietnam': ['China'],
+
+  // ── Star in canton with red-white-blue ──
+  'Chile': ['Cuba'],
+  'Cuba': ['Chile'],
+
+  // ── Green field with white crescent ──
+  'Pakistan': ['Mauritania'],
+  'Mauritania': ['Pakistan'],
+
+  // ── Red cross / white cross designs ──
+  'Tonga': ['Georgia', 'Switzerland', 'Denmark'],
+  'Georgia': ['Tonga', 'Switzerland', 'Denmark'],
+  'Switzerland': ['Tonga', 'Georgia', 'Denmark'],
 };
