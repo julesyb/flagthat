@@ -19,7 +19,7 @@ import { spacing, typography, fontFamily, fontSize, buildButtons, borderRadius, 
 import { APP_URL } from '../utils/config';
 import { useTheme } from '../contexts/ThemeContext';
 import { getStreakFromResults, generateDailyShareGrid, generateShareGrid, modeLabelKey } from '../utils/gameEngine';
-import { updateStats, updateFlagResults, saveDailyChallenge, incrementDailyChallenges, markShared, saveBaselineResult, getStats, getFlagStats, getDayStreakInfo, getBadgeData, persistEarnedBadges, getMissedFlagIds, addGameHistoryEntry, getChallengeName, saveChallengeName, addChallengeToHistory, recordRegionScore, getPersistedLevel, persistLevel, UNLOCK_THRESHOLD } from '../utils/storage';
+import { updateStats, updateFlagResults, saveDailyChallenge, incrementDailyChallenges, markShared, saveBaselineResult, getStats, getFlagStats, getDayStreakInfo, getBadgeData, persistEarnedBadges, getMissedFlagIds, addGameHistoryEntry, getChallengeName, saveChallengeName, addChallengeToHistory, recordRegionScore, getPersistedLevel, persistLevel, UNLOCK_THRESHOLD, recordGameForProgression } from '../utils/storage';
 import { BaselineRegionId, UserStats, GameMode, CategoryId, BASELINE_REGIONS } from '../types';
 import { t } from '../utils/i18n';
 import { hapticCorrect, hapticTap, playCelebrationSound } from '../utils/feedback';
@@ -81,6 +81,8 @@ async function persistGameData(
   await updateStats(correct, questionTotal, streak, config.mode, config.category, speedData);
   await updateFlagResults(results);
   await addGameHistoryEntry(accuracy, config.mode);
+  // Auto-progression: track perfect games for skill level advancement
+  await recordGameForProgression(correct, questionTotal);
 
   if ((BASELINE_REGIONS as readonly string[]).includes(config.category)) {
     await recordRegionScore(config.category as BaselineRegionId, correct, questionTotal);

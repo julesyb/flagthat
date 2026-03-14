@@ -129,6 +129,8 @@ function buildColors(p: typeof darkPalette, isDark: boolean) {
     diffMediumBorder: dk ? 'rgba(233, 186, 76, 0.40)' : 'rgba(154, 92, 10, 0.25)',
     diffHardBg: dk ? 'rgba(236, 102, 102, 0.12)' : 'rgba(196, 48, 48, 0.10)',
     diffHardBorder: dk ? 'rgba(236, 102, 102, 0.30)' : 'rgba(196, 48, 48, 0.25)',
+    expertBg: dk ? 'rgba(164, 127, 212, 0.12)' : 'rgba(164, 127, 212, 0.10)',
+    expertBorder: dk ? 'rgba(164, 127, 212, 0.30)' : 'rgba(164, 127, 212, 0.25)',
 
     // Translucent helpers
     whiteAlpha15: dk ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.06)',

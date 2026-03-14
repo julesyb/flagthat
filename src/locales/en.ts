@@ -539,6 +539,16 @@ const en = {
     baselineMotivation: 'Finish all 5 to track your improvement',
     continueBaseline: 'Continue',
     regionsComplete: '{count}/{total} regions',
+    tellUsAboutYou: 'Tell us about yourself',
+    skillBeginner: "I'm new to flags",
+    skillBeginnerDesc: 'Start with the most recognizable flags',
+    skillIntermediate: 'I know a good amount',
+    skillIntermediateDesc: 'Ready for all flags, multiple choice',
+    skillAdvanced: 'Try me, I know my stuff',
+    skillAdvancedDesc: 'Hard mode with helpful hints',
+    skillExpert: "I'm a flag expert",
+    skillExpertDesc: 'Maps, typing, no hand-holding',
+    skillLevelUp: 'Nice work! You leveled up to {level}',
   },
 
   // ─── Game Modes (for labels) ────────────────────────────

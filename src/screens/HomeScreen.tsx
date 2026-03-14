@@ -16,7 +16,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { ThemeColors } from '../utils/theme';
 import { getTotalFlagCount, getCategoryCount } from '../data';
 import { initAudio, hapticTap, hapticCorrect, hapticWrong, playWrongSound, setSoundsEnabled, setHapticsEnabled } from '../utils/feedback';
-import { getStats, getSettings, getMissedFlagIds, getBaselineData, isDailyCompleteToday, BaselineData, getFlagStats, getBadgeData, getDayStreakInfo, getPersistedLevel, persistLevel } from '../utils/storage';
+import { getStats, getSettings, getMissedFlagIds, getBaselineData, isDailyCompleteToday, BaselineData, getFlagStats, getBadgeData, getDayStreakInfo, getPersistedLevel, persistLevel, getSkillLevel, getDefaultDifficulty } from '../utils/storage';
 import { generateQuestions, getDailyConfig, getDailyVariant } from '../utils/gameEngine';
 import { RootStackParamList } from '../types/navigation';
 import { GameMode, UserStats, GameQuestion, CategoryId, BASELINE_REGIONS } from '../types';
@@ -150,6 +150,7 @@ export default function HomeScreen({ navigation }: Props) {
   const [stats, setStats] = useState<UserStats | null>(null);
   const [teaserKey, setTeaserKey] = useState(0);
   const [weakFlagCount, setWeakFlagCount] = useState(0);
+  const skillLoaded = useRef(false);
   const [dailyDone, setDailyDone] = useState(false);
   const dailyVariant = useMemo(() => getDailyVariant(), []);
   const dailyTagText = useMemo(() => {
@@ -194,6 +195,15 @@ export default function HomeScreen({ navigation }: Props) {
       isDailyCompleteToday().then(setDailyDone);
       getBaselineData().then(setBaseline);
       setTeaserKey((k) => k + 1);
+      // Apply skill level as default difficulty on first load
+      if (!skillLoaded.current) {
+        getSkillLevel().then((skill) => {
+          if (skill) {
+            setMode(getDefaultDifficulty(skill));
+            skillLoaded.current = true;
+          }
+        });
+      }
       Promise.all([getStats(), getFlagStats(), getBadgeData(), getDayStreakInfo(), getPersistedLevel()]).then(
         ([s, fs, bd, dsi, pl]) => {
           setStats(s);

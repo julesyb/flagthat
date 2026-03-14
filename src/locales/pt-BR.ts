@@ -434,6 +434,16 @@ const ptBR: DeepPartial<TranslationStrings> = {
     baselineProgress: 'Descubra seu nivel',
     continueBaseline: 'Continuar',
     regionsComplete: '{count}/{total} regioes',
+    tellUsAboutYou: 'Conte-nos sobre voc\u00ea',
+    skillBeginner: 'Sou novo com bandeiras',
+    skillBeginnerDesc: 'Comece com as bandeiras mais conhecidas',
+    skillIntermediate: 'Tenho bons conhecimentos',
+    skillIntermediateDesc: 'Todas as bandeiras, m\u00faltipla escolha',
+    skillAdvanced: 'Me teste, eu sei bastante',
+    skillAdvancedDesc: 'Modo dif\u00edcil com dicas \u00fateis',
+    skillExpert: 'Sou especialista em bandeiras',
+    skillExpertDesc: 'Mapas, digita\u00e7\u00e3o, sem ajuda',
+    skillLevelUp: '\u00d3timo trabalho! Voc\u00ea subiu para o n\u00edvel {level}',
   },
 
   modes: {

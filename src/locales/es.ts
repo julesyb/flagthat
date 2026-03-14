@@ -434,6 +434,16 @@ const es: DeepPartial<TranslationStrings> = {
     baselineProgress: 'Descubre tu nivel',
     continueBaseline: 'Continuar',
     regionsComplete: '{count}/{total} regiones',
+    tellUsAboutYou: 'Cu\u00e9ntanos sobre ti',
+    skillBeginner: 'Soy nuevo con las banderas',
+    skillBeginnerDesc: 'Empieza con las banderas m\u00e1s conocidas',
+    skillIntermediate: 'Tengo buenos conocimientos',
+    skillIntermediateDesc: 'Todas las banderas, opci\u00f3n m\u00faltiple',
+    skillAdvanced: 'Ponme a prueba',
+    skillAdvancedDesc: 'Modo dif\u00edcil con pistas \u00fatiles',
+    skillExpert: 'Soy experto en banderas',
+    skillExpertDesc: 'Mapas, escritura, sin ayuda',
+    skillLevelUp: '\u00a1Buen trabajo! Subiste al nivel {level}',
   },
 
   modes: {

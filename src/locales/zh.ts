@@ -433,6 +433,16 @@ const zh: DeepPartial<TranslationStrings> = {
     baselineProgress: '\u6d4b\u6d4b\u4f60\u7684\u6c34\u5e73',
     continueBaseline: '\u7ee7\u7eed',
     regionsComplete: '{count}/{total}\u4e2a\u5730\u533a',
+    tellUsAboutYou: '\u544a\u8bc9\u6211\u4eec\u4f60\u7684\u60c5\u51b5',
+    skillBeginner: '\u6211\u521a\u5f00\u59cb\u5b66\u56fd\u65d7',
+    skillBeginnerDesc: '\u4ece\u6700\u8457\u540d\u7684\u56fd\u65d7\u5f00\u59cb',
+    skillIntermediate: '\u6211\u6709\u4e00\u5b9a\u4e86\u89e3',
+    skillIntermediateDesc: '\u6240\u6709\u56fd\u65d7\uff0c\u9009\u62e9\u9898',
+    skillAdvanced: '\u6765\u8003\u8003\u6211',
+    skillAdvancedDesc: '\u56f0\u96be\u6a21\u5f0f\uff0c\u5e26\u63d0\u793a',
+    skillExpert: '\u6211\u662f\u56fd\u65d7\u4e13\u5bb6',
+    skillExpertDesc: '\u5730\u56fe\u3001\u8f93\u5165\u3001\u65e0\u63d0\u793a',
+    skillLevelUp: '\u5e72\u5f97\u6f02\u4eae\uff01\u4f60\u5347\u7ea7\u5230\u4e86{level}',
   },
 
   modes: {

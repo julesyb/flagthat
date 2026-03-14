@@ -19,6 +19,8 @@ const CHALLENGE_HISTORY_KEY = '@flagsareus_challenge_history';
 const REGION_SCORES_KEY = '@flagsareus_region_scores';
 const LEVEL_KEY = '@flagsareus_level';
 const DAILY_LEADERBOARD_KEY = '@flagsareus_daily_leaderboard';
+const SKILL_LEVEL_KEY = '@flagsareus_skill_level';
+const PERFECT_STREAK_KEY = '@flagsareus_perfect_streak';
 
 // ─── Challenge Name ─────────────────────────────────────────
 export async function getChallengeName(): Promise<string> {
@@ -280,6 +282,8 @@ export async function resetStats(): Promise<void> {
     await AsyncStorage.removeItem(LEVEL_KEY);
     await AsyncStorage.removeItem(DAILY_LEADERBOARD_KEY);
     await AsyncStorage.removeItem(CHALLENGE_NAME_KEY);
+    await AsyncStorage.removeItem(SKILL_LEVEL_KEY);
+    await AsyncStorage.removeItem(PERFECT_STREAK_KEY);
   } catch {
     // Silently fail
   }
@@ -781,6 +785,108 @@ export async function persistLevel(level: number): Promise<void> {
     }
   } catch {
     // Silently fail
+  }
+}
+
+// ─── Skill Level ─────────────────────────────────────────
+// User's self-assessed skill level from onboarding, with auto-progression.
+// Starts at whatever the user picks, then progresses when they consistently ace games.
+
+export type SkillLevel = 'beginner' | 'intermediate' | 'advanced' | 'expert';
+
+/** Number of consecutive 100% games needed to auto-promote difficulty */
+const PERFECT_GAMES_TO_PROMOTE = 10;
+
+const SKILL_TO_DIFFICULTY: Record<SkillLevel, 'easy' | 'medium' | 'hard'> = {
+  beginner: 'easy',
+  intermediate: 'medium',
+  advanced: 'hard',
+  expert: 'hard',
+};
+
+const SKILL_PROGRESSION: Record<SkillLevel, SkillLevel | null> = {
+  beginner: 'intermediate',
+  intermediate: 'advanced',
+  advanced: 'expert',
+  expert: null,
+};
+
+export async function getSkillLevel(): Promise<SkillLevel | null> {
+  try {
+    const val = await AsyncStorage.getItem(SKILL_LEVEL_KEY);
+    if (val && ['beginner', 'intermediate', 'advanced', 'expert'].includes(val)) {
+      return val as SkillLevel;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+export async function saveSkillLevel(level: SkillLevel): Promise<void> {
+  try {
+    await AsyncStorage.setItem(SKILL_LEVEL_KEY, level);
+  } catch { /* ignore */ }
+}
+
+export function getDefaultDifficulty(skill: SkillLevel): 'easy' | 'medium' | 'hard' {
+  return SKILL_TO_DIFFICULTY[skill];
+}
+
+/** Returns the current consecutive-perfect-game count for the active skill level */
+async function getPerfectStreak(): Promise<{ level: SkillLevel; count: number }> {
+  try {
+    const json = await AsyncStorage.getItem(PERFECT_STREAK_KEY);
+    if (json) return JSON.parse(json);
+    return { level: 'beginner', count: 0 };
+  } catch {
+    return { level: 'beginner', count: 0 };
+  }
+}
+
+/**
+ * Called after each quiz game. If the user got 100%, increment their perfect streak.
+ * After PERFECT_GAMES_TO_PROMOTE consecutive perfect games, auto-promote their skill level.
+ * Returns the new skill level if promoted, null otherwise.
+ */
+export async function recordGameForProgression(
+  correct: number,
+  total: number,
+): Promise<SkillLevel | null> {
+  try {
+    const skill = await getSkillLevel();
+    if (!skill) return null;
+
+    const nextSkill = SKILL_PROGRESSION[skill];
+    if (!nextSkill) return null; // already at max
+
+    const isPerfect = total > 0 && correct === total;
+    const streak = await getPerfectStreak();
+
+    // Reset streak if skill level changed externally
+    if (streak.level !== skill) {
+      streak.level = skill;
+      streak.count = 0;
+    }
+
+    if (isPerfect) {
+      streak.count += 1;
+    } else {
+      streak.count = 0;
+    }
+
+    await AsyncStorage.setItem(PERFECT_STREAK_KEY, JSON.stringify(streak));
+
+    if (streak.count >= PERFECT_GAMES_TO_PROMOTE) {
+      await saveSkillLevel(nextSkill);
+      // Reset streak for new level
+      await AsyncStorage.setItem(PERFECT_STREAK_KEY, JSON.stringify({ level: nextSkill, count: 0 }));
+      return nextSkill;
+    }
+
+    return null;
+  } catch {
+    return null;
   }
 }
 
