@@ -185,11 +185,10 @@ export default function HomeScreen({ navigation }: Props) {
       setSoundsEnabled(s.soundEnabled);
       setHapticsEnabled(s.hapticsEnabled);
     });
-    // Apply skill level as default difficulty once on mount
-    getSkillLevel().then((skill) => {
-      if (skill) setMode(getDefaultDifficulty(skill));
-    });
   }, []);
+
+  // Track known skill level so we only update difficulty on actual promotions
+  const lastSkillRef = useRef<string | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -198,6 +197,13 @@ export default function HomeScreen({ navigation }: Props) {
       isDailyCompleteToday().then(setDailyDone);
       getBaselineData().then(setBaseline);
       setTeaserKey((k) => k + 1);
+      // Sync difficulty when skill level changes (initial load or auto-promotion)
+      getSkillLevel().then((skill) => {
+        if (skill && skill !== lastSkillRef.current) {
+          setMode(getDefaultDifficulty(skill));
+          lastSkillRef.current = skill;
+        }
+      });
       Promise.all([getStats(), getFlagStats(), getBadgeData(), getDayStreakInfo(), getPersistedLevel()]).then(
         ([s, fs, bd, dsi, pl]) => {
           setStats(s);

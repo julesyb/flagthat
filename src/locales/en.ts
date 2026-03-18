@@ -272,6 +272,8 @@ const en = {
   settings: {
     title: 'Settings',
     subtitle: 'Customize your experience',
+    skillLevel: 'Skill Level',
+    skillLevelDesc: 'Affects your default difficulty',
     soundHaptics: 'Sound & Haptics',
     soundEffects: 'Sound Effects',
     soundDesc: 'Correct, wrong, and celebration sounds',
@@ -542,6 +544,7 @@ const en = {
     skillExpertDesc: 'Maps and flags, good luck',
     skillExpertTag: 'Expert',
     skillLevelUp: 'Nice work! You leveled up to {level}',
+    skipToHome: 'Skip, just let me play',
   },
 
   // ─── Game Modes (for labels) ────────────────────────────

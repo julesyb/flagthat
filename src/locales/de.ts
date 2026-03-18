@@ -262,6 +262,8 @@ const de: DeepPartial<TranslationStrings> = {
     themeLight: 'Hell',
     themeDark: 'Dunkel',
     themeSystem: 'System',
+    skillLevel: 'Schwierigkeitsstufe',
+    skillLevelDesc: 'Bestimmt deine Standard-Schwierigkeit',
     soundHaptics: 'Ton & Haptik',
     soundEffects: 'Soundeffekte',
     soundDesc: 'T\u00f6ne f\u00fcr Antworten und Erfolge',
@@ -437,6 +439,7 @@ const de: DeepPartial<TranslationStrings> = {
     skillExpertDesc: 'Karten und Flaggen, viel Gl\u00fcck',
     skillExpertTag: 'Experte',
     skillLevelUp: 'Gut gemacht! Du bist jetzt auf Level {level}',
+    skipToHome: '\u00dcberspringen, lass mich spielen',
   },
 
   modes: {

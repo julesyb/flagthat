@@ -160,6 +160,12 @@ export default function OnboardingScreen({ navigation }: Props) {
     });
   };
 
+  const handleSkip = async () => {
+    hapticTap();
+    await skipOnboarding();
+    navigation.replace('Home');
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.background} />
@@ -254,6 +260,18 @@ export default function OnboardingScreen({ navigation }: Props) {
               );
             })}
           </View>
+
+          {/* Skip link */}
+          <Animated.View style={[styles.skipWrap, { opacity: promptFade }]}>
+            <TouchableOpacity
+              onPress={handleSkip}
+              activeOpacity={0.6}
+              accessibilityRole="button"
+              accessibilityLabel={t('onboarding.skipToHome')}
+            >
+              <Text style={styles.skipText}>{t('onboarding.skipToHome')}</Text>
+            </TouchableOpacity>
+          </Animated.View>
         </ScreenContainer>
       </ScrollView>
     </SafeAreaView>
@@ -392,5 +410,17 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     color: colors.white,
     letterSpacing: 0.5,
     textTransform: 'uppercase',
+  },
+
+  // ── Skip
+  skipWrap: {
+    alignItems: 'center',
+    marginTop: spacing.lg,
+  },
+  skipText: {
+    fontFamily: fontFamily.bodyMedium,
+    fontSize: fontSize.sm,
+    color: colors.textTertiary,
+    paddingVertical: spacing.sm,
   },
 });

@@ -262,6 +262,8 @@ const zh: DeepPartial<TranslationStrings> = {
     themeLight: '亮色',
     themeDark: '暗色',
     themeSystem: '跟随系统',
+    skillLevel: '\u6280\u80fd\u7b49\u7ea7',
+    skillLevelDesc: '\u5f71\u54cd\u4f60\u7684\u9ed8\u8ba4\u96be\u5ea6',
     soundHaptics: '声音与触感',
     soundEffects: '\u97f3\u6548',
     soundDesc: '\u7b54\u9898\u548c\u5e86\u795d\u97f3\u6548',
@@ -436,6 +438,7 @@ const zh: DeepPartial<TranslationStrings> = {
     skillExpertDesc: '\u5730\u56fe\u548c\u56fd\u65d7\uff0c\u795d\u4f60\u597d\u8fd0',
     skillExpertTag: '\u4e13\u5bb6',
     skillLevelUp: '\u5e72\u5f97\u6f02\u4eae\uff01\u4f60\u5347\u7ea7\u5230\u4e86{level}',
+    skipToHome: '\u8df3\u8fc7\uff0c\u8ba9\u6211\u76f4\u63a5\u73a9',
   },
 
   modes: {

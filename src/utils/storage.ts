@@ -844,16 +844,23 @@ async function getPerfectStreak(): Promise<{ level: SkillLevel; count: number }>
   }
 }
 
+/** Core quiz modes that count toward skill progression */
+const PROGRESSION_MODES = new Set(['easy', 'medium', 'hard', 'daily', 'timeattack']);
+
 /**
  * Called after each quiz game. If the user got 100%, increment their perfect streak.
  * After PERFECT_GAMES_TO_PROMOTE consecutive perfect games, auto-promote their skill level.
+ * Only core quiz modes count — special modes (flash flag, impostor, etc.) are ignored.
  * Returns the new skill level if promoted, null otherwise.
  */
 export async function recordGameForProgression(
   correct: number,
   total: number,
+  mode: string,
 ): Promise<SkillLevel | null> {
   try {
+    if (!PROGRESSION_MODES.has(mode)) return null;
+
     const skill = await getSkillLevel();
     if (!skill) return null;
 

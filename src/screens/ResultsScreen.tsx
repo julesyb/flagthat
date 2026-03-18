@@ -89,7 +89,7 @@ async function persistGameData(
   await updateFlagResults(results);
   await addGameHistoryEntry(accuracy, config.mode);
   // Auto-progression: track perfect games for skill level advancement
-  const skillUp = await recordGameForProgression(correct, questionTotal);
+  const skillUp = await recordGameForProgression(correct, questionTotal, config.mode);
 
   if ((BASELINE_REGIONS as readonly string[]).includes(config.category)) {
     await recordRegionScore(config.category as BaselineRegionId, correct, questionTotal);
