@@ -19,7 +19,7 @@ import { spacing, typography, fontFamily, fontSize, buildButtons, borderRadius, 
 import { APP_URL } from '../utils/config';
 import { useTheme } from '../contexts/ThemeContext';
 import { getStreakFromResults, generateDailyShareGrid, generateShareGrid, modeLabelKey } from '../utils/gameEngine';
-import { updateStats, updateFlagResults, saveDailyChallenge, incrementDailyChallenges, markShared, saveBaselineResult, getStats, getFlagStats, getDayStreakInfo, getBadgeData, persistEarnedBadges, getMissedFlagIds, addGameHistoryEntry, getChallengeName, saveChallengeName, addChallengeToHistory, recordRegionScore, getPersistedLevel, persistLevel, UNLOCK_THRESHOLD, recordGameForProgression, SkillLevel } from '../utils/storage';
+import { updateStats, updateFlagResults, saveDailyChallenge, incrementDailyChallenges, markShared, saveBaselineResult, getStats, getFlagStats, getDayStreakInfo, getBadgeData, persistEarnedBadges, getMissedFlagIds, addGameHistoryEntry, getChallengeName, saveChallengeName, addChallengeToHistory, recordRegionScore, getPersistedLevel, persistLevel, UNLOCK_THRESHOLD, recordGameForProgression, SkillLevel, SKILL_TAG_KEYS } from '../utils/storage';
 import { BaselineRegionId, UserStats, GameMode, CategoryId, BASELINE_REGIONS } from '../types';
 import { t } from '../utils/i18n';
 import { hapticCorrect, hapticTap, playCelebrationSound } from '../utils/feedback';
@@ -41,13 +41,6 @@ import NameInputModal from '../components/NameInputModal';
 import { getTodayDateString } from '../utils/gameEngine';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Results'>;
-
-const SKILL_TAG_KEYS: Record<SkillLevel, string> = {
-  beginner: 'onboarding.skillBeginnerTag',
-  intermediate: 'onboarding.skillIntermediateTag',
-  advanced: 'onboarding.skillAdvancedTag',
-  expert: 'onboarding.skillExpertTag',
-};
 
 // ── Extracted helpers for processResults ──
 

@@ -794,6 +794,15 @@ export async function persistLevel(level: number): Promise<void> {
 
 export type SkillLevel = 'beginner' | 'intermediate' | 'advanced' | 'expert';
 
+export const SKILL_LEVELS: readonly SkillLevel[] = ['beginner', 'intermediate', 'advanced', 'expert'];
+
+export const SKILL_TAG_KEYS: Record<SkillLevel, string> = {
+  beginner: 'onboarding.skillBeginnerTag',
+  intermediate: 'onboarding.skillIntermediateTag',
+  advanced: 'onboarding.skillAdvancedTag',
+  expert: 'onboarding.skillExpertTag',
+};
+
 /** Number of consecutive 100% games needed to auto-promote difficulty */
 const PERFECT_GAMES_TO_PROMOTE = 10;
 

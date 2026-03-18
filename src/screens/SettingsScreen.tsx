@@ -16,7 +16,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
 import Constants from 'expo-constants';
 import { spacing, typography, fontFamily, fontSize, borderRadius, APP_URL, APP_DOMAIN, ThemeColors, ThemeMode } from '../utils/theme';
-import { getSettings, saveSettings, AppSettings, resetStats, getSkillLevel, saveSkillLevel, SkillLevel } from '../utils/storage';
+import { getSettings, saveSettings, AppSettings, resetStats, getSkillLevel, saveSkillLevel, SkillLevel, SKILL_LEVELS, SKILL_TAG_KEYS } from '../utils/storage';
 import {
   setSoundsEnabled,
   setHapticsEnabled,
@@ -217,7 +217,7 @@ export default function SettingsScreen() {
               </View>
               <View style={styles.settingDivider} />
               <View style={styles.skillRow}>
-                {(['beginner', 'intermediate', 'advanced', 'expert'] as const).map((level) => {
+                {SKILL_LEVELS.map((level) => {
                   const isActive = skillLevel === level;
                   return (
                     <TouchableOpacity
@@ -226,11 +226,11 @@ export default function SettingsScreen() {
                       onPress={() => handleSkillChange(level)}
                       activeOpacity={0.7}
                       accessibilityRole="button"
-                      accessibilityLabel={t(`onboarding.skill${level.charAt(0).toUpperCase() + level.slice(1)}Tag`)}
+                      accessibilityLabel={t(SKILL_TAG_KEYS[level])}
                       accessibilityState={{ selected: isActive }}
                     >
                       <Text style={[styles.skillOptionText, isActive && styles.skillOptionTextActive]}>
-                        {t(`onboarding.skill${level.charAt(0).toUpperCase() + level.slice(1)}Tag`)}
+                        {t(SKILL_TAG_KEYS[level])}
                       </Text>
                     </TouchableOpacity>
                   );
