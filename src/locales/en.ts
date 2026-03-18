@@ -521,19 +521,11 @@ const en = {
 
   // ─── Onboarding ───────────────────────────────────────────
   onboarding: {
-    subtitle: "Let's see where you stand",
-    regionTest: 'Flag quiz',
-    flagCount: '{count} flags',
-    completed: 'Done',
-    startPlaying: 'Start Playing',
-    skip: 'Skip',
     next: 'Next Region',
-    allDone: 'All done, nice work',
     welcome: 'Welcome to',
     tagline: 'How well do you know the world?',
     baselineProgress: 'See Where You Stand',
     baselineMotivation: 'Finish all 5 to track your improvement',
-    continueBaseline: 'Continue',
     regionsComplete: '{count}/{total} regions',
     tellUsAboutYou: 'Tell us about yourself',
     wellStartYouOff: "Pick your level and we'll jump right in",

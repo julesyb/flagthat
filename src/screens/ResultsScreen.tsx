@@ -42,6 +42,13 @@ import { getTodayDateString } from '../utils/gameEngine';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Results'>;
 
+const SKILL_TAG_KEYS: Record<SkillLevel, string> = {
+  beginner: 'onboarding.skillBeginnerTag',
+  intermediate: 'onboarding.skillIntermediateTag',
+  advanced: 'onboarding.skillAdvancedTag',
+  expert: 'onboarding.skillExpertTag',
+};
+
 // ── Extracted helpers for processResults ──
 
 interface PreGameSnapshot {
@@ -223,6 +230,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
   const [newCountriesCount, setNewCountriesCount] = useState(0);
   const [levelUpTo, setLevelUpTo] = useState<number | null>(null);
   const [skillLevelUp, setSkillLevelUp] = useState<SkillLevel | null>(null);
+  const skillBannerAnim = useRef(new Animated.Value(0)).current;
 
   // Daily leaderboard state
   const [leaderboardEntries, setLeaderboardEntries] = useState<DailyLeaderboardEntry[]>([]);
@@ -381,7 +389,10 @@ export default function ResultsScreen({ route, navigation }: Props) {
           results, config, correct, streak, accuracy, questionTotal,
           isDaily, isChallenge, challenge, playerName,
         );
-        if (newSkill) setSkillLevelUp(newSkill);
+        if (newSkill) {
+          setSkillLevelUp(newSkill);
+          Animated.spring(skillBannerAnim, { toValue: 1, friction: 7, tension: 60, useNativeDriver: true }).start();
+        }
       }
       if (isBaseline) {
         const regionTotal = getCategoryCount(config.category as CategoryId);
@@ -1001,9 +1012,12 @@ export default function ResultsScreen({ route, navigation }: Props) {
 
       {/* ── Skill level-up banner ── */}
       {skillLevelUp && (
-        <View style={styles.skillUpBanner}>
+        <Animated.View style={[styles.skillUpBanner, {
+          opacity: skillBannerAnim,
+          transform: [{ translateY: skillBannerAnim.interpolate({ inputRange: [0, 1], outputRange: [40, 0] }) }],
+        }]}>
           <Text style={styles.skillUpText}>
-            {t('onboarding.skillLevelUp', { level: t(`onboarding.skill${skillLevelUp.charAt(0).toUpperCase() + skillLevelUp.slice(1)}Tag`) })}
+            {t('onboarding.skillLevelUp', { level: t(SKILL_TAG_KEYS[skillLevelUp]) })}
           </Text>
           <TouchableOpacity
             onPress={() => setSkillLevelUp(null)}
@@ -1012,7 +1026,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
           >
             <Text style={styles.skillUpDismissText}>{t('common.next')}</Text>
           </TouchableOpacity>
-        </View>
+        </Animated.View>
       )}
     </SafeAreaView>
   );

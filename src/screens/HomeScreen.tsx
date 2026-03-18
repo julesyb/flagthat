@@ -150,7 +150,6 @@ export default function HomeScreen({ navigation }: Props) {
   const [stats, setStats] = useState<UserStats | null>(null);
   const [teaserKey, setTeaserKey] = useState(0);
   const [weakFlagCount, setWeakFlagCount] = useState(0);
-  const skillLoaded = useRef(false);
   const [dailyDone, setDailyDone] = useState(false);
   const dailyVariant = useMemo(() => getDailyVariant(), []);
   const dailyTagText = useMemo(() => {
@@ -186,6 +185,10 @@ export default function HomeScreen({ navigation }: Props) {
       setSoundsEnabled(s.soundEnabled);
       setHapticsEnabled(s.hapticsEnabled);
     });
+    // Apply skill level as default difficulty once on mount
+    getSkillLevel().then((skill) => {
+      if (skill) setMode(getDefaultDifficulty(skill));
+    });
   }, []);
 
   useFocusEffect(
@@ -195,15 +198,6 @@ export default function HomeScreen({ navigation }: Props) {
       isDailyCompleteToday().then(setDailyDone);
       getBaselineData().then(setBaseline);
       setTeaserKey((k) => k + 1);
-      // Apply skill level as default difficulty on first load
-      if (!skillLoaded.current) {
-        getSkillLevel().then((skill) => {
-          if (skill) {
-            setMode(getDefaultDifficulty(skill));
-            skillLoaded.current = true;
-          }
-        });
-      }
       Promise.all([getStats(), getFlagStats(), getBadgeData(), getDayStreakInfo(), getPersistedLevel()]).then(
         ([s, fs, bd, dsi, pl]) => {
           setStats(s);
