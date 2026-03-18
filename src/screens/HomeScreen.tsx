@@ -16,7 +16,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { ThemeColors } from '../utils/theme';
 import { getTotalFlagCount, getCategoryCount } from '../data';
 import { initAudio, hapticTap, hapticCorrect, hapticWrong, playWrongSound, setSoundsEnabled, setHapticsEnabled } from '../utils/feedback';
-import { getStats, getSettings, getMissedFlagIds, getBaselineData, isDailyCompleteToday, BaselineData, getFlagStats, getBadgeData, getDayStreakInfo, getPersistedLevel, persistLevel } from '../utils/storage';
+import { getStats, getSettings, getMissedFlagIds, getBaselineData, isDailyCompleteToday, BaselineData, getFlagStats, getBadgeData, getDayStreakInfo, getPersistedLevel, persistLevel, getSkillLevel, getDefaultDifficulty } from '../utils/storage';
 import { generateQuestions, getDailyConfig, getDailyVariant } from '../utils/gameEngine';
 import { RootStackParamList } from '../types/navigation';
 import { GameMode, UserStats, GameQuestion, CategoryId, BASELINE_REGIONS } from '../types';
@@ -187,6 +187,9 @@ export default function HomeScreen({ navigation }: Props) {
     });
   }, []);
 
+  // Track known skill level so we only update difficulty on actual promotions
+  const lastSkillRef = useRef<string | null>(null);
+
   useFocusEffect(
     useCallback(() => {
       getStats().then(setStats);
@@ -194,6 +197,13 @@ export default function HomeScreen({ navigation }: Props) {
       isDailyCompleteToday().then(setDailyDone);
       getBaselineData().then(setBaseline);
       setTeaserKey((k) => k + 1);
+      // Sync difficulty when skill level changes (initial load or auto-promotion)
+      getSkillLevel().then((skill) => {
+        if (skill && skill !== lastSkillRef.current) {
+          setMode(getDefaultDifficulty(skill));
+          lastSkillRef.current = skill;
+        }
+      });
       Promise.all([getStats(), getFlagStats(), getBadgeData(), getDayStreakInfo(), getPersistedLevel()]).then(
         ([s, fs, bd, dsi, pl]) => {
           setStats(s);

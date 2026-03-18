@@ -16,7 +16,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
 import Constants from 'expo-constants';
 import { spacing, typography, fontFamily, fontSize, borderRadius, APP_URL, APP_DOMAIN, ThemeColors, ThemeMode } from '../utils/theme';
-import { getSettings, saveSettings, AppSettings, resetStats } from '../utils/storage';
+import { getSettings, saveSettings, AppSettings, resetStats, getSkillLevel, saveSkillLevel, SkillLevel, SKILL_LEVELS, SKILL_TAG_KEYS } from '../utils/storage';
 import {
   setSoundsEnabled,
   setHapticsEnabled,
@@ -46,12 +46,19 @@ export default function SettingsScreen() {
   });
   const [, forceRender] = useState(0);
   const [langOpen, setLangOpen] = useState(false);
+  const [skillLevel, setSkillLevel] = useState<SkillLevel | null>(null);
 
   useFocusEffect(
     useCallback(() => {
       getSettings().then(setSettings);
+      getSkillLevel().then(setSkillLevel);
     }, []),
   );
+
+  const handleSkillChange = async (level: SkillLevel) => {
+    setSkillLevel(level);
+    await saveSkillLevel(level);
+  };
 
   const updateSetting = async <K extends keyof AppSettings>(key: K, value: AppSettings[K]) => {
     const updated = { ...settings, [key]: value };
@@ -195,6 +202,43 @@ export default function SettingsScreen() {
             })}
           </View>
         </View>
+
+        {/* Skill Level */}
+        {skillLevel && (
+          <>
+            <Text style={styles.sectionTitle}>{t('settings.skillLevel')}</Text>
+
+            <View style={styles.settingCard}>
+              <View style={styles.settingRow}>
+                <View style={styles.settingInfo}>
+                  <Text style={styles.settingLabel}>{t('settings.skillLevel')}</Text>
+                  <Text style={styles.settingDesc}>{t('settings.skillLevelDesc')}</Text>
+                </View>
+              </View>
+              <View style={styles.settingDivider} />
+              <View style={styles.skillRow}>
+                {SKILL_LEVELS.map((level) => {
+                  const isActive = skillLevel === level;
+                  return (
+                    <TouchableOpacity
+                      key={level}
+                      style={[styles.skillOption, isActive && styles.skillOptionActive]}
+                      onPress={() => handleSkillChange(level)}
+                      activeOpacity={0.7}
+                      accessibilityRole="button"
+                      accessibilityLabel={t(SKILL_TAG_KEYS[level])}
+                      accessibilityState={{ selected: isActive }}
+                    >
+                      <Text style={[styles.skillOptionText, isActive && styles.skillOptionTextActive]}>
+                        {t(SKILL_TAG_KEYS[level])}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </View>
+          </>
+        )}
 
         {/* Sound & Haptics */}
         <Text style={styles.sectionTitle}>{t('settings.soundHaptics')}</Text>
@@ -458,6 +502,28 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     flexDirection: 'row',
     padding: spacing.sm,
     gap: spacing.xs,
+  },
+  skillRow: {
+    flexDirection: 'row',
+    padding: spacing.sm,
+    gap: spacing.xs,
+  },
+  skillOption: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: 'center',
+    borderRadius: borderRadius.sm,
+  },
+  skillOptionActive: {
+    backgroundColor: colors.goldBright,
+  },
+  skillOptionText: {
+    ...typography.label,
+    color: colors.textSecondary,
+  },
+  skillOptionTextActive: {
+    color: colors.playText,
+    fontFamily: fontFamily.bodyBold,
   },
   themeOption: {
     flex: 1,

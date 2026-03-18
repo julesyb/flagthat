@@ -19,7 +19,7 @@ import { spacing, typography, fontFamily, fontSize, buildButtons, borderRadius, 
 import { APP_URL } from '../utils/config';
 import { useTheme } from '../contexts/ThemeContext';
 import { getStreakFromResults, generateDailyShareGrid, generateShareGrid, modeLabelKey } from '../utils/gameEngine';
-import { updateStats, updateFlagResults, saveDailyChallenge, incrementDailyChallenges, markShared, saveBaselineResult, getStats, getFlagStats, getDayStreakInfo, getBadgeData, persistEarnedBadges, getMissedFlagIds, addGameHistoryEntry, getChallengeName, saveChallengeName, addChallengeToHistory, recordRegionScore, getPersistedLevel, persistLevel, UNLOCK_THRESHOLD } from '../utils/storage';
+import { updateStats, updateFlagResults, saveDailyChallenge, incrementDailyChallenges, markShared, saveBaselineResult, getStats, getFlagStats, getDayStreakInfo, getBadgeData, persistEarnedBadges, getMissedFlagIds, addGameHistoryEntry, getChallengeName, saveChallengeName, addChallengeToHistory, recordRegionScore, getPersistedLevel, persistLevel, UNLOCK_THRESHOLD, recordGameForProgression, SkillLevel, SKILL_TAG_KEYS } from '../utils/storage';
 import { BaselineRegionId, UserStats, GameMode, CategoryId, BASELINE_REGIONS } from '../types';
 import { t } from '../utils/i18n';
 import { hapticCorrect, hapticTap, playCelebrationSound } from '../utils/feedback';
@@ -73,7 +73,7 @@ async function persistGameData(
   isChallenge: boolean,
   challenge: ChallengeData | undefined,
   playerName: string | undefined,
-): Promise<void> {
+): Promise<SkillLevel | null> {
   const correctResults = results.filter((r) => r.correct);
   const speedData = correctResults.length > 0
     ? { correctTimeMs: correctResults.reduce((sum, r) => sum + r.timeTaken, 0), correctCount: correctResults.length }
@@ -81,6 +81,8 @@ async function persistGameData(
   await updateStats(correct, questionTotal, streak, config.mode, config.category, speedData);
   await updateFlagResults(results);
   await addGameHistoryEntry(accuracy, config.mode);
+  // Auto-progression: track perfect games for skill level advancement
+  const skillUp = await recordGameForProgression(correct, questionTotal, config.mode);
 
   if ((BASELINE_REGIONS as readonly string[]).includes(config.category)) {
     await recordRegionScore(config.category as BaselineRegionId, correct, questionTotal);
@@ -119,6 +121,7 @@ async function persistGameData(
       opponentResults: challenge.hostResults.map((r) => r.correct),
     });
   }
+  return skillUp;
 }
 
 interface PostGameResult {
@@ -219,6 +222,8 @@ export default function ResultsScreen({ route, navigation }: Props) {
   const [isNewBestStreak, setIsNewBestStreak] = useState(false);
   const [newCountriesCount, setNewCountriesCount] = useState(0);
   const [levelUpTo, setLevelUpTo] = useState<number | null>(null);
+  const [skillLevelUp, setSkillLevelUp] = useState<SkillLevel | null>(null);
+  const skillBannerAnim = useRef(new Animated.Value(0)).current;
 
   // Daily leaderboard state
   const [leaderboardEntries, setLeaderboardEntries] = useState<DailyLeaderboardEntry[]>([]);
@@ -373,10 +378,14 @@ export default function ResultsScreen({ route, navigation }: Props) {
         await snapshotPreGameState(streak);
 
       if (!reviewOnly) {
-        await persistGameData(
+        const newSkill = await persistGameData(
           results, config, correct, streak, accuracy, questionTotal,
           isDaily, isChallenge, challenge, playerName,
         );
+        if (newSkill) {
+          setSkillLevelUp(newSkill);
+          Animated.spring(skillBannerAnim, { toValue: 1, friction: 7, tension: 60, useNativeDriver: true }).start();
+        }
       }
       if (isBaseline) {
         const regionTotal = getCategoryCount(config.category as CategoryId);
@@ -993,6 +1002,25 @@ export default function ResultsScreen({ route, navigation }: Props) {
           </TouchableOpacity>
         </TouchableOpacity>
       </Modal>
+
+      {/* ── Skill level-up banner ── */}
+      {skillLevelUp && (
+        <Animated.View style={[styles.skillUpBanner, {
+          opacity: skillBannerAnim,
+          transform: [{ translateY: skillBannerAnim.interpolate({ inputRange: [0, 1], outputRange: [40, 0] }) }],
+        }]}>
+          <Text style={styles.skillUpText}>
+            {t('onboarding.skillLevelUp', { level: t(SKILL_TAG_KEYS[skillLevelUp]) })}
+          </Text>
+          <TouchableOpacity
+            onPress={() => setSkillLevelUp(null)}
+            accessibilityRole="button"
+            accessibilityLabel={t('common.closeDialog')}
+          >
+            <Text style={styles.skillUpDismissText}>{t('common.next')}</Text>
+          </TouchableOpacity>
+        </Animated.View>
+      )}
     </SafeAreaView>
   );
 }
@@ -1330,5 +1358,21 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   },
   levelUpButtonText: {
     ...typography.actionLabel, color: colors.playText,
+  },
+
+  // ── Skill level-up banner
+  skillUpBanner: {
+    position: 'absolute', bottom: spacing.xl, left: spacing.md, right: spacing.md,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    backgroundColor: colors.surface, borderRadius: borderRadius.lg,
+    padding: spacing.md, paddingHorizontal: spacing.lg,
+    borderWidth: 2, borderColor: colors.goldBright,
+    ...shadows.medium,
+  },
+  skillUpText: {
+    ...typography.bodyBold, color: colors.goldBright, flex: 1,
+  },
+  skillUpDismissText: {
+    ...typography.actionLabel, color: colors.goldBright, marginLeft: spacing.md,
   },
 }); };
