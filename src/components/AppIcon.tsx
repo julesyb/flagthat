@@ -23,6 +23,9 @@ export default function AppIcon({ size = 120, variant = 'dark' }: AppIconProps) 
 
   return (
     <View
+      accessible
+      accessibilityRole="image"
+      accessibilityLabel="Flag That"
       style={[
         styles.container,
         {

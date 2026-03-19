@@ -371,7 +371,7 @@ export default function HomeScreen({ navigation }: Props) {
                 });
               }}
               accessibilityRole="button"
-              accessibilityLabel={`Play ${t('home.timedQuiz')}`}
+              accessibilityLabel={t('a11y.playMode', { mode: t('home.timedQuiz') })}
               accessibilityHint={t('a11y.opensMode')}
             >
               <View style={[styles.modeBar, { backgroundColor: colors.modeRed }]} />
@@ -390,7 +390,7 @@ export default function HomeScreen({ navigation }: Props) {
                 });
               }}
               accessibilityRole="button"
-              accessibilityLabel={`Play ${t('home.flagImpostor')}`}
+              accessibilityLabel={t('a11y.playMode', { mode: t('home.flagImpostor') })}
               accessibilityHint={t('a11y.opensMode')}
             >
               <View style={[styles.modeBar, { backgroundColor: colors.modeGreen }]} />
@@ -409,7 +409,7 @@ export default function HomeScreen({ navigation }: Props) {
                 });
               }}
               accessibilityRole="button"
-              accessibilityLabel={`Play ${t('setup.flagPuzzle')}`}
+              accessibilityLabel={t('a11y.playMode', { mode: t('setup.flagPuzzle') })}
               accessibilityHint={t('a11y.opensMode')}
             >
               <View style={[styles.modeBar, { backgroundColor: colors.modePurple }]} />
@@ -429,7 +429,7 @@ export default function HomeScreen({ navigation }: Props) {
                   });
                 }}
                 accessibilityRole="button"
-                accessibilityLabel={`Play ${t('home.practiceWeak')}`}
+                accessibilityLabel={t('a11y.playMode', { mode: t('home.practiceWeak') })}
                 accessibilityHint={t('a11y.opensPractice')}
               >
                 <View style={[styles.modeBar, { backgroundColor: colors.modeRed }]} />
@@ -481,7 +481,7 @@ export default function HomeScreen({ navigation }: Props) {
                   });
                 }}
                 accessibilityRole="button"
-                accessibilityLabel={`Start ${t(`categories.${nextRegion}`)} knowledge test`}
+                accessibilityLabel={t('a11y.startBaseline', { region: t(`categories.${nextRegion}`) })}
                 accessibilityHint={t('a11y.beginsBaseline')}
               >
                 <Text style={styles.onboardingCtaText}>{t(`categories.${nextRegion}`)}</Text>
@@ -521,7 +521,7 @@ export default function HomeScreen({ navigation }: Props) {
                       });
                     }}
                     accessibilityRole="button"
-                    accessibilityLabel={isDone ? `${t(`categories.${r}`)} completed, ${result!.accuracy}% accuracy` : `Start ${t(`categories.${r}`)} knowledge test`}
+                    accessibilityLabel={isDone ? t('a11y.regionCompleted', { region: t(`categories.${r}`), accuracy: result!.accuracy }) : t('a11y.startBaseline', { region: t(`categories.${r}`) })}
                     accessibilityState={{ disabled: isDone }}
                   >
                     {isDone && <CheckIcon size={10} color={colors.success} />}

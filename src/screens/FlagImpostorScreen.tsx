@@ -527,9 +527,9 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
                       ? item.isFake
                         ? t('impostor.fake')
                         : flagName(item.flag!)
-                      : `Flag option ${item.index + 1}`
+                      : t('a11y.flagOption', { number: item.index + 1 })
                   }
-                  accessibilityHint={picked === null ? "Tap to select as the impostor flag" : undefined}
+                  accessibilityHint={picked === null ? t('a11y.selectImpostor') : undefined}
                   accessibilityState={{ disabled: picked !== null }}
                 >
                   {item.isFake ? (

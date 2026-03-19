@@ -600,6 +600,12 @@ const en = {
     zoomIn: 'Zoom in',
     zoomOut: 'Zoom out',
     timeLimitSeconds: '{label}: {seconds} seconds',
+    playMode: 'Play {mode}',
+    flagOption: 'Flag option {number}',
+    selectImpostor: 'Tap to select as the impostor flag',
+    selectCountry: 'Select {name}',
+    startBaseline: 'Start {region} knowledge test',
+    regionCompleted: '{region} completed, {accuracy}% accuracy',
   },
 };
 
