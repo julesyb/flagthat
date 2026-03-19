@@ -1,6 +1,7 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { colors, spacing, typography, borderRadius } from '../utils/theme';
+import { spacing, typography, borderRadius, ThemeColors } from '../utils/theme';
+import { useTheme } from '../contexts/ThemeContext';
 import { t } from '../utils/i18n';
 
 interface Props {
@@ -11,15 +12,15 @@ interface State {
   hasError: boolean;
 }
 
-export default class ErrorBoundary extends Component<Props, State> {
+class ErrorBoundaryInner extends Component<Props & { colors: ThemeColors }, State> {
   state: State = { hasError: false };
 
   static getDerivedStateFromError(): State {
     return { hasError: true };
   }
 
-  componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error('ErrorBoundary caught:', error, info.componentStack);
+  componentDidCatch(_error: Error, _info: ErrorInfo) {
+    // Error logging handled by external service if needed
   }
 
   handleReset = () => {
@@ -28,6 +29,7 @@ export default class ErrorBoundary extends Component<Props, State> {
 
   render() {
     if (this.state.hasError) {
+      const styles = createStyles(this.props.colors);
       return (
         <View style={styles.container}>
           <Text style={styles.title}>{t('error.title')}</Text>
@@ -38,6 +40,8 @@ export default class ErrorBoundary extends Component<Props, State> {
             style={styles.button}
             onPress={this.handleReset}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel={t('error.tryAgain')}
           >
             <Text style={styles.buttonText}>{t('error.tryAgain')}</Text>
           </TouchableOpacity>
@@ -49,7 +53,12 @@ export default class ErrorBoundary extends Component<Props, State> {
   }
 }
 
-const styles = StyleSheet.create({
+export default function ErrorBoundary({ children }: Props) {
+  const { colors } = useTheme();
+  return <ErrorBoundaryInner colors={colors}>{children}</ErrorBoundaryInner>;
+}
+
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,

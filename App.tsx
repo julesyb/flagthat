@@ -241,12 +241,12 @@ export default function App() {
   }
 
   return (
-    <ErrorBoundary>
-      <ThemeProvider>
+    <ThemeProvider>
+      <ErrorBoundary>
         <AppContent />
-      </ThemeProvider>
-      {Platform.OS === 'web' && <Analytics />}
-    </ErrorBoundary>
+        {Platform.OS === 'web' && <Analytics />}
+      </ErrorBoundary>
+    </ThemeProvider>
   );
 }
 

@@ -14,7 +14,7 @@ export default function PageHeader({ title, subtitle, style }: PageHeaderProps) 
 
   return (
     <View style={[styles.container, style]}>
-      <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
+      <Text style={[styles.title, { color: colors.text }]} accessibilityRole="header">{title}</Text>
       {subtitle != null && (
         <Text style={[styles.subtitle, { color: colors.textTertiary }]}>
           {subtitle}

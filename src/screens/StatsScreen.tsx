@@ -1385,7 +1385,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   dailyPlayBtnText: {
     ...typography.bodyBold,
-    color: '#FFFFFF',
+    color: colors.white,
   },
   dailyViewBtn: {
     backgroundColor: colors.surfaceSecondary,

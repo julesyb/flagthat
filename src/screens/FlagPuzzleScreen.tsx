@@ -409,7 +409,7 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
                   onPress={() => handleSuggestionSelect(name)}
                   activeOpacity={0.7}
                   accessibilityRole="button"
-                  accessibilityLabel={`Select ${name}`}
+                  accessibilityLabel={t('a11y.selectCountry', { name })}
                 >
                   <Text style={styles.suggestionText}>{name}</Text>
                 </TouchableOpacity>
