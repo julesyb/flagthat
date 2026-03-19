@@ -41,6 +41,33 @@ import { hasCompletedOnboarding } from './src/utils/storage';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
+/**
+ * Wraps a game screen to redirect to Home if config param is missing (e.g. corrupted deep link).
+ * Uses `any` because React Navigation screen props are contravariant in the route name,
+ * making generic HOC typing impractical without type assertions at every call site.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function withConfigGuard(Screen: React.ComponentType<any>) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return function ConfigGuard(props: any) {
+    const config = props.route?.params?.config;
+    useEffect(() => {
+      if (!config) props.navigation.replace('Home');
+    }, [config, props.navigation]);
+    if (!config) return null;
+    return <Screen {...props} />;
+  };
+}
+
+const gameScreenConfig = {
+  parse: {
+    config: (json: string) => {
+      try { return JSON.parse(json); } catch { return undefined; }
+    },
+  },
+  stringify: { config: (config: object) => JSON.stringify(config) },
+};
+
 const linking = {
   prefixes: [APP_URL, 'flagthat://'],
   config: {
@@ -57,6 +84,12 @@ const linking = {
         path: 'd/:code',
         parse: { code: (code: string) => decodeURIComponent(code) },
       },
+      Game: { path: 'Game', ...gameScreenConfig },
+      FlashFlag: { path: 'FlashFlag', ...gameScreenConfig },
+      FlagPuzzle: { path: 'FlagPuzzle', ...gameScreenConfig },
+      Neighbors: { path: 'Neighbors', ...gameScreenConfig },
+      FlagImpostor: { path: 'FlagImpostor', ...gameScreenConfig },
+      CapitalConnection: { path: 'CapitalConnection', ...gameScreenConfig },
     },
   },
 };
@@ -94,6 +127,13 @@ function useScreenOptions() {
 
 // Configure notification display behavior at module level
 configureNotificationHandler();
+
+const GuardedGame = withConfigGuard(GameScreen);
+const GuardedFlashFlag = withConfigGuard(FlashFlagScreen);
+const GuardedFlagPuzzle = withConfigGuard(FlagPuzzleScreen);
+const GuardedNeighbors = withConfigGuard(NeighborsScreen);
+const GuardedFlagImpostor = withConfigGuard(FlagImpostorScreen);
+const GuardedCapitalConnection = withConfigGuard(CapitalConnectionScreen);
 
 function AppContent() {
   const [localeReady, setLocaleReady] = useState(false);
@@ -140,32 +180,32 @@ function AppContent() {
         />
         <Stack.Screen
           name="Game"
-          component={GameScreen}
+          component={GuardedGame}
           options={{ headerShown: false, gestureEnabled: false }}
         />
         <Stack.Screen
           name="FlashFlag"
-          component={FlashFlagScreen}
+          component={GuardedFlashFlag}
           options={{ headerShown: false, gestureEnabled: false }}
         />
         <Stack.Screen
           name="FlagPuzzle"
-          component={FlagPuzzleScreen}
+          component={GuardedFlagPuzzle}
           options={{ headerShown: false, gestureEnabled: false }}
         />
         <Stack.Screen
           name="Neighbors"
-          component={NeighborsScreen}
+          component={GuardedNeighbors}
           options={{ headerShown: false, gestureEnabled: false }}
         />
         <Stack.Screen
           name="FlagImpostor"
-          component={FlagImpostorScreen}
+          component={GuardedFlagImpostor}
           options={{ headerShown: false, gestureEnabled: false }}
         />
         <Stack.Screen
           name="CapitalConnection"
-          component={CapitalConnectionScreen}
+          component={GuardedCapitalConnection}
           options={{ headerShown: false, gestureEnabled: false }}
         />
         <Stack.Screen
