@@ -15,7 +15,7 @@ import {
   Alert,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { spacing, typography, fontFamily, fontSize, buildButtons, borderRadius, ThemeColors } from '../utils/theme';
+import { spacing, typography, fontFamily, fontSize, buildButtons, borderRadius, shadows, ThemeColors } from '../utils/theme';
 import { APP_URL } from '../utils/config';
 import { useTheme } from '../contexts/ThemeContext';
 import { getStreakFromResults, generateDailyShareGrid, generateShareGrid, modeLabelKey } from '../utils/gameEngine';
