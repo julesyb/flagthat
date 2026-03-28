@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { fontFamily, fontSize, spacing, ThemeColors } from '../utils/theme';
+import { View, StyleSheet } from 'react-native';
+import Svg, { Path, Text as SvgText } from 'react-native-svg';
+import { ThemeColors } from '../utils/theme';
 import { useTheme } from '../contexts/ThemeContext';
 
 interface AppIconProps {
@@ -9,110 +10,75 @@ interface AppIconProps {
 }
 
 /**
- * Brand app icon component — renders the "Flag That" logotype
- * in a square container matching the app icon design.
+ * Brand app icon component — renders "FT" inside a waving flag outline
+ * on a black background.
  *
  * Usage: <AppIcon size={120} variant="dark" />
  */
 export default function AppIcon({ size = 120, variant = 'dark' }: AppIconProps) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const isDark = variant === 'dark';
-  const scale = size / 120;
-  const textColor = isDark ? colors.white : colors.ink;
 
   return (
     <View
       accessible
       accessibilityRole="image"
       accessibilityLabel="Flag That"
-      style={[
-        styles.container,
-        {
-          width: size,
-          height: size,
-          backgroundColor: isDark ? colors.ink : colors.background,
-        },
-      ]}
+      style={[styles.container, { width: size, height: size }]}
     >
-      {/* Accent bar */}
-      <View
-        style={[
-          styles.accentBar,
-          {
-            left: size * 0.08,
-            top: size * 0.12,
-            width: size * 0.025,
-            height: size * 0.76,
-          },
-        ]}
-      />
-
-      <View style={[styles.textContainer, { paddingLeft: size * 0.16, paddingTop: size * 0.22 }]}>
-        <Text
-          style={[
-            styles.flagText,
-            {
-              fontSize: fontSize.title * scale,
-              lineHeight: 36 * scale,
-              color: textColor,
-            },
-          ]}
-        >
-          Flag
-        </Text>
-        <View
-          style={[
-            styles.rule,
-            {
-              backgroundColor: isDark ? colors.whiteAlpha15 : colors.inkAlpha10,
-              height: Math.max(1, 2 * scale),
-              marginTop: spacing.xxs * scale,
-              marginBottom: spacing.xxs * scale,
-            },
-          ]}
+      <Svg width={size} height={size} viewBox="0 0 120 120" fill="none">
+        {/* Flag pole */}
+        <Path
+          d="M28 22 L28 100"
+          stroke="#FFFFFF"
+          strokeWidth={3.5}
+          strokeLinecap="round"
         />
-        <Text
-          style={[
-            styles.thatText,
-            {
-              fontSize: fontSize.title * scale,
-              lineHeight: 36 * scale,
-            },
-          ]}
+
+        {/* Flag shape with wind wave */}
+        <Path
+          d="M28 24 C42 20, 58 30, 72 26 C80 24, 88 22, 96 26 L96 28 C92 38, 94 48, 96 58 L96 60 C88 56, 80 58, 72 60 C58 64, 42 54, 28 58 Z"
+          stroke="#FFFFFF"
+          strokeWidth={2.5}
+          strokeLinejoin="round"
+          fill="none"
+        />
+
+        {/* F in white */}
+        <SvgText
+          x="48"
+          y="50"
+          fontSize="28"
+          fontWeight="bold"
+          fontFamily="Barlow-Bold, Barlow, sans-serif"
+          fill="#FFFFFF"
+          textAnchor="middle"
         >
-          That
-        </Text>
-      </View>
+          F
+        </SvgText>
+
+        {/* T in gold/yellow */}
+        <SvgText
+          x="72"
+          y="50"
+          fontSize="28"
+          fontWeight="bold"
+          fontFamily="Barlow-Bold, Barlow, sans-serif"
+          fill="#E9BA4C"
+          textAnchor="middle"
+        >
+          T
+        </SvgText>
+      </Svg>
     </View>
   );
 }
 
-const createStyles = (colors: ThemeColors) => StyleSheet.create({
+const createStyles = (_colors: ThemeColors) => StyleSheet.create({
   container: {
-    position: 'relative',
+    backgroundColor: '#1A1820',
     overflow: 'hidden',
-  },
-  accentBar: {
-    position: 'absolute',
-    backgroundColor: colors.accent,
-  },
-  textContainer: {
-    flex: 1,
+    alignItems: 'center',
     justifyContent: 'center',
   },
-  flagText: {
-    fontFamily: fontFamily.display,
-    letterSpacing: -0.5,
-  },
-  rule: {
-    alignSelf: 'flex-start',
-    width: '60%',
-  },
-  thatText: {
-    fontFamily: fontFamily.displayItalic,
-    color: colors.accent,
-    letterSpacing: -0.5,
-  },
 });
-
