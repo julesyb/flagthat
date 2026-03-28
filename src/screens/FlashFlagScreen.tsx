@@ -88,27 +88,30 @@ export default function FlashFlagScreen({ route, navigation }: Props) {
   const [countdown, setCountdown] = useState(3);
   const [motionGranted, setMotionGranted] = useState(false);
   const questionStartTime = useRef(Date.now());
-  const isProcessing = useRef(false);
-  const tiltCooldown = useRef(false);
+  // Single lock gate: true while feedback is showing + cooldown period.
+  const locked = useRef(false);
   const resultsRef = useRef<GameResult[]>([]);
-  // Hysteresis: track whether the phone has returned to the neutral zone
-  // after the last tilt. Prevents re-triggering while the phone is still tilted.
+  // Hysteresis for sensors only: the phone must return to the neutral zone
+  // between tilts. Buttons/keyboard bypass this since each press is discrete.
   const returnedToNeutral = useRef(true);
-  // Keep mutable refs for values the sensor callbacks need, so the sensor
-  // effects only subscribe once (on phase change) instead of tearing down and
-  // re-subscribing on every question change.
+  // Mutable mirrors of state so sensor callbacks (subscribed once) stay current.
   const currentIndexRef = useRef(0);
   const questionsRef = useRef<GameQuestion[]>([]);
+  // Track pending timeouts so we can cancel on unmount.
+  const feedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cooldownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  useEffect(() => { resultsRef.current = results; }, [results]);
+  useEffect(() => { currentIndexRef.current = currentIndex; }, [currentIndex]);
+  useEffect(() => { questionsRef.current = questions; }, [questions]);
+
+  // Cancel pending timeouts on unmount to avoid state updates after navigation.
   useEffect(() => {
-    resultsRef.current = results;
-  }, [results]);
-  useEffect(() => {
-    currentIndexRef.current = currentIndex;
-  }, [currentIndex]);
-  useEffect(() => {
-    questionsRef.current = questions;
-  }, [questions]);
+    return () => {
+      if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
+      if (cooldownTimer.current) clearTimeout(cooldownTimer.current);
+    };
+  }, []);
 
   // Lock to landscape (native only)
   useEffect(() => {
@@ -157,20 +160,18 @@ export default function FlashFlagScreen({ route, navigation }: Props) {
     }
   }, [timeLeft]);
 
-  // Stable tilt handler that reads from refs so it never goes stale.
-  // Defined with useCallback with NO deps that change per-question,
-  // so sensor effects can subscribe once and stay stable.
+  // Core action handler. Reads from refs so it never captures stale state.
+  // Sensor listeners gate on `returnedToNeutral` before calling this;
+  // buttons/keyboard call it directly (no hysteresis needed).
   const handleTilt = useCallback(
     (action: 'correct' | 'skip') => {
-      if (isProcessing.current || tiltCooldown.current) return;
-      if (!returnedToNeutral.current) return;
+      if (locked.current) return;
 
       const idx = currentIndexRef.current;
       const qs = questionsRef.current;
       if (!qs[idx]) return;
 
-      isProcessing.current = true;
-      tiltCooldown.current = true;
+      locked.current = true;
       returnedToNeutral.current = false;
 
       const timeTaken = Date.now() - questionStartTime.current;
@@ -193,10 +194,9 @@ export default function FlashFlagScreen({ route, navigation }: Props) {
       setTiltState(action);
       setResults((prev) => [...prev, result]);
 
-      // Brief feedback flash, then advance to next flag.
-      setTimeout(() => {
+      // Feedback flash, then advance to next flag.
+      feedbackTimer.current = setTimeout(() => {
         setTiltState('neutral');
-        isProcessing.current = false;
 
         if (idx < qs.length - 1) {
           setCurrentIndex(idx + 1);
@@ -209,13 +209,9 @@ export default function FlashFlagScreen({ route, navigation }: Props) {
           return;
         }
 
-        setTimeout(() => {
-          tiltCooldown.current = false;
-          // For button/keyboard input, re-enable immediately since each
-          // press is a discrete action. For sensors, the hysteresis check
-          // in the listener will keep it blocked until the phone returns
-          // to the neutral zone.
-          returnedToNeutral.current = true;
+        // Brief cooldown before unlocking to prevent accidental double-input.
+        cooldownTimer.current = setTimeout(() => {
+          locked.current = false;
         }, COOLDOWN_MS);
       }, FEEDBACK_DURATION_MS);
     },
@@ -234,15 +230,17 @@ export default function FlashFlagScreen({ route, navigation }: Props) {
       Accelerometer.setUpdateInterval(100);
 
       subscription = Accelerometer.addListener(({ z }: { z: number }) => {
-        if (isProcessing.current || tiltCooldown.current) return;
-
-        // Hysteresis: require return to neutral zone before next trigger
+        // Hysteresis: require return to neutral zone before next trigger.
+        // This check runs even while locked so the neutral zone is tracked
+        // continuously, and the phone is ready as soon as the lock clears.
         if (!returnedToNeutral.current) {
           if (Math.abs(z) < NATIVE_NEUTRAL_ZONE) {
             returnedToNeutral.current = true;
           }
           return;
         }
+
+        if (locked.current) return;
 
         if (z < -NATIVE_TILT_THRESHOLD) {
           handleTilt('correct');
@@ -270,19 +268,19 @@ export default function FlashFlagScreen({ route, navigation }: Props) {
     if (!motionGranted) return;
 
     const handleMotion = (e: DeviceMotionEvent) => {
-      if (isProcessing.current || tiltCooldown.current) return;
       const acc = e.accelerationIncludingGravity;
       if (!acc || acc.z == null) return;
 
       const z = acc.z;
 
-      // Hysteresis: require return to neutral zone before next trigger
       if (!returnedToNeutral.current) {
         if (Math.abs(z) < WEB_NEUTRAL_ZONE) {
           returnedToNeutral.current = true;
         }
         return;
       }
+
+      if (locked.current) return;
 
       if (z < -WEB_TILT_THRESHOLD) {
         handleTilt('correct');
@@ -296,7 +294,7 @@ export default function FlashFlagScreen({ route, navigation }: Props) {
   }, [phase, motionGranted, handleTilt]);
 
   // Web keyboard controls (desktop web fallback).
-  // Subscribes once when playing starts.
+  // Subscribes once when playing starts. No hysteresis needed.
   useEffect(() => {
     if (!isWeb) return;
     if (phase !== 'playing') return;
