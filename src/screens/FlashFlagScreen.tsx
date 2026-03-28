@@ -47,6 +47,16 @@ function getIsMobileWeb(): boolean {
 
 const isMobileWeb = getIsMobileWeb();
 
+// Tilt thresholds - require a strong, deliberate tilt to trigger
+const NATIVE_TILT_THRESHOLD = 0.7;
+const WEB_TILT_THRESHOLD = 7;
+// Neutral zone - phone must return close to flat before next tilt registers
+const NATIVE_NEUTRAL_ZONE = 0.3;
+const WEB_NEUTRAL_ZONE = 3;
+// Timing
+const FEEDBACK_DURATION_MS = 400;
+const COOLDOWN_MS = 150;
+
 // Request DeviceMotion permission on iOS 13+ (required for tilt on mobile Safari)
 async function requestMotionPermission(): Promise<boolean> {
   if (typeof DeviceMotionEvent === 'undefined') return false;
@@ -78,13 +88,33 @@ export default function FlashFlagScreen({ route, navigation }: Props) {
   const [countdown, setCountdown] = useState(3);
   const [motionGranted, setMotionGranted] = useState(false);
   const questionStartTime = useRef(Date.now());
-  const isProcessing = useRef(false);
-  const tiltCooldown = useRef(false);
+  // Single lock gate: true while feedback is showing + cooldown period.
+  const locked = useRef(false);
   const resultsRef = useRef<GameResult[]>([]);
+  // Hysteresis for sensors only: the phone must return to the neutral zone
+  // between tilts. Buttons/keyboard bypass this since each press is discrete.
+  const returnedToNeutral = useRef(true);
+  // Mutable mirrors of state so sensor callbacks (subscribed once) stay current.
+  const currentIndexRef = useRef(0);
+  const questionsRef = useRef<GameQuestion[]>([]);
+  // Track pending timeouts so we can cancel on unmount.
+  const feedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cooldownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Prevent double-navigation (timer expiry, last-question answer, and Exit
+  // can all race to navigate to Results).
+  const navigated = useRef(false);
 
+  useEffect(() => { resultsRef.current = results; }, [results]);
+  useEffect(() => { currentIndexRef.current = currentIndex; }, [currentIndex]);
+  useEffect(() => { questionsRef.current = questions; }, [questions]);
+
+  // Cancel pending timeouts on unmount to avoid state updates after navigation.
   useEffect(() => {
-    resultsRef.current = results;
-  }, [results]);
+    return () => {
+      if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
+      if (cooldownTimer.current) clearTimeout(cooldownTimer.current);
+    };
+  }, []);
 
   // Lock to landscape (native only)
   useEffect(() => {
@@ -128,12 +158,83 @@ export default function FlashFlagScreen({ route, navigation }: Props) {
 
   // Navigate to results when time runs out
   useEffect(() => {
-    if (phase === 'playing' && timeLeft <= 0) {
+    if (phase === 'playing' && timeLeft <= 0 && !navigated.current) {
+      navigated.current = true;
       navigation.replace('Results', { results: resultsRef.current, config });
     }
   }, [timeLeft]);
 
-  // Accelerometer for tilt detection (native only)
+  // Core action handler. Reads from refs so it never captures stale state.
+  // Sensor listeners gate on `returnedToNeutral` before calling this;
+  // buttons/keyboard call it directly (no hysteresis needed).
+  const handleTilt = useCallback(
+    (action: 'correct' | 'skip') => {
+      if (locked.current || navigated.current) return;
+
+      const idx = currentIndexRef.current;
+      const qs = questionsRef.current;
+      if (!qs[idx]) return;
+
+      locked.current = true;
+      returnedToNeutral.current = false;
+
+      const timeTaken = Date.now() - questionStartTime.current;
+      const currentQ = qs[idx];
+
+      const result: GameResult = {
+        question: currentQ,
+        userAnswer: action === 'correct' ? currentQ.flag.name : 'SKIPPED',
+        correct: action === 'correct',
+        timeTaken,
+      };
+
+      if (action === 'correct') {
+        hapticCorrect();
+      } else {
+        hapticWrong();
+        playWrongSound();
+      }
+
+      const isLastQuestion = idx >= qs.length - 1;
+
+      // Advance index immediately so the next flag preloads behind the
+      // feedback overlay (FlagImage stays mounted, receives new countryCode,
+      // and loads from cache while the green/red flash is visible).
+      if (!isLastQuestion) {
+        setCurrentIndex(idx + 1);
+      }
+
+      setTiltState(action);
+      setResults((prev) => [...prev, result]);
+
+      // Feedback flash, then reveal the preloaded flag or navigate.
+      feedbackTimer.current = setTimeout(() => {
+        if (navigated.current) return;
+        setTiltState('neutral');
+
+        if (isLastQuestion) {
+          navigated.current = true;
+          // resultsRef is already synced (includes `result` from setResults above).
+          navigation.replace('Results', {
+            results: resultsRef.current,
+            config,
+          });
+          return;
+        }
+
+        // Start timing the new question when it becomes visible.
+        questionStartTime.current = Date.now();
+
+        cooldownTimer.current = setTimeout(() => {
+          locked.current = false;
+        }, COOLDOWN_MS);
+      }, FEEDBACK_DURATION_MS);
+    },
+    [navigation, config],
+  );
+
+  // Accelerometer for tilt detection (native only).
+  // Subscribes once when playing starts; reads refs for current state.
   useEffect(() => {
     if (isWeb) return;
     if (phase !== 'playing') return;
@@ -144,11 +245,21 @@ export default function FlashFlagScreen({ route, navigation }: Props) {
       Accelerometer.setUpdateInterval(100);
 
       subscription = Accelerometer.addListener(({ z }: { z: number }) => {
-        if (isProcessing.current || tiltCooldown.current) return;
+        // Hysteresis: require return to neutral zone before next trigger.
+        // This check runs even while locked so the neutral zone is tracked
+        // continuously, and the phone is ready as soon as the lock clears.
+        if (!returnedToNeutral.current) {
+          if (Math.abs(z) < NATIVE_NEUTRAL_ZONE) {
+            returnedToNeutral.current = true;
+          }
+          return;
+        }
 
-        if (z < -0.6) {
+        if (locked.current) return;
+
+        if (z < -NATIVE_TILT_THRESHOLD) {
           handleTilt('correct');
-        } else if (z > 0.6) {
+        } else if (z > NATIVE_TILT_THRESHOLD) {
           handleTilt('skip');
         }
       });
@@ -159,38 +270,46 @@ export default function FlashFlagScreen({ route, navigation }: Props) {
     return () => {
       if (subscription) subscription.remove();
     };
-  }, [phase, currentIndex, questions]);
+  }, [phase, handleTilt]);
 
-  // Mobile web tilt detection via DeviceMotion API
+  // Mobile web tilt detection via DeviceMotion API.
   // Uses z-axis (perpendicular to screen) to match native behavior.
   // Phone on forehead, screen outward: z ~ 0 at rest.
   // Tilt forward (nod, screen faces ground): z goes negative.
   // Tilt backward (look up, screen faces sky): z goes positive.
-  // Thresholds ±6 m/s^2 match native ±0.6g (expo-sensors normalizes to 0-1).
   useEffect(() => {
     if (!isMobileWeb) return;
     if (phase !== 'playing') return;
     if (!motionGranted) return;
 
     const handleMotion = (e: DeviceMotionEvent) => {
-      if (isProcessing.current || tiltCooldown.current) return;
       const acc = e.accelerationIncludingGravity;
       if (!acc || acc.z == null) return;
 
       const z = acc.z;
 
-      if (z < -6) {
-        handleTilt('correct'); // Screen facing ground (nod forward)
-      } else if (z > 6) {
-        handleTilt('skip'); // Screen facing sky (lean back)
+      if (!returnedToNeutral.current) {
+        if (Math.abs(z) < WEB_NEUTRAL_ZONE) {
+          returnedToNeutral.current = true;
+        }
+        return;
+      }
+
+      if (locked.current) return;
+
+      if (z < -WEB_TILT_THRESHOLD) {
+        handleTilt('correct');
+      } else if (z > WEB_TILT_THRESHOLD) {
+        handleTilt('skip');
       }
     };
 
     window.addEventListener('devicemotion', handleMotion as EventListener);
     return () => window.removeEventListener('devicemotion', handleMotion as EventListener);
-  }, [phase, currentIndex, questions, motionGranted]);
+  }, [phase, motionGranted, handleTilt]);
 
-  // Web keyboard controls (desktop web fallback)
+  // Web keyboard controls (desktop web fallback).
+  // Subscribes once when playing starts. No hysteresis needed.
   useEffect(() => {
     if (!isWeb) return;
     if (phase !== 'playing') return;
@@ -207,61 +326,7 @@ export default function FlashFlagScreen({ route, navigation }: Props) {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [phase, currentIndex, questions]);
-
-  const handleTilt = useCallback(
-    (action: 'correct' | 'skip') => {
-      if (isProcessing.current || tiltCooldown.current) return;
-      if (!questions[currentIndex]) return;
-
-      isProcessing.current = true;
-      tiltCooldown.current = true;
-
-      const timeTaken = Date.now() - questionStartTime.current;
-      const currentQ = questions[currentIndex];
-
-      const result: GameResult = {
-        question: currentQ,
-        userAnswer: action === 'correct' ? currentQ.flag.name : 'SKIPPED',
-        correct: action === 'correct',
-        timeTaken,
-      };
-
-      if (action === 'correct') {
-        hapticCorrect();
-      } else {
-        hapticWrong();
-        playWrongSound();
-      }
-
-      setTiltState(action);
-      setResults((prev) => [...prev, result]);
-
-      // Keep feedback brief so the game stays fast-paced.
-      // 500ms flash (enough to register green/red), then 200ms cooldown
-      // before the next flag to prevent accidental double-tilts.
-      setTimeout(() => {
-        setTiltState('neutral');
-        isProcessing.current = false;
-
-        if (currentIndex < questions.length - 1) {
-          setCurrentIndex((i) => i + 1);
-          questionStartTime.current = Date.now();
-        } else {
-          navigation.replace('Results', {
-            results: [...resultsRef.current, result],
-            config,
-          });
-          return;
-        }
-
-        setTimeout(() => {
-          tiltCooldown.current = false;
-        }, 200);
-      }, 500);
-    },
-    [currentIndex, questions, navigation, config],
-  );
+  }, [phase, handleTilt]);
 
   const currentQuestion = questions[currentIndex] ?? null;
   const correctCount = React.useMemo(
@@ -270,6 +335,8 @@ export default function FlashFlagScreen({ route, navigation }: Props) {
   );
 
   const exitGame = () => {
+    if (navigated.current) return;
+    navigated.current = true;
     navigation.replace('Results', { results: resultsRef.current, config });
   };
 
@@ -443,31 +510,36 @@ export default function FlashFlagScreen({ route, navigation }: Props) {
 
       <ScreenContainer flex game>
       <View style={styles.gameContent}>
-        {tiltState === 'correct' ? (
-          <Text style={styles.feedbackText} accessibilityLiveRegion="polite">{t('flashFlag.correctFeedback')}</Text>
-        ) : tiltState === 'skip' ? (
-          <Text style={styles.feedbackText} accessibilityLiveRegion="polite">{t('flashFlag.passFeedback')}</Text>
+        {/* Flag stays mounted at all times so it preloads the next image
+            behind the feedback overlay. During the green/red flash, the
+            index has already advanced and FlagImage loads from cache. When
+            feedback clears, the new flag appears instantly - no remount,
+            no spinner flash, no crossfade delay. */}
+        {config.displayMode === 'map' ? (
+          <MapImage
+            countryCode={currentQuestion.flag.id}
+            size="hero"
+            style={!isNeutral ? styles.preload : undefined}
+          />
         ) : (
-          <>
-            {config.displayMode === 'map' ? (
-              <MapImage
-                countryCode={currentQuestion.flag.id}
-                size="hero"
-              />
-            ) : (
-              <FlagImage
-                countryCode={currentQuestion.flag.id}
-                size="hero"
-              />
-            )}
-            {/* On native/mobile, teammates see the screen from across the room
-                during Heads Up play. Hide the country name so they must describe
-                the flag visually instead of reading the answer. Desktop web shows
-                it as a self-grading flash card. */}
-            {isWeb && !isMobileWeb && (
-              <Text style={styles.flagName}>{flagName(currentQuestion.flag)}</Text>
-            )}
-          </>
+          <FlagImage
+            countryCode={currentQuestion.flag.id}
+            size="hero"
+            transition={0}
+            style={!isNeutral ? styles.preload : undefined}
+          />
+        )}
+        {/* On native/mobile, teammates see the screen from across the room
+            during Heads Up play. Hide the country name so they must describe
+            the flag visually instead of reading the answer. Desktop web shows
+            it as a self-grading flash card. */}
+        {isWeb && !isMobileWeb && isNeutral && (
+          <Text style={styles.flagName}>{flagName(currentQuestion.flag)}</Text>
+        )}
+        {!isNeutral && (
+          <Text style={styles.feedbackText} accessibilityLiveRegion="polite">
+            {tiltState === 'correct' ? t('flashFlag.correctFeedback') : t('flashFlag.passFeedback')}
+          </Text>
         )}
       </View>
 
@@ -620,12 +692,6 @@ const createStyles = (colors: ThemeColors) => {
     color: colors.text,
   },
   // Playing
-  loadingText: {
-    ...typography.body,
-    color: colors.text,
-    textAlign: 'center',
-    marginTop: '45%',
-  },
   timerBar: {
     height: 6,
     backgroundColor: colors.whiteAlpha20,
@@ -641,6 +707,12 @@ const createStyles = (colors: ThemeColors) => {
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
     gap: spacing.sm,
+  },
+  // Keeps the flag mounted (for preloading) but invisible and out of flow
+  // so the feedback text centers naturally in gameContent.
+  preload: {
+    position: 'absolute',
+    opacity: 0,
   },
   flagName: {
     fontSize: fontSize.display,
