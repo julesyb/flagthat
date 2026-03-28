@@ -11,10 +11,10 @@
   .icon-card { text-align: center; }
   .icon-card label { display: block; margin-top: 8px; font-size: 12px; color: #888; }
   canvas { image-rendering: -webkit-optimize-contrast; }
-  button { background: #E5271C; color: #fff; border: none; padding: 12px 32px;
+  button { background: #9A5C0A; color: #fff; border: none; padding: 12px 32px;
            font-size: 14px; cursor: pointer; text-transform: uppercase;
            letter-spacing: 2px; margin-top: 32px; }
-  button:hover { background: #c92018; }
+  button:hover { background: #5C3506; }
 </style>
 <!--
   Google Fonts loaded here because the icon uses the same brand typefaces.
@@ -31,20 +31,21 @@
 <button onclick="downloadAll()">Download All Icons</button>
 
 <script>
-// ── Brand palette ──
-const INK    = '#111827';
-const RED    = '#E5271C';
-const PAPER  = '#F9FAFB';
+// ── Brand palette (aligned with theme.ts) ──
+const INK    = '#1A1820';
+const GOLD   = '#9A5C0A';
+const GOLD_BRIGHT = '#E9BA4C';
+const PAPER  = '#F5EFE6';
 const WHITE  = '#FFFFFF';
 
 // ── Icon variants ──
 const VARIANTS = [
-  { name: 'icon',                     size: 1024, bg: INK,   mono: false },
-  { name: 'favicon',                  size: 64,   bg: INK,   mono: false },
-  { name: 'splash-icon',              size: 512,  bg: PAPER, mono: false },
-  { name: 'android-icon-foreground',  size: 432,  bg: null,  mono: false },
-  { name: 'android-icon-background',  size: 432,  bg: PAPER, mono: false, bgOnly: true },
-  { name: 'android-icon-monochrome',  size: 432,  bg: null,  mono: true  },
+  { name: 'icon',                     size: 1024, bg: INK,   accent: GOLD_BRIGHT, mono: false },
+  { name: 'favicon',                  size: 64,   bg: INK,   accent: GOLD_BRIGHT, mono: false },
+  { name: 'splash-icon',              size: 512,  bg: PAPER, accent: GOLD,        mono: false },
+  { name: 'android-icon-foreground',  size: 432,  bg: null,  accent: GOLD,        mono: false },
+  { name: 'android-icon-background',  size: 432,  bg: PAPER, accent: null,        mono: false, bgOnly: true },
+  { name: 'android-icon-monochrome',  size: 432,  bg: null,  accent: null,        mono: true  },
 ];
 
 const grid = document.getElementById('grid');
@@ -54,7 +55,7 @@ function waitForFonts() {
   return document.fonts.ready;
 }
 
-function drawIcon(ctx, size, bg, mono, bgOnly) {
+function drawIcon(ctx, size, bg, accent, mono, bgOnly) {
   const s = size;
   ctx.clearRect(0, 0, s, s);
 
@@ -68,9 +69,9 @@ function drawIcon(ctx, size, bg, mono, bgOnly) {
 
   const scale = s / 1024;
 
-  // ── Accent bar (top-left vertical stripe) ──
+  // ── Accent bar (top-left vertical stripe, gold) ──
   if (!mono) {
-    ctx.fillStyle = RED;
+    ctx.fillStyle = accent;
     ctx.fillRect(s * 0.08, s * 0.12, s * 0.025, s * 0.76);
   }
 
@@ -82,20 +83,19 @@ function drawIcon(ctx, size, bg, mono, bgOnly) {
   ctx.fillStyle = mono ? '#000000' : (bg === INK ? WHITE : INK);
   ctx.fillText('Flag', s * 0.16, s * 0.52);
 
-  // ── "That" text (italic, red on dark / red on light) ──
+  // ── "That" text (italic, gold accent) ──
   const thatSize = Math.round(280 * scale);
   ctx.font = `italic 400 ${thatSize}px "Libre Baskerville", serif`;
-  ctx.fillStyle = mono ? '#000000' : RED;
+  ctx.fillStyle = mono ? '#000000' : accent;
   ctx.fillText('That', s * 0.16, s * 0.82);
 
   // ── Small decorative rule under "Flag" ──
   if (!mono) {
     const ruleY = s * 0.55;
-    const flagMetrics = ctx.measureText('Flag');
-    // Reset font to measure "Flag" width
+    // Measure "Flag" width
     ctx.font = `700 ${flagSize}px "Libre Baskerville", serif`;
     const flagWidth = ctx.measureText('Flag').width;
-    ctx.fillStyle = bg === INK ? 'rgba(255,255,255,0.15)' : 'rgba(17,24,39,0.1)';
+    ctx.fillStyle = bg === INK ? 'rgba(255,255,255,0.15)' : 'rgba(26,24,32,0.1)';
     ctx.fillRect(s * 0.16, ruleY, flagWidth, Math.max(2, 2 * scale));
   }
 }
@@ -119,7 +119,7 @@ async function init() {
     }
 
     const ctx = canvas.getContext('2d');
-    drawIcon(ctx, v.size, v.bg, v.mono, v.bgOnly);
+    drawIcon(ctx, v.size, v.bg, v.accent, v.mono, v.bgOnly);
 
     card.appendChild(canvas);
 
