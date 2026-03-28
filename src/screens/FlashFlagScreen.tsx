@@ -169,7 +169,7 @@ export default function FlashFlagScreen({ route, navigation }: Props) {
   // buttons/keyboard call it directly (no hysteresis needed).
   const handleTilt = useCallback(
     (action: 'correct' | 'skip') => {
-      if (locked.current) return;
+      if (locked.current || navigated.current) return;
 
       const idx = currentIndexRef.current;
       const qs = questionsRef.current;
