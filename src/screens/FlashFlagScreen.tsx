@@ -100,6 +100,9 @@ export default function FlashFlagScreen({ route, navigation }: Props) {
   // Track pending timeouts so we can cancel on unmount.
   const feedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const cooldownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Prevent double-navigation (timer expiry, last-question answer, and Exit
+  // can all race to navigate to Results).
+  const navigated = useRef(false);
 
   useEffect(() => { resultsRef.current = results; }, [results]);
   useEffect(() => { currentIndexRef.current = currentIndex; }, [currentIndex]);
@@ -155,7 +158,8 @@ export default function FlashFlagScreen({ route, navigation }: Props) {
 
   // Navigate to results when time runs out
   useEffect(() => {
-    if (phase === 'playing' && timeLeft <= 0) {
+    if (phase === 'playing' && timeLeft <= 0 && !navigated.current) {
+      navigated.current = true;
       navigation.replace('Results', { results: resultsRef.current, config });
     }
   }, [timeLeft]);
@@ -196,12 +200,14 @@ export default function FlashFlagScreen({ route, navigation }: Props) {
 
       // Feedback flash, then advance to next flag.
       feedbackTimer.current = setTimeout(() => {
+        if (navigated.current) return;
         setTiltState('neutral');
 
         if (idx < qs.length - 1) {
           setCurrentIndex(idx + 1);
           questionStartTime.current = Date.now();
         } else {
+          navigated.current = true;
           navigation.replace('Results', {
             results: [...resultsRef.current, result],
             config,
@@ -320,6 +326,8 @@ export default function FlashFlagScreen({ route, navigation }: Props) {
   );
 
   const exitGame = () => {
+    if (navigated.current) return;
+    navigated.current = true;
     navigation.replace('Results', { results: resultsRef.current, config });
   };
 
@@ -670,12 +678,6 @@ const createStyles = (colors: ThemeColors) => {
     color: colors.text,
   },
   // Playing
-  loadingText: {
-    ...typography.body,
-    color: colors.text,
-    textAlign: 'center',
-    marginTop: '45%',
-  },
   timerBar: {
     height: 6,
     backgroundColor: colors.whiteAlpha20,
