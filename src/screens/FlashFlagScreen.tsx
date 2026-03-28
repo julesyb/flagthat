@@ -47,6 +47,16 @@ function getIsMobileWeb(): boolean {
 
 const isMobileWeb = getIsMobileWeb();
 
+// Tilt thresholds - require a strong, deliberate tilt to trigger
+const NATIVE_TILT_THRESHOLD = 0.7;
+const WEB_TILT_THRESHOLD = 7;
+// Neutral zone - phone must return close to flat before next tilt registers
+const NATIVE_NEUTRAL_ZONE = 0.3;
+const WEB_NEUTRAL_ZONE = 3;
+// Timing
+const FEEDBACK_DURATION_MS = 400;
+const COOLDOWN_MS = 150;
+
 // Request DeviceMotion permission on iOS 13+ (required for tilt on mobile Safari)
 async function requestMotionPermission(): Promise<boolean> {
   if (typeof DeviceMotionEvent === 'undefined') return false;
@@ -81,10 +91,24 @@ export default function FlashFlagScreen({ route, navigation }: Props) {
   const isProcessing = useRef(false);
   const tiltCooldown = useRef(false);
   const resultsRef = useRef<GameResult[]>([]);
+  // Hysteresis: track whether the phone has returned to the neutral zone
+  // after the last tilt. Prevents re-triggering while the phone is still tilted.
+  const returnedToNeutral = useRef(true);
+  // Keep mutable refs for values the sensor callbacks need, so the sensor
+  // effects only subscribe once (on phase change) instead of tearing down and
+  // re-subscribing on every question change.
+  const currentIndexRef = useRef(0);
+  const questionsRef = useRef<GameQuestion[]>([]);
 
   useEffect(() => {
     resultsRef.current = results;
   }, [results]);
+  useEffect(() => {
+    currentIndexRef.current = currentIndex;
+  }, [currentIndex]);
+  useEffect(() => {
+    questionsRef.current = questions;
+  }, [questions]);
 
   // Lock to landscape (native only)
   useEffect(() => {
@@ -133,92 +157,24 @@ export default function FlashFlagScreen({ route, navigation }: Props) {
     }
   }, [timeLeft]);
 
-  // Accelerometer for tilt detection (native only)
-  useEffect(() => {
-    if (isWeb) return;
-    if (phase !== 'playing') return;
-
-    let subscription: { remove: () => void } | null = null;
-    try {
-      const { Accelerometer } = require('expo-sensors');
-      Accelerometer.setUpdateInterval(100);
-
-      subscription = Accelerometer.addListener(({ z }: { z: number }) => {
-        if (isProcessing.current || tiltCooldown.current) return;
-
-        if (z < -0.6) {
-          handleTilt('correct');
-        } else if (z > 0.6) {
-          handleTilt('skip');
-        }
-      });
-    } catch {
-      // Accelerometer not available
-    }
-
-    return () => {
-      if (subscription) subscription.remove();
-    };
-  }, [phase, currentIndex, questions]);
-
-  // Mobile web tilt detection via DeviceMotion API
-  // Uses z-axis (perpendicular to screen) to match native behavior.
-  // Phone on forehead, screen outward: z ~ 0 at rest.
-  // Tilt forward (nod, screen faces ground): z goes negative.
-  // Tilt backward (look up, screen faces sky): z goes positive.
-  // Thresholds ±6 m/s^2 match native ±0.6g (expo-sensors normalizes to 0-1).
-  useEffect(() => {
-    if (!isMobileWeb) return;
-    if (phase !== 'playing') return;
-    if (!motionGranted) return;
-
-    const handleMotion = (e: DeviceMotionEvent) => {
-      if (isProcessing.current || tiltCooldown.current) return;
-      const acc = e.accelerationIncludingGravity;
-      if (!acc || acc.z == null) return;
-
-      const z = acc.z;
-
-      if (z < -6) {
-        handleTilt('correct'); // Screen facing ground (nod forward)
-      } else if (z > 6) {
-        handleTilt('skip'); // Screen facing sky (lean back)
-      }
-    };
-
-    window.addEventListener('devicemotion', handleMotion as EventListener);
-    return () => window.removeEventListener('devicemotion', handleMotion as EventListener);
-  }, [phase, currentIndex, questions, motionGranted]);
-
-  // Web keyboard controls (desktop web fallback)
-  useEffect(() => {
-    if (!isWeb) return;
-    if (phase !== 'playing') return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
-        e.preventDefault();
-        handleTilt('correct');
-      } else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
-        e.preventDefault();
-        handleTilt('skip');
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [phase, currentIndex, questions]);
-
+  // Stable tilt handler that reads from refs so it never goes stale.
+  // Defined with useCallback with NO deps that change per-question,
+  // so sensor effects can subscribe once and stay stable.
   const handleTilt = useCallback(
     (action: 'correct' | 'skip') => {
       if (isProcessing.current || tiltCooldown.current) return;
-      if (!questions[currentIndex]) return;
+      if (!returnedToNeutral.current) return;
+
+      const idx = currentIndexRef.current;
+      const qs = questionsRef.current;
+      if (!qs[idx]) return;
 
       isProcessing.current = true;
       tiltCooldown.current = true;
+      returnedToNeutral.current = false;
 
       const timeTaken = Date.now() - questionStartTime.current;
-      const currentQ = questions[currentIndex];
+      const currentQ = qs[idx];
 
       const result: GameResult = {
         question: currentQ,
@@ -237,15 +193,13 @@ export default function FlashFlagScreen({ route, navigation }: Props) {
       setTiltState(action);
       setResults((prev) => [...prev, result]);
 
-      // Keep feedback brief so the game stays fast-paced.
-      // 500ms flash (enough to register green/red), then 200ms cooldown
-      // before the next flag to prevent accidental double-tilts.
+      // Brief feedback flash, then advance to next flag.
       setTimeout(() => {
         setTiltState('neutral');
         isProcessing.current = false;
 
-        if (currentIndex < questions.length - 1) {
-          setCurrentIndex((i) => i + 1);
+        if (idx < qs.length - 1) {
+          setCurrentIndex(idx + 1);
           questionStartTime.current = Date.now();
         } else {
           navigation.replace('Results', {
@@ -257,11 +211,109 @@ export default function FlashFlagScreen({ route, navigation }: Props) {
 
         setTimeout(() => {
           tiltCooldown.current = false;
-        }, 200);
-      }, 500);
+          // For button/keyboard input, re-enable immediately since each
+          // press is a discrete action. For sensors, the hysteresis check
+          // in the listener will keep it blocked until the phone returns
+          // to the neutral zone.
+          returnedToNeutral.current = true;
+        }, COOLDOWN_MS);
+      }, FEEDBACK_DURATION_MS);
     },
-    [currentIndex, questions, navigation, config],
+    [navigation, config],
   );
+
+  // Accelerometer for tilt detection (native only).
+  // Subscribes once when playing starts; reads refs for current state.
+  useEffect(() => {
+    if (isWeb) return;
+    if (phase !== 'playing') return;
+
+    let subscription: { remove: () => void } | null = null;
+    try {
+      const { Accelerometer } = require('expo-sensors');
+      Accelerometer.setUpdateInterval(100);
+
+      subscription = Accelerometer.addListener(({ z }: { z: number }) => {
+        if (isProcessing.current || tiltCooldown.current) return;
+
+        // Hysteresis: require return to neutral zone before next trigger
+        if (!returnedToNeutral.current) {
+          if (Math.abs(z) < NATIVE_NEUTRAL_ZONE) {
+            returnedToNeutral.current = true;
+          }
+          return;
+        }
+
+        if (z < -NATIVE_TILT_THRESHOLD) {
+          handleTilt('correct');
+        } else if (z > NATIVE_TILT_THRESHOLD) {
+          handleTilt('skip');
+        }
+      });
+    } catch {
+      // Accelerometer not available
+    }
+
+    return () => {
+      if (subscription) subscription.remove();
+    };
+  }, [phase, handleTilt]);
+
+  // Mobile web tilt detection via DeviceMotion API.
+  // Uses z-axis (perpendicular to screen) to match native behavior.
+  // Phone on forehead, screen outward: z ~ 0 at rest.
+  // Tilt forward (nod, screen faces ground): z goes negative.
+  // Tilt backward (look up, screen faces sky): z goes positive.
+  useEffect(() => {
+    if (!isMobileWeb) return;
+    if (phase !== 'playing') return;
+    if (!motionGranted) return;
+
+    const handleMotion = (e: DeviceMotionEvent) => {
+      if (isProcessing.current || tiltCooldown.current) return;
+      const acc = e.accelerationIncludingGravity;
+      if (!acc || acc.z == null) return;
+
+      const z = acc.z;
+
+      // Hysteresis: require return to neutral zone before next trigger
+      if (!returnedToNeutral.current) {
+        if (Math.abs(z) < WEB_NEUTRAL_ZONE) {
+          returnedToNeutral.current = true;
+        }
+        return;
+      }
+
+      if (z < -WEB_TILT_THRESHOLD) {
+        handleTilt('correct');
+      } else if (z > WEB_TILT_THRESHOLD) {
+        handleTilt('skip');
+      }
+    };
+
+    window.addEventListener('devicemotion', handleMotion as EventListener);
+    return () => window.removeEventListener('devicemotion', handleMotion as EventListener);
+  }, [phase, motionGranted, handleTilt]);
+
+  // Web keyboard controls (desktop web fallback).
+  // Subscribes once when playing starts.
+  useEffect(() => {
+    if (!isWeb) return;
+    if (phase !== 'playing') return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        handleTilt('correct');
+      } else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        handleTilt('skip');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [phase, handleTilt]);
 
   const currentQuestion = questions[currentIndex] ?? null;
   const correctCount = React.useMemo(
