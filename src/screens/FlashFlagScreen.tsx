@@ -195,27 +195,36 @@ export default function FlashFlagScreen({ route, navigation }: Props) {
         playWrongSound();
       }
 
+      const isLastQuestion = idx >= qs.length - 1;
+
+      // Advance index immediately so the next flag preloads behind the
+      // feedback overlay (FlagImage stays mounted, receives new countryCode,
+      // and loads from cache while the green/red flash is visible).
+      if (!isLastQuestion) {
+        setCurrentIndex(idx + 1);
+      }
+
       setTiltState(action);
       setResults((prev) => [...prev, result]);
 
-      // Feedback flash, then advance to next flag.
+      // Feedback flash, then reveal the preloaded flag or navigate.
       feedbackTimer.current = setTimeout(() => {
         if (navigated.current) return;
         setTiltState('neutral');
 
-        if (idx < qs.length - 1) {
-          setCurrentIndex(idx + 1);
-          questionStartTime.current = Date.now();
-        } else {
+        if (isLastQuestion) {
           navigated.current = true;
+          // resultsRef is already synced (includes `result` from setResults above).
           navigation.replace('Results', {
-            results: [...resultsRef.current, result],
+            results: resultsRef.current,
             config,
           });
           return;
         }
 
-        // Brief cooldown before unlocking to prevent accidental double-input.
+        // Start timing the new question when it becomes visible.
+        questionStartTime.current = Date.now();
+
         cooldownTimer.current = setTimeout(() => {
           locked.current = false;
         }, COOLDOWN_MS);
@@ -501,31 +510,36 @@ export default function FlashFlagScreen({ route, navigation }: Props) {
 
       <ScreenContainer flex game>
       <View style={styles.gameContent}>
-        {tiltState === 'correct' ? (
-          <Text style={styles.feedbackText} accessibilityLiveRegion="polite">{t('flashFlag.correctFeedback')}</Text>
-        ) : tiltState === 'skip' ? (
-          <Text style={styles.feedbackText} accessibilityLiveRegion="polite">{t('flashFlag.passFeedback')}</Text>
+        {/* Flag stays mounted at all times so it preloads the next image
+            behind the feedback overlay. During the green/red flash, the
+            index has already advanced and FlagImage loads from cache. When
+            feedback clears, the new flag appears instantly - no remount,
+            no spinner flash, no crossfade delay. */}
+        {config.displayMode === 'map' ? (
+          <MapImage
+            countryCode={currentQuestion.flag.id}
+            size="hero"
+            style={!isNeutral ? styles.preload : undefined}
+          />
         ) : (
-          <>
-            {config.displayMode === 'map' ? (
-              <MapImage
-                countryCode={currentQuestion.flag.id}
-                size="hero"
-              />
-            ) : (
-              <FlagImage
-                countryCode={currentQuestion.flag.id}
-                size="hero"
-              />
-            )}
-            {/* On native/mobile, teammates see the screen from across the room
-                during Heads Up play. Hide the country name so they must describe
-                the flag visually instead of reading the answer. Desktop web shows
-                it as a self-grading flash card. */}
-            {isWeb && !isMobileWeb && (
-              <Text style={styles.flagName}>{flagName(currentQuestion.flag)}</Text>
-            )}
-          </>
+          <FlagImage
+            countryCode={currentQuestion.flag.id}
+            size="hero"
+            transition={0}
+            style={!isNeutral ? styles.preload : undefined}
+          />
+        )}
+        {/* On native/mobile, teammates see the screen from across the room
+            during Heads Up play. Hide the country name so they must describe
+            the flag visually instead of reading the answer. Desktop web shows
+            it as a self-grading flash card. */}
+        {isWeb && !isMobileWeb && isNeutral && (
+          <Text style={styles.flagName}>{flagName(currentQuestion.flag)}</Text>
+        )}
+        {!isNeutral && (
+          <Text style={styles.feedbackText} accessibilityLiveRegion="polite">
+            {tiltState === 'correct' ? t('flashFlag.correctFeedback') : t('flashFlag.passFeedback')}
+          </Text>
         )}
       </View>
 
@@ -693,6 +707,12 @@ const createStyles = (colors: ThemeColors) => {
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
     gap: spacing.sm,
+  },
+  // Keeps the flag mounted (for preloading) but invisible and out of flow
+  // so the feedback text centers naturally in gameContent.
+  preload: {
+    position: 'absolute',
+    opacity: 0,
   },
   flagName: {
     fontSize: fontSize.display,
