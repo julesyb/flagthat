@@ -989,7 +989,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
             <Text style={styles.levelUpTitle}>{t('stats.levelUp')}</Text>
             <Text style={styles.levelUpNumber}>{levelUpTo}</Text>
             <Text style={styles.levelUpTier}>{getTierLabel(getLevelTier(levelUpTo ?? 1))}</Text>
-            <Text style={styles.levelUpDesc}>{t('stats.levelReached', { level: levelUpTo })}</Text>
+            <Text style={styles.levelUpDesc}>{t('stats.levelReached', { level: levelUpTo ?? 1 })}</Text>
             <TouchableOpacity
               style={styles.levelUpButton}
               onPress={() => setLevelUpTo(null)}

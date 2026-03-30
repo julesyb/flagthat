@@ -1072,7 +1072,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   levelNumber: {
     fontFamily: fontFamily.display,
-    fontSize: fontSize.xl,
+    fontSize: fontSize.title,
     color: colors.goldBright,
     letterSpacing: -0.5,
     lineHeight: 28,

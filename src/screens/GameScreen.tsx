@@ -257,8 +257,10 @@ export default function GameScreen({ route, navigation }: Props) {
       <ScreenContainer flex game>
       <GameTopBar
         onExit={() => {
+          if (navigatedRef.current) return;
+          navigatedRef.current = true;
           if (autoAdvanceRef.current) clearTimeout(autoAdvanceRef.current);
-          const currentResults = pendingResultsRef.current ?? results;
+          const currentResults = pendingResultsRef.current ?? resultsRef.current;
           if (currentResults.length > 0) {
             navigation.replace('Results', { results: currentResults, config, ...(challenge && { challenge, playerName }) });
           } else {
