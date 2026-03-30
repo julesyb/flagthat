@@ -647,7 +647,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
 
               {/* VS circle */}
               <View style={styles.h2hVs}>
-                <Text style={styles.h2hVsText}>VS</Text>
+                <Text style={styles.h2hVsText}>{t('common.vs')}</Text>
               </View>
 
               {/* Host side */}

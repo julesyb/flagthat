@@ -341,6 +341,10 @@ const zh: DeepPartial<TranslationStrings> = {
     neighborCountPlural: '{name}\u6709{count}\u4e2a\u90bb\u56fd',
     missed: '\u9057\u6f0f',
     notANeighbor: '\u4e0d\u662f\u90bb\u56fd',
+    a11yCorrect: '正确的邻国',
+    a11yMissed: '遗漏的邻国',
+    a11yNotNeighbor: '不是邻国',
+    a11ySelected: '已选择',
   },
 
   flashFlag: {

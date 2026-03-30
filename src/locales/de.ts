@@ -341,6 +341,10 @@ const de: DeepPartial<TranslationStrings> = {
     neighborCountPlural: '{name} hat {count} Nachbarn',
     missed: 'Verfehlt',
     notANeighbor: 'Kein Nachbar',
+    a11yCorrect: 'richtiger Nachbar',
+    a11yMissed: 'verfehlter Nachbar',
+    a11yNotNeighbor: 'kein Nachbar',
+    a11ySelected: 'ausgewählt',
   },
 
   flashFlag: {
