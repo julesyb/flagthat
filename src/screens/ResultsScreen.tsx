@@ -106,7 +106,7 @@ async function persistGameData(
   if (isChallenge && challenge && playerName) {
     const shortCode = generateShortCode(challenge);
     const hostScore = challenge.hostResults.filter((r) => r.correct).length;
-    addChallengeToHistory({
+    await addChallengeToHistory({
       shortCode,
       mode: config.mode,
       date: new Date().toISOString(),
