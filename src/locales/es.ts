@@ -193,7 +193,7 @@ const es: DeepPartial<TranslationStrings> = {
     baselineLabel: 'Inicio: {pct}%',
     improvementUp: '+{pct}%, ¡sigue así!',
     improvementSame: 'Sin cambios',
-    improvementDown: '{pct}% por recuperar, tu puedes',
+    improvementDown: '{pct}% por recuperar, tú puedes',
     accuracy: 'Precisión',
     gamesPlayedLabel: 'Partidas',
     bestIn60s: 'Mejor en 60s',

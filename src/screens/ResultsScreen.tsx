@@ -1235,6 +1235,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     fontSize: fontSize.xs,
     letterSpacing: 1,
     color: colors.textTertiary,
+    textTransform: 'uppercase',
   },
   h2hDotsSection: {
     marginTop: spacing.md,
