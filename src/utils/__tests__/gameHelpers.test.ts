@@ -1,18 +1,19 @@
 /**
  * Tests for gameHelpers utility functions.
  */
-
 import { countCorrect, countWrong, calculateProgress } from '../gameHelpers';
 import { GameResult } from '../../types';
 
-// Minimal GameResult factory - only the fields the helpers inspect
 function makeResult(correct: boolean): GameResult {
   return {
-    question: { flag: { id: 'US', name: 'United States', region: 'americas' }, options: ['United States'] },
+    question: {
+      flag: { id: 'US', name: 'United States', category: 'north-america' } as any,
+      options: ['United States', 'Canada', 'Mexico', 'Brazil'],
+    },
     userAnswer: correct ? 'United States' : 'Canada',
     correct,
-    timeTaken: 1000,
-  } as GameResult;
+    timeTaken: 2000,
+  };
 }
 
 describe('countCorrect', () => {
@@ -20,18 +21,18 @@ describe('countCorrect', () => {
     expect(countCorrect([])).toBe(0);
   });
 
-  it('counts correct results', () => {
-    const results = [makeResult(true), makeResult(false), makeResult(true), makeResult(true)];
+  it('counts all correct', () => {
+    const results = [makeResult(true), makeResult(true), makeResult(true)];
     expect(countCorrect(results)).toBe(3);
   });
 
-  it('returns 0 when all wrong', () => {
+  it('counts none correct', () => {
     const results = [makeResult(false), makeResult(false)];
     expect(countCorrect(results)).toBe(0);
   });
 
-  it('returns full count when all correct', () => {
-    const results = [makeResult(true), makeResult(true), makeResult(true)];
+  it('counts mixed results', () => {
+    const results = [makeResult(true), makeResult(false), makeResult(true), makeResult(false), makeResult(true)];
     expect(countCorrect(results)).toBe(3);
   });
 });
@@ -41,14 +42,24 @@ describe('countWrong', () => {
     expect(countWrong([])).toBe(0);
   });
 
-  it('counts wrong results', () => {
+  it('counts all wrong', () => {
+    const results = [makeResult(false), makeResult(false), makeResult(false)];
+    expect(countWrong(results)).toBe(3);
+  });
+
+  it('counts none wrong', () => {
+    const results = [makeResult(true), makeResult(true)];
+    expect(countWrong(results)).toBe(0);
+  });
+
+  it('counts mixed results', () => {
     const results = [makeResult(true), makeResult(false), makeResult(true), makeResult(false)];
     expect(countWrong(results)).toBe(2);
   });
 
-  it('returns full count when all wrong', () => {
-    const results = [makeResult(false), makeResult(false), makeResult(false)];
-    expect(countWrong(results)).toBe(3);
+  it('countCorrect + countWrong equals total', () => {
+    const results = [makeResult(true), makeResult(false), makeResult(true)];
+    expect(countCorrect(results) + countWrong(results)).toBe(results.length);
   });
 });
 
@@ -58,21 +69,18 @@ describe('calculateProgress', () => {
   });
 
   it('returns correct fraction for first question', () => {
-    // currentIndex=0, total=10 -> (0+1)/10 = 0.1
     expect(calculateProgress(0, 10)).toBeCloseTo(0.1);
   });
 
   it('returns correct fraction for middle question', () => {
-    // currentIndex=4, total=10 -> (4+1)/10 = 0.5
     expect(calculateProgress(4, 10)).toBeCloseTo(0.5);
   });
 
-  it('returns 1.0 for last question', () => {
-    // currentIndex=9, total=10 -> (9+1)/10 = 1.0
+  it('returns 1 for last question', () => {
     expect(calculateProgress(9, 10)).toBeCloseTo(1.0);
   });
 
-  it('handles single-question game', () => {
+  it('returns correct fraction for single question', () => {
     expect(calculateProgress(0, 1)).toBeCloseTo(1.0);
   });
 });
