@@ -110,6 +110,7 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
   const questionStartTime = useRef(Date.now());
   const autoAdvanceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingResultsRef = useRef<GameResult[] | null>(null);
+  const navigatedRef = useRef(false);
 
   // Clean up auto-advance timer on unmount
   useEffect(() => {
@@ -146,7 +147,8 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
         questionStartTime.current = Date.now();
         Animated.timing(fadeAnim, { toValue: 1, duration: 150, useNativeDriver: true }).start();
       });
-    } else {
+    } else if (!navigatedRef.current) {
+      navigatedRef.current = true;
       navigation.replace('Results', { results: newResults, config, ...(challenge && { challenge, playerName }) });
     }
   }, [currentIndex, questions, navigation, config, fadeAnim]);
@@ -208,7 +210,12 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
 
       <ScreenContainer flex game>
       <GameTopBar
-        onExit={() => navigation.popToTop()}
+        onExit={() => {
+          if (navigatedRef.current) return;
+          navigatedRef.current = true;
+          if (autoAdvanceRef.current) clearTimeout(autoAdvanceRef.current);
+          navigation.popToTop();
+        }}
         center={
           <View style={styles.centerInfo}>
             <Text style={styles.counter}>

@@ -79,7 +79,7 @@ const FLAG_TEMPLATES: FlagTemplate[] = [
 
 // Blocklist: template + sorted color combos that match real national flags
 const REAL_FLAG_COMBOS = new Set([
-  // japan/palau (circle layouts)
+  // japan/palau (diamond layouts)
   'japan:#CE1126,#FFFFFF',             // Japan
   'japan:#003DA5,#FFCD00',             // Palau
   'japan:#009739,#CE1126',             // Bangladesh
