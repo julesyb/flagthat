@@ -1,0 +1,29 @@
+const store: Record<string, string> = {};
+
+const AsyncStorage = {
+  getItem: jest.fn(async (key: string): Promise<string | null> => {
+    return store[key] ?? null;
+  }),
+  setItem: jest.fn(async (key: string, value: string): Promise<void> => {
+    store[key] = value;
+  }),
+  removeItem: jest.fn(async (key: string): Promise<void> => {
+    delete store[key];
+  }),
+  clear: jest.fn(async (): Promise<void> => {
+    for (const key of Object.keys(store)) {
+      delete store[key];
+    }
+  }),
+  getAllKeys: jest.fn(async (): Promise<string[]> => {
+    return Object.keys(store);
+  }),
+  _getStore: () => store,
+  _clear: () => {
+    for (const key of Object.keys(store)) {
+      delete store[key];
+    }
+  },
+};
+
+export default AsyncStorage;

@@ -305,6 +305,9 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
           if (navigatedRef.current) return;
           navigatedRef.current = true;
           if (autoAdvanceRef.current) clearTimeout(autoAdvanceRef.current);
+          if (timerRef.current) clearInterval(timerRef.current);
+          if (revealIntervalRef.current) clearInterval(revealIntervalRef.current);
+          if (revealDelayRef.current) clearTimeout(revealDelayRef.current);
           navigation.popToTop();
         }}
         center={
