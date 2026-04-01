@@ -352,6 +352,10 @@ const en = {
     neighborCountPlural: '{name} has {count} neighbors',
     missed: 'Missed',
     notANeighbor: 'Not a neighbor',
+    a11yCorrect: 'correct neighbor',
+    a11yMissed: 'missed neighbor',
+    a11yNotNeighbor: 'not a neighbor',
+    a11ySelected: 'selected',
   },
 
   // ─── Flash Flag Screen ──────────────────────────────────

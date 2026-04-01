@@ -172,6 +172,7 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
 
   const pendingResultsRef = useRef<GameResult[] | null>(null);
   const autoAdvanceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const navigatedRef = useRef(false);
 
   const goToNext = useCallback(() => {
     if (autoAdvanceRef.current) {
@@ -196,7 +197,8 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
         setQuestionStartTime(Date.now());
         Keyboard.dismiss();
       });
-    } else {
+    } else if (!navigatedRef.current) {
+      navigatedRef.current = true;
       navigation.replace('Results', {
         results: newResults,
         config,
@@ -299,7 +301,15 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
       {/* Top bar */}
       <ScreenContainer flex game>
       <GameTopBar
-        onExit={() => navigation.popToTop()}
+        onExit={() => {
+          if (navigatedRef.current) return;
+          navigatedRef.current = true;
+          if (autoAdvanceRef.current) clearTimeout(autoAdvanceRef.current);
+          if (timerRef.current) clearInterval(timerRef.current);
+          if (revealIntervalRef.current) clearInterval(revealIntervalRef.current);
+          if (revealDelayRef.current) clearTimeout(revealDelayRef.current);
+          navigation.popToTop();
+        }}
         center={
           <View style={styles.centerInfo}>
             <Text style={styles.counter}>

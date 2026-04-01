@@ -106,7 +106,7 @@ async function persistGameData(
   if (isChallenge && challenge && playerName) {
     const shortCode = generateShortCode(challenge);
     const hostScore = challenge.hostResults.filter((r) => r.correct).length;
-    addChallengeToHistory({
+    await addChallengeToHistory({
       shortCode,
       mode: config.mode,
       date: new Date().toISOString(),
@@ -647,7 +647,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
 
               {/* VS circle */}
               <View style={styles.h2hVs}>
-                <Text style={styles.h2hVsText}>VS</Text>
+                <Text style={styles.h2hVsText}>{t('common.vs')}</Text>
               </View>
 
               {/* Host side */}
@@ -989,7 +989,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
             <Text style={styles.levelUpTitle}>{t('stats.levelUp')}</Text>
             <Text style={styles.levelUpNumber}>{levelUpTo}</Text>
             <Text style={styles.levelUpTier}>{getTierLabel(getLevelTier(levelUpTo ?? 1))}</Text>
-            <Text style={styles.levelUpDesc}>{t('stats.levelReached', { level: levelUpTo })}</Text>
+            <Text style={styles.levelUpDesc}>{t('stats.levelReached', { level: levelUpTo ?? 1 })}</Text>
             <TouchableOpacity
               style={styles.levelUpButton}
               onPress={() => setLevelUpTo(null)}
@@ -1235,6 +1235,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     fontSize: fontSize.xs,
     letterSpacing: 1,
     color: colors.textTertiary,
+    textTransform: 'uppercase',
   },
   h2hDotsSection: {
     marginTop: spacing.md,

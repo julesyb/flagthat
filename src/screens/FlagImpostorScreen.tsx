@@ -8,7 +8,7 @@ import {
   ScrollView,
   Animated,
 } from 'react-native';
-import Svg, { Rect, Path, Circle } from 'react-native-svg';
+import Svg, { Rect, Path } from 'react-native-svg';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { spacing, typography, fontFamily, fontSize, buildButtons, borderRadius, ThemeColors } from '../utils/theme';
 import { useTheme } from '../contexts/ThemeContext';
@@ -79,7 +79,7 @@ const FLAG_TEMPLATES: FlagTemplate[] = [
 
 // Blocklist: template + sorted color combos that match real national flags
 const REAL_FLAG_COMBOS = new Set([
-  // japan/palau (circle layouts)
+  // japan/palau (diamond layouts)
   'japan:#CE1126,#FFFFFF',             // Japan
   'japan:#003DA5,#FFCD00',             // Palau
   'japan:#009739,#CE1126',             // Bangladesh
@@ -180,22 +180,30 @@ function generateFakeFlag(): FakeFlag {
 
 function renderTemplateContent(name: string, c: string[], w: number, h: number): React.ReactNode {
   switch (name) {
-    // Solid background + centered circle (Japan)
-    case 'japan':
+    // Solid background + centered diamond (Japan-inspired)
+    case 'japan': {
+      const r = Math.min(w, h) * 0.22;
+      const cx = w / 2;
+      const cy = h / 2;
       return (
         <>
           <Rect x={0} y={0} width={w} height={h} fill={c[0]} />
-          <Circle cx={w / 2} cy={h / 2} r={Math.min(w, h) * 0.22} fill={c[1]} />
+          <Path d={`M${cx},${cy - r} L${cx + r},${cy} L${cx},${cy + r} L${cx - r},${cy} Z`} fill={c[1]} />
         </>
       );
-    // Solid background + off-center circle (Palau)
-    case 'palau':
+    }
+    // Solid background + off-center diamond (Palau-inspired)
+    case 'palau': {
+      const r = Math.min(w, h) * 0.22;
+      const cx = w * 0.38;
+      const cy = h / 2;
       return (
         <>
           <Rect x={0} y={0} width={w} height={h} fill={c[0]} />
-          <Circle cx={w * 0.38} cy={h / 2} r={Math.min(w, h) * 0.22} fill={c[1]} />
+          <Path d={`M${cx},${cy - r} L${cx + r},${cy} L${cx},${cy + r} L${cx - r},${cy} Z`} fill={c[1]} />
         </>
       );
+    }
     // Vertical triband (France)
     case 'france':
       return (

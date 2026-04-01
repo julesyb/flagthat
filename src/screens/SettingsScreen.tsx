@@ -156,7 +156,7 @@ export default function SettingsScreen() {
           {
             text: t('settings.reset'),
             style: 'destructive',
-            onPress: () => resetStats(),
+            onPress: async () => { await resetStats(); },
           },
         ],
       );

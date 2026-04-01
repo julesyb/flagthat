@@ -234,13 +234,13 @@ export default function NeighborsScreen({ navigation, route }: Props) {
                   accessibilityLabel={
                     submitted
                       ? showCorrect && isSelected
-                        ? `${flagName(flag)}, correct neighbor`
+                        ? `${flagName(flag)}, ${t('neighbors.a11yCorrect')}`
                         : showMissed
-                        ? `${flagName(flag)}, missed neighbor`
+                        ? `${flagName(flag)}, ${t('neighbors.a11yMissed')}`
                         : showWrong
-                        ? `${flagName(flag)}, not a neighbor`
+                        ? `${flagName(flag)}, ${t('neighbors.a11yNotNeighbor')}`
                         : flagName(flag)
-                      : `${flagName(flag)}${isSelected ? ', selected' : ''}`
+                      : `${flagName(flag)}${isSelected ? `, ${t('neighbors.a11ySelected')}` : ''}`
                   }
                   accessibilityState={{ selected: isSelected, disabled: submitted }}
                 >

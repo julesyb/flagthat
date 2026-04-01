@@ -83,6 +83,7 @@ export default function GameScreen({ route, navigation }: Props) {
   const autoAdvanceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const wrongCountRef = useRef(0);
   const resultsRef = useRef<GameResult[]>([]);
+  const navigatedRef = useRef(false);
 
   // Clean up auto-advance timer on unmount
   useEffect(() => {
@@ -93,9 +94,10 @@ export default function GameScreen({ route, navigation }: Props) {
 
   // When timeLeft hits 0, navigate to results
   useEffect(() => {
-    if (isTimeAttack && timeLeft === 0) {
-      const finalResults = pendingResultsRef.current ?? results;
+    if (isTimeAttack && timeLeft === 0 && !navigatedRef.current) {
+      const finalResults = pendingResultsRef.current ?? resultsRef.current;
       if (finalResults.length > 0) {
+        navigatedRef.current = true;
         if (autoAdvanceRef.current) {
           clearTimeout(autoAdvanceRef.current);
           autoAdvanceRef.current = null;
@@ -150,7 +152,8 @@ export default function GameScreen({ route, navigation }: Props) {
         setQuestionStartTime(Date.now());
         Keyboard.dismiss();
       });
-    } else {
+    } else if (!navigatedRef.current) {
+      navigatedRef.current = true;
       navigation.replace('Results', { results: newResults, config, ...(challenge && { challenge, playerName }) });
     }
   }, [currentIndex, questions, navigation, config, animateTransition]);
@@ -201,6 +204,8 @@ export default function GameScreen({ route, navigation }: Props) {
 
       if (isEliminated) {
         autoAdvanceRef.current = setTimeout(() => {
+          if (navigatedRef.current) return;
+          navigatedRef.current = true;
           navigation.replace('Results', { results: newResults, config, ...(challenge && { challenge, playerName }) });
         }, feedbackDelay);
       } else {
@@ -252,8 +257,10 @@ export default function GameScreen({ route, navigation }: Props) {
       <ScreenContainer flex game>
       <GameTopBar
         onExit={() => {
+          if (navigatedRef.current) return;
+          navigatedRef.current = true;
           if (autoAdvanceRef.current) clearTimeout(autoAdvanceRef.current);
-          const currentResults = pendingResultsRef.current ?? results;
+          const currentResults = pendingResultsRef.current ?? resultsRef.current;
           if (currentResults.length > 0) {
             navigation.replace('Results', { results: currentResults, config, ...(challenge && { challenge, playerName }) });
           } else {

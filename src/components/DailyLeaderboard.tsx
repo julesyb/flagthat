@@ -48,7 +48,6 @@ export default function DailyLeaderboard({ entries }: Props) {
               styles.row,
               entry.isMe && styles.rowMe,
             ]}
-            accessibilityRole="listitem"
             accessibilityLabel={t('daily.leaderboardEntry', { rank, name: entry.name, score: entry.score, total: DAILY_QUESTION_COUNT, time: formatTime(entry.totalTimeMs) })}
           >
             <View style={[styles.rankBadge, isTopThree && styles.rankBadgeTop]}>
