@@ -1,11 +1,8 @@
 /**
  * Lightweight profanity filter for user-entered challenge names.
- * Blocks common English slurs and offensive terms to satisfy
- * Apple's UGC moderation requirements.
  *
- * Uses whole-word matching for short words after normalisation to
- * avoid the "Scunthorpe problem" (blocking legitimate names like
- * class, bass, Hancock, etc.).
+ * Uses whole-word matching for short words to avoid false positives
+ * on legitimate names (class, bass, Hancock, etc.).
  */
 
 /** Words blocked as exact whole tokens only (avoids false positives on substrings). */
@@ -15,7 +12,7 @@ const BLOCKED_EXACT: readonly string[] = [
   'twat', 'wank', 'whore',
 ];
 
-/** Longer slurs blocked via substring (no Scunthorpe risk at 5+ chars). */
+/** Longer slurs blocked via substring (safe from false positives at this length). */
 const BLOCKED_SUBSTRING: readonly string[] = [
   'asshole', 'bastard', 'bitch', 'blowjob', 'dickhead', 'dildo', 'douche',
   'faggot', 'fuck', 'goddamn', 'jerkoff', 'kike', 'motherfuck',

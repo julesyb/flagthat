@@ -34,7 +34,7 @@ function pickRandom<T>(arr: T[], count: number): T[] {
 
 // ── Impostor flags: real flag layouts recolored with non-traditional colors ──
 
-// IMPOSTOR_COLORS imported from theme.ts — single source of truth for colors
+// ── Impostor flags: real flag layouts recolored with non-traditional colors ──
 
 interface FlagTemplate {
   name: string;
