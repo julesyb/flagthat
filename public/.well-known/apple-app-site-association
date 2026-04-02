@@ -4,11 +4,7 @@
     "details": [
       {
         "appIDs": ["TEAMID.com.flagsareus.app"],
-        "components": [
-          { "/": "/c/*" },
-          { "/": "/r/*" },
-          { "/": "/d/*" }
-        ]
+        "paths": ["/c/*", "/r/*", "/d/*"]
       }
     ]
   }
