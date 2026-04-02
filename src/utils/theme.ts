@@ -201,6 +201,22 @@ export type ThemeMode = 'light' | 'dark' | 'system';
 // Default export for backward compat (dark theme)
 export const colors = darkColors;
 
+/** Common flag colors used to generate impostor (fake) flags. */
+export const IMPOSTOR_COLORS = [
+  '#CE1126', // red
+  '#003DA5', // blue
+  '#009739', // green
+  '#FFCD00', // yellow
+  '#FFFFFF', // white
+  '#000000', // black
+  '#FF6600', // orange
+  '#00A9E0', // sky blue
+  '#7B3F00', // brown
+  '#502379', // purple
+  '#D21034', // crimson
+  '#007A5E', // teal green
+];
+
 export const spacing = {
   xxs: 2,
   xs: 4,

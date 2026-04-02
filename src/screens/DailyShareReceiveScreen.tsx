@@ -99,7 +99,9 @@ export default function DailyShareReceiveScreen({ route, navigation }: Props) {
       // Fallback: go home
       navigation.replace('Home');
     }
-    process();
+    process().catch(() => {
+      navigation.replace('Home');
+    });
   }, [code, navigation]);
 
   return (

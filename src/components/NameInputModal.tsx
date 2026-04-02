@@ -1,8 +1,9 @@
 import React, { useMemo } from 'react';
-import { Modal, TouchableOpacity, TextInput, Text, StyleSheet, Keyboard } from 'react-native';
+import { Modal, TouchableOpacity, TextInput, Text, StyleSheet, Keyboard, Alert } from 'react-native';
 import { spacing, typography, borderRadius, ThemeColors } from '../utils/theme';
 import { useTheme } from '../contexts/ThemeContext';
 import { MAX_CHALLENGE_NAME_LENGTH } from '../utils/config';
+import { isNameBlocked } from '../utils/nameFilter';
 import { t } from '../utils/i18n';
 
 interface Props {
@@ -18,6 +19,14 @@ export default function NameInputModal({ visible, value, onChangeText, title, on
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const canSubmit = value.trim().length > 0;
+
+  const handleSubmit = () => {
+    if (isNameBlocked(value)) {
+      Alert.alert(t('challenge.nameBlockedTitle'), t('challenge.nameBlockedDesc'));
+      return;
+    }
+    onSubmit();
+  };
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
@@ -41,12 +50,12 @@ export default function NameInputModal({ visible, value, onChangeText, title, on
             maxLength={MAX_CHALLENGE_NAME_LENGTH}
             autoFocus
             returnKeyType="done"
-            onSubmitEditing={canSubmit ? () => { Keyboard.dismiss(); onSubmit(); } : undefined}
+            onSubmitEditing={canSubmit ? () => { Keyboard.dismiss(); handleSubmit(); } : undefined}
             accessibilityLabel={title}
           />
           <TouchableOpacity
             style={[styles.shareBtn, !canSubmit && styles.shareBtnDisabled]}
-            onPress={onSubmit}
+            onPress={handleSubmit}
             disabled={!canSubmit}
             activeOpacity={0.7}
             accessibilityRole="button"

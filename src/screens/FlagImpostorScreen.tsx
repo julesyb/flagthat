@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import Svg, { Rect, Path } from 'react-native-svg';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { spacing, typography, fontFamily, fontSize, buildButtons, borderRadius, ThemeColors } from '../utils/theme';
+import { spacing, typography, fontFamily, fontSize, buildButtons, borderRadius, ThemeColors, IMPOSTOR_COLORS } from '../utils/theme';
 import { useTheme } from '../contexts/ThemeContext';
 import { hapticTap, hapticCorrect, hapticWrong, playWrongSound } from '../utils/feedback';
 import { updateStats, updateFlagResults } from '../utils/storage';
@@ -34,21 +34,7 @@ function pickRandom<T>(arr: T[], count: number): T[] {
 
 // ── Impostor flags: real flag layouts recolored with non-traditional colors ──
 
-// Common flag colors - the random pairing with a mismatched template makes the impostor
-const IMPOSTOR_COLORS = [
-  '#CE1126', // red
-  '#003DA5', // blue
-  '#009739', // green
-  '#FFCD00', // yellow
-  '#FFFFFF', // white
-  '#000000', // black
-  '#FF6600', // orange
-  '#00A9E0', // sky blue
-  '#7B3F00', // brown
-  '#502379', // purple
-  '#D21034', // crimson
-  '#007A5E', // teal green
-];
+// IMPOSTOR_COLORS imported from theme.ts — single source of truth for colors
 
 interface FlagTemplate {
   name: string;
