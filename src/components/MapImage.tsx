@@ -10,6 +10,7 @@ interface MapImageProps {
   countryCode: string;
   size?: 'small' | 'medium' | 'large' | 'hero';
   style?: StyleProp<ViewStyle>;
+  accessibilityLabel?: string;
 }
 
 // CartoDB Positron no-labels — simple country outlines
@@ -68,7 +69,7 @@ function getCenterOffset(lat: number, lng: number, zoom: number, gridSize: numbe
   return { centerPxX, centerPxY };
 }
 
-export default function MapImage({ countryCode, size = 'hero', style }: MapImageProps) {
+export default function MapImage({ countryCode, size = 'hero', style, accessibilityLabel }: MapImageProps) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { width: screenWidth } = useWindowDimensions();
@@ -93,7 +94,7 @@ export default function MapImage({ countryCode, size = 'hero', style }: MapImage
 
   if (!coord) {
     return (
-      <View style={[styles.fallback, dimensions, style]}>
+      <View style={[styles.fallback, dimensions, style]} accessible accessibilityRole="image" accessibilityLabel={accessibilityLabel ?? t('a11y.mapImage')}>
         <Text style={styles.fallbackText}>-</Text>
       </View>
     );
@@ -138,7 +139,7 @@ export default function MapImage({ countryCode, size = 'hero', style }: MapImage
   if (!isInteractive) {
     // Non-interactive: simple clipped view (small/medium sizes)
     return (
-      <View style={[styles.container, dimensions, style]}>
+      <View style={[styles.container, dimensions, style]} accessible accessibilityRole="image" accessibilityLabel={accessibilityLabel ?? t('a11y.mapImage')}>
         <View
           style={{
             width: totalPx,
@@ -189,7 +190,7 @@ export default function MapImage({ countryCode, size = 'hero', style }: MapImage
 
   // Interactive: ScrollView with pinch-to-zoom + pan
   return (
-    <View style={[styles.container, dimensions, style]}>
+    <View style={[styles.container, dimensions, style]} accessible accessibilityRole="image" accessibilityLabel={accessibilityLabel ?? t('a11y.mapImage')}>
       <ScrollView
         ref={scrollRef}
         style={dimensions}

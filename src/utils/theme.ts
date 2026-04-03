@@ -46,7 +46,7 @@ const darkPalette = {
   goldShadow: raw.goldShadow,
   red: raw.redLight,        // Lighter red for dark bg readability
   redLight: raw.redLight,
-  muted: '#6E6878',         // --muted: tertiary text
+  muted: '#8B8698',         // --muted: tertiary text
   dim: '#3D3A4A',           // --dim: dimmed elements
   paper: '#15141A',         // --bg: dark background
   paperDark: '#1D1C23',     // --surface: raised dark surface
@@ -69,7 +69,7 @@ const lightPalette = {
   goldShadow: raw.goldShadow,
   red: raw.red,             // standard red on light bg
   redLight: raw.redLight,
-  muted: '#8A8494',         // tertiary text
+  muted: '#706A78',         // tertiary text
   dim: '#D5CFC6',           // dimmed elements on light bg
   paper: '#F5EFE6',         // warm parchment background
   paperDark: '#FFFFFF',     // white surface cards
@@ -200,6 +200,22 @@ export type ThemeMode = 'light' | 'dark' | 'system';
 
 // Default export for backward compat (dark theme)
 export const colors = darkColors;
+
+/** Common flag colors used to generate impostor (fake) flags. */
+export const IMPOSTOR_COLORS = [
+  '#CE1126', // red
+  '#003DA5', // blue
+  '#009739', // green
+  '#FFCD00', // yellow
+  '#FFFFFF', // white
+  '#000000', // black
+  '#FF6600', // orange
+  '#00A9E0', // sky blue
+  '#7B3F00', // brown
+  '#502379', // purple
+  '#D21034', // crimson
+  '#007A5E', // teal green
+];
 
 export const spacing = {
   xxs: 2,

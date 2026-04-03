@@ -68,7 +68,7 @@ export default function GameScreen({ route, navigation }: Props) {
         const q = generatePracticeQuestions(ids);
         setQuestions(q);
         setQuestionStartTime(Date.now());
-      });
+      }).catch(() => {});
     } else {
       const timeAttackConfig = isTimeAttack
         ? { ...config, questionCount: UNLIMITED_QUESTIONS }

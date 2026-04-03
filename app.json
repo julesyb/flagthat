@@ -15,6 +15,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.flagsareus.app",
+      "buildNumber": "1",
       "associatedDomains": ["applinks:flagthat.app"],
       "minimumOSVersion": "16.0",
       "infoPlist": {

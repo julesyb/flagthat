@@ -62,8 +62,8 @@ export default function BrowseScreen({ route, navigation }: Props) {
 
   useFocusEffect(
     useCallback(() => {
-      getMissedFlagIds().then(setMissedFlagIds);
-      getFlagStats().then(setFlagStats);
+      getMissedFlagIds().then(setMissedFlagIds).catch(() => {});
+      getFlagStats().then(setFlagStats).catch(() => {});
     }, []),
   );
 

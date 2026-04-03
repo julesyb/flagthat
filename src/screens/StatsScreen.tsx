@@ -137,6 +137,7 @@ export default function StatsScreen() {
 
       loadStatsData().then((loaded) => {
         if (cancelled) return;
+
         setData(loaded);
 
         const acc = loaded.stats.totalAnswered > 0
@@ -188,7 +189,7 @@ export default function StatsScreen() {
           regionFade.setValue(1);
           restFade.setValue(1);
         }
-      });
+      }).catch(() => {});
 
       return () => {
         cancelled = true;

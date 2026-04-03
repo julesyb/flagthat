@@ -99,15 +99,19 @@ export async function saveBadgeData(data: BadgeData): Promise<void> {
 }
 
 export async function markShared(): Promise<void> {
-  const data = await getBadgeData();
-  data.hasShared = true;
-  await saveBadgeData(data);
+  try {
+    const data = await getBadgeData();
+    data.hasShared = true;
+    await saveBadgeData(data);
+  } catch { /* ignore */ }
 }
 
 export async function incrementDailyChallenges(): Promise<void> {
-  const data = await getBadgeData();
-  data.dailyChallengesCompleted += 1;
-  await saveBadgeData(data);
+  try {
+    const data = await getBadgeData();
+    data.dailyChallengesCompleted += 1;
+    await saveBadgeData(data);
+  } catch { /* ignore */ }
 }
 
 export async function persistEarnedBadges(badgeIds: string[]): Promise<void> {

@@ -241,10 +241,10 @@ export default function ResultsScreen({ route, navigation }: Props) {
         setChallengeName(saved);
         setDailyName(saved);
       }
-    });
+    }).catch(() => {});
     if (isDaily) {
       const dateStr = getTodayDateString();
-      getDailyLeaderboardForDate(dateStr).then(setLeaderboardEntries);
+      getDailyLeaderboardForDate(dateStr).then(setLeaderboardEntries).catch(() => {});
     }
   }, [isDaily]);
 
@@ -415,10 +415,10 @@ export default function ResultsScreen({ route, navigation }: Props) {
       // Refresh leaderboard after persist so user's own entry appears
       if (isDaily && !reviewOnly) {
         const dateStr = getTodayDateString();
-        getDailyLeaderboardForDate(dateStr).then(setLeaderboardEntries);
+        getDailyLeaderboardForDate(dateStr).then(setLeaderboardEntries).catch(() => {});
       }
     }
-    processResults();
+    processResults().catch(() => {});
 
     // ── Animation sequence ──
     // Phase 1: Count-up (0 → accuracy)

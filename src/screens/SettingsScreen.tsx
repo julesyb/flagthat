@@ -50,8 +50,8 @@ export default function SettingsScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      getSettings().then(setSettings);
-      getSkillLevel().then(setSkillLevel);
+      getSettings().then(setSettings).catch(() => {});
+      getSkillLevel().then(setSkillLevel).catch(() => {});
     }, []),
   );
 

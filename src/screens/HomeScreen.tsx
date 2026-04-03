@@ -184,7 +184,7 @@ export default function HomeScreen({ navigation }: Props) {
     getSettings().then((s) => {
       setSoundsEnabled(s.soundEnabled);
       setHapticsEnabled(s.hapticsEnabled);
-    });
+    }).catch(() => {});
   }, []);
 
   // Track known skill level so we only update difficulty on actual promotions
@@ -192,10 +192,10 @@ export default function HomeScreen({ navigation }: Props) {
 
   useFocusEffect(
     useCallback(() => {
-      getStats().then(setStats);
-      getMissedFlagIds().then((ids) => setWeakFlagCount(ids.length));
-      isDailyCompleteToday().then(setDailyDone);
-      getBaselineData().then(setBaseline);
+      getStats().then(setStats).catch(() => {});
+      getMissedFlagIds().then((ids) => setWeakFlagCount(ids.length)).catch(() => {});
+      isDailyCompleteToday().then(setDailyDone).catch(() => {});
+      getBaselineData().then(setBaseline).catch(() => {});
       setTeaserKey((k) => k + 1);
       // Sync difficulty when skill level changes (initial load or auto-promotion)
       getSkillLevel().then((skill) => {
@@ -203,7 +203,7 @@ export default function HomeScreen({ navigation }: Props) {
           setMode(getDefaultDifficulty(skill));
           lastSkillRef.current = skill;
         }
-      });
+      }).catch(() => {});
       Promise.all([getStats(), getFlagStats(), getBadgeData(), getDayStreakInfo(), getPersistedLevel()]).then(
         ([s, fs, bd, dsi, pl]) => {
           setStats(s);
@@ -211,7 +211,7 @@ export default function HomeScreen({ navigation }: Props) {
           setLevelProgress(lp);
           persistLevel(lp.currentLevel);
         },
-      );
+      ).catch(() => {});
     }, []),
   );
 

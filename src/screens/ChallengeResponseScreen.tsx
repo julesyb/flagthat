@@ -58,6 +58,8 @@ export default function ChallengeResponseScreen({ route, navigation }: Props) {
         hapticWrong();
         setResult({ status: 'not_found', name: recipientName, score: recipientScore, total: totalFlags });
       }
+    }).catch(() => {
+      setResult({ status: 'not_found', name: recipientName, score: recipientScore, total: totalFlags });
     });
   }, [responseCode]);
 

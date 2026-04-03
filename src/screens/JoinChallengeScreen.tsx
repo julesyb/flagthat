@@ -55,7 +55,7 @@ export default function JoinChallengeScreen({ route, navigation }: Props) {
   useEffect(() => {
     getChallengeName().then((saved) => {
       if (saved) setName(saved);
-    });
+    }).catch(() => {});
   }, []);
 
   const decoded = useMemo(() => {
@@ -78,7 +78,7 @@ export default function JoinChallengeScreen({ route, navigation }: Props) {
         (h) => h.shortCode === shortCode && h.direction === 'received',
       );
       setPreviousAttempt(existing ?? null);
-    });
+    }).catch(() => {});
   }, [preview]);
 
   const canPlay = decoded?.status === 'ok' && name.trim().length > 0 && !previousAttempt;

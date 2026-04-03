@@ -26,6 +26,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     getSettings().then((s) => {
       setThemeModeState(s.themeMode ?? 'dark');
       setLoaded(true);
+    }).catch(() => {
+      setLoaded(true);
     });
   }, []);
 

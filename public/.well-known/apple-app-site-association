@@ -1,0 +1,11 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appIDs": ["TEAMID.com.flagsareus.app"],
+        "paths": ["/c/*", "/r/*", "/d/*"]
+      }
+    ]
+  }
+}
