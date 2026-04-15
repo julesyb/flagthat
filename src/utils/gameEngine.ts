@@ -4,6 +4,7 @@ import { countryAliases, twinPairs } from '../data/countryAliases';
 import { translateName } from '../data/countryNames';
 import { countryCapitals } from '../data/countryCapitals';
 import { APP_DOMAIN, DAILY_QUESTION_COUNT, SHARE_GRID_ROW_SIZE, EASY_CHOICE_COUNT, STANDARD_CHOICE_COUNT } from './config';
+import { getFlagLastShownSync, FlagLastShown } from './storage';
 import { t } from './i18n';
 
 /** Maps a GameMode to its display-label i18n key. Quiz difficulty modes (easy/medium/hard) all display as "Quiz". */
@@ -19,6 +20,28 @@ export function shuffleArray<T>(array: T[]): T[] {
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
   return shuffled;
+}
+
+/**
+ * Rotates a pool of items so that the least-recently-shown items come first.
+ * Ties (including flags that have never been shown) are randomized via a prior shuffle.
+ * Relies on Array.prototype.sort being stable (ES2019+), which all supported engines honor.
+ *
+ * This is the mechanism that enforces "no repeats until you've seen everything else":
+ * callers select the first N items from the result, so a flag that was just shown
+ * cannot reappear until every other flag in the pool has been shown at least as recently.
+ *
+ * `getId` extracts the flag id for each item so callers can pass either FlagItem
+ * objects or bare id strings (as Neighbors does with its eligible country-code list).
+ */
+export function rotateByLeastRecentlyShown<T>(
+  items: T[],
+  getId: (item: T) => string,
+  lastShown?: FlagLastShown,
+): T[] {
+  const map = lastShown ?? getFlagLastShownSync();
+  const shuffled = shuffleArray(items);
+  return shuffled.sort((a, b) => (map[getId(a)] ?? 0) - (map[getId(b)] ?? 0));
 }
 
 // Seeded PRNG (mulberry32) - deterministic shuffle for daily challenge
@@ -201,9 +224,13 @@ export function generateQuestions(config: GameConfig): GameQuestion[] {
       .map((id) => flagMap.get(id))
       .filter((f): f is FlagItem => f !== undefined);
   } else {
-    const shuffledFlags = shuffleArray(categoryFlags);
+    // Rotate so least-recently-shown flags come first. Ties (including flags the
+    // user has never seen) are randomized, so the selection still feels fresh
+    // within the "due" bucket while guaranteeing no repeats until the category
+    // pool has cycled.
+    const rotated = rotateByLeastRecentlyShown(categoryFlags, (f) => f.id);
     const count = Math.min(config.questionCount, categoryFlags.length);
-    selectedFlags = shuffledFlags.slice(0, count);
+    selectedFlags = rotated.slice(0, count);
   }
 
   return selectedFlags.map((flag) => {

@@ -19,7 +19,7 @@ import { spacing, typography, fontFamily, fontSize, buildButtons, borderRadius, 
 import { APP_URL } from '../utils/config';
 import { useTheme } from '../contexts/ThemeContext';
 import { getStreakFromResults, generateDailyShareGrid, generateShareGrid, modeLabelKey } from '../utils/gameEngine';
-import { updateStats, updateFlagResults, saveDailyChallenge, incrementDailyChallenges, markShared, saveBaselineResult, getStats, getFlagStats, getDayStreakInfo, getBadgeData, persistEarnedBadges, getMissedFlagIds, addGameHistoryEntry, getChallengeName, saveChallengeName, addChallengeToHistory, recordRegionScore, getPersistedLevel, persistLevel, UNLOCK_THRESHOLD, recordGameForProgression, SkillLevel, SKILL_TAG_KEYS } from '../utils/storage';
+import { updateStats, updateFlagResults, saveDailyChallenge, incrementDailyChallenges, markShared, saveBaselineResult, getStats, getFlagStats, getDayStreakInfo, getBadgeData, persistEarnedBadges, getMissedFlagIds, addGameHistoryEntry, getChallengeName, saveChallengeName, addChallengeToHistory, recordRegionScore, getPersistedLevel, persistLevel, UNLOCK_THRESHOLD, recordGameForProgression, recordFlagsShown, SkillLevel, SKILL_TAG_KEYS } from '../utils/storage';
 import { BaselineRegionId, UserStats, GameMode, CategoryId, BASELINE_REGIONS } from '../types';
 import { t } from '../utils/i18n';
 import { hapticCorrect, hapticTap, playCelebrationSound } from '../utils/feedback';
@@ -80,6 +80,9 @@ async function persistGameData(
     : undefined;
   await updateStats(correct, questionTotal, streak, config.mode, config.category, speedData);
   await updateFlagResults(results);
+  // Record that these flags were just shown so the rotation engine surfaces
+  // other flags next time. Covers every mode that routes through Results.
+  await recordFlagsShown(results.map((r) => r.question.flag.id));
   await addGameHistoryEntry(accuracy, config.mode);
   // Auto-progression: track perfect games for skill level advancement
   const skillUp = await recordGameForProgression(correct, questionTotal, config.mode);

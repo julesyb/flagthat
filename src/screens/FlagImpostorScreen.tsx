@@ -13,8 +13,8 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { spacing, typography, fontFamily, fontSize, buildButtons, borderRadius, ThemeColors, IMPOSTOR_COLORS } from '../utils/theme';
 import { useTheme } from '../contexts/ThemeContext';
 import { hapticTap, hapticCorrect, hapticWrong, playWrongSound } from '../utils/feedback';
-import { updateStats, updateFlagResults } from '../utils/storage';
-import { shuffleArray, getStreakFromResults } from '../utils/gameEngine';
+import { updateStats, updateFlagResults, recordFlagsShown } from '../utils/storage';
+import { shuffleArray, getStreakFromResults, rotateByLeastRecentlyShown } from '../utils/gameEngine';
 import { t } from '../utils/i18n';
 import { flagName } from '../data/countryNames';
 import { RootStackParamList } from '../types/navigation';
@@ -385,9 +385,30 @@ function generateRounds(count: number): RoundData[] {
   const rounds: RoundData[] = [];
   const usedIds = new Set<string>();
 
+  // Rotate the full country pool by least-recently-shown so Impostor cycles
+  // through every country before a repeat. The rotated order is stable for
+  // this game; we just walk it from the top, skipping ids already used this
+  // game to keep rounds unique.
+  const rotated = rotateByLeastRecentlyShown(countries, (c) => c.id);
+  let cursor = 0;
+
+  const takeThree = (): FlagItem[] => {
+    const picks: FlagItem[] = [];
+    while (picks.length < 3 && cursor < rotated.length) {
+      const next = rotated[cursor++];
+      if (!usedIds.has(next.id)) picks.push(next);
+    }
+    // Fallback if the rotation ran out (shouldn't happen for normal counts)
+    if (picks.length < 3) {
+      const remaining = 3 - picks.length;
+      const backup = pickRandom(countries.filter((c) => !usedIds.has(c.id) && !picks.includes(c)), remaining);
+      picks.push(...backup);
+    }
+    return picks;
+  };
+
   for (let i = 0; i < count; i++) {
-    const available = countries.filter((c) => !usedIds.has(c.id));
-    const realFlags = pickRandom(available.length >= 3 ? available : countries, 3);
+    const realFlags = takeThree();
     realFlags.forEach((f) => usedIds.add(f.id));
     rounds.push({ realFlags, fakeFlag: generateFakeFlag(), fakeIndex: Math.floor(Math.random() * 4) });
   }
@@ -450,6 +471,15 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
   };
 
   const finishGame = (finalResults: GameResult[]) => {
+    // Impostor shows 3 real flags per round but only the first one rides along
+    // in GameResult. Record every real flag that was on screen so the rotation
+    // engine treats all three as "just seen".
+    const seenIds = new Set<string>();
+    for (let i = 0; i <= roundIndex && i < rounds.length; i++) {
+      for (const f of rounds[i].realFlags) seenIds.add(f.id);
+    }
+    // Fire-and-forget; persistence failures shouldn't block navigation.
+    recordFlagsShown([...seenIds]);
     navigation.replace('Results', { results: finalResults, config });
   };
 

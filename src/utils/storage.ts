@@ -21,6 +21,7 @@ const LEVEL_KEY = '@flagsareus_level';
 const DAILY_LEADERBOARD_KEY = '@flagsareus_daily_leaderboard';
 const SKILL_LEVEL_KEY = '@flagsareus_skill_level';
 const PERFECT_STREAK_KEY = '@flagsareus_perfect_streak';
+const FLAG_LAST_SHOWN_KEY = '@flagsareus_flag_last_shown';
 
 // ─── Challenge Name ─────────────────────────────────────────
 export async function getChallengeName(): Promise<string> {
@@ -288,6 +289,8 @@ export async function resetStats(): Promise<void> {
     await AsyncStorage.removeItem(CHALLENGE_NAME_KEY);
     await AsyncStorage.removeItem(SKILL_LEVEL_KEY);
     await AsyncStorage.removeItem(PERFECT_STREAK_KEY);
+    await AsyncStorage.removeItem(FLAG_LAST_SHOWN_KEY);
+    cachedLastShown = {};
   } catch {
     // Silently fail
   }
@@ -478,6 +481,53 @@ export async function updateFlagResults(results: GameResult[]): Promise<void> {
       }
     }
     await AsyncStorage.setItem(FLAG_STATS_KEY, JSON.stringify(stats));
+  } catch {
+    // Silently fail
+  }
+}
+
+// ─── Flag Rotation (last-shown tracking) ───────────────────
+// Tracks when each flag was last presented to the user as a question.
+// Game screens use this to sort the flag pool so that the least-recently-shown
+// flags surface first, cycling through the whole pool before repeats.
+//
+// Reads are served from an in-memory cache primed at app startup so that
+// synchronous selection code (useMemo in game screens) can consult it without
+// needing to await AsyncStorage on every render.
+
+export type FlagLastShown = Record<string, number>;
+
+let cachedLastShown: FlagLastShown | null = null;
+
+export async function primeFlagLastShownCache(): Promise<void> {
+  try {
+    const json = await AsyncStorage.getItem(FLAG_LAST_SHOWN_KEY);
+    cachedLastShown = json ? JSON.parse(json) : {};
+  } catch {
+    cachedLastShown = {};
+  }
+}
+
+export function getFlagLastShownSync(): FlagLastShown {
+  return cachedLastShown ?? {};
+}
+
+export async function getFlagLastShown(): Promise<FlagLastShown> {
+  if (cachedLastShown) return cachedLastShown;
+  await primeFlagLastShownCache();
+  return cachedLastShown ?? {};
+}
+
+export async function recordFlagsShown(flagIds: string[]): Promise<void> {
+  if (flagIds.length === 0) return;
+  try {
+    const current = cachedLastShown ?? (await getFlagLastShown());
+    const now = Date.now();
+    for (const id of flagIds) {
+      current[id] = now;
+    }
+    cachedLastShown = current;
+    await AsyncStorage.setItem(FLAG_LAST_SHOWN_KEY, JSON.stringify(current));
   } catch {
     // Silently fail
   }
