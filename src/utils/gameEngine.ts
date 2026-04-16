@@ -4,6 +4,12 @@ import { countryAliases, twinPairs } from '../data/countryAliases';
 import { translateName } from '../data/countryNames';
 import { countryCapitals } from '../data/countryCapitals';
 import { APP_DOMAIN, DAILY_QUESTION_COUNT, SHARE_GRID_ROW_SIZE, EASY_CHOICE_COUNT, STANDARD_CHOICE_COUNT } from './config';
+import {
+  getFlagLastShownSync,
+  getFlagStatsSync,
+  FlagLastShown,
+  FlagStats,
+} from './storage';
 import { t } from './i18n';
 
 /** Maps a GameMode to its display-label i18n key. Quiz difficulty modes (easy/medium/hard) all display as "Quiz". */
@@ -19,6 +25,137 @@ export function shuffleArray<T>(array: T[]): T[] {
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
   return shuffled;
+}
+
+/**
+ * Rotates a pool of items so that the least-recently-shown items come first.
+ * Ties (including flags that have never been shown) are randomized via a prior shuffle.
+ * Relies on Array.prototype.sort being stable (ES2019+), which all supported engines honor.
+ *
+ * This is the mechanism that enforces "no repeats until you've seen everything else":
+ * callers select the first N items from the result, so a flag that was just shown
+ * cannot reappear until every other flag in the pool has been shown at least as recently.
+ *
+ * `getId` extracts the flag id for each item so callers can pass either FlagItem
+ * objects or bare id strings (as Neighbors does with its eligible country-code list).
+ */
+export function rotateByLeastRecentlyShown<T>(
+  items: T[],
+  getId: (item: T) => string,
+  lastShown?: FlagLastShown,
+): T[] {
+  const map = lastShown ?? getFlagLastShownSync();
+  const shuffled = shuffleArray(items);
+  return shuffled.sort((a, b) => (map[getId(a)] ?? 0) - (map[getId(b)] ?? 0));
+}
+
+// ── Spaced-repetition: two-lane selection ──────────────────────────────
+//
+// Two competing goals:
+//   1. "Go through the whole list before anything repeats" — hard cycle.
+//   2. "If I got Mozambique wrong, show it again soon" — spaced repetition.
+//
+// A single sorted queue can't do both. If you get one wrong it goes to
+// the back of the rotation queue — you won't see it again for 200 flags.
+// That kills learning.
+//
+// Solution: two lanes.
+//
+//   ROTATION LANE (hard cycle guarantee):
+//     Sort pool by lastShown ascending (ties randomized). Take exactly
+//     the N stalest flags. Everything else is hard-excluded. Shuffle
+//     the slice so in-game ordering stays unpredictable.
+//
+//   URGENT LANE (spaced repetition override):
+//     Reserve up to ~20% of question slots (min 1, max 2) for flags the
+//     user is actively struggling with (rightStreak === 0, wrong > 0),
+//     regardless of when they were last shown. These bypass the cycle.
+//     Capped so it can't dominate and feel like "the same flags again."
+
+/** How much of the game to reserve for urgent misses (20%, min 1, max 2). */
+function urgentSlotCount(totalCount: number): number {
+  if (totalCount <= 2) return 0; // don't take over tiny games
+  return Math.min(2, Math.max(1, Math.floor(totalCount * 0.2)));
+}
+
+/**
+ * Weighted sampling without replacement via Efraimidis-Spirakis reservoir
+ * keys: draw U ~ Uniform(0,1) for each item, compute key = -ln(U) / weight,
+ * keep the `count` items with the smallest keys.
+ */
+export function weightedSampleWithoutReplacement<T>(
+  items: T[],
+  getWeight: (item: T) => number,
+  count: number,
+): T[] {
+  if (count <= 0 || items.length === 0) return [];
+  if (count >= items.length) return shuffleArray(items);
+  const keyed = items.map((item) => {
+    const w = Math.max(getWeight(item), 1e-6);
+    const u = Math.random() || 1e-12;
+    return { item, key: -Math.log(u) / w };
+  });
+  keyed.sort((a, b) => a.key - b.key);
+  return keyed.slice(0, count).map((x) => x.item);
+}
+
+/**
+ * The main selection primitive used by every non-deterministic game mode.
+ *
+ * Guarantees:
+ *   • Hard cycle: a flag cannot appear in the rotation lane until every
+ *     other flag in the pool has been shown first.
+ *   • Spaced repetition: flags the user is struggling with can re-surface
+ *     within 1-2 games via the urgent lane, even if they were just shown.
+ *   • Non-determinism: ties in lastShown are randomized, the urgent lane
+ *     uses weighted sampling, and the final result is shuffled.
+ */
+export function selectFlagsForGame<T>(
+  pool: T[],
+  count: number,
+  getId: (item: T) => string,
+  opts?: { lastShown?: FlagLastShown; flagStats?: FlagStats },
+): T[] {
+  if (pool.length === 0 || count <= 0) return [];
+  const actualCount = Math.min(count, pool.length);
+  const lastShown = opts?.lastShown ?? getFlagLastShownSync();
+  const flagStats = opts?.flagStats ?? getFlagStatsSync();
+
+  // ── Urgent lane: pull struggling flags that bypass the cycle ──
+  const maxUrgent = urgentSlotCount(actualCount);
+  let urgentPicks: T[] = [];
+  const urgentSet = new Set<string>();
+
+  if (maxUrgent > 0) {
+    // Struggling = last answer was wrong and they haven't recovered.
+    // Weighted sample by wrong-count so harder flags get more priority,
+    // but it stays unpredictable across runs.
+    const struggling = pool.filter((item) => {
+      const s = flagStats[getId(item)];
+      return s && s.rightStreak === 0 && s.wrong > 0;
+    });
+    if (struggling.length > 0) {
+      urgentPicks = weightedSampleWithoutReplacement(
+        struggling,
+        (item) => flagStats[getId(item)]?.wrong ?? 1,
+        Math.min(maxUrgent, struggling.length),
+      );
+      for (const item of urgentPicks) urgentSet.add(getId(item));
+    }
+  }
+
+  // ── Rotation lane: hard cycle for the remaining slots ──
+  const rotationCount = actualCount - urgentPicks.length;
+  const rotationPool = pool.filter((item) => !urgentSet.has(getId(item)));
+  const rotated = rotateByLeastRecentlyShown(rotationPool, getId, lastShown);
+
+  // Hard cycle: take exactly rotationCount from the front of the rotation.
+  // These are the stalest flags, and everything behind them is excluded.
+  // Shuffle the slice so in-game ordering stays unpredictable.
+  const rotationPicks = shuffleArray(rotated.slice(0, rotationCount));
+
+  // ── Combine and shuffle so urgent flags don't cluster at the start ──
+  return shuffleArray([...urgentPicks, ...rotationPicks]);
 }
 
 // Seeded PRNG (mulberry32) - deterministic shuffle for daily challenge
@@ -201,9 +338,11 @@ export function generateQuestions(config: GameConfig): GameQuestion[] {
       .map((id) => flagMap.get(id))
       .filter((f): f is FlagItem => f !== undefined);
   } else {
-    const shuffledFlags = shuffleArray(categoryFlags);
-    const count = Math.min(config.questionCount, categoryFlags.length);
-    selectedFlags = shuffledFlags.slice(0, count);
+    selectedFlags = selectFlagsForGame(
+      categoryFlags,
+      config.questionCount,
+      (f) => f.id,
+    );
   }
 
   return selectedFlags.map((flag) => {

@@ -13,8 +13,8 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { spacing, typography, fontFamily, fontSize, buildButtons, borderRadius, ThemeColors, IMPOSTOR_COLORS } from '../utils/theme';
 import { useTheme } from '../contexts/ThemeContext';
 import { hapticTap, hapticCorrect, hapticWrong, playWrongSound } from '../utils/feedback';
-import { updateStats, updateFlagResults } from '../utils/storage';
-import { shuffleArray, getStreakFromResults } from '../utils/gameEngine';
+import { updateStats, updateFlagResults, recordFlagsShown } from '../utils/storage';
+import { shuffleArray, getStreakFromResults, selectFlagsForGame } from '../utils/gameEngine';
 import { t } from '../utils/i18n';
 import { flagName } from '../data/countryNames';
 import { RootStackParamList } from '../types/navigation';
@@ -27,12 +27,6 @@ import GameTopBar from '../components/GameTopBar';
 import ScreenContainer from '../components/ScreenContainer';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'FlagImpostor'>;
-
-function pickRandom<T>(arr: T[], count: number): T[] {
-  return shuffleArray(arr).slice(0, count);
-}
-
-// ── Impostor flags: real flag layouts recolored with non-traditional colors ──
 
 // ── Impostor flags: real flag layouts recolored with non-traditional colors ──
 
@@ -382,13 +376,17 @@ interface RoundData {
 }
 
 function generateRounds(count: number): RoundData[] {
-  const rounds: RoundData[] = [];
-  const usedIds = new Set<string>();
+  // Select 3 flags per round in one batch via rotation + weighted sampling.
+  // This means the whole set of real flags in this game session is drawn from
+  // the oldest / most-struggled part of the pool.
+  const totalNeeded = count * 3;
+  const selected = selectFlagsForGame(countries, totalNeeded, (c) => c.id);
 
+  const rounds: RoundData[] = [];
   for (let i = 0; i < count; i++) {
-    const available = countries.filter((c) => !usedIds.has(c.id));
-    const realFlags = pickRandom(available.length >= 3 ? available : countries, 3);
-    realFlags.forEach((f) => usedIds.add(f.id));
+    const start = i * 3;
+    const realFlags = selected.slice(start, start + 3);
+    if (realFlags.length < 3) break;
     rounds.push({ realFlags, fakeFlag: generateFakeFlag(), fakeIndex: Math.floor(Math.random() * 4) });
   }
   return rounds;
@@ -450,6 +448,15 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
   };
 
   const finishGame = (finalResults: GameResult[]) => {
+    // Impostor shows 3 real flags per round but only the first one rides along
+    // in GameResult. Record every real flag that was on screen so the rotation
+    // engine treats all three as "just seen".
+    const seenIds = new Set<string>();
+    for (let i = 0; i <= roundIndex && i < rounds.length; i++) {
+      for (const f of rounds[i].realFlags) seenIds.add(f.id);
+    }
+    // Fire-and-forget; persistence failures shouldn't block navigation.
+    recordFlagsShown([...seenIds]);
     navigation.replace('Results', { results: finalResults, config });
   };
 

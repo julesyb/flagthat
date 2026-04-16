@@ -37,7 +37,7 @@ import { colors, fontSize, APP_URL } from './src/utils/theme';
 import { ThemeProvider, useTheme } from './src/contexts/ThemeContext';
 import { configureNotificationHandler, syncNotificationSchedule } from './src/utils/notifications';
 import { initLocale, t } from './src/utils/i18n';
-import { hasCompletedOnboarding } from './src/utils/storage';
+import { hasCompletedOnboarding, primeFlagLastShownCache, primeFlagStatsCache } from './src/utils/storage';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -146,7 +146,11 @@ function AppContent() {
     }
     initLocale()
       .then(async () => {
-        const onboarded = await hasCompletedOnboarding();
+        const [onboarded] = await Promise.all([
+          hasCompletedOnboarding(),
+          primeFlagLastShownCache(),
+          primeFlagStatsCache(),
+        ]);
         setInitialRoute(onboarded ? 'Home' : 'Onboarding');
         setLocaleReady(true);
         syncNotificationSchedule();

@@ -21,6 +21,7 @@ const LEVEL_KEY = '@flagsareus_level';
 const DAILY_LEADERBOARD_KEY = '@flagsareus_daily_leaderboard';
 const SKILL_LEVEL_KEY = '@flagsareus_skill_level';
 const PERFECT_STREAK_KEY = '@flagsareus_perfect_streak';
+const FLAG_LAST_SHOWN_KEY = '@flagsareus_flag_last_shown';
 
 // ─── Challenge Name ─────────────────────────────────────────
 export async function getChallengeName(): Promise<string> {
@@ -288,6 +289,9 @@ export async function resetStats(): Promise<void> {
     await AsyncStorage.removeItem(CHALLENGE_NAME_KEY);
     await AsyncStorage.removeItem(SKILL_LEVEL_KEY);
     await AsyncStorage.removeItem(PERFECT_STREAK_KEY);
+    await AsyncStorage.removeItem(FLAG_LAST_SHOWN_KEY);
+    cachedLastShown = {};
+    cachedFlagStats = {};
   } catch {
     // Silently fail
   }
@@ -440,7 +444,10 @@ export interface FlagStats {
   [flagId: string]: { wrong: number; right: number; rightStreak: number; totalTimeRight?: number; totalTimeWrong?: number };
 }
 
+let cachedFlagStats: FlagStats | null = null;
+
 export async function getFlagStats(): Promise<FlagStats> {
+  if (cachedFlagStats) return cachedFlagStats;
   try {
     const json = await AsyncStorage.getItem(FLAG_STATS_KEY);
     if (json) {
@@ -451,12 +458,28 @@ export async function getFlagStats(): Promise<FlagStats> {
           parsed[id].rightStreak = 0;
         }
       }
+      cachedFlagStats = parsed;
       return parsed;
     }
+    cachedFlagStats = {};
     return {};
   } catch {
+    cachedFlagStats = {};
     return {};
   }
+}
+
+/**
+ * Synchronous accessor for the cached flag stats. Returns an empty object
+ * if the cache hasn't been primed yet (caller should treat unknown flags
+ * as "neutral"). Primed at app startup via primeFlagStatsCache.
+ */
+export function getFlagStatsSync(): FlagStats {
+  return cachedFlagStats ?? {};
+}
+
+export async function primeFlagStatsCache(): Promise<void> {
+  await getFlagStats();
 }
 
 export async function updateFlagResults(results: GameResult[]): Promise<void> {
@@ -477,7 +500,47 @@ export async function updateFlagResults(results: GameResult[]): Promise<void> {
         stats[id].totalTimeWrong = (stats[id].totalTimeWrong || 0) + r.timeTaken;
       }
     }
+    cachedFlagStats = stats;
     await AsyncStorage.setItem(FLAG_STATS_KEY, JSON.stringify(stats));
+  } catch {
+    // Silently fail
+  }
+}
+
+// ─── Flag Rotation (last-shown tracking) ───────────────────
+// Tracks when each flag was last presented to the user as a question.
+// Game screens use this to sort the flag pool so that the least-recently-shown
+// flags surface first, cycling through the whole pool before repeats.
+//
+// Reads are served from an in-memory cache primed at app startup so that
+// synchronous selection code (useMemo in game screens) can consult it without
+// needing to await AsyncStorage on every render.
+
+export type FlagLastShown = Record<string, number>;
+
+let cachedLastShown: FlagLastShown | null = null;
+
+export async function primeFlagLastShownCache(): Promise<void> {
+  try {
+    const json = await AsyncStorage.getItem(FLAG_LAST_SHOWN_KEY);
+    cachedLastShown = json ? JSON.parse(json) : {};
+  } catch {
+    cachedLastShown = {};
+  }
+}
+
+export function getFlagLastShownSync(): FlagLastShown {
+  return cachedLastShown ?? {};
+}
+
+export async function recordFlagsShown(flagIds: string[]): Promise<void> {
+  if (flagIds.length === 0) return;
+  try {
+    if (!cachedLastShown) await primeFlagLastShownCache();
+    const current = cachedLastShown!;
+    const now = Date.now();
+    for (const id of flagIds) current[id] = now;
+    await AsyncStorage.setItem(FLAG_LAST_SHOWN_KEY, JSON.stringify(current));
   } catch {
     // Silently fail
   }
