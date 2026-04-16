@@ -128,16 +128,13 @@ export function selectFlagsForGame<T>(
 
   if (maxUrgent > 0) {
     // Struggling = last answer was wrong and they haven't recovered.
-    // Sort by most-wrong-first so the hardest flags get priority.
-    const struggling = pool
-      .filter((item) => {
-        const s = flagStats[getId(item)];
-        return s && s.rightStreak === 0 && s.wrong > 0;
-      })
-      .sort((a, b) => (flagStats[getId(b)]?.wrong ?? 0) - (flagStats[getId(a)]?.wrong ?? 0));
-
+    // Weighted sample by wrong-count so harder flags get more priority,
+    // but it stays unpredictable across runs.
+    const struggling = pool.filter((item) => {
+      const s = flagStats[getId(item)];
+      return s && s.rightStreak === 0 && s.wrong > 0;
+    });
     if (struggling.length > 0) {
-      // Weighted sample (not strict top-N) so it stays unpredictable.
       urgentPicks = weightedSampleWithoutReplacement(
         struggling,
         (item) => flagStats[getId(item)]?.wrong ?? 1,

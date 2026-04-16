@@ -28,12 +28,6 @@ import ScreenContainer from '../components/ScreenContainer';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'FlagImpostor'>;
 
-function pickRandom<T>(arr: T[], count: number): T[] {
-  return shuffleArray(arr).slice(0, count);
-}
-
-// ── Impostor flags: real flag layouts recolored with non-traditional colors ──
-
 // ── Impostor flags: real flag layouts recolored with non-traditional colors ──
 
 interface FlagTemplate {

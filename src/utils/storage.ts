@@ -533,21 +533,13 @@ export function getFlagLastShownSync(): FlagLastShown {
   return cachedLastShown ?? {};
 }
 
-export async function getFlagLastShown(): Promise<FlagLastShown> {
-  if (cachedLastShown) return cachedLastShown;
-  await primeFlagLastShownCache();
-  return cachedLastShown ?? {};
-}
-
 export async function recordFlagsShown(flagIds: string[]): Promise<void> {
   if (flagIds.length === 0) return;
   try {
-    const current = cachedLastShown ?? (await getFlagLastShown());
+    if (!cachedLastShown) await primeFlagLastShownCache();
+    const current = cachedLastShown!;
     const now = Date.now();
-    for (const id of flagIds) {
-      current[id] = now;
-    }
-    cachedLastShown = current;
+    for (const id of flagIds) current[id] = now;
     await AsyncStorage.setItem(FLAG_LAST_SHOWN_KEY, JSON.stringify(current));
   } catch {
     // Silently fail

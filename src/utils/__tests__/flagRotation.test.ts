@@ -80,11 +80,6 @@ function makeFlags(ids: string[]): FlagItem[] {
   })) as unknown as FlagItem[];
 }
 
-async function seedFlagStats(stats: FlagStats): Promise<void> {
-  await AsyncStorage.setItem('@flagsareus_flag_stats', JSON.stringify(stats));
-  await primeFlagStatsCache();
-}
-
 beforeEach(async () => {
   await AsyncStorage.clear();
   await primeFlagLastShownCache();
