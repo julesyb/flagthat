@@ -9,7 +9,6 @@ import {
   getFlagStatsSync,
   FlagLastShown,
   FlagStats,
-  MASTERED_STREAK,
 } from './storage';
 import { t } from './i18n';
 
@@ -73,23 +72,10 @@ export function rotateByLeastRecentlyShown<T>(
 //     regardless of when they were last shown. These bypass the cycle.
 //     Capped so it can't dominate and feel like "the same flags again."
 
-const WEIGHT_MASTERED = 0.4;
-const WEIGHT_NEUTRAL = 1;
-const WEIGHT_STRUGGLING = 2.5;
-
 /** How much of the game to reserve for urgent misses (20%, min 1, max 2). */
 function urgentSlotCount(totalCount: number): number {
   if (totalCount <= 2) return 0; // don't take over tiny games
   return Math.min(2, Math.max(1, Math.floor(totalCount * 0.2)));
-}
-
-export function flagLearningWeight(id: string, stats?: FlagStats): number {
-  const map = stats ?? getFlagStatsSync();
-  const s = map[id];
-  if (!s) return WEIGHT_NEUTRAL;
-  if (s.rightStreak >= MASTERED_STREAK) return WEIGHT_MASTERED;
-  if (s.rightStreak === 0 && s.wrong > 0) return WEIGHT_STRUGGLING;
-  return WEIGHT_NEUTRAL;
 }
 
 /**

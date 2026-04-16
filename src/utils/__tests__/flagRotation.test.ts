@@ -55,7 +55,6 @@ import {
   rotateByLeastRecentlyShown,
   selectFlagsForGame,
   weightedSampleWithoutReplacement,
-  flagLearningWeight,
   generateQuestions,
   shuffleArray,
 } from '../gameEngine';
@@ -127,29 +126,6 @@ describe('rotateByLeastRecentlyShown', () => {
     const lastShown = { a: 2000, b: 500, c: 1000 };
     const out = rotateByLeastRecentlyShown(ids, (id) => id, lastShown);
     expect(out).toEqual(['b', 'c', 'a']);
-  });
-});
-
-// ── flagLearningWeight ──────────────────────────────────────────────────
-
-describe('flagLearningWeight', () => {
-  it('returns neutral for flags with no stats', () => {
-    expect(flagLearningWeight('x', {})).toBe(1);
-  });
-
-  it('boosts struggling flags (wrong > 0 and rightStreak === 0)', () => {
-    const stats: FlagStats = { x: { wrong: 3, right: 1, rightStreak: 0 } };
-    expect(flagLearningWeight('x', stats)).toBe(2.5);
-  });
-
-  it('dampens mastered flags (rightStreak >= MASTERED_STREAK)', () => {
-    const stats: FlagStats = { x: { wrong: 0, right: 5, rightStreak: 3 } };
-    expect(flagLearningWeight('x', stats)).toBe(0.4);
-  });
-
-  it('returns neutral for a recovering flag (rightStreak > 0 but < mastered)', () => {
-    const stats: FlagStats = { x: { wrong: 2, right: 3, rightStreak: 2 } };
-    expect(flagLearningWeight('x', stats)).toBe(1);
   });
 });
 
