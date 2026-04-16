@@ -14,7 +14,7 @@ import { spacing, typography, fontFamily, fontSize, buildButtons, borderRadius, 
 import { useTheme } from '../contexts/ThemeContext';
 import { hapticTap, hapticCorrect, hapticWrong, playWrongSound } from '../utils/feedback';
 import { updateStats, updateFlagResults, recordFlagsShown } from '../utils/storage';
-import { shuffleArray, getStreakFromResults, rotateByLeastRecentlyShown } from '../utils/gameEngine';
+import { shuffleArray, getStreakFromResults, selectFlagsForGame } from '../utils/gameEngine';
 import { t } from '../utils/i18n';
 import { flagName } from '../data/countryNames';
 import { RootStackParamList } from '../types/navigation';
@@ -382,34 +382,17 @@ interface RoundData {
 }
 
 function generateRounds(count: number): RoundData[] {
+  // Select 3 flags per round in one batch via rotation + weighted sampling.
+  // This means the whole set of real flags in this game session is drawn from
+  // the oldest / most-struggled part of the pool.
+  const totalNeeded = count * 3;
+  const selected = selectFlagsForGame(countries, totalNeeded, (c) => c.id);
+
   const rounds: RoundData[] = [];
-  const usedIds = new Set<string>();
-
-  // Rotate the full country pool by least-recently-shown so Impostor cycles
-  // through every country before a repeat. The rotated order is stable for
-  // this game; we just walk it from the top, skipping ids already used this
-  // game to keep rounds unique.
-  const rotated = rotateByLeastRecentlyShown(countries, (c) => c.id);
-  let cursor = 0;
-
-  const takeThree = (): FlagItem[] => {
-    const picks: FlagItem[] = [];
-    while (picks.length < 3 && cursor < rotated.length) {
-      const next = rotated[cursor++];
-      if (!usedIds.has(next.id)) picks.push(next);
-    }
-    // Fallback if the rotation ran out (shouldn't happen for normal counts)
-    if (picks.length < 3) {
-      const remaining = 3 - picks.length;
-      const backup = pickRandom(countries.filter((c) => !usedIds.has(c.id) && !picks.includes(c)), remaining);
-      picks.push(...backup);
-    }
-    return picks;
-  };
-
   for (let i = 0; i < count; i++) {
-    const realFlags = takeThree();
-    realFlags.forEach((f) => usedIds.add(f.id));
+    const start = i * 3;
+    const realFlags = selected.slice(start, start + 3);
+    if (realFlags.length < 3) break;
     rounds.push({ realFlags, fakeFlag: generateFakeFlag(), fakeIndex: Math.floor(Math.random() * 4) });
   }
   return rounds;

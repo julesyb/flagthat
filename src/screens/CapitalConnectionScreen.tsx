@@ -11,7 +11,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { spacing, typography, fontFamily, fontSize, buildButtons, borderRadius, ThemeColors, layout } from '../utils/theme';
 import { useTheme } from '../contexts/ThemeContext';
 import { hapticTap, hapticCorrect, hapticWrong, playWrongSound } from '../utils/feedback';
-import { shuffleArray, rotateByLeastRecentlyShown } from '../utils/gameEngine';
+import { shuffleArray, selectFlagsForGame } from '../utils/gameEngine';
 import { RootStackParamList } from '../types/navigation';
 import { FlagItem, GameResult } from '../types';
 import { countries } from '../data/countries';
@@ -82,9 +82,7 @@ function generateQuestions(count: number, challengeFlagIds?: string[], difficult
   const eligible = countries.filter((c) => countryCapitals[c.id]);
   const withCities = eligible.filter((c) => countryCities[c.id]?.length >= 3);
   const pool = withCities.length >= count ? withCities : eligible;
-  // Rotate by least-recently-shown so users cycle through the whole capital
-  // pool before seeing a repeat.
-  const selected = rotateByLeastRecentlyShown(pool, (c) => c.id).slice(0, count);
+  const selected = selectFlagsForGame(pool, count, (c) => c.id);
 
   const questions: QuestionData[] = [];
   for (const flag of selected) {

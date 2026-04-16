@@ -291,6 +291,7 @@ export async function resetStats(): Promise<void> {
     await AsyncStorage.removeItem(PERFECT_STREAK_KEY);
     await AsyncStorage.removeItem(FLAG_LAST_SHOWN_KEY);
     cachedLastShown = {};
+    cachedFlagStats = {};
   } catch {
     // Silently fail
   }
@@ -443,7 +444,10 @@ export interface FlagStats {
   [flagId: string]: { wrong: number; right: number; rightStreak: number; totalTimeRight?: number; totalTimeWrong?: number };
 }
 
+let cachedFlagStats: FlagStats | null = null;
+
 export async function getFlagStats(): Promise<FlagStats> {
+  if (cachedFlagStats) return cachedFlagStats;
   try {
     const json = await AsyncStorage.getItem(FLAG_STATS_KEY);
     if (json) {
@@ -454,12 +458,28 @@ export async function getFlagStats(): Promise<FlagStats> {
           parsed[id].rightStreak = 0;
         }
       }
+      cachedFlagStats = parsed;
       return parsed;
     }
+    cachedFlagStats = {};
     return {};
   } catch {
+    cachedFlagStats = {};
     return {};
   }
+}
+
+/**
+ * Synchronous accessor for the cached flag stats. Returns an empty object
+ * if the cache hasn't been primed yet (caller should treat unknown flags
+ * as "neutral"). Primed at app startup via primeFlagStatsCache.
+ */
+export function getFlagStatsSync(): FlagStats {
+  return cachedFlagStats ?? {};
+}
+
+export async function primeFlagStatsCache(): Promise<void> {
+  await getFlagStats();
 }
 
 export async function updateFlagResults(results: GameResult[]): Promise<void> {
@@ -480,6 +500,7 @@ export async function updateFlagResults(results: GameResult[]): Promise<void> {
         stats[id].totalTimeWrong = (stats[id].totalTimeWrong || 0) + r.timeTaken;
       }
     }
+    cachedFlagStats = stats;
     await AsyncStorage.setItem(FLAG_STATS_KEY, JSON.stringify(stats));
   } catch {
     // Silently fail

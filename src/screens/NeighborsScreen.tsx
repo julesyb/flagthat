@@ -13,7 +13,7 @@ import { spacing, typography, fontFamily, fontSize, buildButtons, borderRadius, 
 import { useTheme } from '../contexts/ThemeContext';
 import { hapticTap, hapticCorrect, hapticWrong, playWrongSound } from '../utils/feedback';
 import { updateStats, updateFlagResults } from '../utils/storage';
-import { shuffleArray, getStreakFromResults, rotateByLeastRecentlyShown } from '../utils/gameEngine';
+import { shuffleArray, getStreakFromResults, selectFlagsForGame } from '../utils/gameEngine';
 import { t } from '../utils/i18n';
 import { flagName } from '../data/countryNames';
 import { RootStackParamList } from '../types/navigation';
@@ -79,9 +79,7 @@ function generateRounds(count: number, challengeFlagIds?: string[]): RoundData[]
   );
   if (eligible.length === 0) return [];
 
-  // Rotate the eligible pool by least-recently-shown so players cycle through
-  // every country with neighbors before seeing a repeat.
-  const shuffled = rotateByLeastRecentlyShown(eligible, (id) => id).slice(0, count);
+  const shuffled = selectFlagsForGame(eligible, count, (id) => id);
   const rounds: RoundData[] = [];
   for (const code of shuffled) {
     const round = buildRoundForCountry(code);
