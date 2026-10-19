@@ -30,13 +30,18 @@ Without it `eas build` cannot run.
 
 ### 2. iOS submit credentials missing (`eas.json`)
 
-`submit.production.ios` has empty `ascAppId` and `appleTeamId`. Fill in:
+Account decision (2026-10-19): enrolled as an **Individual** developer account
+under Apple ID `beynon.julie@gmail.com`. The App Store seller will show the
+enrollee's personal legal name, not a company. The app can be moved to an
+Organization account later via App Store Connect's App Transfer once the
+company (Ontario corp, D-U-N-S pending) is enrolled.
 
-- `appleTeamId` - your Apple Developer Team ID (Membership page).
-- `ascAppId` - the numeric App Store Connect app ID, created when you register
-  the app in App Store Connect.
-- `appleId` is set to `losmith66@gmail.com` - confirm that is the intended
-  Apple account.
+- `appleId` - set to `beynon.julie@gmail.com`. Done.
+- `appleTeamId` - still empty. Your Apple Developer Team ID (10-char code on the
+  Membership details page at developer.apple.com/account).
+- `ascAppId` - still empty. The numeric App Store Connect app ID, created when
+  you register the app (App Store Connect -> Apps -> New App, bundle ID
+  `com.flagsareus.app`); it shows under App Information after creation.
 
 ### 3. Android submit credentials missing (`eas.json`)
 
