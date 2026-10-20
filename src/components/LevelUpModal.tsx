@@ -77,7 +77,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     textAlign: 'center', marginBottom: spacing.lg,
   },
   levelUpButton: {
-    paddingVertical: 14, paddingHorizontal: spacing.xxl,
+    paddingVertical: spacing.md, paddingHorizontal: spacing.xxl,
     alignItems: 'center', borderRadius: borderRadius.md,
     backgroundColor: colors.goldBright,
   },

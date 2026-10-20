@@ -37,7 +37,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     flex: 1,
     paddingVertical: spacing.sm,
     backgroundColor: colors.surfaceSecondary,
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: colors.rule,
     borderRadius: borderRadius.sm,
     alignItems: 'center',

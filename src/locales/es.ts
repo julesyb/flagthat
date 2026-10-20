@@ -90,6 +90,7 @@ const es: DeepPartial<TranslationStrings> = {
     chooseYourGameDesc: 'Elige un modo y dificultad',
     practice: 'Practicar',
     practiceDesc: 'Explora todas las banderas',
+    streakA11y: '{count} días seguidos',
   },
 
   setup: {
@@ -136,6 +137,10 @@ const es: DeepPartial<TranslationStrings> = {
     typePrompt: 'Escribe el nombre de esta bandera:',
     nameCountry: 'Nombra este pa\u00eds:',
     typePlaceholder: 'Escribe tu respuesta...',
+    learnTitle: 'Casi',
+    youPicked: 'Elegiste',
+    answer: 'Respuesta',
+    gotIt: 'Entendido',
   },
 
   results: {
@@ -167,6 +172,9 @@ const es: DeepPartial<TranslationStrings> = {
     tryHardMode: 'Probar dif\u00edcil',
     playAgain: 'Jugar de nuevo',
     almostThere: '{remaining} m\u00e1s para {badge}',
+    reminderTitle: '¿Quieres un recordatorio diario?',
+    reminderYes: 'Activar',
+    reminderNo: 'Ahora no',
   },
 
   stats: {
@@ -293,7 +301,7 @@ const es: DeepPartial<TranslationStrings> = {
     reminderTime: 'Hora del recordatorio',
     tapToChange: 'Toca para cambiar',
     notificationsDisabled: 'Notificaciones desactivadas',
-    notificationsAlert: 'Permite las notificaciones en los ajustes del dispositivo.',
+    notificationsAlert: 'Activa las notificaciones en Ajustes para recibir recordatorios.',
     openSettings: 'Abrir ajustes',
     language: 'Idioma',
     languageDesc: 'Idioma de la aplicaci\u00f3n',
@@ -303,18 +311,20 @@ const es: DeepPartial<TranslationStrings> = {
     data: 'Datos',
     resetAllData: 'Restablecer datos',
     resetConfirmTitle: 'Restablecer datos',
-    resetConfirmMsg: 'Se borrar\u00e1n todas las estad\u00edsticas, rachas y progreso. Esta acci\u00f3n es irreversible.',
-    resetConfirmWeb: '\u00bfRestablecer datos?\n\nSe borrar\u00e1n todas las estad\u00edsticas, rachas y progreso. Esta acci\u00f3n es irreversible.',
+    resetConfirmMsg: 'Se borrará todo tu progreso. No se puede deshacer.',
+    resetConfirmWeb: '¿Restablecer datos?\n\nSe borrará todo tu progreso. No se puede deshacer.',
     reset: 'Restablecer',
     termsOfService: 'Términos de servicio',
     am: 'AM',
     pm: 'PM',
     support: 'Soporte',
+    missTips: 'Ayuda al fallar',
+    missTipsDesc: 'Compara las banderas tras un error',
   },
 
   support: {
     title: 'Inv\u00edtanos a un caf\u00e9',
-    subtitle: 'Flag That es gratis, sin anuncios. Ay\u00fadanos a seguir as\u00ed viendo un video corto. Totalmente opcional.',
+    subtitle: 'Flag That es gratis. Mira un video corto para ayudarnos.',
     watchButton: 'Ver un video',
     watchAgain: 'Ver',
     thankYou: 'Eres el mejor. \u00a1Gracias!',
@@ -343,7 +353,7 @@ const es: DeepPartial<TranslationStrings> = {
 
   neighbors: {
     noCountries: 'No hay pa\u00edses disponibles',
-    noCountriesDesc: 'No hay pa\u00edses con fronteras terrestres en esta categor\u00eda.',
+    noCountriesDesc: 'No hay países con fronteras terrestres aquí.',
     selectAll: 'Selecciona todos los pa\u00edses vecinos',
     submitSelected: 'Enviar ({count} seleccionados)',
     neighborCount: '{name} tiene {count} vecino',
@@ -404,7 +414,7 @@ const es: DeepPartial<TranslationStrings> = {
 
   capital: {
     noCountries: 'No hay pa\u00edses disponibles',
-    noCountriesDesc: 'No hay pa\u00edses con capitales conocidas en esta categor\u00eda.',
+    noCountriesDesc: 'No hay países con capitales conocidas aquí.',
     whatIsCapital: '\u00bfCu\u00e1l es la capital de {name}?',
   },
 
@@ -477,8 +487,8 @@ const es: DeepPartial<TranslationStrings> = {
     tagline: '¿Cuánto sabes del mundo?',
     baselineMotivation: 'Completa las 5 para seguir tu mejora',
     baselineProgress: 'Descubre tu nivel',
-    welcomeTitle: 'Bienvenido a tu conocimiento de banderas',
-    welcomeSub: 'Banderas, capitales, mapas y geografía. Descubre cuánto sabes del mundo.',
+    welcomeTitle: '¿Cuánto sabes de banderas?',
+    welcomeSub: 'Descúbrelo con 10 banderas.',
     giveItATry: 'Inténtalo',
     regionsComplete: '{count}/{total} regiones',
     playCta: 'Jugar',
@@ -547,7 +557,7 @@ const es: DeepPartial<TranslationStrings> = {
     codeHint: 'Obt\u00e9n un c\u00f3digo de un amigo que comparti\u00f3 su partida.',
     play: 'Jugar',
     invalidCodeTitle: 'C\u00f3digo inv\u00e1lido',
-    invalidCode: 'Este c\u00f3digo de desaf\u00edo no es v\u00e1lido. Verifica que hayas pegado el c\u00f3digo completo.',
+    invalidCode: 'Este código no funciona. Revisa que esté completo.',
     nameBlockedTitle: 'Nombre no permitido',
     nameBlockedDesc: 'Por favor, elige otro nombre.',
     unsupportedCode: 'Este c\u00f3digo fue creado con una versi\u00f3n m\u00e1s nueva de Flag That. Actualiza la app para jugar este desaf\u00edo.',

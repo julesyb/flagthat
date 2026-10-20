@@ -371,7 +371,7 @@ const createStyles = (colors: ThemeColors) => {
   iconCircle: {
     width: 64,
     height: 64,
-    borderRadius: 32,
+    borderRadius: borderRadius.full,
     backgroundColor: colors.goldBright + '18',
     alignItems: 'center',
     justifyContent: 'center',
@@ -482,7 +482,7 @@ const createStyles = (colors: ThemeColors) => {
     fontFamily: fontFamily.bodyBold,
     fontSize: fontSize.sm,
     color: colors.ink,
-    marginBottom: 2,
+    marginBottom: spacing.xxs,
   },
   detailLabel: {
     ...typography.micro,
@@ -499,7 +499,7 @@ const createStyles = (colors: ThemeColors) => {
     flexDirection: 'row',
     justifyContent: 'center',
     flexWrap: 'wrap',
-    gap: 4,
+    gap: spacing.xs,
     marginTop: spacing.sm,
   },
   dot: {

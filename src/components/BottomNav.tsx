@@ -63,8 +63,8 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: colors.rule,
     backgroundColor: colors.navBg,
-    paddingTop: 6,
-    paddingBottom: 20,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.md + spacing.xs,
     alignItems: 'center',
   },
   inner: {
@@ -77,7 +77,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     alignItems: 'center',
     paddingTop: spacing.sm,
     paddingBottom: spacing.xs,
-    gap: 3,
+    gap: spacing.xs,
   },
   label: {
     fontFamily: fontFamily.uiLabel,

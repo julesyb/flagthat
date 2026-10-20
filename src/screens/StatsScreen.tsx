@@ -28,7 +28,8 @@ import ScreenContainer from '../components/ScreenContainer';
 import { useNavTabs } from '../hooks/useNavTabs';
 import { getAllEarnedBadges, buildBadgeContext, deriveFromContext, BADGES, TIER_COLORS, getBadgeProgress, getBadgeName, Badge } from '../utils/badges';
 import { computeLevelProgress, LevelProgress, getTierLabel, getLevelTier } from '../utils/levels';
-import { ChevronRightIcon, BadgeIconView, UsersIcon, FlameIcon } from '../components/Icons';
+import { ChevronRightIcon, BadgeIconView, UsersIcon } from '../components/Icons';
+import StreakPill from '../components/StreakPill';
 import { hapticTap } from '../utils/feedback';
 import PageHeader from '../components/PageHeader';
 import { BadgeDetailModal, ChallengeDetailModal, ChallengeDisplayRow } from '../components/StatsModals';
@@ -389,15 +390,7 @@ export default function StatsScreen() {
         ]}>
           <View style={styles.headerRow}>
             <PageHeader title={t('stats.yourStats')} subtitle={t('stats.allTime')} />
-            <View style={styles.streakBadge}>
-              <FlameIcon size={16} color={dayStreakInfo.current > 0 ? colors.goldBright : colors.textTertiary} />
-              <Text style={[styles.streakNum, dayStreakInfo.current === 0 && styles.streakNumInactive]}>{dayStreakInfo.current}</Text>
-              <View style={styles.streakPips}>
-                {Array.from({ length: 7 }).map((_, i) => (
-                  <View key={i} style={[styles.pip, i < Math.min(dayStreakInfo.current, 7) && styles.pipLit]} />
-                ))}
-              </View>
-            </View>
+            <StreakPill days={dayStreakInfo.current} />
           </View>
           <View style={styles.heroCard}>
             <View style={styles.heroStatItem}>
@@ -794,43 +787,6 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  streakBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    paddingLeft: spacing.sm + 2,
-    borderRadius: borderRadius.full,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-  },
-  streakNum: {
-    fontFamily: fontFamily.display,
-    fontSize: fontSize.lg,
-    color: colors.goldBright,
-    letterSpacing: -0.8,
-    lineHeight: 22,
-  },
-  streakNumInactive: {
-    color: colors.textTertiary,
-  },
-  streakPips: {
-    flexDirection: 'row',
-    gap: 3,
-    marginLeft: 2,
-  },
-  pip: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: colors.pipInactive,
-  },
-  pipLit: {
-    backgroundColor: colors.pipActive,
-  },
-
   // ── Hero (3-column stats card)
   heroCard: {
     backgroundColor: colors.surface,
@@ -854,7 +810,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     ...typography.statValue,
     color: colors.ink,
     lineHeight: 26,
-    marginBottom: 2,
+    marginBottom: spacing.xxs,
   },
   heroStatLabel: {
     ...typography.eyebrow,
@@ -867,15 +823,15 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     borderRadius: borderRadius.lg,
     borderWidth: 1,
     borderColor: colors.border,
-    padding: 12,
-    paddingHorizontal: 14,
+    padding: spacing.sm + spacing.xs,
+    paddingHorizontal: spacing.md,
     marginBottom: spacing.sm,
   },
   tileCompactRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 6,
+    marginBottom: spacing.sm,
   },
   tileCompactVal: {
     ...typography.bodyBold,
@@ -898,7 +854,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   levelGoalDesc: {
     ...typography.micro,
     color: colors.textSecondary,
-    marginTop: 6,
+    marginTop: spacing.sm,
     fontStyle: 'italic',
   },
 
@@ -908,7 +864,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     backgroundColor: colors.border,
     borderRadius: borderRadius.full,
     overflow: 'hidden',
-    marginTop: 12,
+    marginTop: spacing.sm + spacing.xs,
   },
   progressFill: {
     height: '100%',
@@ -918,7 +874,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   progressLabels: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 6,
+    marginTop: spacing.sm,
   },
   progressLabelBold: {
     ...typography.microBold,
@@ -957,12 +913,12 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     borderRadius: borderRadius.md,
     borderWidth: 1,
     borderColor: colors.border,
-    padding: 12,
-    paddingHorizontal: 16,
-    marginBottom: 6,
+    padding: spacing.sm + spacing.xs,
+    paddingHorizontal: spacing.md,
+    marginBottom: spacing.sm,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: spacing.sm + spacing.xs,
   },
   rank: {
     ...typography.statValue,
@@ -978,8 +934,8 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   scoreBadge: {
     backgroundColor: colors.errorBg,
     borderRadius: borderRadius.full,
-    paddingVertical: 3,
-    paddingHorizontal: 10,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm + spacing.xs,
   },
   scoreBadgeText: {
     ...typography.tag,
@@ -992,13 +948,13 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     borderRadius: borderRadius.lg,
     borderWidth: 1,
     borderColor: colors.border,
-    padding: 14,
-    gap: 10,
+    padding: spacing.md,
+    gap: spacing.sm + spacing.xs,
   },
   distRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: spacing.sm + spacing.xs,
   },
   distLabel: {
     ...typography.microMedium,
@@ -1033,7 +989,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
 
   // ── Challenges
   challengeList: {
-    gap: 6,
+    gap: spacing.sm,
   },
   challengeRow: {
     flexDirection: 'row',
@@ -1042,9 +998,9 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     borderRadius: borderRadius.md,
     borderWidth: 1,
     borderColor: colors.border,
-    padding: 12,
-    paddingHorizontal: 14,
-    gap: 12,
+    padding: spacing.sm + spacing.xs,
+    paddingHorizontal: spacing.md,
+    gap: spacing.sm + spacing.xs,
   },
   challengeIconWrap: {
     width: 36,
@@ -1060,7 +1016,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 2,
+    marginBottom: spacing.xxs,
   },
   challengeCode: {
     fontFamily: fontFamily.uiLabel,
@@ -1075,12 +1031,12 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   challengeMode: {
     ...typography.micro,
     color: colors.textTertiary,
-    marginBottom: 4,
+    marginBottom: spacing.xs,
   },
   challengeScoreRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: spacing.xs,
   },
   challengeScoreLabel: {
     ...typography.micro,
@@ -1095,7 +1051,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   badgeGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 6,
+    gap: spacing.sm,
     justifyContent: 'center',
   },
   badgeCard: {
@@ -1104,13 +1060,13 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     borderRadius: borderRadius.sm,
     borderWidth: 1,
     borderColor: colors.border,
-    padding: 8,
+    padding: spacing.sm,
     alignItems: 'center',
   },
   badgeCardLocked: { opacity: 0.45 },
   badgeIconWrap: {
     width: 28, height: 28, borderRadius: borderRadius.sm,
-    justifyContent: 'center', alignItems: 'center', marginBottom: 6,
+    justifyContent: 'center', alignItems: 'center', marginBottom: spacing.sm,
   },
   badgeName: {
     fontFamily: fontFamily.uiLabel,
@@ -1124,7 +1080,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     backgroundColor: colors.border,
     borderRadius: borderRadius.full,
     overflow: 'hidden',
-    marginTop: 5,
+    marginTop: spacing.xs,
     width: '100%',
   },
   badgeProgressFill: {
@@ -1231,7 +1187,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     borderRadius: borderRadius.lg,
     borderWidth: 1,
     borderColor: colors.border,
-    padding: 14,
+    padding: spacing.md,
   },
   regionScoreTitle: {
     ...typography.captionStrong,
@@ -1252,7 +1208,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   regionScoreLabel: {
     ...typography.micro,
     color: colors.textTertiary,
-    marginBottom: 4,
+    marginBottom: spacing.xs,
   },
   regionScoreValue: {
     ...typography.statValue,
@@ -1265,7 +1221,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 4,
+    gap: spacing.xs,
     marginTop: spacing.sm,
     paddingTop: spacing.sm,
     borderTopWidth: 1,

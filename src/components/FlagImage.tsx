@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { StyleSheet, View, Text, ActivityIndicator, Pressable, useWindowDimensions, StyleProp, ViewStyle, TextStyle, ImageStyle } from 'react-native';
 import { Image } from 'expo-image';
-import { fontFamily, fontSize, borderRadius, ThemeColors } from '../utils/theme';
+import { fontFamily, fontSize, borderRadius, spacing, ThemeColors } from '../utils/theme';
 import { useTheme } from '../contexts/ThemeContext';
 import { t } from '../utils/i18n';
 import { hapticTap } from '../utils/feedback';
@@ -234,7 +234,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     letterSpacing: 1,
     color: colors.textTertiary,
     textAlign: 'center',
-    paddingHorizontal: 4,
+    paddingHorizontal: spacing.xs,
   },
   smallContainer: {
     width: 56,

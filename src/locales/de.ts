@@ -90,6 +90,7 @@ const de: DeepPartial<TranslationStrings> = {
     chooseYourGameDesc: 'Modus und Schwierigkeit wählen',
     practice: 'Üben',
     practiceDesc: 'Alle Flaggen durchsuchen',
+    streakA11y: '{count} Tage in Folge',
   },
 
   setup: {
@@ -136,6 +137,10 @@ const de: DeepPartial<TranslationStrings> = {
     typePrompt: 'Tippe den Namen dieser Flagge:',
     nameCountry: 'Benenne dieses Land:',
     typePlaceholder: 'Deine Antwort...',
+    learnTitle: 'Nicht ganz',
+    youPicked: 'Deine Wahl',
+    answer: 'Antwort',
+    gotIt: 'Verstanden',
   },
 
   results: {
@@ -167,6 +172,9 @@ const de: DeepPartial<TranslationStrings> = {
     tryHardMode: 'Schwer versuchen',
     playAgain: 'Nochmal spielen',
     almostThere: 'Noch {remaining} f\u00fcr {badge}',
+    reminderTitle: 'Tägliche Erinnerung?',
+    reminderYes: 'Aktivieren',
+    reminderNo: 'Später',
   },
 
   stats: {
@@ -293,7 +301,7 @@ const de: DeepPartial<TranslationStrings> = {
     reminderTime: 'Erinnerungszeit',
     tapToChange: 'Tippen zum \u00c4ndern',
     notificationsDisabled: 'Benachrichtigungen deaktiviert',
-    notificationsAlert: 'Erlaube Benachrichtigungen in den Ger\u00e4teeinstellungen.',
+    notificationsAlert: 'Aktiviere Benachrichtigungen in den Einstellungen, um Erinnerungen zu bekommen.',
     openSettings: 'Einstellungen \u00f6ffnen',
     language: 'Sprache',
     languageDesc: 'Anzeigesprache der App',
@@ -303,18 +311,20 @@ const de: DeepPartial<TranslationStrings> = {
     data: 'Daten',
     resetAllData: 'Alle Daten zur\u00fccksetzen',
     resetConfirmTitle: 'Alle Daten zur\u00fccksetzen',
-    resetConfirmMsg: 'Alle Statistiken, Serien und Fortschritte werden gel\u00f6scht. Dies kann nicht r\u00fcckg\u00e4ngig gemacht werden.',
-    resetConfirmWeb: 'Alle Daten zur\u00fccksetzen?\n\nAlle Statistiken, Serien und Fortschritte werden gel\u00f6scht. Dies kann nicht r\u00fcckg\u00e4ngig gemacht werden.',
+    resetConfirmMsg: 'Dein gesamter Fortschritt wird gelöscht. Das lässt sich nicht rückgängig machen.',
+    resetConfirmWeb: 'Alle Daten zurücksetzen?\n\nDein gesamter Fortschritt wird gelöscht. Das lässt sich nicht rückgängig machen.',
     reset: 'Zurücksetzen',
     termsOfService: 'Nutzungsbedingungen',
     am: 'AM',
     pm: 'PM',
     support: 'Support',
+    missTips: 'Tipps bei Fehlern',
+    missTipsDesc: 'Flaggen nach falscher Antwort vergleichen',
   },
 
   support: {
     title: 'Spendier uns einen Kaffee',
-    subtitle: 'Flag That ist kostenlos, ohne Werbung. Hilf uns, das beizubehalten - schau ein kurzes Video. V\u00f6llig freiwillig.',
+    subtitle: 'Flag That ist kostenlos. Schau ein kurzes Video, um uns zu helfen.',
     watchButton: 'Video ansehen',
     watchAgain: 'Ansehen',
     thankYou: 'Du bist spitze. Danke!',
@@ -343,7 +353,7 @@ const de: DeepPartial<TranslationStrings> = {
 
   neighbors: {
     noCountries: 'Keine L\u00e4nder verf\u00fcgbar',
-    noCountriesDesc: 'Es gibt keine L\u00e4nder mit Landgrenzen in dieser Kategorie.',
+    noCountriesDesc: 'Hier gibt es keine Länder mit Landgrenzen.',
     selectAll: 'W\u00e4hle alle Nachbarl\u00e4nder',
     submitSelected: 'Absenden ({count} ausgew\u00e4hlt)',
     neighborCount: '{name} hat {count} Nachbarn',
@@ -404,7 +414,7 @@ const de: DeepPartial<TranslationStrings> = {
 
   capital: {
     noCountries: 'Keine L\u00e4nder verf\u00fcgbar',
-    noCountriesDesc: 'Es gibt keine L\u00e4nder mit bekannten Hauptst\u00e4dten in dieser Kategorie.',
+    noCountriesDesc: 'Hier gibt es keine Länder mit bekannten Hauptstädten.',
     whatIsCapital: 'Was ist die Hauptstadt von {name}?',
   },
 
@@ -477,8 +487,8 @@ const de: DeepPartial<TranslationStrings> = {
     tagline: 'Wie gut kennst du die Welt?',
     baselineMotivation: 'Schliesse alle 5 ab, um deine Verbesserung zu verfolgen',
     baselineProgress: 'Zeig, was du weisst',
-    welcomeTitle: 'Willkommen zu deinem Flaggenwissen',
-    welcomeSub: 'Flaggen, Hauptstädte, Karten und Geografie. Finde heraus, wie gut du die Welt wirklich kennst.',
+    welcomeTitle: 'Wie gut kennst du Flaggen?',
+    welcomeSub: 'Finde es mit 10 Flaggen heraus.',
     giveItATry: 'Probier es aus',
     regionsComplete: '{count}/{total} Regionen',
     playCta: 'Spielen',
@@ -547,7 +557,7 @@ const de: DeepPartial<TranslationStrings> = {
     codeHint: 'Erhalte einen Code von einem Freund, der sein Spiel geteilt hat.',
     play: 'Spielen',
     invalidCodeTitle: 'Ung\u00fcltiger Code',
-    invalidCode: 'Dieser Challenge-Code ist nicht g\u00fcltig. Pr\u00fcfe, ob du den vollst\u00e4ndigen Code eingef\u00fcgt hast.',
+    invalidCode: 'Dieser Code funktioniert nicht. Prüfe, ob er vollständig ist.',
     nameBlockedTitle: 'Name nicht erlaubt',
     nameBlockedDesc: 'Bitte w\u00e4hle einen anderen Namen.',
     unsupportedCode: 'Dieser Code wurde mit einer neueren Version von Flag That erstellt. Aktualisiere die App, um diese Challenge zu spielen.',

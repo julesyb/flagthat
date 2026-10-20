@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, useWindowDimensions, StyleProp, ViewStyle } from 'react-native';
 import { Image } from 'expo-image';
-import { fontFamily, fontSize, borderRadius, shadows, ThemeColors } from '../utils/theme';
+import { fontFamily, fontSize, borderRadius, spacing, shadows, ThemeColors } from '../utils/theme';
 import { useTheme } from '../contexts/ThemeContext';
 import { t } from '../utils/i18n';
 import { countryCoordinates } from '../data/countryCoordinates';
@@ -286,7 +286,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   pinHead: {
     width: 26,
     height: 26,
-    borderRadius: 13,
+    borderRadius: borderRadius.full,
     backgroundColor: colors.accent,
     borderWidth: 3,
     borderColor: colors.white,
@@ -307,7 +307,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     position: 'absolute',
     bottom: 10,
     right: 10,
-    gap: 6,
+    gap: spacing.sm,
   },
   zoomButton: {
     width: 36,

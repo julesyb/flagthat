@@ -8,7 +8,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { spacing, buildButtons, typography, ThemeColors } from '../utils/theme';
+import { spacing, borderRadius, buildButtons, typography, ThemeColors } from '../utils/theme';
 import { useTheme } from '../contexts/ThemeContext';
 import { RootStackParamList } from '../types/navigation';
 import { decodeResponse } from '../utils/challengeCode';
@@ -169,7 +169,7 @@ const createStyles = (colors: ThemeColors) => {
     iconCircle: {
       width: 64,
       height: 64,
-      borderRadius: 32,
+      borderRadius: borderRadius.full,
       alignItems: 'center',
       justifyContent: 'center',
       marginBottom: spacing.lg,

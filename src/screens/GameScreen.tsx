@@ -16,7 +16,7 @@ import { ThemeColors, spacing, typography, fontFamily, buildNav, buildButtons, b
 import { useTheme } from '../contexts/ThemeContext';
 import { GameQuestion, GameResult } from '../types';
 import { generateQuestions, generateDailyQuestions, generatePracticeQuestions, checkAnswer } from '../utils/gameEngine';
-import { getMissedFlagIds } from '../utils/storage';
+import { getMissedFlagIds, getSettings } from '../utils/storage';
 import { hapticCorrect, hapticWrong, hapticTap, playCorrectSound, playWrongSound } from '../utils/feedback';
 import { t } from '../utils/i18n';
 import { translateName, flagName } from '../data/countryNames';
@@ -28,6 +28,7 @@ import { getFlagByName, getFlagsForCategory } from '../data';
 import { RootStackParamList } from '../types/navigation';
 import { UNLIMITED_QUESTIONS } from '../utils/config';
 import GameTopBar from '../components/GameTopBar';
+import LearnCard from '../components/LearnCard';
 import ScreenContainer from '../components/ScreenContainer';
 import { buildChallengeQuestions } from '../utils/challengeCode';
 import { countCorrect, calculateProgress } from '../utils/gameHelpers';
@@ -77,6 +78,13 @@ export default function GameScreen({ route, navigation }: Props) {
       setQuestions(q);
       setQuestionStartTime(Date.now());
     }
+  }, []);
+
+  // Learn card: after a miss, show the picked flag next to the answer until the player taps "Got it".
+  const missTipsRef = useRef(true);
+  const [learnPick, setLearnPick] = useState<string | null>(null);
+  useEffect(() => {
+    getSettings().then((st) => { missTipsRef.current = st.missTips; }).catch(() => {});
   }, []);
 
   const pendingResultsRef = useRef<GameResult[] | null>(null);
@@ -202,12 +210,17 @@ export default function GameScreen({ route, navigation }: Props) {
         ? (correct ? 300 : 600)
         : (correct && !isMapMode ? 600 : 1200);
 
+      const showLearn = !correct && !isTimeAttack && missTipsRef.current && !isEliminated;
+
       if (isEliminated) {
         autoAdvanceRef.current = setTimeout(() => {
           if (navigatedRef.current) return;
           navigatedRef.current = true;
           navigation.replace('Results', { results: newResults, config, ...(challenge && { challenge, playerName }) });
         }, feedbackDelay);
+      } else if (showLearn) {
+        // Wait for "Got it" instead of auto-advancing
+        setLearnPick(answer);
       } else {
         autoAdvanceRef.current = setTimeout(() => {
           goToNext();
@@ -458,6 +471,16 @@ export default function GameScreen({ route, navigation }: Props) {
         )}
       </Animated.View>
       </ScreenContainer>
+      {learnPick !== null && (
+        <LearnCard
+          picked={learnPick}
+          answer={currentQuestion.flag}
+          onDone={() => {
+            setLearnPick(null);
+            goToNext();
+          }}
+        />
+      )}
     </SafeAreaView>
   );
 }
@@ -696,7 +719,7 @@ const createStyles = (colors: ThemeColors) => {
   },
   feedbackWrong: {
     ...typography.heading,
-    color: colors.error,
+    color: colors.success,
   },
   });
 };

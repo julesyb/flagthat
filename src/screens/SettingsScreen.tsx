@@ -16,7 +16,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
 import Constants from 'expo-constants';
 import { spacing, typography, fontFamily, fontSize, borderRadius, APP_URL, APP_DOMAIN, ThemeColors, ThemeMode } from '../utils/theme';
-import { getSettings, saveSettings, AppSettings, resetStats, getSkillLevel, saveSkillLevel, SkillLevel, SKILL_LEVELS, SKILL_TAG_KEYS } from '../utils/storage';
+import { getSettings, saveSettings, AppSettings, DEFAULT_SETTINGS, resetStats, getSkillLevel, saveSkillLevel, SkillLevel, SKILL_LEVELS, SKILL_TAG_KEYS } from '../utils/storage';
 import {
   setSoundsEnabled,
   setHapticsEnabled,
@@ -35,15 +35,7 @@ export default function SettingsScreen() {
   const onNavigate = useNavTabs();
   const { colors, themeMode, setThemeMode } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const [settings, setSettings] = useState<AppSettings>({
-    soundEnabled: true,
-    hapticsEnabled: true,
-    dailyReminderEnabled: false,
-    reminderHour: 9,
-    reminderMinute: 0,
-    locale: null,
-    themeMode: 'dark',
-  });
+  const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
   const [, forceRender] = useState(0);
   const [langOpen, setLangOpen] = useState(false);
   const [skillLevel, setSkillLevel] = useState<SkillLevel | null>(null);
@@ -275,6 +267,22 @@ export default function SettingsScreen() {
               accessibilityState={{ checked: settings.hapticsEnabled }}
             />
           </View>
+          <View style={styles.settingDivider} />
+          <View style={styles.settingRow}>
+            <View style={styles.settingInfo}>
+              <Text style={styles.settingLabel}>{t('settings.missTips')}</Text>
+              <Text style={styles.settingDesc}>{t('settings.missTipsDesc')}</Text>
+            </View>
+            <Switch
+              value={settings.missTips}
+              onValueChange={(v) => updateSetting('missTips', v)}
+              trackColor={{ false: colors.rule, true: colors.ink }}
+              thumbColor={colors.white}
+              accessibilityRole="switch"
+              accessibilityLabel={t('settings.missTips')}
+              accessibilityState={{ checked: settings.missTips }}
+            />
+          </View>
         </View>
 
         {/* Notifications */}
@@ -467,7 +475,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: spacing.md,
-    paddingVertical: 14,
+    paddingVertical: spacing.md,
   },
   settingDivider: {
     height: 1,
@@ -484,7 +492,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   settingDesc: {
     ...typography.caption,
     color: colors.textTertiary,
-    marginTop: 2,
+    marginTop: spacing.xxs,
   },
   settingValue: {
     ...typography.caption,
@@ -510,7 +518,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   skillOption: {
     flex: 1,
-    paddingVertical: 10,
+    paddingVertical: spacing.sm + spacing.xs,
     alignItems: 'center',
     borderRadius: borderRadius.sm,
   },
@@ -527,7 +535,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   themeOption: {
     flex: 1,
-    paddingVertical: 10,
+    paddingVertical: spacing.sm + spacing.xs,
     alignItems: 'center',
     borderRadius: borderRadius.sm,
   },

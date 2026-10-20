@@ -27,8 +27,9 @@ import ScreenContainer from '../components/ScreenContainer';
 import SegBtn from '../components/SegBtn';
 import ConfigRow, { ConfigCard } from '../components/ConfigRow';
 import FactOfDay from '../components/FactOfDay';
+import StreakPill from '../components/StreakPill';
 import { useNavTabs } from '../hooks/useNavTabs';
-import { computeLevelProgress, LevelProgress } from '../utils/levels';
+import { computeLevelProgress } from '../utils/levels';
 import { t } from '../utils/i18n';
 import { translateName, flagName } from '../data/countryNames';
 import { HOME_QUESTION_COUNTS, UNLIMITED_QUESTIONS, TIMEATTACK_DEFAULT_TIME } from '../utils/config';
@@ -184,7 +185,7 @@ export default function HomeScreen({ navigation }: Props) {
   }, [dailyVariant]);
   const [autocomplete, setAutocomplete] = useState(false);
   const [baseline, setBaseline] = useState<BaselineData | null>(null);
-  const [levelProgress, setLevelProgress] = useState<LevelProgress | null>(null);
+  const [dayStreak, setDayStreak] = useState(0);
   const playBtnScale = useRef(new Animated.Value(1)).current;
 
   const pulsePlayBtn = useCallback(() => {
@@ -224,8 +225,8 @@ export default function HomeScreen({ navigation }: Props) {
       Promise.all([getStats(), getFlagStats(), getBadgeData(), getDayStreakInfo(), getPersistedLevel()]).then(
         ([s, fs, bd, dsi, pl]) => {
           setStats(s);
+          setDayStreak(dsi.current);
           const lp = computeLevelProgress({ stats: s, flagStats: fs, badgeData: bd, dayStreakInfo: dsi }, pl);
-          setLevelProgress(lp);
           persistLevel(lp.currentLevel);
         },
       ).catch(() => {});
@@ -370,19 +371,11 @@ export default function HomeScreen({ navigation }: Props) {
             <Text style={styles.wmFlag}>Flag</Text>
             <Text style={styles.wmThat}>That</Text>
           </Text>
-          {levelProgress && (
-            <TouchableOpacity
-              style={styles.levelBadge}
-              onPress={() => navigation.navigate('Stats')}
-              activeOpacity={0.7}
-              accessibilityRole="button"
-              accessibilityLabel={t('stats.level', { level: levelProgress.currentLevel })}
-              accessibilityHint={t('a11y.opensStats')}
-            >
-              <Text style={styles.levelBadgeLabel}>{t('stats.levelLabel')}</Text>
-              <Text style={styles.levelBadgeNum}>{levelProgress.currentLevel}</Text>
-            </TouchableOpacity>
-          )}
+          <StreakPill
+            days={dayStreak}
+            onPress={() => navigation.navigate('Stats')}
+            accessibilityHint={t('a11y.opensStats')}
+          />
         </View>
 
         {/* ── CONFIG (above the flag so players notice they can change the mode) ── */}
@@ -625,29 +618,6 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     fontSize: fontSize.title,
     color: colors.goldBright,
   },
-  levelBadge: {
-    alignItems: 'center',
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.sm + 2,
-    borderRadius: borderRadius.full,
-    borderWidth: 1,
-    borderColor: colors.goldBright,
-    backgroundColor: colors.surface,
-  },
-  levelBadgeLabel: {
-    fontFamily: fontFamily.uiLabel,
-    fontSize: fontSize.xs,
-    color: colors.textTertiary,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  levelBadgeNum: {
-    fontFamily: fontFamily.display,
-    fontSize: fontSize.body,
-    color: colors.goldBright,
-    letterSpacing: -0.5,
-  },
-
   // ── Onboarding progress
   onboardingWrap: {
     marginHorizontal: spacing.md,
@@ -682,8 +652,8 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     gap: spacing.xs,
     backgroundColor: colors.goldBright,
     borderRadius: borderRadius.sm,
-    paddingVertical: spacing.xs + 2,
-    paddingHorizontal: spacing.sm + 2,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.sm + spacing.xs,
   },
   onboardingCtaText: {
     fontFamily: fontFamily.uiLabel,
@@ -753,7 +723,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   // ── Hero flag teaser (light mode - no dark background)
   heroCard: {
     marginHorizontal: spacing.md,
-    marginTop: spacing.xs,
+    marginTop: spacing.md,
   },
   heroLabel: {
     ...typography.eyebrow,
@@ -788,7 +758,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   },
   optBtn: {
     backgroundColor: colors.surface,
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: colors.border,
     borderRadius: borderRadius.md,
     height: 42,
@@ -847,7 +817,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     flexDirection: 'row',
     justifyContent: 'center',
     gap: spacing.sm,
-    paddingVertical: 13,
+    paddingVertical: spacing.sm + spacing.xs,
   },
   playBtnText: {
     ...btn.primaryText,
@@ -880,10 +850,10 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     alignItems: 'center',
     gap: spacing.md,
     backgroundColor: colors.surface,
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: colors.border,
     borderRadius: borderRadius.lg,
-    paddingVertical: spacing.sm + 2,
+    paddingVertical: spacing.sm + spacing.xs,
     paddingHorizontal: spacing.md,
   },
   modeCardDisabled: {
@@ -908,7 +878,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   modeTag: {
     ...typography.micro,
     color: colors.textTertiary,
-    marginTop: 2,
+    marginTop: spacing.xxs,
   },
 
 }); };

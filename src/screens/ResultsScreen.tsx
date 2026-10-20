@@ -26,8 +26,9 @@ import FlagImage, { FlagImageSmall } from '../components/FlagImage';
 import { CheckIcon, CrossIcon, ChevronRightIcon, GlobeIcon, UsersIcon, BadgeIconView } from '../components/Icons';
 import BottomNav from '../components/BottomNav';
 import ScreenContainer from '../components/ScreenContainer';
+import ReminderPrompt from '../components/ReminderPrompt';
 import { useNavTabs } from '../hooks/useNavTabs';
-import { UNLIMITED_QUESTIONS, SHARE_GRID_ROW_SIZE, DAILY_QUESTION_COUNT } from '../utils/config';
+import { UNLIMITED_QUESTIONS, SHARE_GRID_ROW_SIZE, DAILY_QUESTION_COUNT, GOOD_ACCURACY_PCT } from '../utils/config';
 import { countCorrect } from '../utils/gameHelpers';
 import { RootStackParamList } from '../types/navigation';
 import { getAllEarnedBadges, detectPerGameBadges, buildBadgeContext, BADGES, TIER_COLORS, EarnedBadge, getBadgeName, getBadgeDescription } from '../utils/badges';
@@ -855,6 +856,12 @@ export default function ResultsScreen({ route, navigation }: Props) {
           </Animated.View>
         )}
 
+        {/* ── DAILY REMINDER OFFER (once, after a good round) ── */}
+        {!reviewOnly && !isChallenge && (
+          <Animated.View style={{ opacity: restFade }}>
+            <ReminderPrompt eligible={accuracy >= GOOD_ACCURACY_PCT} />
+          </Animated.View>
+        )}
 
         {/* ── NEWLY EARNED BADGES (hidden for challenges and daily) ── */}
         {newBadges.length > 0 && !isChallenge && !isDaily && (
@@ -1050,7 +1057,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     marginBottom: spacing.sm,
   },
   timelineDots: {
-    flexDirection: 'row', flexWrap: 'wrap', gap: 6,
+    flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm,
     marginBottom: spacing.md,
   },
   timelineDot: {
@@ -1073,7 +1080,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   },
   newBestPill: {
     backgroundColor: colors.accentBg, borderRadius: borderRadius.full,
-    paddingVertical: 2, paddingHorizontal: 8, marginTop: spacing.xxs,
+    paddingVertical: spacing.xxs, paddingHorizontal: spacing.sm, marginTop: spacing.xxs,
   },
   newBestPillText: {
     ...typography.eyebrow, color: colors.accent,
@@ -1095,20 +1102,20 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   dailyCellWrong: { backgroundColor: colors.dim },
 
   // ── Insights
-  insightRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: spacing.sm },
+  insightRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginBottom: spacing.sm },
   insightChip: {
-    flexDirection: 'row', alignItems: 'center', gap: 6,
+    flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
     backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
-    borderRadius: borderRadius.full, paddingVertical: 6, paddingHorizontal: 12,
+    borderRadius: borderRadius.full, paddingVertical: spacing.sm, paddingHorizontal: spacing.sm + spacing.xs,
   },
   insightText: { ...typography.microMedium, color: colors.textSecondary },
 
   // ── Buttons
   buttonRow: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.md },
   buttonHalf: { flex: 1 },
-  secondaryButton: { ...btn.secondary, justifyContent: 'center', alignItems: 'center', paddingVertical: 12, paddingHorizontal: 18 },
+  secondaryButton: { ...btn.secondary, justifyContent: 'center', alignItems: 'center', paddingVertical: spacing.sm + spacing.xs, paddingHorizontal: spacing.md },
   secondaryButtonText: { ...btn.secondaryText, textAlign: 'center', fontSize: 15 },
-  primaryButton: { ...btn.primary, justifyContent: 'center', alignItems: 'center', paddingVertical: 12, paddingHorizontal: 18 },
+  primaryButton: { ...btn.primary, justifyContent: 'center', alignItems: 'center', paddingVertical: spacing.sm + spacing.xs, paddingHorizontal: spacing.md },
   primaryButtonText: { ...btn.primaryText, textAlign: 'center', fontSize: 15 },
 
   // ── Badges
@@ -1116,13 +1123,13 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   badgeRow: {
     flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface,
     borderRadius: borderRadius.md, borderWidth: 1, borderColor: colors.border,
-    padding: 14, marginBottom: 6, gap: 12,
+    padding: spacing.md, marginBottom: spacing.sm, gap: spacing.sm + spacing.xs,
   },
   badgeIconWrap: { width: 36, height: 36, borderRadius: borderRadius.md, justifyContent: 'center', alignItems: 'center' },
   badgeContent: { flex: 1 },
-  badgeName: { ...typography.captionStrong, color: colors.ink, marginBottom: 2 },
+  badgeName: { ...typography.captionStrong, color: colors.ink, marginBottom: spacing.xxs },
   badgeDesc: { ...typography.micro, color: colors.textSecondary },
-  badgeTierPill: { borderRadius: borderRadius.full, paddingVertical: 3, paddingHorizontal: 10 },
+  badgeTierPill: { borderRadius: borderRadius.full, paddingVertical: spacing.xs, paddingHorizontal: spacing.sm + spacing.xs },
   badgeTierText: { ...typography.eyebrow },
 
   // ── Sections
@@ -1138,8 +1145,8 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   // ── Review
   reviewItem: {
     flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface,
-    padding: 12, paddingHorizontal: 14, marginBottom: 6,
-    borderLeftWidth: 4, borderRadius: borderRadius.md, gap: 12,
+    padding: spacing.sm + spacing.xs, paddingHorizontal: spacing.md, marginBottom: spacing.sm,
+    borderLeftWidth: 4, borderRadius: borderRadius.md, gap: spacing.sm + spacing.xs,
   },
   reviewCorrect: { borderLeftColor: colors.success },
   reviewWrong: { borderLeftColor: colors.error },
@@ -1151,12 +1158,12 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   reviewAnswerRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
   reviewWrongFlag: { width: 28, height: 19, borderWidth: 1, borderColor: colors.ruleDark },
   reviewAnswer: { ...typography.micro, color: colors.error, marginTop: spacing.xxs, flexShrink: 1 },
-  reviewRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  reviewRight: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   reviewTime: { ...typography.microMedium, color: colors.textTertiary },
   reviewTimeFastest: { color: colors.success },
   reviewH2hHeader: {
-    flexDirection: 'row', alignItems: 'center', gap: 12,
-    paddingHorizontal: 14, marginBottom: spacing.xs,
+    flexDirection: 'row', alignItems: 'center', gap: spacing.sm + spacing.xs,
+    paddingHorizontal: spacing.md, marginBottom: spacing.xs,
   },
   reviewH2hLabel: {
     ...typography.eyebrow, color: colors.textTertiary,
@@ -1236,11 +1243,11 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     flexDirection: 'row',
     justifyContent: 'center',
     flexWrap: 'wrap',
-    gap: 6,
+    gap: spacing.sm,
   },
   h2hDotPair: {
     alignItems: 'center',
-    gap: 2,
+    gap: spacing.xxs,
   },
   h2hDotSmall: {
     width: 6,
@@ -1269,7 +1276,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     borderWidth: 2,
     borderColor: colors.goldBright,
     borderRadius: borderRadius.md,
-    paddingVertical: spacing.sm + 2,
+    paddingVertical: spacing.sm + spacing.xs,
     paddingHorizontal: spacing.lg,
     marginBottom: spacing.md,
   },
@@ -1288,7 +1295,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   challengeButtonInner: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm + 2,
+    gap: spacing.sm + spacing.xs,
   },
   challengeButtonContent: {
     flex: 1,
@@ -1296,7 +1303,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   challengeButtonTitle: {
     ...typography.bodyBold,
     color: colors.goldBright,
-    marginBottom: 2,
+    marginBottom: spacing.xxs,
   },
   challengeButtonDesc: {
     ...typography.micro,

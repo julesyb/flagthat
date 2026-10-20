@@ -90,6 +90,7 @@ const ptBR: DeepPartial<TranslationStrings> = {
     chooseYourGameDesc: 'Escolha um modo e dificuldade',
     practice: 'Praticar',
     practiceDesc: 'Explore todas as bandeiras',
+    streakA11y: '{count} dias seguidos',
   },
 
   setup: {
@@ -136,6 +137,10 @@ const ptBR: DeepPartial<TranslationStrings> = {
     typePrompt: 'Digite o nome desta bandeira:',
     nameCountry: 'Nomeie este pa\u00eds:',
     typePlaceholder: 'Sua resposta...',
+    learnTitle: 'Quase',
+    youPicked: 'Você escolheu',
+    answer: 'Resposta',
+    gotIt: 'Entendi',
   },
 
   results: {
@@ -167,6 +172,9 @@ const ptBR: DeepPartial<TranslationStrings> = {
     tryHardMode: 'Tentar dif\u00edcil',
     playAgain: 'Jogar de novo',
     almostThere: 'Mais {remaining} para {badge}',
+    reminderTitle: 'Quer um lembrete diário?',
+    reminderYes: 'Ativar',
+    reminderNo: 'Agora não',
   },
 
   stats: {
@@ -293,7 +301,7 @@ const ptBR: DeepPartial<TranslationStrings> = {
     reminderTime: 'Hor\u00e1rio do lembrete',
     tapToChange: 'Toque para alterar',
     notificationsDisabled: 'Notifica\u00e7\u00f5es desativadas',
-    notificationsAlert: 'Permita notifica\u00e7\u00f5es nas configura\u00e7\u00f5es do dispositivo.',
+    notificationsAlert: 'Ative as notificações nos ajustes para receber lembretes.',
     openSettings: 'Abrir configura\u00e7\u00f5es',
     language: 'Idioma',
     languageDesc: 'Idioma do aplicativo',
@@ -303,18 +311,20 @@ const ptBR: DeepPartial<TranslationStrings> = {
     data: 'Dados',
     resetAllData: 'Redefinir dados',
     resetConfirmTitle: 'Redefinir dados',
-    resetConfirmMsg: 'Todas as estat\u00edsticas, sequ\u00eancias e progresso ser\u00e3o apagados. Isso n\u00e3o pode ser desfeito.',
-    resetConfirmWeb: 'Redefinir dados?\n\nTodas as estat\u00edsticas, sequ\u00eancias e progresso ser\u00e3o apagados. Isso n\u00e3o pode ser desfeito.',
+    resetConfirmMsg: 'Todo o seu progresso será apagado. Não dá para desfazer.',
+    resetConfirmWeb: 'Redefinir dados?\n\nTodo o seu progresso será apagado. Não dá para desfazer.',
     reset: 'Redefinir',
     termsOfService: 'Termos de serviço',
     am: 'AM',
     pm: 'PM',
     support: 'Suporte',
+    missTips: 'Dicas ao errar',
+    missTipsDesc: 'Compare as bandeiras após um erro',
   },
 
   support: {
     title: 'Pague-nos um caf\u00e9',
-    subtitle: 'Flag That \u00e9 gratuito, sem an\u00fancios. Ajude a manter assim assistindo um v\u00eddeo curto. Totalmente opcional.',
+    subtitle: 'Flag That é gratuito. Assista a um vídeo curto para ajudar.',
     watchButton: 'Assistir um v\u00eddeo',
     watchAgain: 'Assistir',
     thankYou: 'Voc\u00ea \u00e9 demais. Obrigado!',
@@ -343,7 +353,7 @@ const ptBR: DeepPartial<TranslationStrings> = {
 
   neighbors: {
     noCountries: 'Nenhum pa\u00eds dispon\u00edvel',
-    noCountriesDesc: 'N\u00e3o h\u00e1 pa\u00edses com fronteiras terrestres nesta categoria.',
+    noCountriesDesc: 'Nenhum país com fronteiras terrestres aqui.',
     selectAll: 'Selecione todos os pa\u00edses vizinhos',
     submitSelected: 'Enviar ({count} selecionados)',
     neighborCount: '{name} tem {count} vizinho',
@@ -404,7 +414,7 @@ const ptBR: DeepPartial<TranslationStrings> = {
 
   capital: {
     noCountries: 'Nenhum pa\u00eds dispon\u00edvel',
-    noCountriesDesc: 'N\u00e3o h\u00e1 pa\u00edses com capitais conhecidas nesta categoria.',
+    noCountriesDesc: 'Nenhum país com capitais conhecidas aqui.',
     whatIsCapital: 'Qual \u00e9 a capital de {name}?',
   },
 
@@ -477,8 +487,8 @@ const ptBR: DeepPartial<TranslationStrings> = {
     tagline: 'Quanto você conhece o mundo?',
     baselineMotivation: 'Complete todos os 5 para acompanhar sua melhora',
     baselineProgress: 'Descubra seu nível',
-    welcomeTitle: 'Bem-vindo ao seu conhecimento de bandeiras',
-    welcomeSub: 'Bandeiras, capitais, mapas e geografia. Veja o quanto você realmente conhece o mundo.',
+    welcomeTitle: 'Quanto você sabe de bandeiras?',
+    welcomeSub: 'Descubra com 10 bandeiras.',
     giveItATry: 'Experimente',
     regionsComplete: '{count}/{total} regiões',
     playCta: 'Jogar',
@@ -547,7 +557,7 @@ const ptBR: DeepPartial<TranslationStrings> = {
     codeHint: 'Obtenha um c\u00f3digo de um amigo que compartilhou sua partida.',
     play: 'Jogar',
     invalidCodeTitle: 'C\u00f3digo inv\u00e1lido',
-    invalidCode: 'Este c\u00f3digo de desafio n\u00e3o \u00e9 v\u00e1lido. Verifique se voc\u00ea colou o c\u00f3digo completo.',
+    invalidCode: 'Esse código não funciona. Confira se ele está completo.',
     nameBlockedTitle: 'Nome n\u00e3o permitido',
     nameBlockedDesc: 'Por favor, escolha outro nome.',
     unsupportedCode: 'Este c\u00f3digo foi criado com uma vers\u00e3o mais nova do Flag That. Atualize o app para jogar este desafio.',

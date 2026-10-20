@@ -140,16 +140,20 @@ export interface AppSettings {
   reminderMinute: number; // 0-59
   locale: string | null; // null = auto-detect from device
   themeMode: ThemeMode;
+  missTips: boolean; // show the side-by-side Learn card after a wrong answer
+  reminderAsked: boolean; // we've offered the daily reminder once after a good round
 }
 
-const DEFAULT_SETTINGS: AppSettings = {
+export const DEFAULT_SETTINGS: AppSettings = {
   soundEnabled: true,
   hapticsEnabled: true,
   dailyReminderEnabled: false,
   reminderHour: 9,
   reminderMinute: 0,
   locale: null,
-  themeMode: 'dark',
+  themeMode: 'system',
+  missTips: true,
+  reminderAsked: false,
 };
 
 export async function getSettings(): Promise<AppSettings> {

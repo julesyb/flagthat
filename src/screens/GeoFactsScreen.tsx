@@ -360,9 +360,9 @@ const createStyles = (colors: ThemeColors) => {
     },
     toggleBtn: {
       flex: 1,
-      paddingVertical: spacing.sm + 2,
+      paddingVertical: spacing.sm + spacing.xs,
       borderRadius: borderRadius.md,
-      borderWidth: 1.5,
+      borderWidth: 1,
       borderColor: colors.border,
       backgroundColor: colors.surface,
       alignItems: 'center',
@@ -395,7 +395,7 @@ const createStyles = (colors: ThemeColors) => {
     },
     chip: {
       paddingVertical: spacing.xs,
-      paddingHorizontal: spacing.sm + 2,
+      paddingHorizontal: spacing.sm + spacing.xs,
       borderRadius: borderRadius.full,
       borderWidth: 1,
       borderColor: colors.border,
@@ -519,7 +519,7 @@ const createStyles = (colors: ThemeColors) => {
     },
     optBtn: {
       backgroundColor: colors.surface,
-      borderWidth: 1.5,
+      borderWidth: 1,
       borderColor: colors.border,
       borderRadius: borderRadius.md,
       minHeight: 56,
