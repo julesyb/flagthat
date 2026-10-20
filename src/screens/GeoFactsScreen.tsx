@@ -271,7 +271,9 @@ function QuizView({ colors, navigation }: { colors: ThemeColors; navigation: Pro
   const takeaway = answered ? getQuizTakeaway(q.id) : null;
 
   return (
-    <ScrollView contentContainerStyle={styles.quizContent} showsVerticalScrollIndicator={false} {...quizSwipe}>
+    // Swipe handlers sit on a plain View: ScrollView replaces some responder props with its own
+    <View style={styles.quizWrap} {...quizSwipe}>
+    <ScrollView contentContainerStyle={styles.quizContent} showsVerticalScrollIndicator={false}>
       <ScreenContainer>
         <Text style={styles.progress}>{t('geofacts.questionOf', { current: index + 1, total: questions.length })}</Text>
 
@@ -301,6 +303,7 @@ function QuizView({ colors, navigation }: { colors: ThemeColors; navigation: Pro
         )}
       </ScreenContainer>
     </ScrollView>
+    </View>
   );
 
   function renderOpt(label: string, i: number) {
@@ -478,6 +481,9 @@ const createStyles = (colors: ThemeColors) => {
       flexGrow: 1,
       justifyContent: 'center',
       padding: spacing.md,
+    },
+    quizWrap: {
+      flex: 1,
     },
     quizContent: {
       padding: spacing.md,
