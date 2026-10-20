@@ -8,6 +8,7 @@ import { flagName } from '../data/countryNames';
 import { hapticTap } from '../utils/feedback';
 import { t } from '../utils/i18n';
 import FlagImage from './FlagImage';
+import { useKeyShortcuts } from '../hooks/useKeyShortcuts';
 
 interface Props {
   /** What the player answered: a country name (English) or free text in hard mode. */
@@ -36,6 +37,13 @@ export default function LearnCard({ picked, answer, onDone }: Props) {
     hapticTap();
     onDone();
   };
+
+  // Web: Enter or Space continues. Allowed from the (now locked) hard-mode text field too.
+  useKeyShortcuts((key) => {
+    if (key !== 'Enter' && key !== ' ') return false;
+    handleDone();
+    return true;
+  }, { allowInInputs: true });
 
   const column = (flag: FlagItem, label: string) => (
     <View style={styles.col}>

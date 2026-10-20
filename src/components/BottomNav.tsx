@@ -49,7 +49,7 @@ export default function BottomNav({ activeTab, onNavigate }: BottomNavProps) {
             >
               {isActive && <View style={styles.activeBar} />}
               {TAB_ICONS[tab.id](isActive, colors)}
-              <Text style={[styles.label, isActive && styles.labelActive]}>{t(tab.labelKey)}</Text>
+              <Text style={[styles.label, isActive && styles.labelActive]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{t(tab.labelKey)}</Text>
             </TouchableOpacity>
           );
         })}
@@ -82,9 +82,11 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   label: {
     fontFamily: fontFamily.uiLabel,
     fontSize: fontSize.xs,
-    letterSpacing: 1,
+    letterSpacing: 0.5,
     textTransform: 'uppercase',
     color: colors.textTertiary,
+    maxWidth: '100%',
+    paddingHorizontal: spacing.xxs,
   },
   labelActive: {
     color: colors.ink,

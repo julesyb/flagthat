@@ -183,6 +183,9 @@ Shipped with this audit:
 - Theme follows the phone, light if unknown.
 - Borders: 1.5px is now 1px. Circles use `borderRadius.full`. Hand-typed spacing snapped to the token grid.
 - Shorter copy in all 6 languages.
+- Flags ship with the app (`assets/flags`), so the game works offline and never shows "Tap to retry" when the flag CDN is down.
+- Keyboard on web: 1-4 pick an answer, Enter or Space continue.
+- Light mode: gold text uses a darker gold (`goldText`) so it reads on cream.
 
 Still to do: Collection, new Home, new first run, one mode list and names, points and combos, weekly Daily, Learn card in Puzzle and Capitals, measuring.
 
@@ -210,5 +213,4 @@ Pick one:
 
 - The sample flag on Home doesn't count toward anything.
 - The first Daily share asks for a name before sharing.
-- With no internet, the game can't load flags. Bundling small flag images fits the app's offline-first design.
 - `ResultsScreen.tsx` and `StatsScreen.tsx` are over 1,200 lines each. Split them first.

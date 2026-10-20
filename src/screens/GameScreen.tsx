@@ -24,6 +24,7 @@ import FlagImage from '../components/FlagImage';
 import MapImage from '../components/MapImage';
 import { useGameAnimations } from '../hooks/useGameAnimations';
 import { useCountdown } from '../hooks/useCountdown';
+import { useKeyShortcuts } from '../hooks/useKeyShortcuts';
 import { getFlagByName, getFlagsForCategory } from '../data';
 import { RootStackParamList } from '../types/navigation';
 import { UNLIMITED_QUESTIONS } from '../utils/config';
@@ -229,6 +230,15 @@ export default function GameScreen({ route, navigation }: Props) {
     },
     [showFeedback, currentQuestion, questionStartTime, isTimeAttack, animateStreak, animateWrong, goToNext, guessLimit],
   );
+
+  // Web: number keys pick an answer (1 = first option)
+  useKeyShortcuts((key) => {
+    if (showFeedback || learnPick !== null || isHard || !currentQuestion) return false;
+    const n = Number(key);
+    if (!Number.isInteger(n) || n < 1 || n > currentQuestion.options.length) return false;
+    handleAnswer(currentQuestion.options[n - 1]);
+    return true;
+  });
 
   const handleSubmitHard = () => {
     if (textInput.trim().length > 0) {
