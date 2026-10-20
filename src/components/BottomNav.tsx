@@ -28,6 +28,9 @@ const TAB_KEYS: { id: TabId; labelKey: string }[] = [
   { id: 'Settings', labelKey: 'nav.settings' },
 ];
 
+/** Tabs left to right, for swipe and arrow-key switching. */
+export const TAB_ORDER: readonly TabId[] = TAB_KEYS.map((tab) => tab.id);
+
 export default function BottomNav({ activeTab, onNavigate }: BottomNavProps) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);

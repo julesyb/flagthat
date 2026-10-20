@@ -25,7 +25,7 @@ import { t } from '../utils/i18n';
 import { FlagImageSmall } from '../components/FlagImage';
 import BottomNav from '../components/BottomNav';
 import ScreenContainer from '../components/ScreenContainer';
-import { useNavTabs } from '../hooks/useNavTabs';
+import { useNavTabs, useTabGestures } from '../hooks/useNavTabs';
 import { getAllEarnedBadges, buildBadgeContext, deriveFromContext, BADGES, TIER_COLORS, getBadgeProgress, getBadgeName, Badge } from '../utils/badges';
 import { computeLevelProgress, LevelProgress, getTierLabel, getLevelTier } from '../utils/levels';
 import { ChevronRightIcon, BadgeIconView, UsersIcon } from '../components/Icons';
@@ -90,6 +90,8 @@ export default function StatsScreen() {
   const route = useRoute<RouteProp<RootStackParamList, 'Stats'>>();
   const highlightChallenge = route.params?.highlightChallenge;
   const onNavigate = useNavTabs();
+  // Swipe or arrow keys move to the neighbouring tab
+  const tabSwipe = useTabGestures('Stats');
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
 
@@ -378,7 +380,7 @@ export default function StatsScreen() {
   });
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} {...tabSwipe}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <ScreenContainer>
 

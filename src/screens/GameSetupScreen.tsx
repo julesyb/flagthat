@@ -22,7 +22,7 @@ import { getCategoryCount, getTotalFlagCount } from '../data';
 import { RootStackParamList } from '../types/navigation';
 import BottomNav from '../components/BottomNav';
 import ScreenContainer from '../components/ScreenContainer';
-import { useNavTabs } from '../hooks/useNavTabs';
+import { useNavTabs, useTabGestures } from '../hooks/useNavTabs';
 import { t } from '../utils/i18n';
 import { hapticTap } from '../utils/feedback';
 import SegBtn from '../components/SegBtn';
@@ -71,6 +71,8 @@ export default function GameSetupScreen({ route, navigation }: Props) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const onNavigate = useNavTabs();
+  // Swipe or arrow keys move to the neighbouring tab
+  const tabSwipe = useTabGestures('Modes');
   const initialMode = route.params?.initialMode;
 
   const [displayMode, setDisplayMode] = useState<DisplayMode>('flag');
@@ -198,7 +200,7 @@ export default function GameSetupScreen({ route, navigation }: Props) {
     : t('setup.startMode', { mode: modeLabel });
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} {...tabSwipe}>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.content}

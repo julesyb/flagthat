@@ -320,6 +320,31 @@ const fr: DeepPartial<TranslationStrings> = {
     support: 'Assistance',
     missTips: 'Aide après une erreur',
     missTipsDesc: 'Comparer les drapeaux après une erreur',
+    shortcuts: 'Raccourcis',
+  },
+
+  // ─── Shortcuts and gestures ────────────────────────────
+  shortcuts: {
+    title: 'Raccourcis',
+    keyboard: 'Clavier',
+    touch: 'Tactile',
+    pickAnswer: 'Choisir une réponse',
+    continue: 'Continuer ou jouer',
+    exitBack: 'Quitter ou revenir',
+    switchTabs: "Changer d'onglet",
+    moveAnswers: "Passer d'une réponse à l'autre",
+    showHelp: 'Afficher les raccourcis',
+    nextQuestion: 'Question suivante',
+    closeTip: 'Fermer une astuce',
+    goBack: 'Revenir',
+    keyEnter: 'Entrée',
+    keySpace: 'Espace',
+    keyEsc: 'Échap',
+    swipeSides: 'Glisser à gauche ou à droite',
+    swipeLeft: 'Glisser à gauche',
+    swipeDown: 'Glisser vers le bas',
+    swipeEdge: 'Glisser depuis le bord',
+    close: 'Fermer',
   },
 
   support: {

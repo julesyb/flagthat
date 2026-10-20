@@ -23,6 +23,7 @@ import { useGameAnimations } from '../hooks/useGameAnimations';
 import { getAllFlags } from '../data';
 import { RootStackParamList } from '../types/navigation';
 import { ChevronRightIcon } from '../components/Icons';
+import { useGameControls } from '../hooks/useGameControls';
 import GameTopBar from '../components/GameTopBar';
 import ScreenContainer from '../components/ScreenContainer';
 import { t } from '../utils/i18n';
@@ -266,6 +267,9 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
     handleAnswer(name);
   };
 
+  // Enter, Space or swipe left skips the pause after an answer
+  const gameSwipe = useGameControls({ canContinue: showFeedback, onContinue: goToNext });
+
   if (questions.length === 0) {
     return (
       <SafeAreaView style={styles.container}>
@@ -281,7 +285,7 @@ export default function FlagPuzzleScreen({ route, navigation }: Props) {
   const isUrgent = timeRemaining <= 10;
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} {...gameSwipe}>
       <View style={styles.progressBar}>
         <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
       </View>

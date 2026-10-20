@@ -24,7 +24,7 @@ import FlagImage from '../components/FlagImage';
 import MapImage from '../components/MapImage';
 import { useGameAnimations } from '../hooks/useGameAnimations';
 import { useCountdown } from '../hooks/useCountdown';
-import { useKeyShortcuts } from '../hooks/useKeyShortcuts';
+import { useGameControls } from '../hooks/useGameControls';
 import { getFlagByName, getFlagsForCategory } from '../data';
 import { RootStackParamList } from '../types/navigation';
 import { UNLIMITED_QUESTIONS } from '../utils/config';
@@ -231,13 +231,15 @@ export default function GameScreen({ route, navigation }: Props) {
     [showFeedback, currentQuestion, questionStartTime, isTimeAttack, animateStreak, animateWrong, goToNext, guessLimit],
   );
 
-  // Web: number keys pick an answer (1 = first option)
-  useKeyShortcuts((key) => {
-    if (showFeedback || learnPick !== null || isHard || !currentQuestion) return false;
-    const n = Number(key);
-    if (!Number.isInteger(n) || n < 1 || n > currentQuestion.options.length) return false;
-    handleAnswer(currentQuestion.options[n - 1]);
-    return true;
+  // Keys pick an answer and skip the feedback pause; swipe left skips it too.
+  // Not after the last life: that round ends on its own timer.
+  const isOut = guessLimit > 0 && wrongCount >= guessLimit;
+  const gameSwipe = useGameControls({
+    optionCount: currentQuestion?.options.length ?? 0,
+    canPick: !showFeedback && learnPick === null && !isHard && !!currentQuestion,
+    onPick: (index) => handleAnswer(currentQuestion.options[index]),
+    canContinue: showFeedback && learnPick === null && !isOut,
+    onContinue: goToNext,
   });
 
   const handleSubmitHard = () => {
@@ -263,7 +265,7 @@ export default function GameScreen({ route, navigation }: Props) {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} {...gameSwipe}>
       {isTimeAttack ? (
         <View style={styles.timerBar}>
           <Text style={[styles.timerText, timeLeft <= 10 && styles.timerTextUrgent]}>

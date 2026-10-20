@@ -320,6 +320,31 @@ const zh: DeepPartial<TranslationStrings> = {
     support: '支持',
     missTips: '答错提示',
     missTipsDesc: '答错后对比两面国旗',
+    shortcuts: '快捷操作',
+  },
+
+  // ─── Shortcuts and gestures ────────────────────────────
+  shortcuts: {
+    title: '快捷操作',
+    keyboard: '键盘',
+    touch: '触屏',
+    pickAnswer: '选择答案',
+    continue: '继续或开始',
+    exitBack: '退出或返回',
+    switchTabs: '切换标签页',
+    moveAnswers: '在答案间移动',
+    showHelp: '显示快捷操作',
+    nextQuestion: '下一题',
+    closeTip: '关闭提示',
+    goBack: '返回',
+    keyEnter: '回车',
+    keySpace: '空格',
+    keyEsc: 'Esc',
+    swipeSides: '左右滑动',
+    swipeLeft: '向左滑动',
+    swipeDown: '向下滑动',
+    swipeEdge: '从边缘滑动',
+    close: '关闭',
   },
 
   support: {

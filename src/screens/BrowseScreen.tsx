@@ -29,7 +29,7 @@ import { t } from '../utils/i18n';
 import { flagName } from '../data/countryNames';
 import BottomNav from '../components/BottomNav';
 import ScreenContainer from '../components/ScreenContainer';
-import { useNavTabs } from '../hooks/useNavTabs';
+import { useNavTabs, useTabGestures } from '../hooks/useNavTabs';
 import { SearchIcon } from '../components/Icons';
 import PageHeader from '../components/PageHeader';
 
@@ -51,6 +51,8 @@ export default function BrowseScreen({ route, navigation }: Props) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const onNavigate = useNavTabs();
+  // Swipe or arrow keys move to the neighbouring tab
+  const tabSwipe = useTabGestures('Browse');
   const initialRegion = route.params?.region ?? 'All';
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState(initialRegion);
@@ -137,7 +139,7 @@ export default function BrowseScreen({ route, navigation }: Props) {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} {...tabSwipe}>
       <ScreenContainer flex>
         <PageHeader
           title={t('browse.title')}

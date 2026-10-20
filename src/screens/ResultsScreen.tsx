@@ -39,6 +39,7 @@ import { DailyLeaderboardEntry, getDailyLeaderboardForDate, addDailyLeaderboardE
 import DailyLeaderboard from '../components/DailyLeaderboard';
 import NameInputModal from '../components/NameInputModal';
 import LevelUpModal from '../components/LevelUpModal';
+import { useKeyShortcuts } from '../hooks/useKeyShortcuts';
 import { getTodayDateString } from '../utils/gameEngine';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Results'>;
@@ -560,6 +561,14 @@ export default function ResultsScreen({ route, navigation }: Props) {
   const playAgain = () => {
     navigatePlayAgain();
   };
+
+  // Web: Enter plays again, same as the main button. Not while a dialog is up.
+  const dialogOpen = showChallengeModal || showDailyNameModal || levelUpTo !== null || skillLevelUp !== null;
+  useKeyShortcuts((key) => {
+    if (key !== 'Enter' || isDaily || isChallenge || dialogOpen) return false;
+    playAgain();
+    return true;
+  });
 
   // Contextual Play CTA text (not used for daily - daily only has Share)
   const playCtaText = isBaseline

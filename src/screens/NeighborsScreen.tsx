@@ -23,6 +23,7 @@ import { countCorrect, countWrong } from '../utils/gameHelpers';
 import { countryNeighbors, getCountriesWithNeighbors } from '../data/countryNeighbors';
 import FlagImage from '../components/FlagImage';
 import { CheckIcon, CrossIcon } from '../components/Icons';
+import { useGameControls } from '../hooks/useGameControls';
 import GameTopBar from '../components/GameTopBar';
 import ScreenContainer from '../components/ScreenContainer';
 import MapImage from '../components/MapImage';
@@ -102,6 +103,19 @@ export default function NeighborsScreen({ navigation, route }: Props) {
   const [results, setResults] = useState<GameResult[]>([]);
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const roundStartTime = useRef(Date.now());
+  // Blocks a second Next (key, swipe or tap) while the round fades out
+  const advancingRef = useRef(false);
+
+  // Keys toggle flags, Enter submits then moves on. Swipe only moves on, never submits.
+  // Handlers are defined below; these arrows only run after a full render.
+  const gameSwipe = useGameControls({
+    optionCount: rounds[roundIndex]?.options.length ?? 0,
+    canPick: rounds.length > 0 && !submitted,
+    onPick: (index) => toggleSelect(rounds[roundIndex].options[index].id),
+    canContinue: rounds.length > 0 && (submitted || selected.size > 0),
+    onContinue: () => (submitted ? handleNext() : handleSubmit()),
+    canSwipe: rounds.length > 0 && submitted,
+  });
 
   // Empty rounds — not enough eligible countries
   if (rounds.length === 0) {
@@ -159,6 +173,8 @@ export default function NeighborsScreen({ navigation, route }: Props) {
   };
 
   const handleNext = () => {
+    if (advancingRef.current) return;
+    advancingRef.current = true;
     const currentResults = [...results];
     const isEliminated = guessLimit > 0 && currentResults.filter((r) => !r.correct).length >= guessLimit;
     if (isLastRound || isEliminated) {
@@ -172,12 +188,13 @@ export default function NeighborsScreen({ navigation, route }: Props) {
       setSelected(new Set());
       setSubmitted(false);
       roundStartTime.current = Date.now();
+      advancingRef.current = false;
       Animated.timing(fadeAnim, { toValue: 1, duration: 180, useNativeDriver: true }).start();
     });
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} {...gameSwipe}>
       <ScreenContainer flex game>
       <GameTopBar
         onExit={() => navigation.goBack()}

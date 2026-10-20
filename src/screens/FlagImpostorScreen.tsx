@@ -23,6 +23,7 @@ import { countCorrect, countWrong } from '../utils/gameHelpers';
 import { countries } from '../data/countries';
 import FlagImage from '../components/FlagImage';
 import { CheckIcon, CrossIcon } from '../components/Icons';
+import { useGameControls } from '../hooks/useGameControls';
 import GameTopBar from '../components/GameTopBar';
 import ScreenContainer from '../components/ScreenContainer';
 
@@ -402,6 +403,8 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
   const [results, setResults] = useState<GameResult[]>([]);
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const roundStartTime = useRef(Date.now());
+  // Blocks a second Next (key, swipe or tap) while the round fades out
+  const advancingRef = useRef(false);
 
   const guessLimit = config.guessLimit ?? 0;
   const wrongCount = countWrong(results);
@@ -424,6 +427,15 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
     }
     return items;
   }, [round]);
+
+  // Handlers are defined below; these arrows only run after a full render.
+  const gameSwipe = useGameControls({
+    optionCount: grid.length,
+    canPick: !!round && picked === null,
+    onPick: (index) => handlePick(index),
+    canContinue: !!round && picked !== null,
+    onContinue: () => handleNext(),
+  });
 
   if (!round) return null;
 
@@ -461,6 +473,8 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
   };
 
   const handleNext = () => {
+    if (advancingRef.current) return;
+    advancingRef.current = true;
     const isEliminated = guessLimit > 0 && countWrong(results) >= guessLimit;
     if (isLastRound || isEliminated) {
       finishGame([...results]);
@@ -472,6 +486,7 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
       setRoundIndex((i) => i + 1);
       setPicked(null);
       roundStartTime.current = Date.now();
+      advancingRef.current = false;
       Animated.timing(fadeAnim, { toValue: 1, duration: 180, useNativeDriver: true }).start();
     });
   };
@@ -480,7 +495,7 @@ export default function FlagImpostorScreen({ navigation, route }: Props) {
   const FLAG_H = 80;
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} {...gameSwipe}>
       <ScreenContainer flex game>
       <GameTopBar
         onExit={() => navigation.goBack()}

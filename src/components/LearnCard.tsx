@@ -9,6 +9,8 @@ import { hapticTap } from '../utils/feedback';
 import { t } from '../utils/i18n';
 import FlagImage from './FlagImage';
 import { useKeyShortcuts } from '../hooks/useKeyShortcuts';
+import { useSwipe } from '../hooks/useSwipe';
+import { isContinueKey } from '../utils/shortcuts';
 
 interface Props {
   /** What the player answered: a country name (English) or free text in hard mode. */
@@ -20,7 +22,8 @@ interface Props {
 
 /**
  * Shown after a wrong answer: the flag the player picked next to the right one,
- * so they can see the difference while it still matters. One tap to move on.
+ * so they can see the difference while it still matters. One tap to move on,
+ * or swipe the sheet down (or left) on touch screens.
  */
 export default function LearnCard({ picked, answer, onDone }: Props) {
   const { colors } = useTheme();
@@ -28,6 +31,8 @@ export default function LearnCard({ picked, answer, onDone }: Props) {
   const btn = useMemo(() => buildButtons(colors), [colors]);
   const pickedFlag = getFlagByName(picked);
   const slide = useRef(new Animated.Value(0)).current;
+  // How far the sheet is dragged down by a finger
+  const drag = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     Animated.spring(slide, { toValue: 1, useNativeDriver: true, tension: 90, friction: 12 }).start();
@@ -40,10 +45,23 @@ export default function LearnCard({ picked, answer, onDone }: Props) {
 
   // Web: Enter or Space continues. Allowed from the (now locked) hard-mode text field too.
   useKeyShortcuts((key) => {
-    if (key !== 'Enter' && key !== ' ') return false;
+    if (!isContinueKey(key)) return false;
     handleDone();
     return true;
   }, { allowInInputs: true });
+
+  const sheetSwipe = useSwipe({
+    axis: 'both',
+    onDrag: (_, dy) => drag.setValue(Math.max(0, dy)),
+    onSwipe: (direction) => {
+      if (direction !== 'down' && direction !== 'left') return false;
+      handleDone();
+      return true;
+    },
+    onEnd: (used) => {
+      if (!used) Animated.spring(drag, { toValue: 0, useNativeDriver: true, tension: 120, friction: 12 }).start();
+    },
+  });
 
   const column = (flag: FlagItem, label: string) => (
     <View style={styles.col}>
@@ -61,8 +79,13 @@ export default function LearnCard({ picked, answer, onDone }: Props) {
       <Animated.View
         style={[
           styles.sheet,
-          { transform: [{ translateY: slide.interpolate({ inputRange: [0, 1], outputRange: [320, 0] }) }] },
+          {
+            transform: [{
+              translateY: Animated.add(slide.interpolate({ inputRange: [0, 1], outputRange: [320, 0] }), drag),
+            }],
+          },
         ]}
+        {...sheetSwipe}
         accessibilityViewIsModal
         accessibilityLiveRegion="polite"
       >
