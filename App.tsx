@@ -37,7 +37,8 @@ import { isShortcutsHelpOpen, setShortcutsHelpOpen } from './src/utils/shortcuts
 import { isWebDialogOpen } from './src/utils/webInput';
 import { ChevronLeftIcon } from './src/components/Icons';
 import { RootStackParamList } from './src/types/navigation';
-import { colors, fontSize, APP_URL } from './src/utils/theme';
+import { colors, fontSize, spacing, APP_URL } from './src/utils/theme';
+import { useLayout } from './src/utils/useLayout';
 import { ThemeProvider, useTheme } from './src/contexts/ThemeContext';
 import { configureNotificationHandler, syncNotificationSchedule } from './src/utils/notifications';
 import { initLocale, t } from './src/utils/i18n';
@@ -100,9 +101,13 @@ const linking = {
 
 function BackButton({ onPress }: { onPress: () => void }) {
   const { colors: c } = useTheme();
+  // On wide screens, line the arrow up with the centered content column
+  // instead of leaving it in the far corner. Phones get 0.
+  const { screenWidth, contentWidth } = useLayout();
+  const columnInset = Math.max(0, (screenWidth - contentWidth) / 2);
   return (
     <TouchableOpacity
-      style={{ marginLeft: -8, padding: 8 }}
+      style={{ marginLeft: columnInset - spacing.sm, padding: spacing.sm }}
       onPress={onPress}
       activeOpacity={0.7}
       accessibilityRole="button"

@@ -140,7 +140,12 @@ function BrowseView({ colors }: { colors: ThemeColors }) {
   );
 
   const renderItem = useCallback(
-    ({ item }: { item: GeoFact }) => <FactCard item={item} colors={colors} />,
+    // Same centered max-width column as the header and filters
+    ({ item }: { item: GeoFact }) => (
+      <ScreenContainer>
+        <FactCard item={item} colors={colors} />
+      </ScreenContainer>
+    ),
     [colors],
   );
 
