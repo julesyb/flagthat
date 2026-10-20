@@ -24,7 +24,7 @@ The problems are not about missing features. The app has too many features compe
 |---|------|---------------------|
 | 1 | Progression is broken and fragmented | It is the reason to come back tomorrow. Today a new player sits at "Level 0" for weeks. |
 | 2 | The core round does not teach or thrill | It is 90% of time spent in the app. Wrong answers flash by, scores are flat, distractors are random. |
-| 3 | First run and Home are overloaded | It decides whether anyone gets to areas 1 and 2. A new player faces 5 choices, then a Home with 3 quizzes and 8 rows. |
+| 3 | First run and Home are overloaded | It decides whether anyone gets to areas 1 and 2. A new player faces 5 choices, then a Home with two mini-quizzes, two settings rows and up to 7 mode rows. |
 
 ---
 
@@ -41,13 +41,15 @@ Levels 4 to 8 then require 100 correct in one specific mode each, so the order y
 
 1. Levels 1-10 (`levels.ts`)
 2. Skill level beginner/intermediate/advanced/expert (`storage.ts`), which only promotes after 10 consecutive perfect games, so it almost never moves
-3. 26 badges (`badges.ts`)
+3. 25 badges (`badges.ts`)
 4. "Mastered" flags (3 right in a row)
 5. Baseline region tests (5 regions, first/best/recent)
 
 Plus the day streak, which is the single strongest retention mechanic in this genre, and it is not on Home at all. It only appears as a small pill on the Stats screen. (CLAUDE.md even specifies a streak badge on Home; it was lost in the Home redesigns.)
 
-**The Daily is not a reliable habit anchor.** `DAILY_VARIANTS` rotates across 12 formats, including "hard + map" (type a country name from its outline). One day it is a 2-choice easy quiz, the next it is near impossible. A habit needs a predictable shape. Sharing the Daily also forces a name entry modal before the share sheet opens.
+**The Daily is not a reliable habit anchor.** `DAILY_VARIANTS` rotates across 12 formats, including "hard + map" (type a country name from its outline). One day it is a 2-choice easy quiz, the next it is near impossible. A habit needs a predictable shape. The first Daily share also asks for a name before the share sheet opens (later shares reuse it).
+
+**Reminders are off unless you find them.** `dailyReminderEnabled` defaults to false and the only way to turn it on is a toggle in Settings. The app never asks. For a daily-habit app this is a large, cheap miss.
 
 **Answers in the Home teaser and Fact of the Day do not count toward anything.**
 
@@ -98,16 +100,17 @@ First rank-up happens in the first session. That is the point.
    - `getCountryState(flagStats, id): 'empty' | 'seen' | 'collected' | 'review'`
    - `getPassportSummary(flagStats): { collected, seen, review, byRegion }`
    - `RANKS` as data `{ id, minCollected, requiresFast? }` and `getRank(summary, stats)`
-   - All derived from existing `FlagStats`; no migration needed, existing players land at their true collection count on first launch.
+   - `FlagStats` today only stores `right`, `wrong` and `rightStreak`, so it cannot tell "collected, then missed" apart from "never collected". Add one field, `collectedAt?: number`, set the first time `rightStreak` reaches `MASTERED_STREAK` and never cleared. Then `review` = `collectedAt` set and `rightStreak === 0`.
+   - One-time backfill for existing players: set `collectedAt` where `rightStreak >= 3`. Flags with `right >= 3` but a broken streak are ambiguous; treat them as `seen` (slightly conservative, never wrong in the player's favour).
 2. **Daily goal + freeze in `storage.ts`**: `DailyGoal { date, target, progress }`, `StreakFreeze { count }`. Hook goal progress into `updateFlagResults` so every mode counts. Record Home teaser answers through the same path.
 3. **`src/components/StreakPill.tsx`** and **`src/components/PassportRing.tsx`** (shared, used on Home, Results, Stats).
 4. **Rename Stats tab to Passport** (`StatsScreen.tsx`): header = rank + "84 / 197 collected", grid of region pages, tap a region for a stamp grid of flags (reuse `FlagImage` small). Keep accuracy and history below the fold.
 5. **Results**: replace the level line with "+3 collected, 1 needs review" and animate the new stamps landing. Rank-up uses the existing `LevelUpModal`, renamed.
-6. **Remove**: `levels.ts` requirement engine, skill level storage and `onboarding.skill*` strings (already mostly orphaned), `persistLevel`. Keep a one-time migration that maps old level to nothing (ranks are derived, so nothing to carry over).
+6. **Remove**: `levels.ts` requirement engine, skill level storage and `onboarding.skill*` strings (already mostly orphaned), `persistLevel`. Ranks are derived from the collection, so old levels need no carry-over; the only migration is the `collectedAt` backfill in step 1.
 7. **Daily**: replace `DAILY_VARIANTS` random rotation with a weekday schedule table in `gameEngine.ts`. Make the name modal in `ResultsScreen.doDailyShare` optional.
 8. **i18n**: rank names, Passport strings, goal strings in all 6 locales.
 
-**Success metrics**: day-1 and day-7 return rate, % of players who see a rank-up in session 1 (target over 80%), median sessions per week.
+**Success metrics** (see "Measuring any of this" below): day-1 and day-7 return rate, % of players who see a rank-up in session 1 (target over 80%), median sessions per week.
 
 ---
 
@@ -115,9 +118,9 @@ First rank-up happens in the first session. That is the point.
 
 ### What is wrong
 
-**Wrong answers do not teach.** In `GameScreen.tsx` a miss shows red/green for 1.2s and then auto-advances. You barely have time to read the correct name, let alone learn why your guess was wrong. The app knows which flags you confuse (it records your wrong answer) but never shows you the two side by side.
+**Wrong answers do not teach.** In `GameScreen.tsx` a miss shows red/green for 1.2s and then auto-advances. You barely have time to read the correct name, let alone learn why your guess was wrong. The app knows which flags you confuse (it records your wrong answer) Since #142 the Results screen does show your pick and the right flag side by side, but only after the round, in a long list, when the moment has passed. Nothing happens at the moment of the mistake.
 
-**Distractors are mostly random.** `generateOptions` prefers look-alike twins, but only 81 flags have a twin entry. The other 116 get random countries from anywhere. In testing: "Benin / Mozambique / Solomon Islands / Saint Lucia". You can often eliminate by vague region or color without knowing the flag, and you never practise the distinctions that actually matter.
+**Distractors are mostly random.** `generateOptions` prefers look-alike twins, but only 81 flags have a twin entry. The other 116 get random countries from whatever pool you are playing. Region filters narrow that pool, but the default Home "Play Now" uses all 197, so in the common case options come from anywhere. In testing: "Benin / Mozambique / Solomon Islands / Saint Lucia". You can often eliminate by vague region or color without knowing the flag, and you never practise the distinctions that actually matter.
 
 **Scoring is flat.** Every round ends as "30%, 3/10 correct". There is a streak counter in the top bar but no points, no combo, no speed reward, no personal best per mode (except Timed). The Results hero is a big percentage, which is great when you get 100% and deflating at 30%.
 
@@ -134,7 +137,9 @@ First rank-up happens in the first session. That is the point.
 - Button: "Got it" (gold). Optional "Add to review" is automatic anyway via the urgent lane.
 - Correct answers keep the fast 600ms auto-advance. Timed mode keeps auto-advance on both (shows the card in Results instead).
 
-This is the single most impactful change for actual learning, and it makes misses feel useful instead of punishing.
+This is the single most impactful change for actual learning, and it makes misses feel useful instead of punishing. It moves the comparison that #142 already added to Results into the moment it matters; the Results list can then shrink to a summary.
+
+Trade-off: a tap per miss slows fast players. Keep it to one tap, never on correct answers, skip it in Timed, and add a Settings toggle ("Show tips on misses", default on). Daily and challenge times are measured before the card appears, so leaderboards are unaffected.
 
 **B. Smart distractors for every flag.** Add a small per-flag descriptor table, `src/data/flagTraits.ts`:
 
@@ -150,7 +155,7 @@ Then `generateOptions` picks wrong answers in priority order: explicit twins, th
 - Results hero becomes the score with a "New best" flag per mode, accuracy moves to the secondary line. A 30% round can still be a personal best on speed or combo, which keeps people playing.
 - Share text leads with score and combo, keeps the grid.
 
-**D. Adaptive difficulty inside the round.** Drop the separate Difficulty selector from Home. Each round starts at the player's recent level and steps distractor depth up after 3 correct, down after 2 misses. Hard (typing) stays as an explicit opt-in mode for people who want it. This replaces the skill level system from area 1.
+**D. Adaptive difficulty inside the round.** Move the Difficulty selector off Home and into Customize (it is still needed for challenge links, which encode difficulty, and for players who like to choose). The default "Play" adapts instead. Each round starts at the player's recent level and steps distractor depth up after 3 correct, down after 2 misses. Hard (typing) stays as an explicit opt-in mode for people who want it. This replaces the skill level system from area 1. The Daily and challenges stay fixed-difficulty so scores between players remain comparable.
 
 **E. Small polish fixes in the same pass**
 
@@ -178,23 +183,23 @@ Then `generateOptions` picks wrong answers in priority order: explicit twins, th
 
 **Onboarding asks before it delights.** First screen: a giant "Welcome to your flag knowledge" headline (awkward phrasing), then 5 choices: Give it a try, See Where You Stand, Choose Your Own Game, Practice, Timed Quiz. "See Where You Stand" starts a 54-flag Africa test as the first thing a new player does. "Practice" here opens Browse, while "Practice" everywhere else means "review weak flags".
 
-**Home has three quizzes and eight decisions on one screen.** From top: wordmark + Level 0 pill, a Cards selector (5/10/15/20/All), a Difficulty selector, a "Name this flag" teaser with 4 options, Play Now, a Fact of the Day quiz with its own options, then a list of up to 7 modes, then the baseline progress card. The teaser and Play Now compete: you answer the teaser, then Play Now starts a different game with different flags.
+**Home has two mini-quizzes, two settings rows and a long mode list on one screen.** From top: wordmark + Level 0 pill, a Cards selector (5/10/15/20/All), a Difficulty selector, a "Name this flag" teaser with 4 options, Play Now, a Fact of the Day quiz with its own options, then a list of up to 7 modes, then the baseline progress card. The teaser and Play Now compete: you answer the teaser, then Play Now starts a different game with different flags.
 
 **Mode naming and placement are inconsistent.**
 
 - "Capital Connection" on Home and Levels, "Capital Quiz" on the Modes screen.
-- Flag Impostor is on Home but missing from the Modes screen.
+- Flag Impostor is on Home but missing from the Modes screen, and Neighbors is on the Modes screen but missing from Home.
 - "Quiz", "Medium", "Play Now" all mean the same thing.
 - "Join challenge" sits in the game mode list as if it were a mode.
 
-**Results can be a dead end.** After the Daily the only button is Share. No "keep playing", no "what's next".
+**Results after the Daily has no next game.** The only action is Share; to keep playing you go back to Home and choose again. That is the moment a player is most warmed up.
 
 ### The fix
 
 **A. Zero-menu first run.** Launch straight into a 5-flag round of famous flags (`easy_flags` category, 2 choices for the first two, then 4). No menu, no welcome wall. One line of copy above the first flag: "Name this flag." After round 1:
 
 - "You collected 4 countries." Stamps animate into an empty Passport.
-- "Want a daily reminder to keep your streak?" (notification permission asked here, at a moment of success, not on launch).
+- "Want a daily reminder to keep your streak?" Today reminders exist only as an off-by-default toggle in Settings, so almost nobody has them. Asking here, right after a win, is the standard moment to get a yes. Turning it on calls the existing `toggleDailyReminder`.
 - Then Home.
 
 Placement is folded into play: the first 3 rounds adapt (area 2D), so we never need a 54-flag test. Remove the baseline flow from onboarding; region pages in the Passport replace it.
@@ -251,17 +256,29 @@ Every mode appears in exactly one list (the Modes tab) plus the Home shelf. Bott
 
 | Phase | Work | Why first |
 |-------|------|-----------|
-| 1 | Learn card, smart distractors, streak pill on Home, fix Level 1 requirement as a stopgap | Small, high impact, no new navigation |
+| 0 | Decide how to measure (see "Measuring any of this") | Otherwise none of the targets can be checked |
+| 1 | Learn card, smart distractors, streak pill on Home, reminder prompt after a good round, fix Level 1 requirement as a stopgap | Small, high impact, no new navigation |
 | 2 | Passport (data, Stats tab, Results stamps), daily goal, streak freeze | The retention backbone |
 | 3 | Zero-menu first run, Home rebuild, mode registry, renames | Depends on Passport for the Today card |
 | 4 | Scoring and combo, weekday Daily, passport share card | Polish that compounds the above |
 
 A stopgap worth doing immediately regardless of the rest: change Level 1 in `levels.ts` to count correct answers in any mode (`total_correct`) with a small target like 25, so new players stop seeing "Level 0".
 
+## Measuring any of this
+
+Every success metric above assumes we can see what players do, and today we cannot. The app is local-first, the iOS privacy manifest declares no collected data, and the only analytics is `@vercel/analytics` on the web build, which counts page views, not game events. Native players are invisible.
+
+Two options, pick one before phase 1 ships:
+
+1. **Add minimal, anonymous event analytics** (round started/finished, rank up, daily done, reminder opted in). This requires updating the App Store privacy label and the privacy manifest, and choosing a provider. Best data, real cost.
+2. **Measure on web only, plus store data.** Instrument the same events through Vercel on the web build, and use App Store Connect / Play Console retention for native. Free and private, but only directional.
+
+Without one of these, the plan can still ship, but the targets in this doc are guesses we will not be able to check.
+
 ## Smaller issues noticed along the way
 
-- Daily share requires typing a name before the share sheet opens.
-- Home teaser and Fact of the Day answers are not recorded anywhere.
+- The first Daily share asks for a name before the share sheet opens.
+- Home teaser answers are not recorded anywhere. Fact of the Day answers are saved, but only for the fact card itself, not toward flag progress.
 - `GAME_MODES` and `CATEGORIES` in `src/types/index.ts` carry hardcoded English labels alongside the i18n keys.
-- Flag images fail silently to a spinner when the CDN is unreachable; consider bundling small flag PNGs for offline (the app is otherwise local-first).
+- Flags load from flagcdn.com at runtime. `FlagImage` retries and then offers a manual retry, which is good, but with no connection the core game cannot be played at all. Bundling small flag images would match the local-first architecture.
 - `ResultsScreen.tsx` and `StatsScreen.tsx` are over 1,200 lines each, which will slow down all of the above; splitting them is part of the plan.
