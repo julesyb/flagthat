@@ -20,6 +20,7 @@ import { getSettings, saveSettings, AppSettings, DEFAULT_SETTINGS, resetStats, g
 import {
   setSoundsEnabled,
   setHapticsEnabled,
+  hapticTap,
 } from '../utils/feedback';
 import { toggleDailyReminder, syncNotificationSchedule } from '../utils/notifications';
 import { t, setLocale, getLocale, SUPPORTED_LOCALES, LocaleCode } from '../utils/i18n';
@@ -27,12 +28,16 @@ import { ChevronRightIcon, ChevronDownIcon, CheckIcon } from '../components/Icon
 import BottomNav from '../components/BottomNav';
 import ScreenContainer from '../components/ScreenContainer';
 import PageHeader from '../components/PageHeader';
-import { useNavTabs } from '../hooks/useNavTabs';
+import { hasShortcutsToShow } from '../components/ShortcutsHelp';
+import { setShortcutsHelpOpen } from '../utils/shortcutsHelp';
+import { useNavTabs, useTabGestures } from '../hooks/useNavTabs';
 import { useTheme } from '../contexts/ThemeContext';
 
 export default function SettingsScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const onNavigate = useNavTabs();
+  // Swipe or arrow keys move to the neighbouring tab
+  const tabSwipe = useTabGestures('Settings');
   const { colors, themeMode, setThemeMode } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
@@ -156,7 +161,7 @@ export default function SettingsScreen() {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} {...tabSwipe}>
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={styles.content}
@@ -393,6 +398,21 @@ export default function SettingsScreen() {
             <Text style={styles.settingLabel}>{t('settings.version')}</Text>
             <Text style={styles.settingValue}>{Constants.expoConfig?.version ?? '1.0.0'}</Text>
           </View>
+          {hasShortcutsToShow() && (
+            <>
+              <View style={styles.settingDivider} />
+              <TouchableOpacity
+                style={styles.settingRow}
+                onPress={() => { hapticTap(); setShortcutsHelpOpen(true); }}
+                activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel={t('settings.shortcuts')}
+              >
+                <Text style={styles.settingLabel}>{t('settings.shortcuts')}</Text>
+                <ChevronRightIcon size={18} color={colors.textTertiary} />
+              </TouchableOpacity>
+            </>
+          )}
           <View style={styles.settingDivider} />
           <TouchableOpacity
             style={styles.settingRow}

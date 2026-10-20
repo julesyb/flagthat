@@ -18,6 +18,7 @@ import { countries } from '../data/countries';
 import { countryCapitals } from '../data/countryCapitals';
 import { countryCities } from '../data/countryCities';
 import FlagImage from '../components/FlagImage';
+import { useGameControls } from '../hooks/useGameControls';
 import GameTopBar from '../components/GameTopBar';
 import ScreenContainer from '../components/ScreenContainer';
 import { t } from '../utils/i18n';
@@ -186,6 +187,14 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
     autoAdvanceRef.current = setTimeout(() => goToNext(), feedbackDelay);
   }, [showFeedback, question, results, goToNext]);
 
+  const gameSwipe = useGameControls({
+    optionCount: question?.options.length ?? 0,
+    canPick: !showFeedback && !!question,
+    onPick: (index) => question && handleAnswer(question.options[index]),
+    canContinue: showFeedback,
+    onContinue: goToNext,
+  });
+
   if (!question) {
     return (
       <SafeAreaView style={styles.container}>
@@ -203,7 +212,7 @@ export default function CapitalConnectionScreen({ navigation, route }: Props) {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} {...gameSwipe}>
       <View style={styles.progressBar}>
         <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
       </View>

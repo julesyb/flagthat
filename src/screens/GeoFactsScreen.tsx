@@ -21,6 +21,7 @@ import { FlagIcon, TrophyIcon, CompassIcon, GlobeIcon, CalendarIcon } from '../c
 import BottomNav from '../components/BottomNav';
 import ScreenContainer from '../components/ScreenContainer';
 import { useNavTabs } from '../hooks/useNavTabs';
+import { useGameControls } from '../hooks/useGameControls';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'GeoFacts'>;
 
@@ -220,6 +221,17 @@ function QuizView({ colors, navigation }: { colors: ThemeColors; navigation: Pro
     }
   };
 
+  // Keys pick an answer; Enter starts the quiz, moves on, or plays again. Swipe left moves on.
+  const playing = phase === 'playing';
+  const quizSwipe = useGameControls({
+    optionCount: playing ? questions[index]?.options.length ?? 0 : 0,
+    canPick: playing && picked === null,
+    onPick: pick,
+    canContinue: !playing || picked !== null,
+    onContinue: playing ? next : start,
+    canSwipe: playing && picked !== null,
+  });
+
   if (phase === 'intro') {
     return (
       <ScrollView contentContainerStyle={styles.centerContent}>
@@ -259,7 +271,7 @@ function QuizView({ colors, navigation }: { colors: ThemeColors; navigation: Pro
   const takeaway = answered ? getQuizTakeaway(q.id) : null;
 
   return (
-    <ScrollView contentContainerStyle={styles.quizContent} showsVerticalScrollIndicator={false}>
+    <ScrollView contentContainerStyle={styles.quizContent} showsVerticalScrollIndicator={false} {...quizSwipe}>
       <ScreenContainer>
         <Text style={styles.progress}>{t('geofacts.questionOf', { current: index + 1, total: questions.length })}</Text>
 

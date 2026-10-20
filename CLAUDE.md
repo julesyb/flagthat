@@ -61,8 +61,13 @@
 - `src/utils/gameHelpers.ts` — helper functions (countCorrect, countWrong, calculateProgress)
 - `src/hooks/useGameAnimations.ts` — shared game animation hook (fade, shake, streak spring)
 - `src/hooks/useCountdown.ts` — countdown timer hook for timed game modes
-- `src/hooks/useNavTabs.ts` — navigation tab state management
-- `src/hooks/useKeyShortcuts.ts` - web keyboard shortcuts (1-4 pick an answer, Enter/Space continue)
+- `src/hooks/useKeyShortcuts.ts` - base web keyboard hook. Only the screen in front hears keys, and keys pause while a dialog is open
+- `src/hooks/useGameControls.ts` - shared game controls: 1-9/A-I pick, Enter/Space continue, swipe left continues
+- `src/hooks/useSwipe.ts` - swipe gestures on any View (PanResponder). Native always, web on touch screens only
+- `src/hooks/useNavTabs.ts` - `useNavTabs()` for BottomNav, `useTabGestures(tab)` for swipe and arrow-key tab switching
+- `src/utils/shortcuts.ts` - pure key and swipe helpers (unit tested)
+- `src/utils/webInput.ts` - web pointer detection, dialog detection, arrow-key focus movement
+- `src/components/ShortcutsHelp.tsx` - shortcuts and gestures sheet. Opens with `?` or from Settings
 - `src/components/Icons.tsx` — all SVG icons (no emoji)
 - `src/components/BottomNav.tsx` — shared bottom navigation
 - `src/components/ScreenContainer.tsx` — max-width wrapper for responsive layout
@@ -117,6 +122,11 @@
 - All interactive elements need `accessibilityRole="button"` and `accessibilityLabel={t(...)}`
 - Selection state: `accessibilityState={{ selected: isActive }}`
 - Tab bars use `accessibilityRole="tablist"` / `"tab"`
+
+### Keyboard and Gestures
+- Game screens call `useGameControls` and spread its handlers on the root view. Esc and arrow keys come from `GameTopBar`
+- Tab screens (Home, Modes, Stats, Browse, Settings) spread `useTabGestures(tab)` on the root view
+- New shortcuts or gestures go in the `ShortcutsHelp` lists too
 
 ### Sound and Haptics
 - Import helpers from `src/utils/feedback.ts`: `hapticTap()`, `hapticCorrect()`, `hapticWrong()`

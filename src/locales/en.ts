@@ -328,6 +328,31 @@ const en = {
     themeSystem: 'System',
     missTips: 'Tips on misses',
     missTipsDesc: 'Compare flags after a wrong answer',
+    shortcuts: 'Shortcuts',
+  },
+
+  // ─── Shortcuts and gestures ────────────────────────────
+  shortcuts: {
+    title: 'Shortcuts',
+    keyboard: 'Keyboard',
+    touch: 'Touch',
+    pickAnswer: 'Pick an answer',
+    continue: 'Continue or play',
+    exitBack: 'Exit or go back',
+    switchTabs: 'Switch tabs',
+    moveAnswers: 'Move between answers',
+    showHelp: 'Show shortcuts',
+    nextQuestion: 'Next question',
+    closeTip: 'Close a tip',
+    goBack: 'Go back',
+    keyEnter: 'Enter',
+    keySpace: 'Space',
+    keyEsc: 'Esc',
+    swipeSides: 'Swipe left or right',
+    swipeLeft: 'Swipe left',
+    swipeDown: 'Swipe down',
+    swipeEdge: 'Swipe from the edge',
+    close: 'Close',
   },
 
   // ─── Support ───────────────────────────────────────────

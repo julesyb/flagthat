@@ -28,7 +28,8 @@ import SegBtn from '../components/SegBtn';
 import ConfigRow, { ConfigCard } from '../components/ConfigRow';
 import FactOfDay from '../components/FactOfDay';
 import StreakPill from '../components/StreakPill';
-import { useNavTabs } from '../hooks/useNavTabs';
+import { useNavTabs, useTabGestures } from '../hooks/useNavTabs';
+import { useKeyShortcuts } from '../hooks/useKeyShortcuts';
 import { computeLevelProgress } from '../utils/levels';
 import { t } from '../utils/i18n';
 import { translateName, flagName } from '../data/countryNames';
@@ -161,6 +162,8 @@ export default function HomeScreen({ navigation }: Props) {
   const { colors, isDark } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const onNavigate = useNavTabs();
+  // Swipe or arrow keys move to the neighbouring tab
+  const tabSwipe = useTabGestures('Home');
   const totalFlags = getTotalFlagCount();
   const [mode, setMode] = useState<GameMode>('medium');
   const [questionCount, setQuestionCount] = useState(10);
@@ -239,6 +242,13 @@ export default function HomeScreen({ navigation }: Props) {
       config: { mode, category: 'all', questionCount: questionCountAll ? totalFlags : questionCount, displayMode: 'flag', ...(mode === 'hard' && { autocomplete }) },
     });
   };
+
+  // Web: Enter starts a round, same as Play
+  useKeyShortcuts((key) => {
+    if (key !== 'Enter') return false;
+    play();
+    return true;
+  });
 
   const onboardingComplete = baseline ? baseline.completedAt !== null : true;
   const onboardingCount = baseline ? BASELINE_REGIONS.filter((r) => baseline.regions[r]).length : 0;
@@ -360,7 +370,7 @@ export default function HomeScreen({ navigation }: Props) {
   ];
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} {...tabSwipe}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.background} />
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>

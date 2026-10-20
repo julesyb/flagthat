@@ -12,7 +12,7 @@ import {
   Barlow_500Medium,
   Barlow_600SemiBold,
 } from '@expo-google-fonts/barlow';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, NavigationContainerRefWithCurrent, useNavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from './src/screens/HomeScreen';
 import GameSetupScreen from './src/screens/GameSetupScreen';
@@ -31,6 +31,10 @@ import JoinChallengeScreen from './src/screens/JoinChallengeScreen';
 import ChallengeResponseScreen from './src/screens/ChallengeResponseScreen';
 import DailyShareReceiveScreen from './src/screens/DailyShareReceiveScreen';
 import ErrorBoundary from './src/components/ErrorBoundary';
+import ShortcutsHelp from './src/components/ShortcutsHelp';
+import { useKeyShortcuts } from './src/hooks/useKeyShortcuts';
+import { isShortcutsHelpOpen, setShortcutsHelpOpen } from './src/utils/shortcutsHelp';
+import { isWebDialogOpen } from './src/utils/webInput';
 import { ChevronLeftIcon } from './src/components/Icons';
 import { RootStackParamList } from './src/types/navigation';
 import { colors, fontSize, APP_URL } from './src/utils/theme';
@@ -128,6 +132,40 @@ function useScreenOptions() {
 // Configure notification display behavior at module level
 configureNotificationHandler();
 
+/** Game screens handle Esc themselves (it exits the round, like the X button). */
+const GAME_ROUTES: ReadonlySet<string> = new Set(['Game', 'FlagPuzzle', 'Neighbors', 'FlagImpostor', 'CapitalConnection']);
+
+/**
+ * App-wide web keys: '?' opens the shortcuts sheet, Esc closes it or goes back.
+ */
+function useGlobalShortcuts(navigationRef: NavigationContainerRefWithCurrent<RootStackParamList>) {
+  useKeyShortcuts((key) => {
+    if (key === '?') {
+      setShortcutsHelpOpen(!isShortcutsHelpOpen());
+      return true;
+    }
+    if (key !== 'Escape') return false;
+    if (isShortcutsHelpOpen()) {
+      setShortcutsHelpOpen(false);
+      return true;
+    }
+    // Another dialog is up: let it close itself instead of leaving the screen
+    if (isWebDialogOpen() || !navigationRef.isReady()) return false;
+    const route = navigationRef.getCurrentRoute()?.name;
+    if (!route || GAME_ROUTES.has(route)) return false;
+    // Results has no screen to go back to; its back button goes Home too
+    if (route === 'Results') {
+      navigationRef.navigate('Home');
+      return true;
+    }
+    if (navigationRef.canGoBack()) {
+      navigationRef.goBack();
+      return true;
+    }
+    return false;
+  }, { whenDialogOpen: true });
+}
+
 const GuardedGame = withConfigGuard(GameScreen);
 const GuardedFlagPuzzle = withConfigGuard(FlagPuzzleScreen);
 const GuardedNeighbors = withConfigGuard(NeighborsScreen);
@@ -138,6 +176,8 @@ function AppContent() {
   const [localeReady, setLocaleReady] = useState(false);
   const [initialRoute, setInitialRoute] = useState<keyof RootStackParamList>('Home');
   const screenOptions = useScreenOptions();
+  const navigationRef = useNavigationContainerRef<RootStackParamList>();
+  useGlobalShortcuts(navigationRef);
 
   useEffect(() => {
     if (Platform.OS === 'web') {
@@ -162,7 +202,8 @@ function AppContent() {
   if (!localeReady) return null;
 
   return (
-    <NavigationContainer linking={linking}>
+    <>
+    <NavigationContainer ref={navigationRef} linking={linking}>
       <Stack.Navigator screenOptions={screenOptions} initialRouteName={initialRoute}>
         <Stack.Screen
           name="Onboarding"
@@ -263,6 +304,8 @@ function AppContent() {
         />
       </Stack.Navigator>
     </NavigationContainer>
+    <ShortcutsHelp />
+    </>
   );
 }
 

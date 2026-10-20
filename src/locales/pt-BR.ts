@@ -320,6 +320,31 @@ const ptBR: DeepPartial<TranslationStrings> = {
     support: 'Suporte',
     missTips: 'Dicas ao errar',
     missTipsDesc: 'Compare as bandeiras após um erro',
+    shortcuts: 'Atalhos',
+  },
+
+  // ─── Shortcuts and gestures ────────────────────────────
+  shortcuts: {
+    title: 'Atalhos',
+    keyboard: 'Teclado',
+    touch: 'Toque',
+    pickAnswer: 'Escolher uma resposta',
+    continue: 'Continuar ou jogar',
+    exitBack: 'Sair ou voltar',
+    switchTabs: 'Trocar de aba',
+    moveAnswers: 'Navegar entre respostas',
+    showHelp: 'Mostrar atalhos',
+    nextQuestion: 'Próxima pergunta',
+    closeTip: 'Fechar uma dica',
+    goBack: 'Voltar',
+    keyEnter: 'Enter',
+    keySpace: 'Espaço',
+    keyEsc: 'Esc',
+    swipeSides: 'Deslize para a esquerda ou direita',
+    swipeLeft: 'Deslize para a esquerda',
+    swipeDown: 'Deslize para baixo',
+    swipeEdge: 'Deslize da borda',
+    close: 'Fechar',
   },
 
   support: {
