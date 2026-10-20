@@ -1,14 +1,23 @@
 # App Store Submission Checklist - Flag That
 
-Audit date: 2026-08-06. This document tracks everything required to ship
-Flag That to the Apple App Store and Google Play. Items are grouped by whether
-they live in this repo (fixable in code) or in an external console/account.
+Audit date: 2026-08-06. Re-verified 2026-10-20. This document tracks
+everything required to ship Flag That to the Apple App Store and Google Play.
+Items are grouped by whether they live in this repo (fixable in code) or in an
+external console/account.
 
 ## Status summary
+
+Re-verification (2026-10-20): `tsc --noEmit` clean, 208/208 tests pass,
+`expo export --platform web` production bundle succeeds, and expo-doctor's
+duplicate-native-module check now passes (the only failing checks need Expo's
+network API, which is blocked in CI). Code/build side is submission-ready; the
+only open items are the external credentials, to be added once the Apple
+account is approved.
 
 The app itself is in good shape:
 
 - TypeScript compiles clean (`tsc --noEmit`), 208 unit tests pass.
+- Production web export (`expo export --platform web`) builds without errors.
 - No `console.log`/`console.warn` noise, no `any`, no leftover TODOs.
 - All 6 locales (en, fr, es, de, pt-BR, zh) present.
 - Privacy policy (`/privacy`) and terms (`/terms`) exist and are wired into
