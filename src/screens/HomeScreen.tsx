@@ -252,7 +252,7 @@ export default function HomeScreen({ navigation }: Props) {
       tag: dailyDone ? t('home.comeBackTomorrow') : dailyTagText,
       icon: <CalendarIcon size={18} color={dailyDone ? colors.textTertiary : colors.modeGold} />,
       accent: colors.modeGold,
-      titleColor: dailyDone ? colors.textTertiary : colors.goldBright,
+      titleColor: dailyDone ? colors.textTertiary : colors.goldText,
       disabled: dailyDone,
       done: dailyDone,
       onPress: () => {
@@ -347,9 +347,9 @@ export default function HomeScreen({ navigation }: Props) {
       key: 'join',
       title: t('challenge.joinTitle'),
       tag: t('challenge.codeHint'),
-      icon: <LinkIcon size={18} color={colors.modeGold} />,
+      icon: <LinkIcon size={18} color={colors.goldText} />,
       accent: colors.modeGold,
-      titleColor: colors.goldBright,
+      titleColor: colors.goldText,
       onPress: () => {
         hapticTap();
         navigation.navigate('JoinChallenge');
@@ -616,7 +616,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   wmThat: {
     fontFamily: fontFamily.displayItalic,
     fontSize: fontSize.title,
-    color: colors.goldBright,
+    color: colors.goldText,
   },
   // ── Onboarding progress
   onboardingWrap: {
@@ -713,7 +713,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     color: colors.success,
   },
   onboardingChipTextPending: {
-    color: colors.goldBright,
+    color: colors.goldText,
   },
   onboardingChipPct: {
     ...typography.tag,

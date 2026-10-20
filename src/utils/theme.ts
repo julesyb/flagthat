@@ -95,6 +95,8 @@ function buildColors(p: typeof darkPalette, isDark: boolean) {
     black: p.black,
     gold: p.gold,
     goldBright: p.goldBright,
+    // Gold for text and icons: bright gold only reads on dark surfaces
+    goldText: dk ? p.goldBright : p.gold,
     purple: p.purple,
     dim: p.dim,
 

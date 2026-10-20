@@ -51,12 +51,12 @@ type SetupMode = 'quiz' | 'facts' | 'flagpuzzle' | 'timeattack' | 'neighbors' | 
 type QuizDifficulty = 'easy' | 'medium' | 'hard';
 
 const SETUP_MODES: { key: SetupMode; labelKey: string; descKey: string; icon: (active: boolean, colors: ThemeColors) => React.ReactNode }[] = [
-  { key: 'quiz', labelKey: 'setup.quiz', descKey: 'setup.quizDesc', icon: (a, c) => <FlagIcon size={22} color={a ? c.goldBright : c.textTertiary} filled={a} /> },
-  { key: 'facts', labelKey: 'setup.geoFacts', descKey: 'setup.geoFactsDesc', icon: (a, c) => <GlobeIcon size={22} color={a ? c.goldBright : c.textTertiary} /> },
-  { key: 'flagpuzzle', labelKey: 'setup.flagPuzzle', descKey: 'setup.flagPuzzleDesc', icon: (a, c) => <PuzzleIcon size={22} color={a ? c.goldBright : c.textTertiary} /> },
-  { key: 'timeattack', labelKey: 'setup.timedQuiz', descKey: 'setup.timedQuizDesc', icon: (a, c) => <ClockIcon size={22} color={a ? c.goldBright : c.textTertiary} /> },
-  { key: 'neighbors', labelKey: 'setup.neighbors', descKey: 'setup.neighborsDesc', icon: (a, c) => <UsersIcon size={22} color={a ? c.goldBright : c.textTertiary} /> },
-  { key: 'capitalconnection', labelKey: 'setup.capitalQuiz', descKey: 'setup.capitalQuizDesc', icon: (a, c) => <LinkIcon size={22} color={a ? c.goldBright : c.textTertiary} strokeWidth={a ? 2 : 1.5} /> },
+  { key: 'quiz', labelKey: 'setup.quiz', descKey: 'setup.quizDesc', icon: (a, c) => <FlagIcon size={22} color={a ? c.goldText : c.textTertiary} filled={a} /> },
+  { key: 'facts', labelKey: 'setup.geoFacts', descKey: 'setup.geoFactsDesc', icon: (a, c) => <GlobeIcon size={22} color={a ? c.goldText : c.textTertiary} /> },
+  { key: 'flagpuzzle', labelKey: 'setup.flagPuzzle', descKey: 'setup.flagPuzzleDesc', icon: (a, c) => <PuzzleIcon size={22} color={a ? c.goldText : c.textTertiary} /> },
+  { key: 'timeattack', labelKey: 'setup.timedQuiz', descKey: 'setup.timedQuizDesc', icon: (a, c) => <ClockIcon size={22} color={a ? c.goldText : c.textTertiary} /> },
+  { key: 'neighbors', labelKey: 'setup.neighbors', descKey: 'setup.neighborsDesc', icon: (a, c) => <UsersIcon size={22} color={a ? c.goldText : c.textTertiary} /> },
+  { key: 'capitalconnection', labelKey: 'setup.capitalQuiz', descKey: 'setup.capitalQuizDesc', icon: (a, c) => <LinkIcon size={22} color={a ? c.goldText : c.textTertiary} strokeWidth={a ? 2 : 1.5} /> },
 ];
 
 const DIFFICULTIES: { key: QuizDifficulty; labelKey: string }[] = [
@@ -267,7 +267,7 @@ export default function GameSetupScreen({ route, navigation }: Props) {
                   >
                     <Text style={[
                       styles.diffBtnText,
-                      isActive && { color: diffColor },
+                      isActive && { color: d.key === 'medium' ? colors.goldText : diffColor },
                     ]}>{t(d.labelKey)}</Text>
                   </TouchableOpacity>
                 );
@@ -572,7 +572,7 @@ const createStyles = (colors: ThemeColors) => {
     color: colors.text,
   },
   modeLabelActive: {
-    color: colors.goldBright,
+    color: colors.goldText,
   },
   modeDesc: {
     ...typography.caption,

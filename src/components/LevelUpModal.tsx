@@ -61,12 +61,12 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     alignItems: 'center', borderWidth: 2, borderColor: colors.goldBright,
   },
   levelUpTitle: {
-    ...typography.eyebrow, color: colors.goldBright,
+    ...typography.eyebrow, color: colors.goldText,
     letterSpacing: 1.5, marginBottom: spacing.sm,
   },
   levelUpNumber: {
     fontFamily: fontFamily.display, fontSize: 56,
-    color: colors.goldBright, lineHeight: 64,
+    color: colors.goldText, lineHeight: 64,
   },
   levelUpTier: {
     ...typography.bodyBold, color: colors.textSecondary,
