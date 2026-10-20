@@ -92,6 +92,7 @@ const en = {
     chooseYourGameDesc: 'Pick a mode and difficulty',
     practice: 'Practice',
     practiceDesc: 'Browse every flag',
+    streakA11y: '{count} day streak',
   },
 
   // ─── Game Setup ──────────────────────────────────────────
@@ -140,6 +141,10 @@ const en = {
     typePrompt: 'Type the name of this flag:',
     nameCountry: 'Name this country:',
     typePlaceholder: 'Type your answer...',
+    learnTitle: 'Not quite',
+    youPicked: 'You picked',
+    answer: 'Answer',
+    gotIt: 'Got it',
   },
 
   // ─── Results Screen ──────────────────────────────────────
@@ -172,6 +177,9 @@ const en = {
     tryHardMode: 'Try Hard Mode',
     playAgain: 'Play Again',
     almostThere: '{remaining} more for {badge}',
+    reminderTitle: 'Want a daily reminder?',
+    reminderYes: 'Turn on',
+    reminderNo: 'Not now',
   },
 
   // ─── Stats Screen ────────────────────────────────────────
@@ -295,7 +303,7 @@ const en = {
     reminderTime: 'Reminder Time',
     tapToChange: 'Tap to change',
     notificationsDisabled: 'Notifications Disabled',
-    notificationsAlert: 'Allow notifications in your device settings to enable daily reminders.',
+    notificationsAlert: 'Turn on notifications in Settings to get reminders.',
     openSettings: 'Open Settings',
     language: 'Language',
     languageDesc: 'App display language',
@@ -305,8 +313,8 @@ const en = {
     data: 'Data',
     resetAllData: 'Reset All Data',
     resetConfirmTitle: 'Reset All Data',
-    resetConfirmMsg: 'This will clear all stats, streaks, and progress. This cannot be undone.',
-    resetConfirmWeb: 'Reset all data?\n\nThis will clear all stats, streaks, and progress. This cannot be undone.',
+    resetConfirmMsg: "This erases all progress. You can't undo it.",
+    resetConfirmWeb: "Reset all data?\n\nThis erases all progress. You can't undo it.",
     reset: 'Reset',
     termsOfService: 'Terms of Service',
     am: 'AM',
@@ -318,12 +326,14 @@ const en = {
     themeLight: 'Light',
     themeDark: 'Dark',
     themeSystem: 'System',
+    missTips: 'Tips on misses',
+    missTipsDesc: 'Compare flags after a wrong answer',
   },
 
   // ─── Support ───────────────────────────────────────────
   support: {
     title: 'Buy us a coffee',
-    subtitle: 'Flag That is free with no ads. Help keep it that way - watch a quick video. Totally optional.',
+    subtitle: 'Flag That is free. Watch a short video to help keep it that way.',
     watchButton: 'Watch a Video',
     watchAgain: 'Watch',
     thankYou: 'You are the best. Thank you!',
@@ -354,7 +364,7 @@ const en = {
   // ─── Neighbors Screen ───────────────────────────────────
   neighbors: {
     noCountries: 'No countries available',
-    noCountriesDesc: 'There are no countries with land borders in the selected category.',
+    noCountriesDesc: 'No countries with land borders here.',
     selectAll: 'Select all neighboring countries',
     submitSelected: 'Submit ({count} selected)',
     neighborCount: '{name} has {count} neighbor',
@@ -419,7 +429,7 @@ const en = {
   // ─── Capital Connection Screen ──────────────────────────
   capital: {
     noCountries: 'No countries available',
-    noCountriesDesc: 'There are no countries with known capitals in the selected category.',
+    noCountriesDesc: 'No countries with known capitals here.',
     whatIsCapital: 'What is the capital of {name}?',
   },
 
@@ -435,7 +445,7 @@ const en = {
     codeHint: 'Get a code from a friend who shared their game.',
     play: 'Play',
     invalidCodeTitle: 'Invalid code',
-    invalidCode: 'This challenge code is not valid. Check that you pasted the full code.',
+    invalidCode: "That code doesn't work. Check you pasted all of it.",
     nameBlockedTitle: 'Name not allowed',
     nameBlockedDesc: 'Please choose a different name.',
     unsupportedCode: 'This code was created with a newer version of Flag That. Update the app to play this challenge.',
@@ -549,8 +559,8 @@ const en = {
     welcome: 'Welcome to',
     tagline: 'How well do you know the world?',
     baselineProgress: 'See Where You Stand',
-    welcomeTitle: 'Welcome to your flag knowledge',
-    welcomeSub: 'Flags, capitals, maps and geography. See how well you really know the world.',
+    welcomeTitle: 'How well do you know flags?',
+    welcomeSub: 'Find out in 10 flags.',
     giveItATry: 'Give it a try',
     baselineMotivation: 'Finish all 5 to track your improvement',
     regionsComplete: '{count}/{total} regions',

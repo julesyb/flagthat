@@ -220,14 +220,17 @@ export function describeRequirement(req: LevelRequirement): string {
 
 // ─── 10 Level definitions ─────────────────────────────────────
 // Each level forces a different activity so you can't skip ahead.
-//   1-3:   Core difficulty mastery (easy, medium, hard)
+//   1:     Getting started (25 correct in any mode)
+//   2-3:   Core difficulty mastery (medium, hard)
 //   4-8:   Explore every game mode (one mode per level)
 //   9:     Prove all-mode breadth (play all 9 modes)
 //   10:    Ultimate mastery (every flag right 10 times)
 
 export const LEVELS: LevelDef[] = [
-  // ── Core Difficulty (1-3) ──
-  { level: 1, requirement: { type: 'mode_correct', mode: 'easy', count: 197 } },
+  // ── Getting started (1) - any mode counts so new players level up in their first sessions ──
+  { level: 1, requirement: { type: 'total_correct', count: 25 } },
+
+  // ── Core Difficulty (2-3) ──
   { level: 2, requirement: { type: 'mode_correct', mode: 'medium', count: 197 } },
   { level: 3, requirement: { type: 'mode_correct', mode: 'hard', count: 197 } },
 

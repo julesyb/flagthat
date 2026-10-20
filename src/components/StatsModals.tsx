@@ -292,7 +292,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     ...typography.bodyBold,
     color: colors.ink,
     textAlign: 'center',
-    marginBottom: 4,
+    marginBottom: spacing.xs,
   },
   modalBadgeDesc: {
     ...typography.caption,
@@ -302,8 +302,8 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   modalStatusPill: {
     borderRadius: borderRadius.full,
-    paddingVertical: 6,
-    paddingHorizontal: 16,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
   },
   modalStatusText: {
     ...typography.captionStrong,
@@ -338,7 +338,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   h2hName: {
     ...typography.captionStrong,
     color: colors.ink,
-    marginBottom: 4,
+    marginBottom: spacing.xs,
   },
   h2hScore: {
     ...typography.statValue,
@@ -370,7 +370,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   h2hDetailsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 4,
+    paddingVertical: spacing.xs,
     paddingHorizontal: spacing.sm,
     borderRadius: borderRadius.sm,
   },
@@ -387,7 +387,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   h2hDot: {
     width: 12,
     height: 12,
-    borderRadius: 6,
+    borderRadius: borderRadius.full,
   },
   copyCodeBtn: {
     flexDirection: 'row',

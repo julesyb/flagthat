@@ -634,7 +634,7 @@ const createStyles = (colors: ThemeColors) => {
     right: spacing.sm,
     width: 24,
     height: 24,
-    borderRadius: 12,
+    borderRadius: borderRadius.full,
     backgroundColor: colors.accent,
     justifyContent: 'center',
     alignItems: 'center',

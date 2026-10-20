@@ -258,7 +258,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     flexDirection: 'row',
     justifyContent: 'center',
     gap: spacing.sm,
-    paddingVertical: 16,
+    paddingVertical: spacing.md,
   },
   tryBtnText: {
     ...btn.primaryText,
@@ -277,7 +277,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     flexBasis: '47%',
     minHeight: 132,
     backgroundColor: colors.surface,
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: colors.border,
     borderRadius: borderRadius.lg,
     padding: spacing.md,

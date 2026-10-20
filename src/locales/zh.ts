@@ -90,6 +90,7 @@ const zh: DeepPartial<TranslationStrings> = {
     chooseYourGameDesc: '\u9009\u62e9\u6a21\u5f0f\u548c\u96be\u5ea6',
     practice: '\u7ec3\u4e60',
     practiceDesc: '\u6d4f\u89c8\u6240\u6709\u56fd\u65d7',
+    streakA11y: '连续 {count} 天',
   },
 
   setup: {
@@ -136,6 +137,10 @@ const zh: DeepPartial<TranslationStrings> = {
     typePrompt: '\u8f93\u5165\u8fd9\u9762\u56fd\u65d7\u7684\u540d\u79f0\uff1a',
     nameCountry: '\u8bf4\u51fa\u8fd9\u4e2a\u56fd\u5bb6\uff1a',
     typePlaceholder: '\u8f93\u5165\u7b54\u6848...',
+    learnTitle: '差一点',
+    youPicked: '你的选择',
+    answer: '正确答案',
+    gotIt: '知道了',
   },
 
   results: {
@@ -167,6 +172,9 @@ const zh: DeepPartial<TranslationStrings> = {
     tryHardMode: '\u8bd5\u8bd5\u56f0\u96be\u6a21\u5f0f',
     playAgain: '\u518d\u6765\u4e00\u5c40',
     almostThere: '\u8fd8\u5dee{remaining}\u5c31\u80fd\u83b7\u5f97{badge}',
+    reminderTitle: '需要每日提醒吗？',
+    reminderYes: '开启',
+    reminderNo: '以后再说',
   },
 
   stats: {
@@ -293,7 +301,7 @@ const zh: DeepPartial<TranslationStrings> = {
     reminderTime: '\u63d0\u9192\u65f6\u95f4',
     tapToChange: '\u70b9\u51fb\u66f4\u6539',
     notificationsDisabled: '\u901a\u77e5\u5df2\u5173\u95ed',
-    notificationsAlert: '\u8bf7\u5728\u8bbe\u5907\u8bbe\u7f6e\u4e2d\u5141\u8bb8\u901a\u77e5\u3002',
+    notificationsAlert: '在设置中开启通知即可收到提醒。',
     openSettings: '\u6253\u5f00\u8bbe\u7f6e',
     language: '\u8bed\u8a00',
     languageDesc: '\u5e94\u7528\u663e\u793a\u8bed\u8a00',
@@ -303,18 +311,20 @@ const zh: DeepPartial<TranslationStrings> = {
     data: '\u6570\u636e',
     resetAllData: '\u91cd\u7f6e\u6240\u6709\u6570\u636e',
     resetConfirmTitle: '\u91cd\u7f6e\u6240\u6709\u6570\u636e',
-    resetConfirmMsg: '\u6240\u6709\u7edf\u8ba1\u3001\u8fde\u80dc\u548c\u8fdb\u5ea6\u5c06\u88ab\u6e05\u9664\uff0c\u65e0\u6cd5\u64a4\u9500\u3002',
-    resetConfirmWeb: '\u91cd\u7f6e\u6240\u6709\u6570\u636e\uff1f\n\n\u6240\u6709\u7edf\u8ba1\u3001\u8fde\u80dc\u548c\u8fdb\u5ea6\u5c06\u88ab\u6e05\u9664\uff0c\u65e0\u6cd5\u64a4\u9500\u3002',
+    resetConfirmMsg: '这会清除所有进度，无法撤销。',
+    resetConfirmWeb: '重置所有数据？\n\n这会清除所有进度，无法撤销。',
     reset: '重置',
     termsOfService: '服务条款',
     am: '上午',
     pm: '下午',
     support: '支持',
+    missTips: '答错提示',
+    missTipsDesc: '答错后对比两面国旗',
   },
 
   support: {
     title: '\u8bf7\u6211\u4eec\u559d\u676f\u5496\u5561',
-    subtitle: 'Flag That \u514d\u8d39\u65e0\u5e7f\u544a\u3002\u770b\u4e00\u4e2a\u77ed\u89c6\u9891\u5e2e\u6211\u4eec\u4fdd\u6301\u8fd9\u6837\u3002\u5b8c\u5168\u81ea\u613f\u3002',
+    subtitle: 'Flag That 免费使用。看一个短视频来支持我们。',
     watchButton: '\u89c2\u770b\u89c6\u9891',
     watchAgain: '\u89c2\u770b',
     thankYou: '\u4f60\u592a\u68d2\u4e86\uff0c\u8c22\u8c22\uff01',
@@ -343,7 +353,7 @@ const zh: DeepPartial<TranslationStrings> = {
 
   neighbors: {
     noCountries: '\u6ca1\u6709\u53ef\u7528\u56fd\u5bb6',
-    noCountriesDesc: '\u8be5\u5206\u7c7b\u4e2d\u6ca1\u6709\u6709\u9646\u5730\u8fb9\u754c\u7684\u56fd\u5bb6\u3002',
+    noCountriesDesc: '这里没有有陆地边界的国家。',
     selectAll: '\u9009\u62e9\u6240\u6709\u76f8\u90bb\u56fd\u5bb6',
     submitSelected: '\u63d0\u4ea4\uff08\u5df2\u9009{count}\u4e2a\uff09',
     neighborCount: '{name}\u6709{count}\u4e2a\u90bb\u56fd',
@@ -404,7 +414,7 @@ const zh: DeepPartial<TranslationStrings> = {
 
   capital: {
     noCountries: '\u6ca1\u6709\u53ef\u7528\u56fd\u5bb6',
-    noCountriesDesc: '\u8be5\u5206\u7c7b\u4e2d\u6ca1\u6709\u6709\u5df2\u77e5\u9996\u90fd\u7684\u56fd\u5bb6\u3002',
+    noCountriesDesc: '这里没有已知首都的国家。',
     whatIsCapital: '{name}\u7684\u9996\u90fd\u662f\u4ec0\u4e48\uff1f',
   },
 
@@ -476,8 +486,8 @@ const zh: DeepPartial<TranslationStrings> = {
     tagline: '\u4f60\u5bf9\u4e16\u754c\u4e86\u89e3\u591a\u5c11?',
     baselineMotivation: '\u5b8c\u6210\u5168\u90e85\u4e2a\u4ee5\u8ffd\u8e2a\u4f60\u7684\u63d0\u5347',
     baselineProgress: '\u6d4b\u6d4b\u4f60\u7684\u6c34\u5e73',
-    welcomeTitle: '\u6b22\u8fce\u6765\u5230\u4f60\u7684\u56fd\u65d7\u77e5\u8bc6',
-    welcomeSub: '\u56fd\u65d7\u3001\u9996\u90fd\u3001\u5730\u56fe\u548c\u5730\u7406\u3002\u770b\u770b\u4f60\u7a76\u7adf\u6709\u591a\u4e86\u89e3\u8fd9\u4e2a\u4e16\u754c\u3002',
+    welcomeTitle: '你有多了解国旗？',
+    welcomeSub: '用 10 面国旗测一测。',
     giveItATry: '\u8bd5\u4e00\u8bd5',
     regionsComplete: '{count}/{total}\u4e2a\u5730\u533a',
     playCta: '\u5f00\u59cb\u6e38\u620f',
@@ -546,7 +556,7 @@ const zh: DeepPartial<TranslationStrings> = {
     codeHint: '\u4ece\u5206\u4eab\u6e38\u620f\u7684\u670b\u53cb\u90a3\u91cc\u83b7\u53d6\u4ee3\u7801\u3002',
     play: '\u5f00\u59cb',
     invalidCodeTitle: '\u65e0\u6548\u4ee3\u7801',
-    invalidCode: '\u6b64\u6311\u6218\u7801\u65e0\u6548\u3002\u8bf7\u68c0\u67e5\u662f\u5426\u7c98\u8d34\u4e86\u5b8c\u6574\u7684\u4ee3\u7801\u3002',
+    invalidCode: '这个代码无效。请检查是否完整粘贴。',
     nameBlockedTitle: '\u540d\u79f0\u4e0d\u5141\u8bb8',
     nameBlockedDesc: '\u8bf7\u9009\u62e9\u5176\u4ed6\u540d\u79f0\u3002',
     unsupportedCode: '\u6b64\u4ee3\u7801\u7531\u8f83\u65b0\u7248\u672c\u7684 Flag That \u521b\u5efa\u3002\u8bf7\u66f4\u65b0\u5e94\u7528\u4ee5\u73a9\u6b64\u6311\u6218\u3002',

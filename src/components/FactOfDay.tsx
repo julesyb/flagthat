@@ -180,7 +180,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   optBtn: {
     backgroundColor: colors.surfaceSecondary,
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: colors.border,
     borderRadius: borderRadius.md,
     minHeight: 52,

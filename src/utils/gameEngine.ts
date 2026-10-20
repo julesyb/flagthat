@@ -377,26 +377,45 @@ export function generatePracticeQuestions(flagIds: string[]): GameQuestion[] {
   });
 }
 
+/**
+ * Pick wrong answers so the choice tests real knowledge.
+ *   easy:   other regions only, no look-alikes (2 choices, should feel winnable)
+ *   medium: look-alike twins first, then same region, then anywhere
+ * Each tier is shuffled so the picks still vary game to game.
+ */
+export function pickDistractors(
+  correct: FlagItem,
+  pool: FlagItem[],
+  count: number,
+  difficulty: 'easy' | 'medium',
+  twinNames: string[],
+): FlagItem[] {
+  const others = pool.filter((f) => f.id !== correct.id);
+  const twins = others.filter((f) => twinNames.includes(f.name));
+  const sameRegion = others.filter((f) => f.region === correct.region && !twinNames.includes(f.name));
+  const otherRegion = others.filter((f) => f.region !== correct.region && !twinNames.includes(f.name));
+
+  const tiers = difficulty === 'easy'
+    ? [otherRegion, sameRegion, twins] // later tiers only as fallback for tiny pools
+    : [twins, sameRegion, otherRegion];
+
+  const picks: FlagItem[] = [];
+  for (const tier of tiers) {
+    if (picks.length >= count) break;
+    picks.push(...shuffleArray(tier).slice(0, count - picks.length));
+  }
+  return picks;
+}
+
 function generateOptions(correctFlag: FlagItem, pool: FlagItem[], mode: GameMode, difficulty?: 'easy' | 'medium' | 'hard'): string[] {
   const effectiveDifficulty = difficulty || (mode === 'easy' ? 'easy' : mode === 'hard' ? 'hard' : 'medium');
   if (effectiveDifficulty === 'hard' || mode === 'flagpuzzle') return [];
 
   const choiceCount = effectiveDifficulty === 'easy' ? EASY_CHOICE_COUNT : STANDARD_CHOICE_COUNT;
-  const otherFlags = pool.filter((f) => f.id !== correctFlag.id);
-
-  // Prioritize twin flags as wrong options so look-alikes appear together
   const twinNames = twinPairs[correctFlag.name] || [];
-  const twinFlags = otherFlags.filter((f) => twinNames.includes(f.name));
-  const nonTwinFlags = otherFlags.filter((f) => !twinNames.includes(f.name));
+  const wrong = pickDistractors(correctFlag, pool, choiceCount - 1, effectiveDifficulty, twinNames);
 
-  const wrongCount = choiceCount - 1;
-  const selectedTwins = shuffleArray(twinFlags).slice(0, wrongCount);
-  const remainingCount = wrongCount - selectedTwins.length;
-  const selectedOthers = shuffleArray(nonTwinFlags).slice(0, remainingCount);
-
-  const wrongOptions = [...selectedTwins, ...selectedOthers].map((f) => f.name);
-
-  return shuffleArray([correctFlag.name, ...wrongOptions]);
+  return shuffleArray([correctFlag.name, ...wrong.map((f) => f.name)]);
 }
 
 export function checkAnswer(userAnswer: string, correctName: string): boolean {

@@ -90,6 +90,7 @@ const fr: DeepPartial<TranslationStrings> = {
     chooseYourGameDesc: 'Choisis un mode et une difficulté',
     practice: 'Entraînement',
     practiceDesc: 'Parcourir tous les drapeaux',
+    streakA11y: '{count} jours consécutifs',
   },
 
   setup: {
@@ -136,6 +137,10 @@ const fr: DeepPartial<TranslationStrings> = {
     typePrompt: 'Tapez le nom de ce drapeau :',
     nameCountry: 'Nommez ce pays :',
     typePlaceholder: 'Votre r\u00e9ponse...',
+    learnTitle: 'Pas tout à fait',
+    youPicked: 'Votre choix',
+    answer: 'Réponse',
+    gotIt: 'Compris',
   },
 
   results: {
@@ -167,6 +172,9 @@ const fr: DeepPartial<TranslationStrings> = {
     tryHardMode: 'Essayer difficile',
     playAgain: 'Rejouer',
     almostThere: 'Encore {remaining} pour {badge}',
+    reminderTitle: 'Un rappel chaque jour ?',
+    reminderYes: 'Activer',
+    reminderNo: 'Plus tard',
   },
 
   stats: {
@@ -293,7 +301,7 @@ const fr: DeepPartial<TranslationStrings> = {
     reminderTime: 'Heure du rappel',
     tapToChange: 'Appuyez pour modifier',
     notificationsDisabled: 'Notifications d\u00e9sactiv\u00e9es',
-    notificationsAlert: 'Autorisez les notifications dans les r\u00e9glages pour activer les rappels.',
+    notificationsAlert: 'Activez les notifications dans les réglages pour recevoir des rappels.',
     openSettings: 'Ouvrir les r\u00e9glages',
     language: 'Langue',
     languageDesc: 'Langue d\'affichage',
@@ -303,18 +311,20 @@ const fr: DeepPartial<TranslationStrings> = {
     data: 'Donn\u00e9es',
     resetAllData: 'R\u00e9initialiser les donn\u00e9es',
     resetConfirmTitle: 'R\u00e9initialiser les donn\u00e9es',
-    resetConfirmMsg: 'Toutes les stats, s\u00e9ries et progr\u00e8s seront effac\u00e9s. Cette action est irr\u00e9versible.',
-    resetConfirmWeb: 'R\u00e9initialiser les donn\u00e9es ?\n\nToutes les stats, s\u00e9ries et progr\u00e8s seront effac\u00e9s. Cette action est irr\u00e9versible.',
+    resetConfirmMsg: "Toute votre progression sera effacée. C'est définitif.",
+    resetConfirmWeb: "Réinitialiser les données ?\n\nToute votre progression sera effacée. C'est définitif.",
     reset: 'Réinitialiser',
     termsOfService: 'Conditions d\'utilisation',
     am: 'AM',
     pm: 'PM',
     support: 'Assistance',
+    missTips: 'Aide après une erreur',
+    missTipsDesc: 'Comparer les drapeaux après une erreur',
   },
 
   support: {
     title: 'Offrez-nous un caf\u00e9',
-    subtitle: 'Flag That est gratuit, sans pub. Aidez-nous \u00e0 continuer en regardant une courte vid\u00e9o. Totalement optionnel.',
+    subtitle: 'Flag That est gratuit. Regardez une courte vidéo pour nous aider.',
     watchButton: 'Regarder une vid\u00e9o',
     watchAgain: 'Regarder',
     thankYou: 'Vous \u00eates formidable. Merci !',
@@ -343,7 +353,7 @@ const fr: DeepPartial<TranslationStrings> = {
 
   neighbors: {
     noCountries: 'Aucun pays disponible',
-    noCountriesDesc: 'Il n\'y a pas de pays avec des fronti\u00e8res terrestres dans cette cat\u00e9gorie.',
+    noCountriesDesc: 'Aucun pays avec des frontières terrestres ici.',
     selectAll: 'S\u00e9lectionnez tous les pays voisins',
     submitSelected: 'Valider ({count} s\u00e9lectionn\u00e9s)',
     neighborCount: '{name} a {count} voisin',
@@ -404,7 +414,7 @@ const fr: DeepPartial<TranslationStrings> = {
 
   capital: {
     noCountries: 'Aucun pays disponible',
-    noCountriesDesc: 'Il n\'y a pas de pays avec des capitales connues dans cette cat\u00e9gorie.',
+    noCountriesDesc: 'Aucun pays avec une capitale connue ici.',
     whatIsCapital: 'Quelle est la capitale de {name} ?',
   },
 
@@ -477,8 +487,8 @@ const fr: DeepPartial<TranslationStrings> = {
     tagline: 'Connaissez-vous bien le monde ?',
     baselineMotivation: 'Terminez les 5 pour suivre votre progression',
     baselineProgress: 'Faites le point',
-    welcomeTitle: 'Bienvenue dans vos connaissances des drapeaux',
-    welcomeSub: 'Drapeaux, capitales, cartes et géographie. Voyez si vous connaissez vraiment le monde.',
+    welcomeTitle: 'Connaissez-vous bien les drapeaux ?',
+    welcomeSub: 'Découvrez-le en 10 drapeaux.',
     giveItATry: 'Faites un essai',
     regionsComplete: '{count}/{total} r\u00e9gions',
     playCta: 'Jouer',
@@ -547,7 +557,7 @@ const fr: DeepPartial<TranslationStrings> = {
     codeHint: 'Obtiens un code d\u2019un ami qui a partag\u00e9 sa partie.',
     play: 'Jouer',
     invalidCodeTitle: 'Code invalide',
-    invalidCode: 'Ce code de d\u00e9fi n\u2019est pas valide. V\u00e9rifie que tu as coll\u00e9 le code complet.',
+    invalidCode: "Ce code ne fonctionne pas. Vérifiez qu'il est complet.",
     nameBlockedTitle: 'Nom non autoris\u00e9',
     nameBlockedDesc: 'Veuillez choisir un autre nom.',
     unsupportedCode: 'Ce code a \u00e9t\u00e9 cr\u00e9\u00e9 avec une version plus r\u00e9cente de Flag That. Mets \u00e0 jour l\u2019appli pour jouer ce d\u00e9fi.',

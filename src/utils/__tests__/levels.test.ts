@@ -18,7 +18,7 @@ jest.mock('../i18n', () => ({
   },
 }));
 
-import { evaluateRequirement, LevelRequirement, LevelContext } from '../levels';
+import { evaluateRequirement, LevelRequirement, LevelContext, LEVELS } from '../levels';
 
 function makeContext(overrides: Partial<LevelContext['stats']> = {}): LevelContext {
   return {
@@ -135,5 +135,11 @@ describe('evaluateRequirement - day_streak', () => {
     const result = evaluateRequirement(req, ctx);
     expect(result.progress).toBe(7);
     expect(result.target).toBe(10);
+  });
+});
+
+describe('level 1', () => {
+  it('counts right answers from any mode, so new players can reach it', () => {
+    expect(LEVELS[0]).toEqual({ level: 1, requirement: { type: 'total_correct', count: 25 } });
   });
 });

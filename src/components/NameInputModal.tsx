@@ -93,7 +93,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     color: colors.text, textAlign: 'center', marginBottom: spacing.md,
   },
   shareBtn: {
-    paddingVertical: 14, alignItems: 'center',
+    paddingVertical: spacing.md, alignItems: 'center',
     borderRadius: borderRadius.md, backgroundColor: colors.goldBright,
   },
   shareBtnDisabled: { backgroundColor: colors.textTertiary },

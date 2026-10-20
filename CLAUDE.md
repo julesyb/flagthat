@@ -29,7 +29,7 @@
 - Game mode bars use `colors.modeRed/modeGold/modeBlue/modeGreen/modePurple`.
 
 ### Component Patterns
-- **Streak badge**: Pill with streak number + "Day streak" label + pip dots (max 7).
+- **Streak badge**: `StreakPill` - flame, streak number, pip dots (max 7). Top right of Home and Stats.
 - **Play/CTA button**: Gold background, white text, hard shadow below.
 - **Difficulty buttons**: 3-column grid, colored when active (green/gold/red).
 - **Mode list**: Rows with colored sidebar bar (3px), title, tag, and chevron.
@@ -73,6 +73,9 @@
 - `src/components/PageHeader.tsx` — screen title and subtitle header
 - `src/components/ErrorBoundary.tsx` — error boundary wrapper for crash recovery
 - `src/components/AppIcon.tsx` — app icon display component
+- `src/components/StreakPill.tsx` - day streak pill (flame, number, 7 pips), used on Home and Stats
+- `src/components/LearnCard.tsx` - after a miss: picked flag next to the answer, waits for "Got it"
+- `src/components/ReminderPrompt.tsx` - one-time daily reminder offer after a good round
 - `src/contexts/ThemeContext.tsx` — theme provider with light/dark/system support
 
 ## Conventions
@@ -83,6 +86,9 @@
 - TypeScript strict mode, no `any` types
 
 ### Styling
+- Spacing, padding, margins and gaps use `spacing` tokens (4px grid). No hand-typed numbers.
+- Borders are 1px. Circles use `borderRadius.full`.
+- Copy: fewest words that work. Plain words ("use", not "utilize"). Buttons are one or two words.
 - Every screen defines a `createStyles(colors: ThemeColors)` function returning `StyleSheet.create({...})`
 - Styles are memoized in component: `const styles = useMemo(() => createStyles(colors), [colors])`
 - Buttons use `buildButtons(colors)` from theme.ts: `btn.primary`, `btn.primaryText`, `btn.secondary`, `btn.secondaryText`

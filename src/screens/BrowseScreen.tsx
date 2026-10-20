@@ -238,7 +238,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     backgroundColor: colors.surface,
     borderRadius: borderRadius.xl,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm + 2,
+    paddingVertical: spacing.sm + spacing.xs,
     gap: spacing.sm,
     borderWidth: 1,
     borderColor: colors.border,
@@ -261,7 +261,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderRadius: borderRadius.full,
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: colors.border,
   },
   chipActive: {

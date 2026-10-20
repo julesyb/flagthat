@@ -137,8 +137,8 @@ The theme has tokens. Screens don't always use them.
 
 - **4 border widths** in use: 1, 1.5, 2 and 3. Use 1 for cards and buttons. Use 3 only for accent bars.
 - **92 hand-typed spacing values** (6, 13, 14, 18 and more) next to 408 that use tokens. Use only `spacing` tokens: 4, 8, 16, 24, 32, 48.
-- **15 hand-typed corner radii.** Use `borderRadius` tokens only.
-- **One page margin: 16px.** On Home today, the sample flag is narrower than the cards above and below it.
+- **15 hand-typed corner radii.** Most are circles (radius = half the size). Use `borderRadius.full` for those.
+- **One page margin: 16px.**
 - **Even gaps:** 8 inside a group, 16 between items, 24 between sections.
 - **Every flag gets the same 1px border and 6px corners.** White flags (Japan, Cyprus) need the border to show their edge.
 - **The game screen** leaves a large empty band above the flag. Move the flag up.
@@ -170,17 +170,32 @@ Update all 6 languages together.
 
 ---
 
+## Done
+
+Shipped with this audit:
+
+- Level 1 is now 25 right answers in any mode.
+- Home shows the day streak instead of "Level 0" (`StreakPill`, shared with Stats).
+- Learn card after a miss in the classic quiz, daily and practice (`LearnCard`). Off switch in Settings: "Tips on misses".
+- The answer shown after a miss is green, not red.
+- Wrong options: Easy picks other regions, Medium picks look-alikes, then the same region (`pickDistractors`, tested).
+- Daily reminder offer, once, after a round of 70% or better (`ReminderPrompt`, phones only).
+- Theme follows the phone, light if unknown.
+- Borders: 1.5px is now 1px. Circles use `borderRadius.full`. Hand-typed spacing snapped to the token grid.
+- Shorter copy in all 6 languages.
+
+Still to do: Collection, new Home, new first run, one mode list and names, points and combos, weekly Daily, Learn card in Puzzle and Capitals, measuring.
+
 ## Order
 
 | Step | What |
 |------|------|
 | 0 | Decide how to measure (below) |
-| 1 | Learn card, smarter wrong options, streak on Home, reminder prompt, spacing and copy cleanup, Level 1 quick fix |
+| 1 | Done (see above) |
 | 2 | Collection, daily goal, streak freeze |
 | 3 | New first run, new Home, one mode list, new names |
 | 4 | Points and combos, weekly Daily, share card |
 
-**Quick fix today:** make Level 1 "25 right answers in any mode". Players stop seeing "Level 0".
 
 ## Measuring
 

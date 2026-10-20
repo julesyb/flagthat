@@ -11,20 +11,20 @@ interface ThemeContextValue {
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
-  colors: darkColors,
-  themeMode: 'dark',
-  isDark: true,
+  colors: lightColors,
+  themeMode: 'system',
+  isDark: false,
   setThemeMode: () => {},
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const systemScheme = useColorScheme();
-  const [themeMode, setThemeModeState] = useState<ThemeMode>('dark');
+  const [themeMode, setThemeModeState] = useState<ThemeMode>('system');
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     getSettings().then((s) => {
-      setThemeModeState(s.themeMode ?? 'dark');
+      setThemeModeState(s.themeMode ?? 'system');
       setLoaded(true);
     }).catch(() => {
       setLoaded(true);
@@ -37,7 +37,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     await saveSettings({ ...settings, themeMode: mode });
   }, []);
 
-  const isDark = themeMode === 'dark' || (themeMode === 'system' && systemScheme !== 'light');
+  // 'system' follows the phone. If the phone doesn't say, use light: warm paper is the brand.
+  const isDark = themeMode === 'dark' || (themeMode === 'system' && systemScheme === 'dark');
   const currentColors = isDark ? darkColors : lightColors;
 
   const value = useMemo<ThemeContextValue>(
