@@ -9,7 +9,6 @@ import {
   Animated,
   Easing,
   Share,
-  Modal,
   Platform,
   Keyboard,
   Alert,
@@ -33,11 +32,12 @@ import { countCorrect } from '../utils/gameHelpers';
 import { RootStackParamList } from '../types/navigation';
 import { getAllEarnedBadges, detectPerGameBadges, buildBadgeContext, BADGES, TIER_COLORS, EarnedBadge, getBadgeName, getBadgeDescription } from '../utils/badges';
 import { getTotalFlagCount, getCategoryCount, getFlagByName } from '../data';
-import { computeLevelProgress, getTierLabel, getLevelTier } from '../utils/levels';
+import { computeLevelProgress } from '../utils/levels';
 import { encodeChallenge, ChallengeData, CHALLENGE_MODES, generateShortCode, generateChallengeShareCard, encodeResponse, encodeDailyShare } from '../utils/challengeCode';
 import { DailyLeaderboardEntry, getDailyLeaderboardForDate, addDailyLeaderboardEntry } from '../utils/storage';
 import DailyLeaderboard from '../components/DailyLeaderboard';
 import NameInputModal from '../components/NameInputModal';
+import LevelUpModal from '../components/LevelUpModal';
 import { getTodayDateString } from '../utils/gameEngine';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Results'>;
@@ -988,36 +988,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
       />
 
       {/* ── Level-up celebration modal ── */}
-      <Modal
-        visible={levelUpTo !== null}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setLevelUpTo(null)}
-      >
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPress={() => setLevelUpTo(null)}
-          accessibilityRole="button"
-          accessibilityLabel={t('common.closeDialog')}
-        >
-          <TouchableOpacity activeOpacity={1} style={styles.levelUpCard} onPress={() => {}}>
-            <Text style={styles.levelUpTitle}>{t('stats.levelUp')}</Text>
-            <Text style={styles.levelUpNumber}>{levelUpTo}</Text>
-            <Text style={styles.levelUpTier}>{getTierLabel(getLevelTier(levelUpTo ?? 1))}</Text>
-            <Text style={styles.levelUpDesc}>{t('stats.levelReached', { level: levelUpTo ?? 1 })}</Text>
-            <TouchableOpacity
-              style={styles.levelUpButton}
-              onPress={() => setLevelUpTo(null)}
-              activeOpacity={0.7}
-              accessibilityRole="button"
-              accessibilityLabel={t('common.next')}
-            >
-              <Text style={styles.levelUpButtonText}>{t('common.next')}</Text>
-            </TouchableOpacity>
-          </TouchableOpacity>
-        </TouchableOpacity>
-      </Modal>
+      <LevelUpModal level={levelUpTo} onClose={() => setLevelUpTo(null)} />
 
       {/* ── Skill level-up banner ── */}
       {skillLevelUp && (
@@ -1340,43 +1311,6 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     ...typography.microMedium,
     color: colors.goldBright,
     textDecorationLine: 'underline',
-  },
-
-  // ── Shared modal overlay (used by level-up modal)
-  modalOverlay: {
-    flex: 1, backgroundColor: colors.overlay,
-    justifyContent: 'center', alignItems: 'center', padding: spacing.lg,
-  },
-
-  // ── Level-up celebration
-  levelUpCard: {
-    backgroundColor: colors.surface, borderRadius: borderRadius.xl,
-    padding: spacing.xl, width: '100%', maxWidth: 320,
-    alignItems: 'center', borderWidth: 2, borderColor: colors.goldBright,
-  },
-  levelUpTitle: {
-    ...typography.eyebrow, color: colors.goldBright,
-    letterSpacing: 1.5, marginBottom: spacing.sm,
-  },
-  levelUpNumber: {
-    fontFamily: fontFamily.display, fontSize: 56,
-    color: colors.goldBright, lineHeight: 64,
-  },
-  levelUpTier: {
-    ...typography.bodyBold, color: colors.textSecondary,
-    marginTop: spacing.xxs, marginBottom: spacing.md,
-  },
-  levelUpDesc: {
-    ...typography.body, color: colors.text,
-    textAlign: 'center', marginBottom: spacing.lg,
-  },
-  levelUpButton: {
-    paddingVertical: 14, paddingHorizontal: spacing.xxl,
-    alignItems: 'center', borderRadius: borderRadius.md,
-    backgroundColor: colors.goldBright,
-  },
-  levelUpButtonText: {
-    ...typography.actionLabel, color: colors.playText,
   },
 
   // ── Skill level-up banner
