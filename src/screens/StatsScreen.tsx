@@ -394,7 +394,7 @@ export default function StatsScreen() {
           </View>
           <View style={styles.heroCard}>
             <View style={styles.heroStatItem}>
-              <Text style={[styles.heroStatValue, { color: colors.goldBright }]}>{stats.totalGamesPlayed}</Text>
+              <Text style={[styles.heroStatValue, { color: colors.goldText }]}>{stats.totalGamesPlayed}</Text>
               <Text style={styles.heroStatLabel}>{t('stats.gamesPlayedLabel')}</Text>
             </View>
             <View style={[styles.heroStatItem, styles.heroStatDivider]}>
@@ -840,7 +840,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   levelNumber: {
     fontFamily: fontFamily.display,
     fontSize: fontSize.title,
-    color: colors.goldBright,
+    color: colors.goldText,
     letterSpacing: -0.5,
     lineHeight: 28,
   },

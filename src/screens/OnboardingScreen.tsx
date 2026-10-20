@@ -225,7 +225,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   wmThat: {
     fontFamily: fontFamily.displayItalic,
     fontSize: fontSize.title,
-    color: colors.goldBright,
+    color: colors.goldText,
   },
 
   // ── Welcome

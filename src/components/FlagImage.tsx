@@ -1,10 +1,11 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { StyleSheet, View, Text, ActivityIndicator, Pressable, useWindowDimensions, StyleProp, ViewStyle, TextStyle, ImageStyle } from 'react-native';
+import { StyleSheet, View, Text, ActivityIndicator, Pressable, useWindowDimensions, StyleProp, ViewStyle, TextStyle, ImageStyle, ImageSourcePropType } from 'react-native';
 import { Image } from 'expo-image';
 import { fontFamily, fontSize, borderRadius, spacing, ThemeColors } from '../utils/theme';
 import { useTheme } from '../contexts/ThemeContext';
 import { t } from '../utils/i18n';
 import { hapticTap } from '../utils/feedback';
+import { FLAG_ASSETS } from '../data/flagAssets';
 
 interface FlagImageProps {
   countryCode: string;
@@ -37,6 +38,17 @@ const MAX_RETRIES = 3;
 
 function nearestCdnWidth(desired: number): number {
   return CDN_WIDTHS.find((w) => w >= desired) ?? 2560;
+}
+
+/**
+ * Flags are bundled with the app (see src/data/flagAssets.ts), so they load
+ * offline and never depend on a third-party server. The CDN is only a backup
+ * for a code we don't ship.
+ */
+function getFlagSource(code: string, width: number, attempt: number): ImageSourcePropType {
+  const bundled = FLAG_ASSETS[code.toLowerCase()];
+  if (bundled) return bundled;
+  return { uri: getFlagUrl(code, width, attempt) };
 }
 
 function getFlagUrl(code: string, width: number, attempt: number): string {
@@ -152,7 +164,7 @@ function FlagPicture({
         )
       )}
       <Image
-        source={{ uri: getFlagUrl(countryCode, requestWidth, attempt) }}
+        source={getFlagSource(countryCode, requestWidth, attempt)}
         style={imageStyle}
         contentFit="contain"
         transition={transition}

@@ -36,7 +36,7 @@ type CategoryMeta = { id: FactCategory; labelKey: string; color: (c: ThemeColors
 
 const CATEGORY_META: CategoryMeta[] = [
   { id: 'flags', labelKey: 'geofacts.catFlags', color: (c) => c.modeRed, Icon: FlagIcon },
-  { id: 'records', labelKey: 'geofacts.catRecords', color: (c) => c.goldBright, Icon: TrophyIcon },
+  { id: 'records', labelKey: 'geofacts.catRecords', color: (c) => c.goldText, Icon: TrophyIcon },
   { id: 'nature', labelKey: 'geofacts.catNature', color: (c) => c.modeGreen, Icon: CompassIcon },
   { id: 'geography', labelKey: 'geofacts.catGeography', color: (c) => c.modeBlue, Icon: GlobeIcon },
   { id: 'history', labelKey: 'geofacts.catHistory', color: (c) => c.modePurple, Icon: CalendarIcon },

@@ -62,12 +62,13 @@
 - `src/hooks/useGameAnimations.ts` — shared game animation hook (fade, shake, streak spring)
 - `src/hooks/useCountdown.ts` — countdown timer hook for timed game modes
 - `src/hooks/useNavTabs.ts` — navigation tab state management
+- `src/hooks/useKeyShortcuts.ts` - web keyboard shortcuts (1-4 pick an answer, Enter/Space continue)
 - `src/components/Icons.tsx` — all SVG icons (no emoji)
 - `src/components/BottomNav.tsx` — shared bottom navigation
 - `src/components/ScreenContainer.tsx` — max-width wrapper for responsive layout
 - `src/components/SegBtn.tsx` — segmented button component
 - `src/components/ConfigRow.tsx` — settings row with label + controls
-- `src/components/FlagImage.tsx` — optimized flag image loading with CDN width selection
+- `src/components/FlagImage.tsx` — flag image display. Uses bundled flags from `src/data/flagAssets.ts` (images in `assets/flags/`); the CDN is only a backup
 - `src/components/MapImage.tsx` — country/region map display
 - `src/components/GameTopBar.tsx` — game screen header with score, streak, progress
 - `src/components/PageHeader.tsx` — screen title and subtitle header

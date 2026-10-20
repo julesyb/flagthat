@@ -107,7 +107,7 @@ export default function DailyShareReceiveScreen({ route, navigation }: Props) {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.center}>
-        <ActivityIndicator size="large" color={colors.goldBright} />
+        <ActivityIndicator size="large" color={colors.goldText} />
         <Text style={styles.text}>{t('common.loading')}</Text>
       </View>
     </SafeAreaView>

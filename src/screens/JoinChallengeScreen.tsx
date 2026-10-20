@@ -187,7 +187,7 @@ export default function JoinChallengeScreen({ route, navigation }: Props) {
           {!preview && (
             <View style={styles.emptyState}>
               <View style={styles.iconCircle}>
-                <LinkIcon size={28} color={colors.goldBright} />
+                <LinkIcon size={28} color={colors.goldText} />
               </View>
               <Text style={styles.title}>{t('challenge.joinTitle')}</Text>
               <Text style={styles.subtitle}>{t('challenge.joinSubtitle')}</Text>
@@ -427,7 +427,7 @@ const createStyles = (colors: ThemeColors) => {
     fontFamily: fontFamily.uiLabel,
     fontSize: fontSize.xs,
     letterSpacing: 2,
-    color: colors.goldBright,
+    color: colors.goldText,
     textAlign: 'center',
     marginBottom: spacing.md,
   },

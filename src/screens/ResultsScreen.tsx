@@ -627,7 +627,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
               <Text style={[styles.h2hBannerText, {
                 color: h2h.winner === 'player' ? colors.success
                   : h2h.winner === 'host' ? colors.error
-                  : colors.goldBright,
+                  : colors.goldText,
               }]}>
                 {h2h.winner === 'player' ? t('challenge.youWin')
                   : h2h.winner === 'host' ? t('challenge.theyWin', { name: challenge.hostName })
@@ -702,12 +702,12 @@ export default function ResultsScreen({ route, navigation }: Props) {
               accessibilityLabel={t('challenge.sendResultsBack')}
             >
               <View style={styles.challengeButtonInner}>
-                <UsersIcon size={18} color={colors.goldBright} />
+                <UsersIcon size={18} color={colors.goldText} />
                 <View style={styles.challengeButtonContent}>
                   <Text style={styles.challengeButtonTitle}>{t('challenge.sendResultsBack')}</Text>
                   <Text style={styles.challengeButtonDesc}>{t('challenge.sendResultsBackDesc')}</Text>
                 </View>
-                <ChevronRightIcon size={14} color={colors.goldBright} />
+                <ChevronRightIcon size={14} color={colors.goldText} />
               </View>
             </TouchableOpacity>
             {/* Challenge Back as text link underneath */}
@@ -850,7 +850,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
               accessibilityRole="button"
               accessibilityLabel={t('challenge.challengeFriend')}
             >
-              <UsersIcon size={16} color={colors.goldBright} />
+              <UsersIcon size={16} color={colors.goldText} />
               <Text style={styles.challengeShareText}>{t('challenge.challengeFriend')}</Text>
             </TouchableOpacity>
           </Animated.View>
@@ -1282,7 +1282,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   },
   challengeShareText: {
     ...typography.bodyBold,
-    color: colors.goldBright,
+    color: colors.goldText,
   },
   challengeButton: {
     backgroundColor: colors.surface,
@@ -1302,7 +1302,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   },
   challengeButtonTitle: {
     ...typography.bodyBold,
-    color: colors.goldBright,
+    color: colors.goldText,
     marginBottom: spacing.xxs,
   },
   challengeButtonDesc: {
@@ -1316,7 +1316,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   },
   challengeBackLinkText: {
     ...typography.microMedium,
-    color: colors.goldBright,
+    color: colors.goldText,
     textDecorationLine: 'underline',
   },
 
@@ -1330,9 +1330,9 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     ...shadows.medium,
   },
   skillUpText: {
-    ...typography.bodyBold, color: colors.goldBright, flex: 1,
+    ...typography.bodyBold, color: colors.goldText, flex: 1,
   },
   skillUpDismissText: {
-    ...typography.actionLabel, color: colors.goldBright, marginLeft: spacing.md,
+    ...typography.actionLabel, color: colors.goldText, marginLeft: spacing.md,
   },
 }); };

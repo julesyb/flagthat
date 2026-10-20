@@ -52,7 +52,7 @@ export default function DailyLeaderboard({ entries }: Props) {
           >
             <View style={[styles.rankBadge, isTopThree && styles.rankBadgeTop]}>
               {rank === 1 ? (
-                <TrophyIcon size={14} color={colors.goldBright} />
+                <TrophyIcon size={14} color={colors.goldText} />
               ) : (
                 <Text style={[styles.rankText, isTopThree && styles.rankTextTop]}>
                   {rank}
@@ -135,7 +135,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     color: colors.textTertiary,
   },
   rankTextTop: {
-    color: colors.goldBright,
+    color: colors.goldText,
   },
   nameContainer: {
     flex: 1,
@@ -145,7 +145,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     color: colors.text,
   },
   nameMe: {
-    color: colors.goldBright,
+    color: colors.goldText,
   },
   statsContainer: {
     alignItems: 'flex-end',

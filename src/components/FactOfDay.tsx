@@ -101,7 +101,7 @@ export default function FactOfDay() {
   return (
     <View style={styles.card}>
       <View style={styles.head}>
-        <GlobeIcon size={14} color={colors.goldBright} />
+        <GlobeIcon size={14} color={colors.goldText} />
         <Text style={styles.eyebrow}>{t('home.factOfDay')}</Text>
       </View>
 
@@ -121,7 +121,7 @@ export default function FactOfDay() {
       {answered && (
         <View style={styles.reveal} accessibilityLiveRegion="polite">
           <View style={styles.revealHead}>
-            <CheckIcon size={12} color={colors.goldBright} />
+            <CheckIcon size={12} color={colors.goldText} />
             <Text style={styles.revealLabel}>{t('home.factDidYouKnow')}</Text>
           </View>
           <Text style={styles.revealText}>{content.fact}</Text>
@@ -147,7 +147,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   eyebrow: {
     ...typography.eyebrow,
-    color: colors.goldBright,
+    color: colors.goldText,
   },
   flagWrap: {
     alignSelf: 'center',
@@ -227,7 +227,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     fontSize: fontSize.xs,
     letterSpacing: 1,
     textTransform: 'uppercase',
-    color: colors.goldBright,
+    color: colors.goldText,
   },
   revealText: {
     ...typography.caption,
