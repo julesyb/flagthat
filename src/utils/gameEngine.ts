@@ -262,6 +262,11 @@ export function getDailyConfig(dateStr?: string): GameConfig {
   return config;
 }
 
+/**
+ * Build the daily challenge's questions: a deterministic, date-seeded flag set
+ * with distractors that prioritize look-alike "twin" flags. Everyone who plays a
+ * given day gets the exact same flags and options.
+ */
 export function generateDailyQuestions(dateStr?: string): GameQuestion[] {
   const date = dateStr || getTodayDateString();
   const seed = dateSeed(date);
@@ -325,6 +330,10 @@ export function generateShareGrid(results: GameResult[], modeLabel: string): str
   return `Flag That - ${modeLabel}\n${correct}/${results.length} (${accuracy}%)${perfectLine}\n\n${gridStr}\n\n${APP_DOMAIN}`;
 }
 
+/**
+ * Build the question list for a standard game from its config. Honors a daily
+ * variant's pre-selected flag ids when present; otherwise samples the category.
+ */
 export function generateQuestions(config: GameConfig): GameQuestion[] {
   const categoryFlags = getFlagsForCategory(config.category);
 
@@ -351,6 +360,7 @@ export function generateQuestions(config: GameConfig): GameQuestion[] {
   });
 }
 
+/** Build a shuffled question list from an explicit set of flag ids (weak-flag practice). */
 export function generatePracticeQuestions(flagIds: string[]): GameQuestion[] {
   const allFlags = getAllFlags();
   const flagMap = new Map(allFlags.map((f) => [f.id, f]));

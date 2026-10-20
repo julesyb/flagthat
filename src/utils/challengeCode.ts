@@ -295,8 +295,12 @@ export function getScreenForMode(mode: GameMode): ChallengeScreenName {
 }
 
 // ── Short challenge code ──
+// Short-code alphabet: omits easily-confused characters (I, O, 0, 1) so codes
+// stay unambiguous when read aloud or typed by hand.
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
+// djb2 string hash: deterministic, fast, non-cryptographic. Used only to spread
+// challenge content across the short-code space, so collision-resistance is not a goal.
 function simpleHash(str: string): number {
   let hash = 5381;
   for (let i = 0; i < str.length; i++) {
@@ -305,6 +309,11 @@ function simpleHash(str: string): number {
   return Math.abs(hash);
 }
 
+/**
+ * Derive a short, human-friendly code (SHORT_CODE_LENGTH chars from CODE_CHARS)
+ * deterministically from a challenge's contents - host, mode, flags and results.
+ * Identical challenge content always produces the same code.
+ */
 export function generateShortCode(data: ChallengeData): string {
   const seed = `${data.hostName}|${data.mode}|${data.flagIds.join('')}|${data.hostResults.map((r) => r.correct ? '1' : '0').join('')}`;
   let hash = simpleHash(seed);
