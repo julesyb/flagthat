@@ -138,8 +138,8 @@ const ptBR: DeepPartial<TranslationStrings> = {
     nameCountry: 'Nomeie este pa\u00eds:',
     typePlaceholder: 'Sua resposta...',
     learnTitle: 'Quase',
-    youPicked: 'Você escolheu',
-    answer: 'Resposta',
+    youPicked: 'Você escolheu {name}',
+    answer: 'A resposta era {name}',
     gotIt: 'Entendi',
   },
 

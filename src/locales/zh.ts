@@ -138,8 +138,8 @@ const zh: DeepPartial<TranslationStrings> = {
     nameCountry: '\u8bf4\u51fa\u8fd9\u4e2a\u56fd\u5bb6\uff1a',
     typePlaceholder: '\u8f93\u5165\u7b54\u6848...',
     learnTitle: '差一点',
-    youPicked: '你的选择',
-    answer: '正确答案',
+    youPicked: '你选了{name}',
+    answer: '正确答案是{name}',
     gotIt: '知道了',
   },
 

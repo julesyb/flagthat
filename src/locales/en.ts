@@ -142,8 +142,8 @@ const en = {
     nameCountry: 'Name this country:',
     typePlaceholder: 'Type your answer...',
     learnTitle: 'Not quite',
-    youPicked: 'You picked',
-    answer: 'Answer',
+    youPicked: 'You picked {name}',
+    answer: 'The answer was {name}',
     gotIt: 'Got it',
   },
 

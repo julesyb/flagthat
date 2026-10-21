@@ -67,15 +67,28 @@ export default function LearnCard({ picked, answer, onDone }: Props) {
     },
   });
 
-  const column = (flag: FlagItem, label: string) => (
-    <View style={styles.col}>
-      <View style={styles.flagBox}>
-        <FlagImage countryCode={flag.id} size="medium" fill hideLabel transition={0} />
+  // A sentence above each flag, e.g. "You picked Argentina", with the country in bold
+  const column = (flag: FlagItem, labelKey: string) => {
+    const name = flagName(flag);
+    const sentence = t(labelKey, { name });
+    const at = sentence.indexOf(name);
+    return (
+      <View style={styles.col}>
+        <Text style={styles.label} numberOfLines={2}>
+          {at < 0 ? sentence : (
+            <>
+              {sentence.slice(0, at)}
+              <Text style={styles.name}>{name}</Text>
+              {sentence.slice(at + name.length)}
+            </>
+          )}
+        </Text>
+        <View style={styles.flagBox}>
+          <FlagImage countryCode={flag.id} size="medium" fill hideLabel transition={0} />
+        </View>
       </View>
-      <Text style={styles.label}>{label}</Text>
-      <Text style={styles.name} numberOfLines={2}>{flagName(flag)}</Text>
-    </View>
-  );
+    );
+  };
 
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
@@ -96,8 +109,8 @@ export default function LearnCard({ picked, answer, onDone }: Props) {
       >
         <Text style={styles.title} accessibilityRole="header">{t('game.learnTitle')}</Text>
         <View style={styles.row}>
-          {pickedFlag && pickedFlag.id !== answer.id && column(pickedFlag, t('game.youPicked'))}
-          {column(answer, t('game.answer'))}
+          {pickedFlag && pickedFlag.id !== answer.id && column(pickedFlag, 'game.youPicked')}
+          {column(answer, 'game.answer')}
         </View>
         <TouchableOpacity
           style={[btn.primary, styles.button]}
@@ -156,9 +169,12 @@ const createStyles = (colors: ThemeColors) =>
     },
     label: {
       fontFamily: fontFamily.body,
-      fontSize: fontSize.sm,
-      color: colors.textTertiary,
-      marginTop: spacing.sm,
+      fontSize: fontSize.body,
+      color: colors.textSecondary,
+      lineHeight: spacing.lg,
+      // Room for two lines, so both flags stay level when one label wraps
+      minHeight: spacing.lg * 2,
+      marginBottom: spacing.xs,
     },
     name: {
       fontFamily: fontFamily.bodyBold,
