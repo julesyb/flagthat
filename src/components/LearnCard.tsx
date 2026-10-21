@@ -4,6 +4,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { ThemeColors, spacing, borderRadius, fontFamily, fontSize, typography, buildButtons } from '../utils/theme';
 import { FlagItem } from '../types';
 import { getFlagByName } from '../data';
+import { getFlagAspect } from '../data/flagAssets';
 import { flagName } from '../data/countryNames';
 import { hapticTap } from '../utils/feedback';
 import { t } from '../utils/i18n';
@@ -83,7 +84,8 @@ export default function LearnCard({ picked, answer, onDone }: Props) {
             </>
           )}
         </Text>
-        <View style={styles.flagBox}>
+        {/* Box matches the flag's real shape, so flags of the same shape look the same size */}
+        <View style={[styles.flagBox, { aspectRatio: getFlagAspect(flag.id) }]}>
           <FlagImage countryCode={flag.id} size="medium" fill hideLabel transition={0} />
         </View>
       </View>
@@ -161,7 +163,6 @@ const createStyles = (colors: ThemeColors) =>
     },
     flagBox: {
       width: '100%',
-      aspectRatio: 3 / 2,
       borderRadius: borderRadius.sm,
       borderWidth: 1,
       borderColor: colors.border,
