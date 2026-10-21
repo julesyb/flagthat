@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
-import { fontFamily, fontSize, spacing, borderRadius, buildButtons, typography, layout } from '../utils/theme';
+import { fontFamily, fontSize, spacing, borderRadius, buildButtons, typography } from '../utils/theme';
 import { useTheme } from '../contexts/ThemeContext';
 import { ThemeColors } from '../utils/theme';
 import { getTotalFlagCount, getCategoryCount } from '../data';
@@ -260,7 +260,7 @@ export default function HomeScreen({ navigation }: Props) {
       key: 'daily',
       title: t('home.daily'),
       tag: dailyDone ? t('home.comeBackTomorrow') : dailyTagText,
-      icon: <CalendarIcon size={18} color={dailyDone ? colors.textTertiary : colors.modeGold} />,
+      icon: <CalendarIcon size={20} color={dailyDone ? colors.textTertiary : colors.modeGold} />,
       accent: colors.modeGold,
       titleColor: dailyDone ? colors.textTertiary : colors.goldText,
       disabled: dailyDone,
@@ -283,7 +283,7 @@ export default function HomeScreen({ navigation }: Props) {
       key: 'timeattack',
       title: t('home.timedQuiz'),
       tag: t('home.timedQuizTag'),
-      icon: <ClockIcon size={18} color={colors.modeRed} />,
+      icon: <ClockIcon size={20} color={colors.modeRed} />,
       accent: colors.modeRed,
       onPress: () => {
         hapticTap();
@@ -298,7 +298,7 @@ export default function HomeScreen({ navigation }: Props) {
       key: 'impostor',
       title: t('home.flagImpostor'),
       tag: t('home.flagImpostorDesc'),
-      icon: <EyeIcon size={18} color={colors.modeGreen} />,
+      icon: <EyeIcon size={20} color={colors.modeGreen} />,
       accent: colors.modeGreen,
       onPress: () => {
         hapticTap();
@@ -313,7 +313,7 @@ export default function HomeScreen({ navigation }: Props) {
       key: 'flagpuzzle',
       title: t('setup.flagPuzzle'),
       tag: t('setup.flagPuzzleDesc'),
-      icon: <PuzzleIcon size={18} color={colors.modePurple} />,
+      icon: <PuzzleIcon size={20} color={colors.modePurple} />,
       accent: colors.modePurple,
       onPress: () => {
         hapticTap();
@@ -328,7 +328,7 @@ export default function HomeScreen({ navigation }: Props) {
       key: 'geofacts',
       title: t('home.geoFacts'),
       tag: t('home.geoFactsDesc'),
-      icon: <GlobeIcon size={18} color={colors.modeBlue} />,
+      icon: <GlobeIcon size={20} color={colors.modeBlue} />,
       accent: colors.modeBlue,
       onPress: () => {
         hapticTap();
@@ -341,7 +341,7 @@ export default function HomeScreen({ navigation }: Props) {
       key: 'practiceWeak',
       title: t('home.practiceWeak'),
       tag: weakFlagCount === 1 ? t('home.flagsToReview', { count: weakFlagCount }) : t('home.flagsToReviewPlural', { count: weakFlagCount }),
-      icon: <CrosshairIcon size={18} color={colors.modeRed} />,
+      icon: <CrosshairIcon size={20} color={colors.modeRed} />,
       accent: colors.modeRed,
       titleColor: colors.red,
       onPress: () => {
@@ -357,7 +357,7 @@ export default function HomeScreen({ navigation }: Props) {
       key: 'join',
       title: t('challenge.joinTitle'),
       tag: t('challenge.codeHint'),
-      icon: <LinkIcon size={18} color={colors.goldText} />,
+      icon: <LinkIcon size={20} color={colors.goldText} />,
       accent: colors.modeGold,
       titleColor: colors.goldText,
       onPress: () => {
@@ -741,27 +741,27 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     color: colors.textTertiary,
     marginBottom: spacing.xs,
   },
+  // White frame around the flag: flags come in many shapes, so the frame keeps
+  // the hero a steady size and the empty space around wide or tall flags looks intended.
   flagWrap: {
     width: '100%',
-    maxWidth: layout.maxFlagWidth,
-    alignSelf: 'center',
-    aspectRatio: 3 / 2,
-    overflow: 'hidden',
+    padding: spacing.md,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
     borderRadius: borderRadius.lg,
-    position: 'relative',
+    overflow: 'hidden',
   },
 
   // Options 2x2
   optsGrid: {
     marginTop: spacing.sm,
-    gap: spacing.xs,
+    gap: spacing.sm,
     width: '100%',
-    maxWidth: layout.maxFlagWidth,
-    alignSelf: 'center',
   },
   optsRow: {
     flexDirection: 'row',
-    gap: spacing.xs,
+    gap: spacing.sm,
   },
   optWrap: {
     flex: 1,
@@ -771,7 +771,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: borderRadius.md,
-    height: 42,
+    minHeight: spacing.xxl,
     paddingHorizontal: spacing.sm,
     alignItems: 'center',
     justifyContent: 'center',
@@ -786,7 +786,6 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   },
   optText: {
     ...typography.label,
-    fontSize: fontSize.sm,
     color: colors.ink,
     textAlign: 'center',
   },
@@ -819,7 +818,7 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
   // ── Play button
   playWrap: {
     paddingHorizontal: spacing.md,
-    paddingTop: spacing.sm,
+    paddingTop: spacing.md,
     paddingBottom: spacing.xs,
   },
   playBtn: {
@@ -849,8 +848,8 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     color: colors.ink,
   },
   sectionAll: {
-    ...typography.microMedium,
-    color: colors.textTertiary,
+    ...typography.captionBold,
+    color: colors.goldText,
   },
   modeList: {
     gap: spacing.sm,
@@ -863,15 +862,15 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: borderRadius.lg,
-    paddingVertical: spacing.sm + spacing.xs,
+    paddingVertical: spacing.md,
     paddingHorizontal: spacing.md,
   },
   modeCardDisabled: {
     opacity: 0.6,
   },
   modeIcon: {
-    width: 36,
-    height: 36,
+    width: 40,
+    height: 40,
     borderRadius: borderRadius.md,
     alignItems: 'center',
     justifyContent: 'center',
@@ -880,13 +879,11 @@ const createStyles = (colors: ThemeColors) => { const btn = buildButtons(colors)
     flex: 1,
   },
   modeTitle: {
-    fontFamily: fontFamily.bodyBold,
-    fontSize: fontSize.sm,
+    ...typography.bodyBold,
     color: colors.ink,
-    letterSpacing: -0.1,
   },
   modeTag: {
-    ...typography.micro,
+    ...typography.caption,
     color: colors.textTertiary,
     marginTop: spacing.xxs,
   },

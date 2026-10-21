@@ -10,6 +10,7 @@ import { t } from '../utils/i18n';
 import FlagImage from './FlagImage';
 import { useKeyShortcuts } from '../hooks/useKeyShortcuts';
 import { useSwipe } from '../hooks/useSwipe';
+import { useLayout } from '../utils/useLayout';
 import { isContinueKey } from '../utils/shortcuts';
 
 interface Props {
@@ -29,6 +30,9 @@ export default function LearnCard({ picked, answer, onDone }: Props) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const btn = useMemo(() => buildButtons(colors), [colors]);
+  // Keep the sheet as wide as the game column, not the whole window
+  const { screenWidth, gameWidth } = useLayout();
+  const sideInset = Math.max(0, (screenWidth - gameWidth) / 2);
   const pickedFlag = getFlagByName(picked);
   const slide = useRef(new Animated.Value(0)).current;
   // How far the sheet is dragged down by a finger
@@ -79,6 +83,7 @@ export default function LearnCard({ picked, answer, onDone }: Props) {
       <Animated.View
         style={[
           styles.sheet,
+          { left: sideInset, right: sideInset },
           {
             transform: [{
               translateY: Animated.add(slide.interpolate({ inputRange: [0, 1], outputRange: [320, 0] }), drag),
