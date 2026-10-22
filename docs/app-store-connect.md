@@ -167,7 +167,7 @@ and Apple indexes the name, so repeating them wastes space.
 | Field | Value |
 | --- | --- |
 | Version | `1.0.0` (matches `app.json`) |
-| Copyright | `2026 Julie Beynon` |
+| Copyright | `2026 JBI` |
 
 ### Screenshots
 
