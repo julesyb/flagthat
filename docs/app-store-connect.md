@@ -222,10 +222,10 @@ One-time setup in the repo, once you have the two IDs:
 1. `npx eas-cli login`
 2. `npx eas-cli init` (fills `extra.eas.projectId` in `app.json`)
 3. In `eas.json` -> `submit.production.ios` set:
-   - `appleTeamId`: 10-char Team ID from developer.apple.com/account -> Membership **YOU**
+   - `appleTeamId`: `3F3D6DY5HC` (done)
    - `ascAppId`: the numeric Apple ID from step 1 **YOU**
-4. In `public/.well-known/apple-app-site-association` replace `TEAMID` with
-   the same Team ID, then redeploy the website.
+4. `public/.well-known/apple-app-site-association` already uses Team ID
+   `3F3D6DY5HC` (done). It goes live when this is merged and the site redeploys.
 
 Then:
 
