@@ -46,8 +46,7 @@ Organization account later via App Store Connect's App Transfer once the
 company (Ontario corp, D-U-N-S pending) is enrolled.
 
 - `appleId` - set to `beynon.julie@gmail.com`. Done.
-- `appleTeamId` - still empty. Your Apple Developer Team ID (10-char code on the
-  Membership details page at developer.apple.com/account).
+- `appleTeamId` - set to `3F3D6DY5HC`. Done.
 - `ascAppId` - still empty. The numeric App Store Connect app ID, created when
   you register the app (App Store Connect -> Apps -> New App, bundle ID
   `com.flagsareus.app`); it shows under App Information after creation.
@@ -60,7 +59,8 @@ it is already covered by `.gitignore` patterns, but store it outside the repo).
 
 ### 4. Deep-link verification files (Universal Links / App Links)
 
-- `public/.well-known/apple-app-site-association` contains a literal
+- Done 2026-10-22: Team ID `3F3D6DY5HC` set in `eas.json` and the AASA file.
+  Previously `public/.well-known/apple-app-site-association` contained a literal
   `TEAMID` placeholder in `"TEAMID.com.flagsareus.app"`. Replace with your real
   Apple Team ID or Universal Links (the `applinks:flagthat.app` associated
   domain) will not verify. This file must be served at
