@@ -138,8 +138,8 @@ const de: DeepPartial<TranslationStrings> = {
     nameCountry: 'Benenne dieses Land:',
     typePlaceholder: 'Deine Antwort...',
     learnTitle: 'Nicht ganz',
-    youPicked: 'Deine Wahl',
-    answer: 'Antwort',
+    youPicked: 'Du hast {name} gewählt',
+    answer: 'Richtig war {name}',
     gotIt: 'Verstanden',
   },
 
