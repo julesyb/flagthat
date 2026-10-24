@@ -150,38 +150,40 @@ function BrowseView({ colors }: { colors: ThemeColors }) {
   );
 
   return (
-    <FlatList
-      data={facts}
-      keyExtractor={(item) => item.id}
-      renderItem={renderItem}
-      style={styles.list}
-      contentContainerStyle={styles.listContent}
-      showsVerticalScrollIndicator={false}
-      ListHeaderComponent={
-        <ScreenContainer>
-          <View style={styles.chipsRow}>
-            {FILTERS.map((f) => {
-              const active = filter === f.id;
-              return (
-                <TouchableOpacity
-                  key={f.id}
-                  style={[styles.chip, active && styles.chipOn]}
-                  onPress={() => { hapticTap(); setFilter(f.id); }}
-                  activeOpacity={0.7}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: active }}
-                  accessibilityLabel={t(f.labelKey)}
-                >
-                  <Text style={[styles.chipText, active && styles.chipTextOn]}>{t(f.labelKey)}</Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-          <Text style={styles.countLabel}>{t('geofacts.factCount', { count: facts.length })}</Text>
-        </ScreenContainer>
-      }
-      ListFooterComponent={<View style={{ height: spacing.xl }} />}
-    />
+    <ScreenContainer flex>
+      <FlatList
+        data={facts}
+        keyExtractor={(item) => item.id}
+        renderItem={renderItem}
+        style={styles.list}
+        contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
+        ListHeaderComponent={
+          <>
+            <View style={styles.chipsRow}>
+              {FILTERS.map((f) => {
+                const active = filter === f.id;
+                return (
+                  <TouchableOpacity
+                    key={f.id}
+                    style={[styles.chip, active && styles.chipOn]}
+                    onPress={() => { hapticTap(); setFilter(f.id); }}
+                    activeOpacity={0.7}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: active }}
+                    accessibilityLabel={t(f.labelKey)}
+                  >
+                    <Text style={[styles.chipText, active && styles.chipTextOn]}>{t(f.labelKey)}</Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+            <Text style={styles.countLabel}>{t('geofacts.factCount', { count: facts.length })}</Text>
+          </>
+        }
+        ListFooterComponent={<View style={{ height: spacing.xl }} />}
+      />
+    </ScreenContainer>
   );
 }
 
